@@ -36,17 +36,18 @@ PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 
 실행 대상은 RTX 렌더링을 지원하는 GPU다. Isaac Sim 5.1.0 / Isaac Lab 2.3.0 / Python 3.11 / RSL-RL 3.0.1을 기준으로 구현했다. 최신 버전을 뜻하는 조합은 아니며, Sim 5.1은 현재 공식 문서에서 지원 종료로 표시된다. 이 프로젝트의 고정 버전으로 먼저 검증하고, 버전 변경은 별도 재검증한다.
 
-설치·실행·종료 절차와 검증 순서는 [Brev 실행 문서](docs/brev-run.md)에 있다. 실행기는 단계 변화와 물리 상태를 JSONL trace로 남기고, 단일 환경 실행을 MP4로 기록한다. 근접 촬영 원본은 1280×960, 30 fps, 약 44초이며 공유용 4배속 편집본은 약 13초다. 대규모 학습 전에 기준선 HDF5 기록 계약과 병렬 환경 격리를 별도로 확인한다.
+설치·실행·종료 절차와 검증 순서는 [Brev 실행 문서](docs/brev-run.md)에 있다. 실행기는 단계 변화와 물리 상태를 JSONL trace로 남기고, 단일 환경 실행을 MP4로 기록한다. 근접 촬영은 1280×960에서 실제 물리 상태를 초당 120장 기록하며, 공유용 4배속 영상과 정상 속도 전체 구도 영상은 모두 60 fps다. 길이는 각각 약 13초와 44초다. 물리 120 Hz·제어 30 Hz는 촬영 전후에 동일하다. 대규모 학습 전에 기준선 HDF5 기록 계약과 병렬 환경 격리를 별도로 확인한다.
 
-전용 Brev L40S에 고정 버전 환경을 설치하고 사용자가 승인한 NVIDIA Omniverse EULA 설정으로 GPU 연산·PhysX·렌더링을 실행했다. 로컬 일반 단위 테스트 54개와 Torch 기반 제어·접촉 계산 테스트 19개가 통과했다. 컴퓨팅 예산과 중지 원칙은 [예산 설정](configs/compute-budget.json)에 기록한다.
+전용 Brev L40S에 고정 버전 환경을 설치하고 사용자가 승인한 NVIDIA Omniverse EULA 설정으로 GPU 연산·PhysX·렌더링을 실행했다. 로컬 일반 단위 테스트 62개와 Torch 기반 제어·접촉 계산 테스트 19개가 통과했다. 컴퓨팅 예산과 중지 원칙은 [예산 설정](configs/compute-budget.json)에 기록한다.
 
 ## 미디어
 
-- [근접 조립 영상](docs/media/nominal-baseline-4x.mp4)
-- [전체 구도 영상](docs/media/nominal-overview.mp4)
+- [근접 조립 영상 · 4배속 · 60 fps](docs/media/nominal-baseline-4x-60fps.mp4)
+- [전체 구도 영상 · 정상 속도 · 60 fps](docs/media/nominal-overview-60fps.mp4)
 - [동작·접촉 trace 그래프](docs/media/nominal-evidence.png)
 - [초기 접근 실패 1](docs/media/failure-early-01.mp4) · [초기 접근 실패 2](docs/media/failure-early-02.mp4) — 이전 제어기 디버깅 기록
 - [미디어 출처와 SHA-256](docs/media/media-manifest.json)
+- [촬영 주기·프레임 누락·물리 상태 대조](docs/evidence/video-cadence.json)
 
 ## 검증 범위
 

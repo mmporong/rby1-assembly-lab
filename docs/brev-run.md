@@ -69,13 +69,13 @@ Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 
 
 ## 확인한 실행 범위
 
-2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 로컬 Python 3.11 + USD 검사 환경의 일반 테스트 54개와 Torch 기반 제어·접촉 계산 테스트 19개가 통과했다.
+2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 로컬 Python 3.11 + USD 검사 환경의 일반 테스트 62개와 Torch 기반 제어·접촉 계산 테스트 19개가 통과했다.
 
-최종 근접 촬영 실행 22의 단일 환경 zero-residual 기준 제어기는 고정 조인트나 물체 자세 덮어쓰기 없이 네 손가락의 마찰 접촉을 유지했다. 두 부품을 각각 초기 높이보다 15 mm 이상 들어 올린 뒤 실제 삽입 깊이 30.66 mm, 횡오차 1.08 mm, 유지 시간 0.4초로 44.07초에 독립 성공 판정을 통과했다. 실행 seed는 `20261025`이며 근거 묶음은 `docs/evidence/nominal-baseline.json`에 있다.
+기준 성공 실행 22의 단일 환경 zero-residual 제어기는 고정 조인트나 물체 자세 덮어쓰기 없이 네 손가락의 마찰 접촉을 유지했다. 두 부품을 각각 초기 높이보다 15 mm 이상 들어 올린 뒤 실제 삽입 깊이 30.66 mm, 횡오차 1.08 mm, 유지 시간 0.4초로 44.07초에 독립 성공 판정을 통과했다. 실행 seed는 `20261025`이며 근거 묶음은 `docs/evidence/nominal-baseline.json`에 있다.
 
 이 성공은 삽입 합력과 개별 법선 하중의 합이 모두 0 N인 여유 끼워맞춤 nominal 조건 한 건이다. 따라서 잼 회복, 잔차 강화학습 성능, 카메라 기반 제어, 실물 검증의 근거로 사용하지 않는다. 기준 제어와 단계 전환은 시뮬레이터 정답 상태를 사용하고, 정책 관측은 정답 상태에 잡음을 더하는 별도 계약이다. 로봇은 고정 베이스이며 자체 충돌은 비활성화되어 있다.
 
-최종 근접 촬영 실행 22는 같은 성공 동작에 `--background --camera-view assembly`를 적용했다. 공식 Isaac Simple Room을 충돌 없는 시각 배경으로 사용하고, 근접 카메라에서 1280×960, 30 fps, 약 44초의 H.264 영상을 생성했다. 공유용 4배속 편집본은 같은 해상도와 frame rate에서 약 13초다. 이 카메라는 관찰용 viewer이며 제어 입력이 아니다.
+근접 촬영 실행 24와 전체 구도 실행 25는 같은 성공 동작을 다시 기록했다. 공식 Isaac Simple Room을 충돌 없는 시각 배경으로 사용하며, 근접 카메라의 원본은 1280×960·120 fps다. 공유용 4배속 근접 영상과 정상 속도 전체 구도 영상은 H.264·60 fps이며 각각 약 13초와 44초다. 이전 30 fps 4배속 편집보다 표시 프레임 사이의 시뮬레이션 시간 간격이 절반으로 줄었다. 이 카메라는 관찰용 viewer이며 제어 입력이 아니다. 프레임 수·타임스탬프·소스 해시·기존 성공 trace 대조 결과는 [영상 검사 근거](evidence/video-cadence.json)에 있다.
 
 기준선 기록 `baseline-rollouts-final.h5`는 서로 다른 3개 seed가 모두 독립 성공·유효 판정을 통과했다. 결정적 분할은 train 2개·eval 1개이며 학습 가능 episode는 train 2개다. 각 episode의 source hash와 함께 보관한 원본 source archive도 검증했다. 정확한 파일 경로·hash·episode 수치의 정본은 [기준선 데이터 근거](evidence/baseline-dataset.json)다. 최종 기록의 소스·설정·에셋 해시는 현재 파일과 모두 일치한다. 평가기 불일치를 발견했던 초기 HDF5는 진단용으로 보존한다.
 
@@ -101,13 +101,17 @@ OMNI_KIT_ACCEPT_EULA=YES python scripts/run_sim.py \
   --report artifacts/physics-smoke.json
 OMNI_KIT_ACCEPT_EULA=YES python scripts/run_sim.py \
   --headless --enable_cameras --num-envs 1 --require-completion \
-  --background --camera-view assembly \
+  --background --camera-view assembly --video-fps 120 \
   --trace artifacts/task-trace.jsonl \
   --video artifacts/task-smoke.mp4 \
   --report artifacts/task-smoke.json
 ```
 
 `--steps`를 생략하면 `configs/task.json`의 60초 제한을 제어 주기 1/30초로 나눈 1,800단계를 사용한다. 첫 실행은 장면 로딩·물리 step과 trace 기록을 확인한다. 두 번째 실행은 조립 성공을 요구하고 실제 렌더 프레임을 MP4로 저장한다. 영상은 단일 환경과 `--enable_cameras`가 필요하다. `--camera-view overview`는 960×720 전체 구도이고, `--camera-view assembly`는 1280×960 근접 구도다. `--background`의 Simple Room과 카메라는 시각화 전용이며 물리 판정이나 제어 관측을 바꾸지 않는다. 실패하면 기준 제어와 접촉 설정을 고치고 재검증한다. 스모크 결과의 `completed=false`를 성공으로 보고하지 않으며 실패 trace와 영상도 보존한다.
+
+`--video-fps`는 30·60·120 중에서 선택하며 기본값은 120이다. 영상 실행에서만 렌더 간격을 물리 4·2·1단계로 바꾼다. 물리 시간 간격 1/120초와 제어 decimation 4는 유지한다. viewer RGB render product를 만든 뒤 `/isaaclab/render/rtx_sensors` 설정으로 물리 루프의 렌더 필요 조건을 등록하고 종료 시 이전 값을 복원한다. 이는 viewer 촬영 예약이며 정책용 카메라 센서를 추가하지 않는다.
+
+준비 렌더링 16회는 물리를 진행하지 않는다. 기록은 첫 렌더 간격 뒤부터 시작하고, 종료 판정 전 물리 단계까지 포함한다. 같은 물리 counter에서 일어나는 자동 reset 렌더는 기록하지 않는다. 각 제어 단계의 예상 프레임 수나 물리 counter 간격이 맞지 않으면 실행을 실패 처리한다. 60 fps 공유본은 실제 렌더 프레임을 일정한 시간 간격으로 선택하며, 마지막 정지 화면 이외의 프레임 복제나 동작 보간은 사용하지 않는다.
 
 삽입 접촉은 두 값으로 나눠 기록한다. `insertion_contact_force_n`은 플러그와 소켓 사이 월드 좌표계 법선 합력 벡터의 크기이고, `insertion_contact_load_n`은 같은 접촉의 개별 법선력 절댓값을 더한 하중이다. 잼·과부하 판정에는 후자를 사용한다. 금지 접촉 하중은 로봇 29개 부위별로 허용되지 않은 대상과의 접촉 쌍에서 개별 법선력 절댓값을 합산한다. 접촉 버퍼 포화, 음수 개수, 잘못된 범위, 활성 힘의 NaN은 유효한 0 N으로 처리하지 않고 실패로 종료한다. 기존 net force 기반 값은 접촉 위치 진단용 trace일 뿐 안전 판정값이 아니다.
 

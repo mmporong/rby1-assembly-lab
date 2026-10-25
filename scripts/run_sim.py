@@ -6,6 +6,7 @@
 """Launch the smallest real-physics smoke run for the assembly environment."""
 
 import argparse
+from contextlib import nullcontext
 import hashlib
 import json
 import math
@@ -28,6 +29,8 @@ parser.add_argument("--seed", type=int, help="Override configs/task.json data.tr
 parser.add_argument("--report", type=Path, default=Path("artifacts/smoke_report.json"))
 parser.add_argument("--trace", type=Path, help="Write sampled controller and physics state as JSONL.")
 parser.add_argument("--video", type=Path, help="Write the rendered single-environment run as a video.")
+parser.add_argument("--video-fps", type=int, choices=(30, 60, 120), default=120,
+                    help="Native rendered physics frames per simulation second; controller stays at 30 Hz.")
 parser.add_argument(
     "--camera-view",
     choices=("overview", "assembly"),
@@ -54,6 +57,7 @@ import torch  # noqa: E402
 import omni.kit.app  # noqa: E402
 
 from rby1_assembly.contracts import ACTION_DIM  # noqa: E402
+from rby1_assembly.video_capture import PhysicsFrameCapture  # noqa: E402
 from rby1_assembly.isaac_env import (  # noqa: E402
     AssemblyPhase,
     FORBIDDEN_CONTACT_LOAD_SOURCE,
@@ -422,10 +426,9 @@ def _trace_record(
 
 
 def _capture_actual_frame(env: Rby1AssemblyEnv):
-    for _ in range(8):
-        frame = env.render()
-        if frame is not None and frame.size > 0 and bool(frame.any()):
-            return frame
+    frame = env.render(recompute=True)
+    if frame is not None and frame.size > 0 and bool(frame.any()):
+        return frame
     raise RuntimeError("renderer did not produce a non-empty RGB frame")
 
 
@@ -465,6 +468,10 @@ def main() -> int:
     effective_steps = args.steps or math.ceil(configured_timeout_s / control_dt_s)
     _effective_steps_for_report = effective_steps
     if args.video is not None:
+        render_stride = round(1.0 / (cfg.sim.dt * args.video_fps))
+        if not math.isclose(render_stride * cfg.sim.dt * args.video_fps, 1.0):
+            raise ValueError("video FPS must divide the physics frequency")
+        cfg.sim.render_interval = render_stride
         if args.camera_view == "overview":
             cfg.viewer.eye = (2.2, -2.0, 1.8)
             cfg.viewer.lookat = (0.35, 0.0, 0.9)
@@ -490,6 +497,8 @@ def main() -> int:
     trace_file = None
     trace_record_count = 0
     video_writer = None
+    video_capture = None
+    previous_rtx_render_setting = None
     video_frame_count = 0
     video_terminal_step_frames_omitted = 0
     try:
@@ -503,14 +512,36 @@ def main() -> int:
             import imageio.v2 as imageio
 
             args.video.parent.mkdir(parents=True, exist_ok=True)
-            video_writer = imageio.get_writer(args.video, fps=1.0 / env.step_dt)
-            video_writer.append_data(_capture_actual_frame(env))
-            video_frame_count += 1
+            video_writer = imageio.get_writer(
+                args.video, fps=args.video_fps, codec="libx264", quality=8,
+                pixelformat="yuv420p", output_params=["-movflags", "+faststart"],
+            )
+            # Initialize the RGB annotator, then converge RTX history without
+            # advancing physics or recording its noisy startup frames.
+            env.render(recompute=True)
+            for _ in range(16):
+                env.sim.render()
+            _capture_actual_frame(env)
+            # The viewer render product is not a Lab Camera sensor, so register
+            # its render scheduling requirement for DirectRLEnv's physics loop.
+            previous_rtx_render_setting = bool(env.sim.get_setting("/isaaclab/render/rtx_sensors"))
+            env.sim.set_setting("/isaaclab/render/rtx_sensors", True)
+            video_capture = PhysicsFrameCapture(
+                env.sim, lambda: env._sim_step_counter,
+                lambda: _capture_actual_frame(env).copy(), video_writer.append_data,
+                stride=render_stride,
+            )
+            video_capture.install()
 
         previous_phase = env._phase.clone()
         for control_step in range(1, effective_steps + 1):
             actions = torch.zeros((env.num_envs, ACTION_DIM), device=env.device)
-            _, _, terminated, truncated, extras = env.step(actions)
+            capture_context = (
+                video_capture.control_step(cfg.decimation // render_stride)
+                if video_capture is not None else nullcontext()
+            )
+            with capture_context:
+                _, _, terminated, truncated, extras = env.step(actions)
             actual_steps += 1
             snapshot = extras["terminal_snapshot"]
             snapshot_phase = snapshot["phase"]
@@ -531,11 +562,8 @@ def main() -> int:
                 )
                 trace_record_count += 1
             previous_phase = snapshot_phase.clone()
-            if video_writer is not None and not bool(torch.any(terminal_mask).item()):
-                video_writer.append_data(_capture_actual_frame(env))
-                video_frame_count += 1
-            elif video_writer is not None:
-                video_terminal_step_frames_omitted += 1
+            if video_capture is not None:
+                video_frame_count = video_capture.frame_count
             max_grip_contact_force_n = max(
                 max_grip_contact_force_n,
                 float(snapshot["grip_contact_force_peak_n"].max().item()),
@@ -627,11 +655,19 @@ def main() -> int:
             "trace_record_count": trace_record_count,
             "video_path": None if args.video is None else str(args.video),
             "video_frame_count": video_frame_count,
-            "video_fps": None if args.video is None else 1.0 / env.step_dt,
+            "video_fps": None if args.video is None else args.video_fps,
+            "video_capture_source": None if args.video is None else "native_physics_substeps_without_interpolation",
+            "video_render_stride_physics_steps": None if args.video is None else render_stride,
+            "video_first_physics_step": None if video_capture is None else video_capture.first_step,
+            "video_last_physics_step": None if video_capture is None else video_capture.last_step,
+            "video_expected_frame_count": None if args.video is None else actual_steps * cfg.decimation // render_stride,
+            "video_initial_frame_policy": None if args.video is None else "first_frame_after_first_capture_stride; no_initial_hold",
+            "video_warmup_render_count": None if args.video is None else 16,
+            "video_viewer_render_scheduling_enabled": args.video is not None,
             "video_terminal_step_frame_policy": (
                 None
                 if args.video is None
-                else "omitted_because_env_step_returns_after_terminal_autoreset"
+                else "captured_before_terminal_autoreset; duplicate_reset_render_omitted"
             ),
             "video_terminal_step_frames_omitted": video_terminal_step_frames_omitted,
             "video_camera": (
@@ -677,6 +713,9 @@ def main() -> int:
         active_exception = sys.exc_info()[0] is not None
         cleanup_error = None
         for resource_name, close_resource in (
+            ("video_capture", None if video_capture is None else video_capture.close),
+            ("video_render_setting", None if previous_rtx_render_setting is None else
+             lambda: env.sim.set_setting("/isaaclab/render/rtx_sensors", previous_rtx_render_setting)),
             ("video_writer", None if video_writer is None else video_writer.close),
             ("trace_file", None if trace_file is None else trace_file.close),
             ("environment", env.close),

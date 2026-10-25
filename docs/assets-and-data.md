@@ -11,7 +11,7 @@
 | 자체 생성 plug/socket/table | 현재 실제 조립 장면 | `configs/task.json`의 명시적 치수로 생성 | 자유 rigid object 2개, 소켓 내부 공간과 벽 collider 4개 감사 |
 | AutoMate `00015` peg/socket | 형상·SDF 설계의 비교 참고 자료 | Isaac 5.1 asset service의 `/Isaac/IsaacLab/AutoMate/00015/` | 최상위 USD와 6개 구성 layer, OBJ의 크기·SHA-256 |
 | AutoMate grasp·거리·분해 궤적 | 초기분포·복구 curriculum 참고 자료. 아직 정책 학습에는 미사용 | 같은 asset service | JSON parsing, asset ID와 episode shape 검사 |
-| Isaac Simple Room | 최종 실행 22·23의 선택형 시각 배경. 물리 충돌과 제어 관측에는 미사용 | Isaac Sim asset root의 `/Isaac/Environments/Simple_Room/simple_room.usd` | versioned URL·최상위 파일 hash와 RTX 렌더 영상 확인 |
+| Isaac Simple Room | 근접·전체 구도 촬영의 선택형 시각 배경. 물리 충돌과 제어 관측에는 미사용 | Isaac Sim asset root의 `/Isaac/Environments/Simple_Room/simple_room.usd` | versioned URL·최상위 파일 hash와 RTX 렌더 영상 확인 |
 | Seattle Lab Table | 선택형 공식 작업대로 준비됨. 현재 scene은 자체 생성 table 사용 | Isaac Sim asset root의 `/Isaac/Props/Mounts/SeattleLabTable/table_instanceable.usd` | versioned URL 응답과 최상위 파일 hash 확인 |
 
 `configs/assets.json`에는 다운로드 파일의 URL·크기·SHA-256과 외부 asset-root 경로를 기록했다. `scripts/fetch_assets.py`는 manifest에 등록된 ID만 받는다. 임의 URL 입력은 받지 않으며 HTTPS 호스트 allowlist, 응답 크기 제한, timeout, 임시 파일 다운로드, SHA-256 확인을 통과한 뒤 원자적으로 cache에 옮긴다.
@@ -27,7 +27,7 @@ cache 기본 경로는 `$HOME/rby1-assembly-lab/assets/cache/`이다. 이 디렉
 
 Simple Room과 Seattle Lab Table은 여러 하위 자산을 asset resolver로 읽으므로 최상위 USD만 cache에 복사하지 않는다. Isaac Sim 5.1의 versioned HTTPS URL이 응답하는지 확인하고 최상위 파일의 크기·SHA-256·확인일을 manifest에 기록했으며, 실행 때는 `asset_root_path`로 전체 의존성을 해석한다.
 
-Simple Room은 `--background`를 지정한 단일 환경 실행에서만 시각 배경으로 불러왔다. `--camera-view assembly`로 기록한 결과는 1280×960, 30 fps, 약 44초이며 4배속 편집본은 같은 해상도와 frame rate에서 약 13초다. 배경과 viewer 카메라는 정책 입력이나 물리 접촉에 연결되지 않으므로 이 영상은 카메라 기반 제어 또는 SimReady 환경의 물리 검증 근거가 아니다. 공유 파일과 원본의 대응 관계는 [미디어 manifest](media/media-manifest.json)에 기록한다.
+Simple Room은 `--background`를 지정한 단일 환경 실행에서만 시각 배경으로 불러왔다. `--camera-view assembly --video-fps 120`으로 1280×960의 실제 물리 단계 화면을 기록하고, 공유용 4배속 근접 영상과 정상 속도 전체 구도 영상을 60 fps로 내보낸다. 길이는 각각 약 13초와 44초다. 배경과 viewer 카메라는 정책 입력이나 물리 접촉에 연결되지 않으므로 이 영상은 카메라 기반 제어 또는 SimReady 환경의 물리 검증 근거가 아니다. 공유 파일과 원본의 대응 관계는 [미디어 manifest](media/media-manifest.json), 촬영 검사는 [영상 근거](evidence/video-cadence.json)에 기록한다.
 
 ## SimReady 표기와 물리 감사의 차이
 

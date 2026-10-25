@@ -1,0 +1,722 @@
+{
+  "scope": "video cadence and native-render recapture; nominal baseline, not learned-policy/jam-recovery evidence",
+  "previous_media": [
+    {
+      "file": "nominal-baseline-4x.mp4",
+      "kind": "nominal_success_4x",
+      "source_run": "22",
+      "sha256": "6575c19b604df80503acce3fa78e3940042ef789a02450afa596f0e5dd0eb56c",
+      "bytes": 2028379,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1280,
+            "height": 960,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "391"
+          }
+        ],
+        "format": {
+          "duration": "13.033333",
+          "size": "2028379"
+        }
+      }
+    },
+    {
+      "file": "nominal-overview.mp4",
+      "kind": "nominal_success_1x",
+      "source_run": "23",
+      "sha256": "a10511757b7b87cc2cfadea9cf4cd39012cf41db1715af633a9ebe872a49a1f1",
+      "bytes": 1058288,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "1322"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "1058288"
+        }
+      }
+    }
+  ],
+  "reason": "The old 4x export was 30 fps. The new 60 fps export halves the simulation-time gap between displayed moving frames.",
+  "physics_controller_unchanged": true,
+  "runs": {
+    "24": {
+      "report": {
+        "completed": true,
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 1800,
+        "steps_cli_override": null,
+        "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+        "actual_steps": 1322,
+        "max_contact_force_proxy_n": 6.391331195831299,
+        "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+        "max_grip_contact_force_n": 6.391331195831299,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "max_insertion_contact_force_n": 0.0,
+        "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "max_insertion_contact_load_n": 0.0,
+        "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "max_forbidden_contact_load_n": 0.0,
+        "forbidden_contact_force_threshold_n": 1.0,
+        "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+        "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+        "visual_background_enabled": true,
+        "trace_path": "artifacts/cloud/physics-trace-24.jsonl",
+        "trace_record_count": 138,
+        "video_path": "artifacts/cloud/assembly-native120-closeup.mp4",
+        "video_frame_count": 5288,
+        "video_fps": 120,
+        "video_capture_source": "native_physics_substeps_without_interpolation",
+        "video_render_stride_physics_steps": 1,
+        "video_first_physics_step": 1,
+        "video_last_physics_step": 5288,
+        "video_expected_frame_count": 5288,
+        "video_initial_frame_policy": "first_frame_after_first_capture_stride; no_initial_hold",
+        "video_warmup_render_count": 16,
+        "video_viewer_render_scheduling_enabled": true,
+        "video_terminal_step_frame_policy": "captured_before_terminal_autoreset; duplicate_reset_render_omitted",
+        "video_terminal_step_frames_omitted": 0,
+        "video_camera": {
+          "preset": "assembly",
+          "eye_world_m": [
+            0.95,
+            -0.6,
+            1.25
+          ],
+          "lookat_world_m": [
+            0.36,
+            0.0,
+            0.87
+          ],
+          "resolution_px": [
+            1280,
+            960
+          ]
+        },
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 1,
+          "abort": 0
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 1,
+          "abort": 0
+        },
+        "grip_proof_peak_count": 1,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "configured_task_timeout_s": 60.0,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "source_sha256": {
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+            "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+            "scripts/run_sim.py": "e7a4df63dbd4c052b19e48cc77845559e83b56e7936270e390d1ee760583b8a2"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "report_path": "artifacts/cloud/physics-smoke-24.json",
+      "report_sha256": "85b0dadf639982e6b7efdf984b783f02064ccf9be46b3bef53b8302563e05219",
+      "trace_path": "artifacts/cloud/physics-trace-24.jsonl",
+      "trace_sha256": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "previous_trace_path": "artifacts/cloud/physics-trace-22.jsonl",
+      "previous_trace_sha256": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "physics_trace_byte_identical_to_previous_success": true,
+      "source_video": "artifacts/cloud/assembly-native120-closeup.mp4",
+      "source_sha256": "d6eaba621b8fb05b831a1d3149e3d94d159c6400e411560247965fd77ae9778c",
+      "source_ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 1280,
+            "height": 960,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "120/1",
+            "avg_frame_rate": "120/1",
+            "nb_frames": "5288"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "44021922"
+        }
+      },
+      "source_frame_analysis": {
+        "decoded_frames": 5288,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.1925,
+          0.24385416666666668,
+          0.31390625
+        ],
+        "active_exact_duplicate_pairs": 0,
+        "intentional_end_hold_frames": 0,
+        "pts_delta_min_s": 0.008332999999996815,
+        "pts_delta_max_s": 0.008334000000004949,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.051720935665070994,
+            0.061024519242346274,
+            0.06666012741625307
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      }
+    },
+    "25": {
+      "report": {
+        "completed": true,
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 1800,
+        "steps_cli_override": null,
+        "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+        "actual_steps": 1322,
+        "max_contact_force_proxy_n": 6.391331195831299,
+        "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+        "max_grip_contact_force_n": 6.391331195831299,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "max_insertion_contact_force_n": 0.0,
+        "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "max_insertion_contact_load_n": 0.0,
+        "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "max_forbidden_contact_load_n": 0.0,
+        "forbidden_contact_force_threshold_n": 1.0,
+        "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+        "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+        "visual_background_enabled": true,
+        "trace_path": "artifacts/cloud/physics-trace-25.jsonl",
+        "trace_record_count": 138,
+        "video_path": "artifacts/cloud/assembly-native60-overview.mp4",
+        "video_frame_count": 2644,
+        "video_fps": 60,
+        "video_capture_source": "native_physics_substeps_without_interpolation",
+        "video_render_stride_physics_steps": 2,
+        "video_first_physics_step": 2,
+        "video_last_physics_step": 5288,
+        "video_expected_frame_count": 2644,
+        "video_initial_frame_policy": "first_frame_after_first_capture_stride; no_initial_hold",
+        "video_warmup_render_count": 16,
+        "video_viewer_render_scheduling_enabled": true,
+        "video_terminal_step_frame_policy": "captured_before_terminal_autoreset; duplicate_reset_render_omitted",
+        "video_terminal_step_frames_omitted": 0,
+        "video_camera": {
+          "preset": "overview",
+          "eye_world_m": [
+            2.2,
+            -2.0,
+            1.8
+          ],
+          "lookat_world_m": [
+            0.35,
+            0.0,
+            0.9
+          ],
+          "resolution_px": [
+            960,
+            720
+          ]
+        },
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 1,
+          "abort": 0
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 1,
+          "abort": 0
+        },
+        "grip_proof_peak_count": 1,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "configured_task_timeout_s": 60.0,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "source_sha256": {
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+            "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+            "scripts/run_sim.py": "e7a4df63dbd4c052b19e48cc77845559e83b56e7936270e390d1ee760583b8a2"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "report_path": "artifacts/cloud/physics-smoke-25.json",
+      "report_sha256": "5a345faadfcbe6643a74e2687d5ce7e4a616f391158867d3de227dc36fed780c",
+      "trace_path": "artifacts/cloud/physics-trace-25.jsonl",
+      "trace_sha256": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "previous_trace_path": "artifacts/cloud/physics-trace-23.jsonl",
+      "previous_trace_sha256": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "physics_trace_byte_identical_to_previous_success": true,
+      "source_video": "artifacts/cloud/assembly-native60-overview.mp4",
+      "source_sha256": "7c94add21c0e0a1575b62cd2f0cae08ded5108951feda042bfc01414fa9dbc4d",
+      "source_ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 960,
+            "height": 720,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "2644"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "15626242"
+        }
+      },
+      "source_frame_analysis": {
+        "decoded_frames": 2644,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.049166666666666664,
+          0.09729166666666667,
+          0.2353125
+        ],
+        "active_exact_duplicate_pairs": 0,
+        "intentional_end_hold_frames": 0,
+        "pts_delta_min_s": 0.016665999999997183,
+        "pts_delta_max_s": 0.016667000000005316,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.03164027798920868,
+            0.04117400012910364,
+            0.06005646772682661
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      }
+    }
+  },
+  "exports": [
+    {
+      "file": "nominal-baseline-4x-60fps.mp4",
+      "kind": "nominal_success_4x_60fps",
+      "source_run": "24",
+      "sha256": "7776e6e9cd53cfbc066ed4091740f357d609e415d6b21dede2d4cd594246047d",
+      "bytes": 3141038,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 1280,
+            "height": 960,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "781"
+          }
+        ],
+        "format": {
+          "duration": "13.016667",
+          "size": "3141038"
+        }
+      },
+      "frame_analysis": {
+        "decoded_frames": 781,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.33927083333333335,
+          1.04078125,
+          1.739375
+        ],
+        "active_exact_duplicate_pairs": 0,
+        "intentional_end_hold_frames": 120,
+        "pts_delta_min_s": 0.01666599999999896,
+        "pts_delta_max_s": 0.0166670000000001,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.11067570038139816,
+            0.48025643825530995,
+            1.2948580503463745
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native120-closeup.mp4",
+      "source_sha256": "d6eaba621b8fb05b831a1d3149e3d94d159c6400e411560247965fd77ae9778c",
+      "playback_multiplier": 4,
+      "end_hold_s": 2,
+      "command": [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        "artifacts/cloud/assembly-native120-closeup.mp4",
+        "-vf",
+        "setpts=(PTS-STARTPTS)/4,fps=60,tpad=stop_mode=clone:stop_duration=2,drawbox=x=20:y=20:w=620:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 4x playback | 60 fps | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "docs/media/nominal-baseline-4x-60fps.mp4"
+      ],
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
+    },
+    {
+      "file": "nominal-overview-60fps.mp4",
+      "kind": "nominal_success_1x_60fps",
+      "source_run": "25",
+      "sha256": "c0117d625d115f812853a685e0700365c20c22693c55b481d8b0a09b3a460951",
+      "bytes": 2866003,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 960,
+            "height": 720,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "2644"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "2866003"
+        }
+      },
+      "frame_analysis": {
+        "decoded_frames": 2644,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.04510416666666667,
+          0.08125,
+          0.21255208333333334
+        ],
+        "active_exact_duplicate_pairs": 3,
+        "intentional_end_hold_frames": 0,
+        "pts_delta_min_s": 0.016665999999997183,
+        "pts_delta_max_s": 0.016667000000005316,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.025800215173512647,
+            0.038311740197241304,
+            0.05125536136329173
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native60-overview.mp4",
+      "source_sha256": "7c94add21c0e0a1575b62cd2f0cae08ded5108951feda042bfc01414fa9dbc4d",
+      "playback_multiplier": 1,
+      "end_hold_s": 0,
+      "command": [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        "artifacts/cloud/assembly-native60-overview.mp4",
+        "-vf",
+        "setpts=(PTS-STARTPTS)/1,fps=60,drawbox=x=20:y=20:w=620:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 1x playback | 60 fps | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "docs/media/nominal-overview-60fps.mp4"
+      ],
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
+    }
+  ],
+  "unit_test_counts": {
+    "general": 62,
+    "video_capture": 8
+  },
+  "initial_probe_failure": {
+    "report": "artifacts/cloud/video-cadence-probe.json",
+    "reason": "The viewer RGB render product did not set the Lab RTX render-scheduling flag; zero expected frames triggered a failure.",
+    "resolution": "Register /isaaclab/render/rtx_sensors while recording and restore its prior value during cleanup."
+  },
+  "successful_short_probe": {
+    "report": {
+      "completed": false,
+      "physics_backend": "PhysX via Isaac Sim",
+      "observation_source": "simulator_state_with_noise",
+      "baseline_controller_state_source": "simulator_ground_truth",
+      "phase_gate_state_source": "simulator_ground_truth",
+      "contact_force_source": "contact_force_proxy",
+      "num_envs": 1,
+      "steps_requested": 30,
+      "steps_cli_override": 30,
+      "steps_default_source": "cli",
+      "actual_steps": 30,
+      "max_contact_force_proxy_n": 0.0,
+      "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+      "max_grip_contact_force_n": 0.0,
+      "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+      "max_insertion_contact_force_n": 0.0,
+      "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+      "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+      "max_insertion_contact_load_n": 0.0,
+      "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+      "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+      "max_forbidden_contact_load_n": 0.0,
+      "forbidden_contact_force_threshold_n": 1.0,
+      "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+      "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+      "visual_background_enabled": true,
+      "trace_path": "artifacts/cloud/video-cadence-probe-v2.jsonl",
+      "trace_record_count": 4,
+      "video_path": "artifacts/cloud/video-cadence-probe-v2.mp4",
+      "video_frame_count": 120,
+      "video_fps": 120,
+      "video_capture_source": "native_physics_substeps_without_interpolation",
+      "video_render_stride_physics_steps": 1,
+      "video_first_physics_step": 1,
+      "video_last_physics_step": 120,
+      "video_expected_frame_count": 120,
+      "video_initial_frame_policy": "first_frame_after_first_capture_stride; no_initial_hold",
+      "video_warmup_render_count": 16,
+      "video_viewer_render_scheduling_enabled": true,
+      "video_terminal_step_frame_policy": "captured_before_terminal_autoreset; duplicate_reset_render_omitted",
+      "video_terminal_step_frames_omitted": 0,
+      "video_camera": {
+        "preset": "assembly",
+        "eye_world_m": [
+          0.95,
+          -0.6,
+          1.25
+        ],
+        "lookat_world_m": [
+          0.36,
+          0.0,
+          0.87
+        ],
+        "resolution_px": [
+          1280,
+          960
+        ]
+      },
+      "last_pre_autoreset_phase_counts": {
+        "pregrasp": 1,
+        "close": 0,
+        "check_lift": 0,
+        "align": 0,
+        "insert": 0,
+        "retract": 0,
+        "done": 0,
+        "abort": 0
+      },
+      "terminal_phase_counts": {
+        "pregrasp": 0,
+        "close": 0,
+        "check_lift": 0,
+        "align": 0,
+        "insert": 0,
+        "retract": 0,
+        "done": 0,
+        "abort": 0
+      },
+      "grip_proof_peak_count": 0,
+      "runtime_validated": true,
+      "provenance": {
+        "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+        "physics_dt_s": 0.008333333333333333,
+        "control_decimation": 4,
+        "control_dt_s": 0.03333333333333333,
+        "configured_task_timeout_s": 60.0,
+        "seed": 20261025,
+        "seed_source": "configs/task.json:data.train_seed",
+        "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+        "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+        "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+        "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+        "source_sha256": {
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+          "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+          "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+          "scripts/run_sim.py": "e7a4df63dbd4c052b19e48cc77845559e83b56e7936270e390d1ee760583b8a2"
+        },
+        "generated_asset_sha256": {
+          "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+          "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+          "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+          "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+          "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+        },
+        "torch_version": "2.7.0+cu128"
+      }
+    },
+    "frame_analysis": {
+      "decoded_frames": 120,
+      "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+      "first_window_frames": 120,
+      "first_window_exact_duplicate_pairs": 0,
+      "first_window_difference_min_median_max": [
+        0.18041666666666667,
+        0.24484375,
+        0.3166145833333333
+      ],
+      "active_exact_duplicate_pairs": 0,
+      "intentional_end_hold_frames": 0,
+      "pts_delta_min_s": 0.008332999999999924,
+      "pts_delta_max_s": 0.008334000000000064,
+      "first_window_optical_flow": {
+        "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+        "pair_count": 119,
+        "per_pair_roi_p95_min_median_max_px": [
+          0.05387618280947208,
+          0.060643325187265854,
+          0.0671407613903284
+        ],
+        "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+      }
+    }
+  },
+  "previous_media_archive": "artifacts/cloud/previous-30fps",
+  "transfer_verification": {
+    "remote_and_local_sha256_match": true,
+    "files": {
+      "assembly-native120-closeup.mp4": "d6eaba621b8fb05b831a1d3149e3d94d159c6400e411560247965fd77ae9778c",
+      "assembly-native60-overview.mp4": "7c94add21c0e0a1575b62cd2f0cae08ded5108951feda042bfc01414fa9dbc4d",
+      "physics-smoke-24.json": "85b0dadf639982e6b7efdf984b783f02064ccf9be46b3bef53b8302563e05219",
+      "physics-smoke-25.json": "5a345faadfcbe6643a74e2687d5ce7e4a616f391158867d3de227dc36fed780c",
+      "physics-trace-24.jsonl": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "physics-trace-25.jsonl": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777"
+    }
+  }
+}

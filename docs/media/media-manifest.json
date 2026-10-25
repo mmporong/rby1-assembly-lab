@@ -2,48 +2,116 @@
   "scope": "actual Isaac Sim nominal-baseline media; no learned-policy or sim-to-real result",
   "media": [
     {
-      "file": "nominal-baseline-4x.mp4",
-      "kind": "nominal_success_4x",
-      "source_run": "22",
-      "sha256": "6575c19b604df80503acce3fa78e3940042ef789a02450afa596f0e5dd0eb56c",
-      "bytes": 2028379,
+      "file": "nominal-baseline-4x-60fps.mp4",
+      "kind": "nominal_success_4x_60fps",
+      "source_run": "24",
+      "sha256": "7776e6e9cd53cfbc066ed4091740f357d609e415d6b21dede2d4cd594246047d",
+      "bytes": 3141038,
       "ffprobe": {
         "programs": [],
         "streams": [
           {
+            "codec_name": "h264",
+            "profile": "High",
             "width": 1280,
             "height": 960,
-            "avg_frame_rate": "30/1",
-            "nb_frames": "391"
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "781"
           }
         ],
         "format": {
-          "duration": "13.033333",
-          "size": "2028379"
+          "duration": "13.016667",
+          "size": "3141038"
         }
-      }
+      },
+      "frame_analysis": {
+        "decoded_frames": 781,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.33927083333333335,
+          1.04078125,
+          1.739375
+        ],
+        "active_exact_duplicate_pairs": 0,
+        "intentional_end_hold_frames": 120,
+        "pts_delta_min_s": 0.01666599999999896,
+        "pts_delta_max_s": 0.0166670000000001,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.11067570038139816,
+            0.48025643825530995,
+            1.2948580503463745
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native120-closeup.mp4",
+      "source_sha256": "d6eaba621b8fb05b831a1d3149e3d94d159c6400e411560247965fd77ae9778c",
+      "playback_multiplier": 4,
+      "end_hold_s": 2,
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
     },
     {
-      "file": "nominal-overview.mp4",
-      "kind": "nominal_success_1x",
-      "source_run": "23",
-      "sha256": "a10511757b7b87cc2cfadea9cf4cd39012cf41db1715af633a9ebe872a49a1f1",
-      "bytes": 1058288,
+      "file": "nominal-overview-60fps.mp4",
+      "kind": "nominal_success_1x_60fps",
+      "source_run": "25",
+      "sha256": "c0117d625d115f812853a685e0700365c20c22693c55b481d8b0a09b3a460951",
+      "bytes": 2866003,
       "ffprobe": {
         "programs": [],
         "streams": [
           {
+            "codec_name": "h264",
+            "profile": "High",
             "width": 960,
             "height": 720,
-            "avg_frame_rate": "30/1",
-            "nb_frames": "1322"
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "2644"
           }
         ],
         "format": {
           "duration": "44.066667",
-          "size": "1058288"
+          "size": "2866003"
         }
-      }
+      },
+      "frame_analysis": {
+        "decoded_frames": 2644,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.04510416666666667,
+          0.08125,
+          0.21255208333333334
+        ],
+        "active_exact_duplicate_pairs": 3,
+        "intentional_end_hold_frames": 0,
+        "pts_delta_min_s": 0.016665999999997183,
+        "pts_delta_max_s": 0.016667000000005316,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.025800215173512647,
+            0.038311740197241304,
+            0.05125536136329173
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native60-overview.mp4",
+      "source_sha256": "7c94add21c0e0a1575b62cd2f0cae08ded5108951feda042bfc01414fa9dbc4d",
+      "playback_multiplier": 1,
+      "end_hold_s": 0,
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
     },
     {
       "file": "nominal-evidence.png",
@@ -248,37 +316,6 @@
     }
   ],
   "success_evidence": "../evidence/nominal-baseline.json",
-  "export": {
-    "source": "artifacts/cloud/assembly-final-closeup.mp4",
-    "source_sha256": "686ebfb107b38d51d319cd319b421902c2f456d9b5dc49856aa1f3bc4e7ecf0c",
-    "export": "docs/media/nominal-baseline-4x.mp4",
-    "export_sha256": "6575c19b604df80503acce3fa78e3940042ef789a02450afa596f0e5dd0eb56c",
-    "playback_multiplier": 4,
-    "end_hold_s": 2,
-    "command": [
-      "ffmpeg",
-      "-hide_banner",
-      "-loglevel",
-      "error",
-      "-y",
-      "-i",
-      "artifacts/cloud/assembly-final-closeup.mp4",
-      "-vf",
-      "setpts=PTS/4,fps=30,tpad=stop_mode=clone:stop_duration=2,drawbox=x=20:y=20:w=505:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 4x playback | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
-      "-an",
-      "-c:v",
-      "libx264",
-      "-crf",
-      "20",
-      "-pix_fmt",
-      "yuv420p",
-      "-movflags",
-      "+faststart",
-      "docs/media/nominal-baseline-4x.mp4"
-    ],
-    "physics_report": "artifacts/cloud/physics-smoke-22.json",
-    "scope": "nominal zero-residual free-fit physics baseline, not learned policy or jam recovery"
-  },
   "graph": {
     "environment_index": 0,
     "generator": "artifacts/cloud/render-evidence-plot-final.py",
@@ -307,5 +344,166 @@
     "title": "Nominal baseline / Simulation / No learned policy",
     "trace_sample_count": 138
   },
-  "capture_note": "Camera angles were rendered in separate single-environment runs with the same seed; terminal autoreset frames are omitted and counts are recorded in each report."
+  "capture_note": "Runs 24 and 25 use native physics-substep renders. Physics is 120 Hz and control is 30 Hz; render rate is recorded per run. Warmup has no physics stepping. The first recorded frame follows one capture stride; terminal physical frames are captured before autoreset. Duplicate reset renders are omitted. The two camera runs and prior runs 22/23 have byte-identical physics traces.",
+  "exports": [
+    {
+      "file": "nominal-baseline-4x-60fps.mp4",
+      "kind": "nominal_success_4x_60fps",
+      "source_run": "24",
+      "sha256": "7776e6e9cd53cfbc066ed4091740f357d609e415d6b21dede2d4cd594246047d",
+      "bytes": 3141038,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 1280,
+            "height": 960,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "781"
+          }
+        ],
+        "format": {
+          "duration": "13.016667",
+          "size": "3141038"
+        }
+      },
+      "frame_analysis": {
+        "decoded_frames": 781,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.33927083333333335,
+          1.04078125,
+          1.739375
+        ],
+        "active_exact_duplicate_pairs": 0,
+        "intentional_end_hold_frames": 120,
+        "pts_delta_min_s": 0.01666599999999896,
+        "pts_delta_max_s": 0.0166670000000001,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.11067570038139816,
+            0.48025643825530995,
+            1.2948580503463745
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native120-closeup.mp4",
+      "source_sha256": "d6eaba621b8fb05b831a1d3149e3d94d159c6400e411560247965fd77ae9778c",
+      "playback_multiplier": 4,
+      "end_hold_s": 2,
+      "command": [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        "artifacts/cloud/assembly-native120-closeup.mp4",
+        "-vf",
+        "setpts=(PTS-STARTPTS)/4,fps=60,tpad=stop_mode=clone:stop_duration=2,drawbox=x=20:y=20:w=620:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 4x playback | 60 fps | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "docs/media/nominal-baseline-4x-60fps.mp4"
+      ],
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
+    },
+    {
+      "file": "nominal-overview-60fps.mp4",
+      "kind": "nominal_success_1x_60fps",
+      "source_run": "25",
+      "sha256": "c0117d625d115f812853a685e0700365c20c22693c55b481d8b0a09b3a460951",
+      "bytes": 2866003,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "codec_name": "h264",
+            "profile": "High",
+            "width": 960,
+            "height": 720,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "2644"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "2866003"
+        }
+      },
+      "frame_analysis": {
+        "decoded_frames": 2644,
+        "measurement": "mean absolute adjacent grayscale pixel difference at 160x120",
+        "first_window_frames": 120,
+        "first_window_exact_duplicate_pairs": 0,
+        "first_window_difference_min_median_max": [
+          0.04510416666666667,
+          0.08125,
+          0.21255208333333334
+        ],
+        "active_exact_duplicate_pairs": 3,
+        "intentional_end_hold_frames": 0,
+        "pts_delta_min_s": 0.016665999999997183,
+        "pts_delta_max_s": 0.016667000000005316,
+        "first_window_optical_flow": {
+          "method": "OpenCV Farneback at 160x120, ROI x=[0,120),y=[10,100); pixels per adjacent frame",
+          "pair_count": 119,
+          "per_pair_roi_p95_min_median_max_px": [
+            0.025800215173512647,
+            0.038311740197241304,
+            0.05125536136329173
+          ],
+          "limitation": "Perceptual diagnostic including RTX temporal effects; not a physical displacement measurement."
+        }
+      },
+      "source": "artifacts/cloud/assembly-native60-overview.mp4",
+      "source_sha256": "7c94add21c0e0a1575b62cd2f0cae08ded5108951feda042bfc01414fa9dbc4d",
+      "playback_multiplier": 1,
+      "end_hold_s": 0,
+      "command": [
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-y",
+        "-i",
+        "artifacts/cloud/assembly-native60-overview.mp4",
+        "-vf",
+        "setpts=(PTS-STARTPTS)/1,fps=60,drawbox=x=20:y=20:w=620:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 1x playback | 60 fps | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
+        "-an",
+        "-c:v",
+        "libx264",
+        "-preset",
+        "medium",
+        "-crf",
+        "18",
+        "-pix_fmt",
+        "yuv420p",
+        "-movflags",
+        "+faststart",
+        "docs/media/nominal-overview-60fps.mp4"
+      ],
+      "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
+    }
+  ],
+  "video_cadence_evidence": "../evidence/video-cadence.json"
 }
