@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rby1-assembly-lab"
+version = "0.1.0"
+description = "RB-Y1 bimanual contact assembly and recovery experiments"
+requires-python = ">=3.11,<3.12"
+dependencies = ["numpy==1.26.4", "h5py==3.14.0"]
+
+[project.optional-dependencies]
+assets = ["usd-core==25.5.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

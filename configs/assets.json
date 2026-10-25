@@ -1,0 +1,255 @@
+{
+  "schema_version": 1,
+  "cache_root": "assets/cache",
+  "sources": {
+    "rby1_sim_isaac": {
+      "repository": "https://github.com/RainbowRobotics/rby1-sim-isaac",
+      "revision": "e2415548e5d6db712ecbff2074741b70261d0cbf",
+      "license_note": "The upstream README only assigns Apache-2.0 to source files carrying NVIDIA SPDX headers. It does not state redistribution terms for the USD assets, so this project fetches them at runtime and does not vendor them."
+    },
+    "isaac_sim_assets": {
+      "documentation": "https://docs.isaacsim.omniverse.nvidia.com/latest/assets/usd_assets_environments.html",
+      "asset_root_documentation": "https://docs.isaacsim.omniverse.nvidia.com/latest/installation/quick-install.html",
+      "license_note": "Resolve these paths through the Isaac Sim asset root supplied by the installed NVIDIA product or its asset packs."
+    },
+    "automate": {
+      "documentation": "https://isaac-sim.github.io/IsaacLab/main/source/overview/environments",
+      "code_repository": "https://github.com/isaac-sim/IsaacLab",
+      "code_revision": "3c6e67bb5c7ada942a6d1884ab69338f57596f77",
+      "asset_root": "/Isaac/IsaacLab/AutoMate",
+      "asset_service_version": "5.1",
+      "license_note": "Isaac Lab code is BSD-3-Clause. AutoMate binary assets are fetched from the NVIDIA Isaac asset service and are not redistributed by this repository; their use remains subject to NVIDIA Isaac Sim/Omniverse asset terms."
+    }
+  },
+  "assets": [
+    {
+      "id": "rby1_model_m_v1_2",
+      "kind": "download",
+      "physical_role": "robot_articulation",
+      "source": "rby1_sim_isaac",
+      "url": "https://raw.githubusercontent.com/RainbowRobotics/rby1-sim-isaac/e2415548e5d6db712ecbff2074741b70261d0cbf/assets/model_v_1_2_m.usd",
+      "path": "rby1/model_v_1_2_m.usd",
+      "size_bytes": 19381526,
+      "sha256": "d72d5e97fded5d4e6e5f59d0248753d3ba7814d00b6bf7eeee9652ac265f069a",
+      "redistributable": false,
+      "usd": true
+    },
+    {
+      "id": "rb_gripper_left",
+      "kind": "download",
+      "physical_role": "end_effector",
+      "source": "rby1_sim_isaac",
+      "url": "https://raw.githubusercontent.com/RainbowRobotics/rby1-sim-isaac/e2415548e5d6db712ecbff2074741b70261d0cbf/assets/gripper/rb_gripper/rb_gripper_left.usd",
+      "path": "rby1/gripper/rb_gripper_left.usd",
+      "size_bytes": 392628,
+      "sha256": "ee22e7b280d07aee12f2c22ec686160ac9675200125eae80d0b3fe4948fb3a09",
+      "redistributable": false,
+      "usd": true
+    },
+    {
+      "id": "rb_gripper_right",
+      "kind": "download",
+      "physical_role": "end_effector",
+      "source": "rby1_sim_isaac",
+      "url": "https://raw.githubusercontent.com/RainbowRobotics/rby1-sim-isaac/e2415548e5d6db712ecbff2074741b70261d0cbf/assets/gripper/rb_gripper/rb_gripper_right.usd",
+      "path": "rby1/gripper/rb_gripper_right.usd",
+      "size_bytes": 392648,
+      "sha256": "e0aa0f79b4f8c85392a7e7055be5f4adb12c95d28affd1de2a4a425199b0b967",
+      "redistributable": false,
+      "usd": true
+    },
+    {
+      "id": "rb_gripper_mount_config",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "rby1_sim_isaac",
+      "url": "https://raw.githubusercontent.com/RainbowRobotics/rby1-sim-isaac/e2415548e5d6db712ecbff2074741b70261d0cbf/assets/gripper/rb_gripper/gripper.json",
+      "path": "rby1/gripper/gripper.json",
+      "size_bytes": 237,
+      "sha256": "05eb7e476d61a3b80e2178c997cf22ebb6859fe919f3e2a9fd553204d556aab7",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_plug_usd",
+      "kind": "download",
+      "physical_role": "physical_interaction_dynamic",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/plug.usd",
+      "path": "automate/00015/plug.usd",
+      "size_bytes": 2412,
+      "sha256": "483b7244f615b109518a35aae1875319410cbea1672083e7d90fe69782a98bd7",
+      "runtime_mass_kg": 0.019,
+      "redistributable": false,
+      "usd": true
+    },
+    {
+      "id": "automate_00015_socket_usd",
+      "kind": "download",
+      "physical_role": "physical_interaction_static",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/socket.usd",
+      "path": "automate/00015/socket.usd",
+      "size_bytes": 2414,
+      "sha256": "fa6d72e5520224a640eeb762de2d6538e8778c23028bcf5f98806adb8cc43bdd",
+      "redistributable": false,
+      "usd": true
+    },
+    {
+      "id": "automate_00015_plug_obj",
+      "kind": "download",
+      "physical_role": "training_data",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/plug.obj",
+      "path": "automate/00015/plug.obj",
+      "size_bytes": 200322,
+      "sha256": "08141474e17e2f34810e6dbe8dbf462607e4110afb52a49a8a85a73b83aac90e",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_socket_obj",
+      "kind": "download",
+      "physical_role": "training_data",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/socket.obj",
+      "path": "automate/00015/socket.obj",
+      "size_bytes": 333380,
+      "sha256": "02962ba728322a45084ebc19812ebab1d1fe60784d34b176ac823719e966f89f",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_plug_grasps",
+      "kind": "download",
+      "physical_role": "training_data",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/plug_grasps.json",
+      "path": "automate/plug_grasps.json",
+      "size_bytes": 12098,
+      "sha256": "6abcc6d172a8001ef411171d37b2c177b840b73d7a8f0f5afbe8cf78cbc7e8fc",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_disassembly_distances",
+      "kind": "download",
+      "physical_role": "training_data",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/disassembly_dist.json",
+      "path": "automate/disassembly_dist.json",
+      "size_bytes": 4284,
+      "sha256": "d7ca71c464417b68b28e3daa3f36fc93f300122aa1d0dca9eb0e23eb2116928b",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_disassembly_trajectories",
+      "kind": "download",
+      "physical_role": "training_data",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/disassemble_traj.json",
+      "path": "automate/00015/disassemble_traj.json",
+      "size_bytes": 14852408,
+      "sha256": "a54be882aaf87d138976ef6f67fbf4e1541855df33b5ad47bc15142163c6f321",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_plug_base",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/plug_base.usd",
+      "path": "automate/00015/configuration/plug_base.usd",
+      "size_bytes": 71883,
+      "sha256": "47da2cdc80d84a432b23690a7ab863e051d9dd0f87d3397eddc60a8f6340c887",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_plug_physics",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/plug_physics.usd",
+      "path": "automate/00015/configuration/plug_physics.usd",
+      "size_bytes": 1465,
+      "sha256": "ef8ee744be961963a850c3f621b1b515cd4aa73036c247d959d71d5b01396168",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_plug_sensor",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/plug_sensor.usd",
+      "path": "automate/00015/configuration/plug_sensor.usd",
+      "size_bytes": 652,
+      "sha256": "f226ee67750f62e5684928867a1534513ca55ec053daa0bee5963729617069b0",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_socket_base",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/socket_base.usd",
+      "path": "automate/00015/configuration/socket_base.usd",
+      "size_bytes": 116852,
+      "sha256": "15184e6b42721383ac9bfb9345e859da6c4331ef4fbb7f69663eca0b25f8b5ac",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_socket_physics",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/socket_physics.usd",
+      "path": "automate/00015/configuration/socket_physics.usd",
+      "size_bytes": 1790,
+      "sha256": "123c9511b8ee61ced366c182c7f5af88cd2e31807b0cb8135c183fdf02105e4a",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "automate_00015_socket_sensor",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "automate",
+      "url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/IsaacLab/AutoMate/00015/configuration/socket_sensor.usd",
+      "path": "automate/00015/configuration/socket_sensor.usd",
+      "size_bytes": 654,
+      "sha256": "df66866570e68cb5602b3f168ef33b3d785f6676a0bd37a855d980e3c672672c",
+      "redistributable": false,
+      "usd": false
+    },
+    {
+      "id": "isaac_simple_room",
+      "kind": "external_runtime",
+      "physical_role": "visual_background",
+      "source": "isaac_sim_assets",
+      "asset_root_path": "/Isaac/Environments/Simple_Room/simple_room.usd",
+      "verified_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Environments/Simple_Room/simple_room.usd",
+      "verified_size_bytes": 1630266,
+      "verified_sha256": "6a1f66ad8ff255db16b35de7a5a5b5c40f3acb257b8504ab23562fe95660db4d",
+      "verified_on": "2026-10-25",
+      "usd": true
+    },
+    {
+      "id": "isaac_seattle_lab_table",
+      "kind": "external_runtime",
+      "physical_role": "physical_interaction_static",
+      "source": "isaac_sim_assets",
+      "asset_root_path": "/Isaac/Props/Mounts/SeattleLabTable/table_instanceable.usd",
+      "verified_url": "https://omniverse-content-production.s3-us-west-2.amazonaws.com/Assets/Isaac/5.1/Isaac/Props/Mounts/SeattleLabTable/table_instanceable.usd",
+      "verified_size_bytes": 4584,
+      "verified_sha256": "479ed8fd374d8eafdedf3ca3b9d0d5981ffc6d5c5016929347f748be93d5df17",
+      "verified_on": "2026-10-25",
+      "usd": true
+    }
+  ]
+}
