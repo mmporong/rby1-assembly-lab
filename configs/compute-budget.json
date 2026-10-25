@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "scope": "rby1-assembly-lab compute estimate only",
+  "authorization": {
+    "currency": "USD",
+    "maximum_amount": 700.0,
+    "starts_on": "2026-10-25",
+    "use_before": "2026-11-25",
+    "timezone": "Asia/Seoul",
+    "ends_at_exclusive": "2026-11-25T00:00:00+09:00",
+    "account_wide_balance_checked": false,
+    "account_wide_usage_included": false
+  },
+  "initial_instance": {
+    "name": "rby1-assembly-20261025",
+    "provider": "crusoe",
+    "instance_type": "l40s-48gb.1x",
+    "gpu": "NVIDIA L40S 48 GB",
+    "gpu_count": 1,
+    "catalog_price_per_hour_usd": 1.74,
+    "theoretical_hours_at_maximum": 402.3,
+    "estimate_excludes": [
+      "storage",
+      "taxes",
+      "catalog price changes",
+      "other project usage"
+    ]
+  },
+  "execution_policy": {
+    "ordered_stages": [
+      "runtime_and_physics_smoke",
+      "physical_grasp_and_baseline_validation",
+      "bounded_rl_scale_up"
+    ],
+    "scale_after_baseline_pass": true,
+    "prohibit_unbounded_idle_or_training_runs": true,
+    "record_estimated_cost_per_run": true,
+    "stop_project_owned_instances_and_processes_after_artifact_retrieval": true
+  }
+}

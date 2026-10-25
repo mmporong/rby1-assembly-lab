@@ -1,0 +1,9 @@
+# Compatibility constraints for Isaac Sim 5.1 / Isaac Lab v2.3.0.
+# Runtime versions and the Lab source commit are recorded in runtime.json.
+setuptools==80.9.0
+wheel==0.45.1
+transformers==4.55.4
+huggingface-hub==0.34.4
+typer==0.16.1
+click==8.1.7
+idna==3.10

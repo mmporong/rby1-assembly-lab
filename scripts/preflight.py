@@ -26,7 +26,7 @@ def command(args: list[str]) -> dict:
 def inspect() -> dict:
     expected = json.loads((ROOT / "configs/runtime.json").read_text())
     versions = {}
-    for name in ("isaacsim", "isaaclab", "isaaclab-rl", "rsl-rl-lib", "torch", "numpy", "h5py"):
+    for name in ("isaacsim", "isaaclab", "isaaclab-rl", "rsl-rl-lib", "torch", "numpy", "h5py", "setuptools", "wheel"):
         try:
             versions[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
@@ -39,13 +39,15 @@ def inspect() -> dict:
         "generated_scene_exists": (ROOT / "assets/generated/scene.usda").is_file(),
     }
     required_versions = {
-        "isaacsim": expected["isaac_sim"],
-        "isaaclab": expected["isaac_lab"],
+        "isaacsim": expected["isaac_sim_distribution"],
+        "isaaclab": expected["isaac_lab_distribution"],
         "isaaclab-rl": expected["isaac_lab_rl"],
         "rsl-rl-lib": expected["rsl_rl"],
         "torch": expected["torch"] + "+" + expected["torch_cuda_build"],
         "numpy": expected["numpy"],
         "h5py": expected["h5py"],
+        "setuptools": expected["setuptools"],
+        "wheel": expected["wheel"],
     }
     checks.update({name + "_version": versions[name] == version
                    for name, version in required_versions.items()})

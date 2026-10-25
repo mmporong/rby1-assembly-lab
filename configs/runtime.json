@@ -1,7 +1,9 @@
 {
   "python": "3.11",
   "isaac_sim": "5.1.0",
+  "isaac_sim_distribution": "5.1.0.0",
   "isaac_lab": "2.3.0",
+  "isaac_lab_distribution": "0.47.2",
   "isaac_lab_commit": "3c6e67bb5c7ada942a6d1884ab69338f57596f77",
   "robot_source_commit": "e2415548e5d6db712ecbff2074741b70261d0cbf",
   "robot_variant": "RB-Y1 M v1.2",
@@ -9,11 +11,13 @@
   "physics_backend": "PhysX",
   "remote_workspace_name": "rby1-assembly-lab",
   "local_gpu_required": false,
-  "source": "https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/installation/isaaclab_pip_installation.html",
+  "source": "https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/installation/pip_installation.html",
   "rsl_rl": "3.0.1",
   "torch": "2.7.0",
   "torch_cuda_build": "cu128",
   "isaac_lab_rl": "0.4.4",
-  "numpy": "1.26.4",
+  "numpy": "1.26.0",
+  "setuptools": "80.9.0",
+  "wheel": "0.45.1",
   "h5py": "3.14.0"
 }
