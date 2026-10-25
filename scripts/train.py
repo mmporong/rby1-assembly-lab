@@ -12,6 +12,7 @@ from importlib import metadata
 import json
 from pathlib import Path
 import sys
+import traceback
 
 from isaaclab.app import AppLauncher
 
@@ -46,10 +47,11 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from rsl_rl.runners import OnPolicyRunner  # noqa: E402
 from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper  # noqa: E402
+import omni.kit.app  # noqa: E402
 from rby1_assembly.isaac_env import Rby1AssemblyEnv, Rby1AssemblyEnvCfg  # noqa: E402
 
 
-def main() -> None:
+def main() -> int:
     cfg = Rby1AssemblyEnvCfg()
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
@@ -87,12 +89,30 @@ def main() -> None:
         runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)
         runner.add_git_repo_to_log(__file__)
         runner.learn(num_learning_iterations=runner_cfg["max_iterations"], init_at_random_ep_len=False)
+        return 0
     finally:
         wrapped.close()
 
 
 if __name__ == "__main__":
+    exit_code = 1
     try:
-        main()
+        exit_code = main()
+    except Exception:
+        traceback.print_exc()
+        sys.stderr.flush()
+        exit_code = 1
     finally:
-        simulation_app.close()
+        try:
+            omni.kit.app.get_app().post_quit(exit_code)
+        except Exception:
+            print("Failed to set Isaac Kit exit code", file=sys.stderr, flush=True)
+            traceback.print_exc()
+            exit_code = 1
+        try:
+            simulation_app.close()
+        except Exception:
+            print("Failed to close Isaac application", file=sys.stderr, flush=True)
+            traceback.print_exc()
+            exit_code = 1
+    raise SystemExit(exit_code)

@@ -32,6 +32,11 @@ PHASE_NAMES = (
     "abort",
 )
 INDEPENDENT_EVALUATOR_SOURCE = "simulator_ground_truth_independent"
+INSERTION_FORCE_SOURCE = "plug_body_filtered_against_socket_net_normal_force_world_frame"
+INSERTION_LOAD_SOURCE = "physx_plug_socket_sum_abs_contact_normals"
+FORBIDDEN_CONTACT_LOAD_SOURCE = (
+    "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces"
+)
 
 
 class RecordingContractError(RuntimeError):
@@ -92,6 +97,14 @@ class PhysicsSnapshot:
     gripper_velocity_m_s: np.ndarray
     object_poses_world_xyzw: np.ndarray
     contact_force_proxy_n: np.ndarray
+    grip_contact_force_peak_n: float
+    insertion_contact_force_n: float
+    insertion_contact_force_w: np.ndarray
+    insertion_contact_force_peak_n: float
+    insertion_contact_load_n: float
+    insertion_contact_load_peak_n: float
+    forbidden_contact_load_n: float
+    forbidden_contact_load_peak_n: float
     phase: str
     ground_truth: GroundTruthMetrics
     reported_geometry_consistent: bool
@@ -219,7 +232,31 @@ def terminal_snapshot_from_extras(
     metrics, geometry_consistent = _metrics_from_mapping(
         evaluation, poses_wxyz, geometry, env_index
     )
-    return PhysicsSnapshot(
+    required_contact_fields = (
+        "grip_contact_force_peak_n",
+        "insertion_contact_force_n",
+        "insertion_contact_force_w",
+        "insertion_contact_force_peak_n",
+        "insertion_contact_force_source",
+        "insertion_contact_load_n",
+        "insertion_contact_load_peak_n",
+        "insertion_contact_load_source",
+        "forbidden_contact_load_n",
+        "forbidden_contact_load_peak_n",
+        "forbidden_contact_load_source",
+    )
+    missing = [name for name in required_contact_fields if name not in snapshots]
+    if missing:
+        raise RecordingContractError(
+            "terminal snapshot is missing measured contact fields: " + ", ".join(missing)
+        )
+    if snapshots["insertion_contact_force_source"] != INSERTION_FORCE_SOURCE:
+        raise RecordingContractError("terminal insertion contact-force source is unsupported")
+    if snapshots["insertion_contact_load_source"] != INSERTION_LOAD_SOURCE:
+        raise RecordingContractError("terminal insertion contact-load source is unsupported")
+    if snapshots["forbidden_contact_load_source"] != FORBIDDEN_CONTACT_LOAD_SOURCE:
+        raise RecordingContractError("terminal forbidden contact-load source is unsupported")
+    snapshot = PhysicsSnapshot(
         joint_position_rad=np.asarray(
             _env_value(snapshots["revolute_joint_positions_rad"], env_index), dtype=np.float64
         ),
@@ -236,10 +273,36 @@ def terminal_snapshot_from_extras(
         contact_force_proxy_n=np.asarray(
             _env_value(snapshots["contact_force_proxy_n"], env_index), dtype=np.float64
         ),
+        grip_contact_force_peak_n=float(
+            _scalar(snapshots["grip_contact_force_peak_n"], env_index)
+        ),
+        insertion_contact_force_n=float(
+            _scalar(snapshots["insertion_contact_force_n"], env_index)
+        ),
+        insertion_contact_force_w=np.asarray(
+            _env_value(snapshots["insertion_contact_force_w"], env_index), dtype=np.float64
+        ),
+        insertion_contact_force_peak_n=float(
+            _scalar(snapshots["insertion_contact_force_peak_n"], env_index)
+        ),
+        insertion_contact_load_n=float(
+            _scalar(snapshots["insertion_contact_load_n"], env_index)
+        ),
+        insertion_contact_load_peak_n=float(
+            _scalar(snapshots["insertion_contact_load_peak_n"], env_index)
+        ),
+        forbidden_contact_load_n=float(
+            _scalar(snapshots["forbidden_contact_load_n"], env_index)
+        ),
+        forbidden_contact_load_peak_n=float(
+            _scalar(snapshots["forbidden_contact_load_peak_n"], env_index)
+        ),
         phase=_phase_name(_env_value(snapshots["phase"], env_index)),
         ground_truth=metrics,
         reported_geometry_consistent=geometry_consistent,
     )
+    _validate_contact_loads(snapshot)
+    return snapshot
 
 
 def live_snapshot(
@@ -250,6 +313,12 @@ def live_snapshot(
     evaluation = extras.get("evaluation")
     if not isinstance(evaluation, Mapping):
         raise RecordingContractError("extras.evaluation is required for ground-truth logging")
+    if extras.get("insertion_contact_force_source") != INSERTION_FORCE_SOURCE:
+        raise RecordingContractError("live insertion contact-force source is missing or unsupported")
+    if extras.get("insertion_contact_load_source") != INSERTION_LOAD_SOURCE:
+        raise RecordingContractError("live insertion contact-load source is missing or unsupported")
+    if extras.get("forbidden_contact_load_source") != FORBIDDEN_CONTACT_LOAD_SOURCE:
+        raise RecordingContractError("live forbidden contact-load source is missing or unsupported")
     root_poses_wxyz = np.stack(
         (
             np.concatenate(
@@ -279,7 +348,22 @@ def live_snapshot(
     metrics, geometry_consistent = _metrics_from_mapping(
         extended_evaluation, root_poses_wxyz, geometry, env_index=0
     )
-    return PhysicsSnapshot(
+    required_env_contact_fields = (
+        "_episode_grip_force_peak_n",
+        "_last_insertion_contact_force_n",
+        "_last_insertion_contact_force_w",
+        "_episode_insertion_contact_force_peak_n",
+        "_last_insertion_contact_load_n",
+        "_episode_insertion_contact_load_peak_n",
+        "_last_forbidden_contact_load_n",
+        "_episode_forbidden_contact_load_peak_n",
+    )
+    missing = [name for name in required_env_contact_fields if not hasattr(env, name)]
+    if missing:
+        raise RecordingContractError(
+            "environment is missing measured contact fields: " + ", ".join(missing)
+        )
+    snapshot = PhysicsSnapshot(
         joint_position_rad=joint_position[revolute_ids],
         joint_velocity_rad_s=joint_velocity[revolute_ids],
         gripper_position_m=joint_position[gripper_ids],
@@ -288,10 +372,59 @@ def live_snapshot(
         contact_force_proxy_n=np.asarray(
             _env_value(env._last_contact_proxy_n, env_index), dtype=np.float64
         ),
+        grip_contact_force_peak_n=float(
+            _scalar(env._episode_grip_force_peak_n, env_index)
+        ),
+        insertion_contact_force_n=float(
+            _scalar(env._last_insertion_contact_force_n, env_index)
+        ),
+        insertion_contact_force_w=np.asarray(
+            _env_value(env._last_insertion_contact_force_w, env_index), dtype=np.float64
+        ),
+        insertion_contact_force_peak_n=float(
+            _scalar(env._episode_insertion_contact_force_peak_n, env_index)
+        ),
+        insertion_contact_load_n=float(
+            _scalar(env._last_insertion_contact_load_n, env_index)
+        ),
+        insertion_contact_load_peak_n=float(
+            _scalar(env._episode_insertion_contact_load_peak_n, env_index)
+        ),
+        forbidden_contact_load_n=float(
+            _scalar(env._last_forbidden_contact_load_n, env_index)
+        ),
+        forbidden_contact_load_peak_n=float(
+            _scalar(env._episode_forbidden_contact_load_peak_n, env_index)
+        ),
         phase=_phase_name(_env_value(env._phase, env_index)),
         ground_truth=metrics,
         reported_geometry_consistent=geometry_consistent,
     )
+    _validate_contact_loads(snapshot)
+    return snapshot
+
+
+def _validate_contact_loads(snapshot: PhysicsSnapshot) -> None:
+    net_norm = float(np.linalg.norm(snapshot.insertion_contact_force_w))
+    if not np.isclose(net_norm, snapshot.insertion_contact_force_n, atol=1e-5, rtol=1e-5):
+        raise RecordingContractError("insertion net-force norm does not match its vector")
+    if snapshot.insertion_contact_load_n + 1e-4 < snapshot.insertion_contact_force_n:
+        raise RecordingContractError("insertion contact load is below the net-force norm")
+    if snapshot.insertion_contact_load_peak_n + 1e-9 < snapshot.insertion_contact_load_n:
+        raise RecordingContractError("insertion contact load peak is below the current load")
+    if snapshot.insertion_contact_load_peak_n + 1e-4 < snapshot.insertion_contact_force_peak_n:
+        raise RecordingContractError("insertion contact load peak is below the net-force peak")
+    if snapshot.forbidden_contact_load_peak_n + 1e-9 < snapshot.forbidden_contact_load_n:
+        raise RecordingContractError("forbidden contact load peak is below the current load")
+    combined_peak = max(
+        snapshot.grip_contact_force_peak_n, snapshot.insertion_contact_load_peak_n
+    )
+    if not np.isclose(
+        snapshot.ground_truth.force_peak_n, combined_peak, atol=1e-4, rtol=1e-5
+    ):
+        raise RecordingContractError(
+            "ground-truth force peak does not match grip/insertion measured peaks"
+        )
 
 
 def terminal_evaluation_from_extras(
@@ -465,6 +598,14 @@ def record_baseline_rollouts(
                         gripper_velocity_m_s=snapshot.gripper_velocity_m_s,
                         object_poses_world=snapshot.object_poses_world_xyzw,
                         contact_force_proxy_n=snapshot.contact_force_proxy_n,
+                        grip_contact_force_peak_n=snapshot.grip_contact_force_peak_n,
+                        insertion_contact_force_n=snapshot.insertion_contact_force_n,
+                        insertion_contact_force_w=snapshot.insertion_contact_force_w,
+                        insertion_contact_force_peak_n=snapshot.insertion_contact_force_peak_n,
+                        insertion_contact_load_n=snapshot.insertion_contact_load_n,
+                        insertion_contact_load_peak_n=snapshot.insertion_contact_load_peak_n,
+                        forbidden_contact_load_n=snapshot.forbidden_contact_load_n,
+                        forbidden_contact_load_peak_n=snapshot.forbidden_contact_load_peak_n,
                         phase=snapshot.phase,
                         ground_truth=snapshot.ground_truth,
                     )

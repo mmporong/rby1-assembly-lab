@@ -14,9 +14,11 @@ from typing import Any, Mapping
 import h5py
 import numpy as np
 
+from .contracts import ACTION_DIM, OBSERVATION_DIM
+
 
 SCHEMA_NAME = "rby1_assembly_episode"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 GROUND_TRUTH_FIELDS = (
     "actual_depth_m",
     "lateral_error_m",
@@ -38,6 +40,11 @@ GRIPPER_JOINT_ORDER = (
 )
 _EPISODE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$")
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
+INSERTION_LOAD_SOURCE = "physx_plug_socket_sum_abs_contact_normals"
+INSERTION_FORCE_SOURCE = "plug_body_filtered_against_socket_net_normal_force_world_frame"
+FORBIDDEN_CONTACT_LOAD_SOURCE = (
+    "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces"
+)
 
 
 class DatasetContractError(ValueError):
@@ -238,6 +245,14 @@ class TimestepRecord:
     gripper_velocity_m_s: Any
     object_poses_world: Any
     contact_force_proxy_n: Any
+    grip_contact_force_peak_n: float
+    insertion_contact_force_n: float
+    insertion_contact_force_w: Any
+    insertion_contact_force_peak_n: float
+    insertion_contact_load_n: float
+    insertion_contact_load_peak_n: float
+    forbidden_contact_load_n: float
+    forbidden_contact_load_peak_n: float
     phase: str
     ground_truth: GroundTruthMetrics
 
@@ -245,8 +260,10 @@ class TimestepRecord:
         _validate_finite("timestamp_s", self.timestamp_s)
         if self.timestamp_s < 0.0:
             raise DatasetContractError("timestamp_s must be non-negative")
-        observation = _numeric_array("observation", self.observation)
-        action = _numeric_array("action", self.action)
+        observation = _numeric_array(
+            "observation", self.observation, shape=(OBSERVATION_DIM,)
+        )
+        action = _numeric_array("action", self.action, shape=(ACTION_DIM,))
         joint_position = _numeric_array(
             "joint_position_rad", self.joint_position_rad, shape=(len(REVOLUTE_JOINT_ORDER),)
         )
@@ -266,10 +283,54 @@ class TimestepRecord:
         contact_force = _numeric_array(
             "contact_force_proxy_n", self.contact_force_proxy_n, shape=(2,)
         )
+        insertion_contact_force = _numeric_array(
+            "insertion_contact_force_w", self.insertion_contact_force_w, shape=(3,)
+        )
+        for name, value in (
+            ("grip_contact_force_peak_n", self.grip_contact_force_peak_n),
+            ("insertion_contact_force_n", self.insertion_contact_force_n),
+            ("insertion_contact_force_peak_n", self.insertion_contact_force_peak_n),
+            ("insertion_contact_load_n", self.insertion_contact_load_n),
+            ("insertion_contact_load_peak_n", self.insertion_contact_load_peak_n),
+            ("forbidden_contact_load_n", self.forbidden_contact_load_n),
+            ("forbidden_contact_load_peak_n", self.forbidden_contact_load_peak_n),
+        ):
+            _validate_finite(name, value)
+            if value < 0.0:
+                raise DatasetContractError(f"{name} must be non-negative")
+        vector_norm = float(np.linalg.norm(insertion_contact_force))
+        if not math.isclose(vector_norm, self.insertion_contact_force_n, abs_tol=1e-5, rel_tol=1e-5):
+            raise DatasetContractError(
+                "insertion_contact_force_n must equal the norm of insertion_contact_force_w"
+            )
+        if self.insertion_contact_force_peak_n + 1e-9 < self.insertion_contact_force_n:
+            raise DatasetContractError("insertion contact peak cannot be below the current norm")
+        if self.insertion_contact_load_n + 1e-4 < self.insertion_contact_force_n:
+            raise DatasetContractError("insertion contact load cannot be below the net force norm")
+        if self.insertion_contact_load_peak_n + 1e-9 < self.insertion_contact_load_n:
+            raise DatasetContractError("insertion contact load peak cannot be below the current load")
+        if self.insertion_contact_load_peak_n + 1e-4 < self.insertion_contact_force_peak_n:
+            raise DatasetContractError("insertion contact load peak cannot be below the net-force peak")
+        if self.forbidden_contact_load_peak_n + 1e-9 < self.forbidden_contact_load_n:
+            raise DatasetContractError("forbidden contact load peak cannot be below the current load")
+        if self.grip_contact_force_peak_n + 1e-9 < float(np.max(contact_force)):
+            raise DatasetContractError("grip contact peak cannot be below the current hand force")
         if not isinstance(self.phase, str) or not self.phase.strip():
             raise DatasetContractError("phase must be a non-empty string")
         if not isinstance(self.ground_truth, GroundTruthMetrics):
             raise DatasetContractError("ground_truth must be GroundTruthMetrics")
+        combined_force_peak = max(
+            self.grip_contact_force_peak_n, self.insertion_contact_load_peak_n
+        )
+        if not math.isclose(
+            self.ground_truth.force_peak_n,
+            combined_force_peak,
+            abs_tol=1e-4,
+            rel_tol=1e-5,
+        ):
+            raise DatasetContractError(
+                "ground_truth.force_peak_n must equal max(grip peak, insertion load peak)"
+            )
         return {
             "timestamp_s": float(self.timestamp_s),
             "observation": observation,
@@ -280,6 +341,14 @@ class TimestepRecord:
             "gripper_velocity_m_s": gripper_velocity,
             "object_poses_world": object_poses,
             "contact_force_proxy_n": contact_force,
+            "grip_contact_force_peak_n": float(self.grip_contact_force_peak_n),
+            "insertion_contact_force_n": float(self.insertion_contact_force_n),
+            "insertion_contact_force_w": insertion_contact_force,
+            "insertion_contact_force_peak_n": float(self.insertion_contact_force_peak_n),
+            "insertion_contact_load_n": float(self.insertion_contact_load_n),
+            "insertion_contact_load_peak_n": float(self.insertion_contact_load_peak_n),
+            "forbidden_contact_load_n": float(self.forbidden_contact_load_n),
+            "forbidden_contact_load_peak_n": float(self.forbidden_contact_load_peak_n),
             "phase": self.phase.strip(),
             "ground_truth_metrics": self.ground_truth.as_array(),
         }
@@ -429,12 +498,46 @@ class EpisodeDatasetWriter:
         )
         self._append_dataset("object_poses_world", normalized["object_poses_world"], (2, 7), dtype=np.float64)
         self._append_dataset("contact_force_proxy_n", normalized["contact_force_proxy_n"], (2,), dtype=np.float64)
+        self._append_dataset("grip_contact_force_peak_n", normalized["grip_contact_force_peak_n"], (), dtype=np.float64)
+        self._append_dataset("insertion_contact_force_n", normalized["insertion_contact_force_n"], (), dtype=np.float64)
+        self._append_dataset("insertion_contact_force_w", normalized["insertion_contact_force_w"], (3,), dtype=np.float64)
+        self._append_dataset("insertion_contact_force_peak_n", normalized["insertion_contact_force_peak_n"], (), dtype=np.float64)
+        self._append_dataset("insertion_contact_load_n", normalized["insertion_contact_load_n"], (), dtype=np.float64)
+        self._append_dataset("insertion_contact_load_peak_n", normalized["insertion_contact_load_peak_n"], (), dtype=np.float64)
+        self._append_dataset("forbidden_contact_load_n", normalized["forbidden_contact_load_n"], (), dtype=np.float64)
+        self._append_dataset("forbidden_contact_load_peak_n", normalized["forbidden_contact_load_peak_n"], (), dtype=np.float64)
         self._append_dataset("phase", normalized["phase"], (), dtype=h5py.string_dtype("utf-8"))
         self._append_dataset("ground_truth_metrics", normalized["ground_truth_metrics"], (len(GROUND_TRUTH_FIELDS),), dtype=np.float64)
         self._active["object_poses_world"].attrs["object_order"] = _canonical_json(["socket", "plug"])
         self._active["object_poses_world"].attrs["quaternion_order"] = "xyzw"
         self._active["contact_force_proxy_n"].attrs["sensor_order"] = _canonical_json(["left", "right"])
         self._active["contact_force_proxy_n"].attrs["representation"] = "per_hand_magnitude"
+        self._active["contact_force_proxy_n"].attrs["source"] = "filtered_finger_object_contact_sensor_proxy"
+        self._active["contact_force_proxy_n"].attrs["is_wrist_six_axis_ft_sensor"] = False
+        self._active["grip_contact_force_peak_n"].attrs["representation"] = "episode_peak_of_per_hand_filtered_finger_magnitude"
+        self._active["grip_contact_force_peak_n"].attrs["measurement_available"] = True
+        self._active["insertion_contact_force_n"].attrs["representation"] = "world_frame_net_force_proxy_norm"
+        self._active["insertion_contact_force_n"].attrs["measurement_available"] = True
+        self._active["insertion_contact_force_n"].attrs["source"] = INSERTION_FORCE_SOURCE
+        self._active["insertion_contact_force_w"].attrs["frame"] = "world"
+        self._active["insertion_contact_force_w"].attrs["representation"] = "net_contact_force_proxy_vector"
+        self._active["insertion_contact_force_w"].attrs["is_wrist_six_axis_ft_sensor"] = False
+        self._active["insertion_contact_force_w"].attrs["measurement_available"] = True
+        self._active["insertion_contact_force_w"].attrs["source"] = INSERTION_FORCE_SOURCE
+        self._active["insertion_contact_force_peak_n"].attrs["representation"] = "episode_peak_of_world_frame_net_force_proxy_norm"
+        self._active["insertion_contact_force_peak_n"].attrs["measurement_available"] = True
+        self._active["insertion_contact_load_n"].attrs["representation"] = "sum_of_absolute_contact_normal_magnitudes"
+        self._active["insertion_contact_load_n"].attrs["measurement_available"] = True
+        self._active["insertion_contact_load_n"].attrs["source"] = INSERTION_LOAD_SOURCE
+        self._active["insertion_contact_load_peak_n"].attrs["representation"] = "episode_peak_of_sum_of_absolute_contact_normal_magnitudes"
+        self._active["insertion_contact_load_peak_n"].attrs["measurement_available"] = True
+        self._active["insertion_contact_load_peak_n"].attrs["source"] = INSERTION_LOAD_SOURCE
+        self._active["forbidden_contact_load_n"].attrs["representation"] = "sum_of_absolute_filtered_pair_normal_forces"
+        self._active["forbidden_contact_load_n"].attrs["measurement_available"] = True
+        self._active["forbidden_contact_load_n"].attrs["source"] = FORBIDDEN_CONTACT_LOAD_SOURCE
+        self._active["forbidden_contact_load_peak_n"].attrs["representation"] = "episode_peak_of_sum_of_absolute_filtered_pair_normal_forces"
+        self._active["forbidden_contact_load_peak_n"].attrs["measurement_available"] = True
+        self._active["forbidden_contact_load_peak_n"].attrs["source"] = FORBIDDEN_CONTACT_LOAD_SOURCE
         self._active["ground_truth_metrics"].attrs["fields"] = _canonical_json(GROUND_TRUTH_FIELDS)
         self._active["joint_positions_rad"].attrs["joint_order"] = _canonical_json(REVOLUTE_JOINT_ORDER)
         self._active["joint_velocities_rad_s"].attrs["joint_order"] = _canonical_json(REVOLUTE_JOINT_ORDER)
@@ -530,7 +633,8 @@ def select_episode_ids(
         _validate_file_schema(file)
         for episode_id in sorted(file["episodes"].keys()):
             group = file["episodes"][episode_id]
-            provenance = json.loads(group.attrs["provenance_json"])
+            validated = _validate_episode_group(group, verify_hash=True)
+            provenance = validated["provenance"]
             if split is not None and group.attrs["split"] != split.value:
                 continue
             if success_only and not bool(group.attrs["success"]):
@@ -539,6 +643,7 @@ def select_episode_ids(
                 group.attrs["split"] == DatasetSplit.TRAIN.value
                 and bool(group.attrs["evaluation_valid"])
                 and provenance["kind"] == ProvenanceKind.ACTUAL_SIMULATOR_ROLLOUT.value
+                and provenance["owns_demonstration"] is True
             ):
                 continue
             selected.append(episode_id)
@@ -548,11 +653,20 @@ def select_episode_ids(
 def load_training_episode(path: str | Path, episode_id: str) -> dict[str, np.ndarray]:
     """평가 split이나 참고·합성 데이터를 거부하고 학습 가능한 배열만 읽는다."""
 
-    eligible = select_episode_ids(path, training_eligible_only=True)
-    if episode_id not in eligible:
-        raise DatasetContractError(f"episode is not eligible for training: {episode_id}")
     with h5py.File(path, "r") as file:
+        _validate_file_schema(file)
+        if episode_id not in file["episodes"]:
+            raise DatasetContractError(f"episode does not exist: {episode_id}")
         group = file[f"episodes/{episode_id}"]
+        validated = _validate_episode_group(group, verify_hash=True)
+        provenance = validated["provenance"]
+        if not (
+            group.attrs["split"] == DatasetSplit.TRAIN.value
+            and bool(group.attrs["evaluation_valid"])
+            and provenance["kind"] == ProvenanceKind.ACTUAL_SIMULATOR_ROLLOUT.value
+            and provenance["owns_demonstration"] is True
+        ):
+            raise DatasetContractError(f"episode is not eligible for training: {episode_id}")
         return {name: group[name][...] for name in group.keys()}
 
 
@@ -578,31 +692,29 @@ def inspect_dataset(path: str | Path, *, verify_hashes: bool = True) -> dict[str
         for episode_id in sorted(file["episodes"].keys()):
             group = file["episodes"][episode_id]
             counts["episodes"] += 1
-            split = str(group.attrs["split"])
-            if split in (DatasetSplit.TRAIN.value, DatasetSplit.EVAL.value):
-                counts[split] += 1
-            else:
-                invalid_contracts.append(f"{episode_id}: invalid split {split}")
-            success = bool(group.attrs.get("success", False))
-            counts["success" if success else "failure"] += 1
             try:
-                provenance = json.loads(group.attrs["provenance_json"])
+                validated = _validate_episode_group(group, verify_hash=verify_hashes)
+                split = validated["split"]
+                success = validated["success"]
+                provenance = validated["provenance"]
                 kind = provenance["kind"]
+                counts[split] += 1
+                counts["success" if success else "failure"] += 1
                 counts[kind] += 1
-            except (KeyError, TypeError, json.JSONDecodeError):
-                kind = "invalid"
-                invalid_contracts.append(f"{episode_id}: invalid provenance")
+            except DatasetContractError as error:
+                message = str(error)
+                if message == "episode hash does not match its content":
+                    invalid_hashes.append(episode_id)
+                else:
+                    invalid_contracts.append(f"{episode_id}: {message}")
+                continue
             if (
                 split == DatasetSplit.TRAIN.value
                 and bool(group.attrs.get("evaluation_valid", False))
                 and kind == ProvenanceKind.ACTUAL_SIMULATOR_ROLLOUT.value
+                and provenance["owns_demonstration"] is True
             ):
                 counts["training_eligible"] += 1
-            lengths = {name: len(group[name]) for name in group.keys()}
-            if not lengths or len(set(lengths.values())) != 1:
-                invalid_contracts.append(f"{episode_id}: inconsistent timestep lengths")
-            if verify_hashes and group.attrs.get("episode_sha256") != _hash_group(group):
-                invalid_hashes.append(episode_id)
     return {
         "path": str(Path(path).resolve()),
         "schema_name": SCHEMA_NAME,
@@ -622,6 +734,224 @@ def _validate_file_schema(file: h5py.File) -> None:
         raise DatasetContractError("unsupported dataset schema version")
     if "episodes" not in file or "_in_progress" not in file:
         raise DatasetContractError("dataset groups are missing")
+
+
+_TIMESTEP_DATASET_SHAPES = {
+    "timestamps_s": (),
+    "observations": (OBSERVATION_DIM,),
+    "actions": (ACTION_DIM,),
+    "joint_positions_rad": (len(REVOLUTE_JOINT_ORDER),),
+    "joint_velocities_rad_s": (len(REVOLUTE_JOINT_ORDER),),
+    "gripper_positions_m": (len(GRIPPER_JOINT_ORDER),),
+    "gripper_velocities_m_s": (len(GRIPPER_JOINT_ORDER),),
+    "object_poses_world": (2, 7),
+    "contact_force_proxy_n": (2,),
+    "grip_contact_force_peak_n": (),
+    "insertion_contact_force_n": (),
+    "insertion_contact_force_w": (3,),
+    "insertion_contact_force_peak_n": (),
+    "insertion_contact_load_n": (),
+    "insertion_contact_load_peak_n": (),
+    "forbidden_contact_load_n": (),
+    "forbidden_contact_load_peak_n": (),
+    "phase": (),
+    "ground_truth_metrics": (len(GROUND_TRUTH_FIELDS),),
+}
+_REQUIRED_DATASET_ATTRS = {
+    "object_poses_world": {
+        "object_order": _canonical_json(["socket", "plug"]),
+        "quaternion_order": "xyzw",
+    },
+    "contact_force_proxy_n": {
+        "sensor_order": _canonical_json(["left", "right"]),
+        "representation": "per_hand_magnitude",
+        "source": "filtered_finger_object_contact_sensor_proxy",
+        "is_wrist_six_axis_ft_sensor": False,
+    },
+    "grip_contact_force_peak_n": {"measurement_available": True},
+    "insertion_contact_force_n": {
+        "measurement_available": True,
+        "source": INSERTION_FORCE_SOURCE,
+    },
+    "insertion_contact_force_w": {
+        "frame": "world",
+        "is_wrist_six_axis_ft_sensor": False,
+        "measurement_available": True,
+        "source": INSERTION_FORCE_SOURCE,
+    },
+    "insertion_contact_force_peak_n": {"measurement_available": True},
+    "insertion_contact_load_n": {
+        "measurement_available": True,
+        "source": INSERTION_LOAD_SOURCE,
+    },
+    "insertion_contact_load_peak_n": {
+        "measurement_available": True,
+        "source": INSERTION_LOAD_SOURCE,
+    },
+    "forbidden_contact_load_n": {
+        "measurement_available": True,
+        "source": FORBIDDEN_CONTACT_LOAD_SOURCE,
+    },
+    "forbidden_contact_load_peak_n": {
+        "measurement_available": True,
+        "source": FORBIDDEN_CONTACT_LOAD_SOURCE,
+    },
+    "ground_truth_metrics": {"fields": _canonical_json(GROUND_TRUTH_FIELDS)},
+    "joint_positions_rad": {"joint_order": _canonical_json(REVOLUTE_JOINT_ORDER)},
+    "joint_velocities_rad_s": {"joint_order": _canonical_json(REVOLUTE_JOINT_ORDER)},
+    "gripper_positions_m": {"joint_order": _canonical_json(GRIPPER_JOINT_ORDER)},
+    "gripper_velocities_m_s": {"joint_order": _canonical_json(GRIPPER_JOINT_ORDER)},
+}
+
+
+def _required_attr(group: h5py.Group, name: str) -> Any:
+    if name not in group.attrs:
+        raise DatasetContractError(f"required episode attribute is missing: {name}")
+    return group.attrs[name]
+
+
+def _validate_provenance_json(raw: Any) -> dict[str, Any]:
+    try:
+        value = json.loads(_decode_string(raw))
+        provenance = EpisodeProvenance(
+            kind=ProvenanceKind(value["kind"]),
+            source_hashes=value["source_hashes"],
+            task_config_sha256=value["task_config_sha256"],
+            runtime_versions=value["runtime_versions"],
+            observation_source=value["observation_source"],
+            contact_force_source=value["contact_force_source"],
+            owns_demonstration=value["owns_demonstration"],
+            external_reference=value.get("external_reference"),
+            experiment_parameters=value.get("experiment_parameters", {}),
+        )
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise DatasetContractError("invalid provenance_json") from error
+    return provenance.as_dict()
+
+
+def _validate_episode_group(
+    group: h5py.Group, *, verify_hash: bool
+) -> dict[str, Any]:
+    """완료 episode의 구조·의미·출처·해시를 하나의 계약으로 검증한다."""
+
+    if not bool(_required_attr(group, "complete")):
+        raise DatasetContractError("episode is not marked complete")
+    episode_id = group.name.rsplit("/", 1)[-1]
+    if not _EPISODE_ID_PATTERN.fullmatch(episode_id):
+        raise DatasetContractError("episode group name is invalid")
+    split = _decode_string(_required_attr(group, "split"))
+    if split not in {item.value for item in DatasetSplit}:
+        raise DatasetContractError(f"invalid split: {split}")
+    try:
+        seed = int(_required_attr(group, "seed"))
+        rollout_index = int(_required_attr(group, "rollout_index"))
+        split_eval_percent = int(_required_attr(group, "split_eval_percent"))
+    except (TypeError, ValueError) as error:
+        raise DatasetContractError("episode integer metadata is invalid") from error
+    split_namespace = _decode_string(_required_attr(group, "split_namespace"))
+    if seed < 0 or rollout_index < 0:
+        raise DatasetContractError("seed and rollout_index must be non-negative")
+    if split != split_for_seed(
+        seed, eval_percent=split_eval_percent, namespace=split_namespace
+    ).value:
+        raise DatasetContractError("split does not match episode seed metadata")
+    provenance = _validate_provenance_json(_required_attr(group, "provenance_json"))
+    success = bool(_required_attr(group, "success"))
+    evaluation_valid = bool(_required_attr(group, "evaluation_valid"))
+    try:
+        evaluation = json.loads(_decode_string(_required_attr(group, "evaluation_json")))
+        metric_values = evaluation["metrics"]
+        terminal = TerminalEvaluation(
+            success=bool(evaluation["success"]),
+            valid=bool(evaluation["valid"]),
+            termination_reason=evaluation["termination_reason"],
+            evaluator_source=evaluation["evaluator_source"],
+            evaluator_version=evaluation["evaluator_version"],
+            terminal_timestamp_s=float(evaluation["terminal_timestamp_s"]),
+            metrics=GroundTruthMetrics(
+                **{name: metric_values[name] for name in GROUND_TRUTH_FIELDS}
+            ),
+            criteria=evaluation["criteria"],
+        )
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise DatasetContractError("invalid evaluation_json") from error
+    if terminal.success != success or terminal.valid != evaluation_valid:
+        raise DatasetContractError("episode evaluation attributes disagree with evaluation_json")
+    expected_count = int(_required_attr(group, "timestep_count"))
+    if expected_count <= 0:
+        raise DatasetContractError("timestep_count must be positive")
+
+    missing = sorted(set(_TIMESTEP_DATASET_SHAPES) - set(group.keys()))
+    if missing:
+        raise DatasetContractError("required timestep datasets are missing: " + ", ".join(missing))
+    for name, sample_shape in _TIMESTEP_DATASET_SHAPES.items():
+        dataset = group[name]
+        expected_shape = (expected_count, *sample_shape)
+        if dataset.shape != expected_shape:
+            raise DatasetContractError(
+                f"{name} must have shape {expected_shape}, got {dataset.shape}"
+            )
+    for dataset_name, expected_attrs in _REQUIRED_DATASET_ATTRS.items():
+        dataset = group[dataset_name]
+        for attr_name, expected in expected_attrs.items():
+            if attr_name not in dataset.attrs:
+                raise DatasetContractError(
+                    f"{dataset_name} required attribute is missing: {attr_name}"
+                )
+            actual = _json_compatible(dataset.attrs[attr_name])
+            if actual != expected:
+                raise DatasetContractError(
+                    f"{dataset_name}.{attr_name} is invalid"
+                )
+
+    timestamps = np.asarray(group["timestamps_s"][...], dtype=np.float64)
+    if not np.all(np.isfinite(timestamps)) or np.any(np.diff(timestamps) <= 0.0):
+        raise DatasetContractError("timestamps must be finite and strictly increasing")
+    if terminal.terminal_timestamp_s + 1e-9 < float(timestamps[-1]):
+        raise DatasetContractError("terminal evaluation precedes the final timestep")
+    for name in _TIMESTEP_DATASET_SHAPES:
+        if name == "phase":
+            if any(not _decode_string(value).strip() for value in group[name][...]):
+                raise DatasetContractError("phase values must be non-empty")
+            continue
+        values = np.asarray(group[name][...], dtype=np.float64)
+        if not np.all(np.isfinite(values)):
+            raise DatasetContractError(f"{name} must contain only finite values")
+
+    insertion_force = np.asarray(group["insertion_contact_force_n"][...])
+    insertion_vector_norm = np.linalg.norm(group["insertion_contact_force_w"][...], axis=1)
+    insertion_force_peak = np.asarray(group["insertion_contact_force_peak_n"][...])
+    insertion_load = np.asarray(group["insertion_contact_load_n"][...])
+    insertion_load_peak = np.asarray(group["insertion_contact_load_peak_n"][...])
+    forbidden_load = np.asarray(group["forbidden_contact_load_n"][...])
+    forbidden_load_peak = np.asarray(group["forbidden_contact_load_peak_n"][...])
+    grip_peak = np.asarray(group["grip_contact_force_peak_n"][...])
+    ground_truth_force_peak = np.asarray(group["ground_truth_metrics"][:, 3])
+    if not np.allclose(insertion_force, insertion_vector_norm, atol=1e-5, rtol=1e-5):
+        raise DatasetContractError("insertion net-force norm does not match its vector")
+    if np.any(insertion_force_peak + 1e-9 < insertion_force):
+        raise DatasetContractError("insertion net-force peak is below the current norm")
+    if np.any(insertion_load + 1e-4 < insertion_force):
+        raise DatasetContractError("insertion contact load is below the net-force norm")
+    if np.any(insertion_load_peak + 1e-9 < insertion_load):
+        raise DatasetContractError("insertion contact load peak is below the current load")
+    if np.any(insertion_load_peak + 1e-4 < insertion_force_peak):
+        raise DatasetContractError("insertion contact load peak is below the net-force peak")
+    if np.any(forbidden_load_peak + 1e-9 < forbidden_load):
+        raise DatasetContractError("forbidden contact load peak is below the current load")
+    combined_peak = np.maximum(grip_peak, insertion_load_peak)
+    if not np.allclose(ground_truth_force_peak, combined_peak, atol=1e-4, rtol=1e-5):
+        raise DatasetContractError("ground-truth force peak is not the combined measured peak")
+    if not np.allclose(
+        group["ground_truth_metrics"][-1], terminal.metrics.as_array(), atol=1e-8, rtol=0.0
+    ):
+        raise DatasetContractError("terminal evaluation metrics disagree with the final timestep")
+
+    episode_hash = _decode_string(_required_attr(group, "episode_sha256"))
+    _validate_sha256("episode_sha256", episode_hash)
+    if verify_hash and episode_hash != _hash_group(group):
+        raise DatasetContractError("episode hash does not match its content")
+    return {"split": split, "success": success, "provenance": provenance}
 
 
 def sha256_file(path: str | Path) -> str:

@@ -1,0 +1,88 @@
+{
+  "scope": "runtime_optimizer_checkpoint_smoke_only_not_policy_performance",
+  "process_exit_code": 0,
+  "num_envs": 4,
+  "learning_iterations": 1,
+  "transitions": 96,
+  "checkpoint_path": "artifacts/cloud/ppo-smoke-v2/2026-10-25_08-02-57/model_0.pt",
+  "checkpoint_sha256": "021bad65fde9986df69da344b4abc975df78e49c1ee69d72458ec6e99570559e",
+  "checkpoint_keys": [
+    "infos",
+    "iter",
+    "model_state_dict",
+    "optimizer_state_dict"
+  ],
+  "all_checkpoint_tensors_finite": true,
+  "tensor_count": 68,
+  "optimizer_state_count": 17,
+  "optimizer_parameter_update_counts": [
+    20.0
+  ],
+  "log_path": "artifacts/cloud/ppo-smoke-v2.log",
+  "log_sha256": "116bc3b3858479ccac2e934b5227352be2e1950c867b50850853b3ce1b409991",
+  "no_physx_replication_or_group_membership_errors": true,
+  "source_hashes_match_current_src": {
+    "src/rby1_assembly/__init__.py": true,
+    "src/rby1_assembly/assets.py": true,
+    "src/rby1_assembly/contact_loads.py": true,
+    "src/rby1_assembly/contracts.py": true,
+    "src/rby1_assembly/control_math.py": true,
+    "src/rby1_assembly/dataset.py": true,
+    "src/rby1_assembly/evaluation.py": true,
+    "src/rby1_assembly/isaac_env.py": true,
+    "src/rby1_assembly/recording.py": true,
+    "src/rby1_assembly/scene.py": true
+  },
+  "training_provenance": {
+    "source_and_config_sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+      "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "scripts/train.py": "3e5dbb8f0b4418c97ce64f837463b3415dcf1690a6c70f04ca0827b66a9c5a7b",
+      "configs/ppo.json": "98a1e68a36d30e20b66daf76eafdcaf6ad5cd7ff0a6ff03118944ff78807bd91",
+      "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+      "configs/compute-budget.json": "c05a7732523cad431899cad47c2907508362dcb87325f909f50e4922b93ba4d8",
+      "configs/runtime.json": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+      "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+      "assets/generated/plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+      "assets/generated/robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+      "assets/generated/scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+      "assets/generated/socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+      "assets/generated/table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950",
+      "assets/generated/build-report.json": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+      "artifacts/cloud/ppo-smoke-v2/2026-10-25_08-02-57/runner_config.json": "2b1a62638102132d990897b55f6492a51cef4b454170b86caf1f91ca2836ab38"
+    },
+    "runtime_versions": {
+      "isaacsim": "5.1.0.0",
+      "isaaclab": "0.47.2",
+      "isaaclab-rl": "0.4.4",
+      "rsl-rl-lib": "3.0.1",
+      "torch": "2.7.0+cu128",
+      "numpy": "1.26.0",
+      "h5py": "3.14.0"
+    },
+    "seed": 20261025,
+    "num_envs": 4,
+    "physics_dt_s": 0.008333333333333333,
+    "control_decimation": 4,
+    "control_dt_s": 0.03333333333333333,
+    "observation_noise": {
+      "distribution": "independent_zero_mean_gaussian_position_and_rotation_vector",
+      "position_std_m": 0.0015,
+      "rotation_vector_std_rad": 0.017453293
+    },
+    "baseline_controller_state_source": "simulator_ground_truth",
+    "checkpoint_scope": "checkpoints created in this run directory"
+  },
+  "limitations": [
+    "96 transitions cover only initial episode steps; assembly and residual-policy success untested",
+    "four-environment physics contact and termination separation is tested separately in parallel-scene-probe.json"
+  ]
+}

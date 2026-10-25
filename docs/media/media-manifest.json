@@ -1,0 +1,311 @@
+{
+  "scope": "actual Isaac Sim nominal-baseline media; no learned-policy or sim-to-real result",
+  "media": [
+    {
+      "file": "nominal-baseline-4x.mp4",
+      "kind": "nominal_success_4x",
+      "source_run": "22",
+      "sha256": "6575c19b604df80503acce3fa78e3940042ef789a02450afa596f0e5dd0eb56c",
+      "bytes": 2028379,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1280,
+            "height": 960,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "391"
+          }
+        ],
+        "format": {
+          "duration": "13.033333",
+          "size": "2028379"
+        }
+      }
+    },
+    {
+      "file": "nominal-overview.mp4",
+      "kind": "nominal_success_1x",
+      "source_run": "23",
+      "sha256": "a10511757b7b87cc2cfadea9cf4cd39012cf41db1715af633a9ebe872a49a1f1",
+      "bytes": 1058288,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "1322"
+          }
+        ],
+        "format": {
+          "duration": "44.066667",
+          "size": "1058288"
+        }
+      }
+    },
+    {
+      "file": "nominal-evidence.png",
+      "kind": "trace_graph",
+      "source_run": "22",
+      "sha256": "3ecf6c709945a9fd2a0c18ede8d2e62a0227fd97833f02f9967e7c75b085126d",
+      "bytes": 203972
+    },
+    {
+      "file": "failure-early-01.mp4",
+      "kind": "historical_debug_failure",
+      "source_run": "03",
+      "sha256": "252fb38663c1a92609889acaeb1d6a9b1aa67fce517c7e43b8e56cc52be7d7c4",
+      "bytes": 402873,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1280,
+            "height": 720,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "39"
+          }
+        ],
+        "format": {
+          "duration": "1.300000",
+          "size": "402873"
+        }
+      },
+      "report": {
+        "completed": false,
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 900,
+        "actual_steps": 39,
+        "max_contact_force_proxy_n": 0.0,
+        "visual_background_enabled": false,
+        "trace_path": "artifacts/cloud/physics-trace-03.jsonl",
+        "trace_record_count": 5,
+        "video_path": "artifacts/cloud/physics-03.mp4",
+        "video_frame_count": 39,
+        "video_fps": 30.0,
+        "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
+        "video_terminal_step_frames_omitted": 1,
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "grip_proof_peak_count": 0,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "ce645ba7ac782466a87c31dedb66e3ea0bb6b1cae7db07a7b87f460acddf7749",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "34891e52142e3a295c31112fd60372f428b90625123a12096dd6801cfb01972c",
+          "source_sha256": {
+            "src/rby1_assembly/isaac_env.py": "9491e508ba6a729c06ea298cd939d8f5d471323395f327455367ad4d084e2f95",
+            "scripts/run_sim.py": "580c8cb1f43cdebe392a2c972fcdd340f47e6d96869c4437eccbb1d33782bb81"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "dce556a19325523a6e71ab121efc092e45a28bb6200f45a41ab10059cf9cf20b",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "scope": "early controller debugging failure; not current policy or jam-recovery evaluation"
+    },
+    {
+      "file": "failure-early-02.mp4",
+      "kind": "historical_debug_failure",
+      "source_run": "07",
+      "sha256": "ff9bd9578378c0b37819050044f20f84f0b1e89f0cf933959cb4241cd318b9d3",
+      "bytes": 561323,
+      "ffprobe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 960,
+            "height": 720,
+            "avg_frame_rate": "30/1",
+            "nb_frames": "601"
+          }
+        ],
+        "format": {
+          "duration": "20.033333",
+          "size": "561323"
+        }
+      },
+      "report": {
+        "completed": false,
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 900,
+        "actual_steps": 601,
+        "max_contact_force_proxy_n": 1.5565418004989624,
+        "visual_background_enabled": false,
+        "trace_path": "artifacts/cloud/physics-trace-07.jsonl",
+        "trace_record_count": 62,
+        "video_path": "artifacts/cloud/physics-07.mp4",
+        "video_frame_count": 601,
+        "video_fps": 30.0,
+        "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
+        "video_terminal_step_frames_omitted": 1,
+        "video_camera": {
+          "eye_world_m": [
+            2.2,
+            -2.0,
+            1.8
+          ],
+          "lookat_world_m": [
+            0.35,
+            0.0,
+            0.9
+          ],
+          "resolution_px": [
+            960,
+            720
+          ]
+        },
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "grip_proof_peak_count": 0,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "aaa1073dd6505d92234e66dd27922b00bddf9722b49188e3333d08adb0be9517",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "6a20147d2436e49f8295664e476ee7c7d3d4220e6ea7460a0e75a7b949f82258",
+          "source_sha256": {
+            "src/rby1_assembly/isaac_env.py": "44f3252e6b2de12525f7c1a604942e979ce606d7eed1d93f96dbe0b658f01d09",
+            "scripts/run_sim.py": "80f15ceb26dca2287802fdb0e7003f766bf2620f5d0cbc4b5e103020f328c633"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "scope": "early controller debugging failure; not current policy or jam-recovery evaluation"
+    }
+  ],
+  "success_evidence": "../evidence/nominal-baseline.json",
+  "export": {
+    "source": "artifacts/cloud/assembly-final-closeup.mp4",
+    "source_sha256": "686ebfb107b38d51d319cd319b421902c2f456d9b5dc49856aa1f3bc4e7ecf0c",
+    "export": "docs/media/nominal-baseline-4x.mp4",
+    "export_sha256": "6575c19b604df80503acce3fa78e3940042ef789a02450afa596f0e5dd0eb56c",
+    "playback_multiplier": 4,
+    "end_hold_s": 2,
+    "command": [
+      "ffmpeg",
+      "-hide_banner",
+      "-loglevel",
+      "error",
+      "-y",
+      "-i",
+      "artifacts/cloud/assembly-final-closeup.mp4",
+      "-vf",
+      "setpts=PTS/4,fps=30,tpad=stop_mode=clone:stop_duration=2,drawbox=x=20:y=20:w=505:h=48:color=white@0.90:t=fill,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='Simulation | 4x playback | Nominal baseline':x=32:y=35:fontsize=20:fontcolor=black",
+      "-an",
+      "-c:v",
+      "libx264",
+      "-crf",
+      "20",
+      "-pix_fmt",
+      "yuv420p",
+      "-movflags",
+      "+faststart",
+      "docs/media/nominal-baseline-4x.mp4"
+    ],
+    "physics_report": "artifacts/cloud/physics-smoke-22.json",
+    "scope": "nominal zero-residual free-fit physics baseline, not learned policy or jam recovery"
+  },
+  "graph": {
+    "environment_index": 0,
+    "generator": "artifacts/cloud/render-evidence-plot-final.py",
+    "generator_sha256": "8a4dc8f027473881c06b588abd84373526584c90f3a3ee7f63b9621d0f932876",
+    "measurement_note": "PhysX trace contact proxies sampled by run_sim.py; not a wrist 6-axis F/T sensor. The 0 N insertion load is a free-fit observation, not force-control evidence.",
+    "output": "artifacts/cloud/assembly-evidence-final.png",
+    "output_sha256": "3ecf6c709945a9fd2a0c18ede8d2e62a0227fd97833f02f9967e7c75b085126d",
+    "seed": 20261025,
+    "sources": {
+      "artifacts/cloud/physics-smoke-22.json": "c2aa4079f80f30d8f0911d513c2809e9f7b315c3adeec774766c942db280e61f",
+      "artifacts/cloud/physics-trace-22.jsonl": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777"
+    },
+    "terminal_sample": {
+      "insertion_depth_mm": 30.656849965453148,
+      "insertion_normal_load_n": 0.0,
+      "lateral_error_mm": 1.0798133444041014,
+      "left_grip_contact_n": 5.742310523986816,
+      "phase": "done",
+      "right_grip_contact_n": 5.717991352081299,
+      "timestamp_s": 44.06666946411133
+    },
+    "thresholds": {
+      "insertion_depth_mm": 30.0,
+      "lateral_error_mm": 2.0
+    },
+    "title": "Nominal baseline / Simulation / No learned policy",
+    "trace_sample_count": 138
+  },
+  "capture_note": "Camera angles were rendered in separate single-environment runs with the same seed; terminal autoreset frames are omitted and counts are recorded in each report."
+}

@@ -6,6 +6,10 @@ from dataclasses import dataclass
 import math
 
 
+OBSERVATION_DIM = 76
+ACTION_DIM = 12
+
+
 def _validate_finite(name: str, value: float) -> None:
     if not math.isfinite(value):
         raise ValueError(f"{name} must be finite")

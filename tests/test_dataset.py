@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 import json
 from pathlib import Path
 import subprocess
@@ -54,7 +55,7 @@ def metrics(*, success: bool = False) -> GroundTruthMetrics:
     )
 
 
-def record(timestamp: float, *, success: bool = False, observation_size: int = 4) -> TimestepRecord:
+def record(timestamp: float, *, success: bool = False, observation_size: int = 76) -> TimestepRecord:
     return TimestepRecord(
         timestamp_s=timestamp,
         observation=np.arange(observation_size, dtype=float),
@@ -67,6 +68,14 @@ def record(timestamp: float, *, success: bool = False, observation_size: int = 4
             [[0.0, 0.0, 0.75, 0.0, 0.0, 0.0, 1.0], [0.1, 0.0, 0.75, 0.0, 0.0, 0.0, 1.0]]
         ),
         contact_force_proxy_n=np.zeros(2),
+        grip_contact_force_peak_n=0.0,
+        insertion_contact_force_n=5.0,
+        insertion_contact_force_w=np.asarray([3.0, 4.0, 0.0]),
+        insertion_contact_force_peak_n=6.0,
+        insertion_contact_load_n=5.5,
+        insertion_contact_load_peak_n=18.0,
+        forbidden_contact_load_n=0.25,
+        forbidden_contact_load_peak_n=0.5,
         phase="insert",
         ground_truth=metrics(success=success),
     )
@@ -126,7 +135,22 @@ class DatasetTests(unittest.TestCase):
             with h5py.File(path, "r") as file:
                 group = file["episodes/run-001"]
                 self.assertEqual(group["actions"].shape, (2, 12))
+                self.assertEqual(group["observations"].shape, (2, 76))
                 self.assertEqual(group["object_poses_world"].shape, (2, 2, 7))
+                self.assertEqual(group["insertion_contact_force_w"].shape, (2, 3))
+                self.assertEqual(group["insertion_contact_force_n"][0], 5.0)
+                self.assertEqual(group["insertion_contact_force_peak_n"][0], 6.0)
+                self.assertEqual(group["insertion_contact_load_n"][0], 5.5)
+                self.assertEqual(group["insertion_contact_load_peak_n"][0], 18.0)
+                self.assertEqual(group["forbidden_contact_load_n"][0], 0.25)
+                self.assertEqual(group["forbidden_contact_load_peak_n"][0], 0.5)
+                self.assertEqual(
+                    group["insertion_contact_load_n"].attrs["source"],
+                    "physx_plug_socket_sum_abs_contact_normals",
+                )
+                self.assertFalse(
+                    bool(group["insertion_contact_force_w"].attrs["is_wrist_six_axis_ft_sensor"])
+                )
                 self.assertEqual(group.attrs["episode_sha256"], episode_hash)
             report = inspect_dataset(path)
             self.assertTrue(report["valid"])
@@ -143,12 +167,31 @@ class DatasetTests(unittest.TestCase):
                 writer.append(record(0.1))
                 with self.assertRaises(DatasetContractError):
                     writer.append(record(0.1))
-                with self.assertRaises(DatasetContractError):
-                    writer.append(record(0.2, observation_size=5))
+                for observation_size in (60, 62, 75, 77):
+                    with self.subTest(observation_size=observation_size):
+                        with self.assertRaises(DatasetContractError):
+                            writer.append(record(0.2, observation_size=observation_size))
+                for action_size in (11, 13):
+                    with self.subTest(action_size=action_size):
+                        bad_action = replace(record(0.2), action=np.zeros(action_size))
+                        with self.assertRaises(DatasetContractError):
+                            writer.append(bad_action)
                 bad = record(0.2)
                 bad.object_poses_world[0, 3:7] = 0.0
                 with self.assertRaises(DatasetContractError):
                     writer.append(bad)
+                bad_force = record(0.2)
+                bad_force.insertion_contact_force_w[:] = [1.0, 0.0, 0.0]
+                with self.assertRaises(DatasetContractError):
+                    writer.append(bad_force)
+                bad_load = replace(record(0.2), insertion_contact_load_n=4.0)
+                with self.assertRaises(DatasetContractError):
+                    writer.append(bad_load)
+                bad_forbidden_peak = replace(
+                    record(0.2), forbidden_contact_load_peak_n=0.1
+                )
+                with self.assertRaises(DatasetContractError):
+                    writer.append(bad_forbidden_peak)
 
     def test_reset_discards_only_incomplete_episode(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -185,6 +228,32 @@ class DatasetTests(unittest.TestCase):
             with self.assertRaises(DatasetContractError):
                 load_training_episode(path, "eval-run")
 
+    def test_actual_rollout_without_owned_demonstration_is_not_training_eligible(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "rollouts.h5"
+            reference_only = EpisodeProvenance(
+                kind=ProvenanceKind.ACTUAL_SIMULATOR_ROLLOUT,
+                source_hashes={"fixture": HASH},
+                task_config_sha256="b" * 64,
+                runtime_versions={"fixture": "1"},
+                observation_source="fixture",
+                contact_force_source="fixture",
+                owns_demonstration=False,
+            )
+            item = EpisodeMetadata.for_seed(
+                episode_id="unowned",
+                seed=seed_for_split(DatasetSplit.TRAIN),
+                rollout_index=0,
+                provenance=reference_only,
+            )
+            with EpisodeDatasetWriter(path) as writer:
+                writer.begin_episode(item)
+                writer.append(record(0.0))
+                writer.finalize_episode(terminal(0.0))
+            self.assertEqual(select_episode_ids(path, training_eligible_only=True), [])
+            with self.assertRaisesRegex(DatasetContractError, "not eligible"):
+                load_training_episode(path, "unowned")
+
     def test_success_filter_and_valid_failure_rollout(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "rollouts.h5"
@@ -213,6 +282,52 @@ class DatasetTests(unittest.TestCase):
             report = inspect_dataset(path)
             self.assertFalse(report["valid"])
             self.assertEqual(report["invalid_hash_episode_ids"], ["run"])
+            with self.assertRaisesRegex(DatasetContractError, "hash"):
+                load_training_episode(path, "run")
+
+    def test_missing_required_load_dataset_is_rejected_by_all_readers(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "rollouts.h5"
+            item = EpisodeMetadata.for_seed(
+                episode_id="run",
+                seed=seed_for_split(DatasetSplit.TRAIN),
+                rollout_index=0,
+                provenance=provenance(),
+            )
+            with EpisodeDatasetWriter(path) as writer:
+                writer.begin_episode(item)
+                writer.append(record(0.0))
+                writer.finalize_episode(terminal(0.0))
+            with h5py.File(path, "r+") as file:
+                del file["episodes/run/insertion_contact_load_n"]
+            report = inspect_dataset(path)
+            self.assertFalse(report["valid"])
+            self.assertTrue(any("insertion_contact_load_n" in error for error in report["contract_errors"]))
+            with self.assertRaisesRegex(DatasetContractError, "insertion_contact_load_n"):
+                select_episode_ids(path, training_eligible_only=True)
+            with self.assertRaisesRegex(DatasetContractError, "insertion_contact_load_n"):
+                load_training_episode(path, "run")
+
+    def test_tampered_measurement_source_is_rejected_before_training(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "rollouts.h5"
+            item = EpisodeMetadata.for_seed(
+                episode_id="run",
+                seed=seed_for_split(DatasetSplit.TRAIN),
+                rollout_index=0,
+                provenance=provenance(),
+            )
+            with EpisodeDatasetWriter(path) as writer:
+                writer.begin_episode(item)
+                writer.append(record(0.0))
+                writer.finalize_episode(terminal(0.0))
+            with h5py.File(path, "r+") as file:
+                file["episodes/run/insertion_contact_load_n"].attrs["source"] = "unknown"
+            report = inspect_dataset(path)
+            self.assertFalse(report["valid"])
+            self.assertTrue(any("source is invalid" in error for error in report["contract_errors"]))
+            with self.assertRaisesRegex(DatasetContractError, "source is invalid"):
+                load_training_episode(path, "run")
 
     def test_cli_outputs_json_and_success_filter(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

@@ -1,0 +1,353 @@
+{
+  "scope": "three_seed_zero_residual_nominal_rollout_recording_not_generalization_or_policy_result",
+  "process_exit_code": 0,
+  "summary": {
+    "dataset": {
+      "contract_errors": [],
+      "counts": {
+        "actual_simulator_rollout": 3,
+        "episodes": 3,
+        "eval": 1,
+        "failure": 0,
+        "source_external_reference": 0,
+        "success": 3,
+        "synthetic_test_fixture": 0,
+        "train": 2,
+        "training_eligible": 2
+      },
+      "in_progress_episode_ids": [],
+      "invalid_hash_episode_ids": [],
+      "path": "/home/ubuntu/rby1-assembly-lab/artifacts/cloud/baseline-rollouts-final.h5",
+      "schema_name": "rby1_assembly_episode",
+      "schema_version": 2,
+      "valid": true
+    },
+    "dataset_valid": true,
+    "episodes": [
+      {
+        "episode_id": "baseline-seed-20261025-episode-0000",
+        "episode_sha256": "e7683bf3d1e5d8658fe7675a1f81e79123c848da93618f5a4b6dc79d6d4d7d0a",
+        "evaluation_valid": true,
+        "seed": 20261025,
+        "split": "train",
+        "steps": 1322,
+        "success": true,
+        "termination_reason": "independent_success"
+      },
+      {
+        "episode_id": "baseline-seed-20261026-episode-0001",
+        "episode_sha256": "fa462fa37fa3a9641228e39fd0898f2a1ce2c0b6dd6ecb867287ff8985e0e7db",
+        "evaluation_valid": true,
+        "seed": 20261026,
+        "split": "eval",
+        "steps": 1329,
+        "success": true,
+        "termination_reason": "independent_success"
+      },
+      {
+        "episode_id": "baseline-seed-20261027-episode-0002",
+        "episode_sha256": "8133ca84f709ca19720e7619d384f314b32df8f7d9e74d82907ea3bf133da806",
+        "evaluation_valid": true,
+        "seed": 20261027,
+        "split": "train",
+        "steps": 1336,
+        "success": true,
+        "termination_reason": "independent_success"
+      }
+    ],
+    "failure_examples": [],
+    "hdf5_path": "artifacts/cloud/baseline-rollouts-final.h5",
+    "operational_success": true,
+    "recording_completed": true,
+    "training_eligible_episode_count": 2
+  },
+  "episodes": [
+    {
+      "id": "baseline-seed-20261025-episode-0000",
+      "source_and_asset_hashes_match_current_files": true,
+      "provenance": {
+        "contact_force_source": "grip_filtered_finger_magnitude_and_insertion_physx_contact_loads",
+        "experiment_parameters": {
+          "baseline_action": "zero_residual_12d",
+          "baseline_controller_state_source": "simulator_ground_truth",
+          "contact_measurements": {
+            "grip": "per_hand_filtered_finger_contact_magnitude_and_episode_peak_n",
+            "insertion_load": "sum_of_absolute_plug_socket_contact_normal_magnitudes_and_episode_peak_n",
+            "insertion_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_net": "world_frame_net_contact_force_proxy_vector_norm_and_episode_peak_n",
+            "insertion_vector_frame": "world",
+            "is_wrist_six_axis_ft_sensor": false
+          },
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "geometry_metric_source": "raw_socket_plug_world_pose_recomputed",
+          "observation_noise": {
+            "distribution": "independent_zero_mean_gaussian",
+            "position_std_m": 0.0015,
+            "rotation_std_rad": 0.017453293
+          },
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "phase_gate_state_source": "simulator_ground_truth",
+          "physics_dt_s": 0.008333333333333333,
+          "recorder_max_steps": 1800,
+          "terminal_state_source": "pre_autoreset_snapshot",
+          "transition_semantics": "observation_t_action_t_physics_state_t_plus_1"
+        },
+        "external_reference": null,
+        "kind": "actual_simulator_rollout",
+        "observation_source": "simulator_state_with_noise",
+        "owns_demonstration": true,
+        "runtime_versions": {
+          "isaac_lab": "0.47.2",
+          "isaac_sim": "5.1.0.0",
+          "physics_backend": "PhysX through Isaac Sim",
+          "torch": "2.7.0+cu128"
+        },
+        "source_hashes": {
+          "assets/generated/build-report.json": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "assets/generated/plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+          "assets/generated/robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+          "assets/generated/scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+          "assets/generated/socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+          "assets/generated/table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950",
+          "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "configs/runtime.json": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "scripts/record_baseline.py": "8da574d40d27b6c8b113fe7d3aea18ad680353ffb6b4652a9b4e32f86dea45d8",
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+          "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a"
+        },
+        "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36"
+      },
+      "evaluation": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.030656856477397958,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 6.391331195831299,
+          "grasp_both": 1.0,
+          "lateral_error_m": 0.0010797969378785659,
+          "orientation_error_rad": 0.0037400925936215525
+        },
+        "success": true,
+        "terminal_timestamp_s": 44.06666666666666,
+        "termination_reason": "independent_success",
+        "valid": true
+      }
+    },
+    {
+      "id": "baseline-seed-20261026-episode-0001",
+      "source_and_asset_hashes_match_current_files": true,
+      "provenance": {
+        "contact_force_source": "grip_filtered_finger_magnitude_and_insertion_physx_contact_loads",
+        "experiment_parameters": {
+          "baseline_action": "zero_residual_12d",
+          "baseline_controller_state_source": "simulator_ground_truth",
+          "contact_measurements": {
+            "grip": "per_hand_filtered_finger_contact_magnitude_and_episode_peak_n",
+            "insertion_load": "sum_of_absolute_plug_socket_contact_normal_magnitudes_and_episode_peak_n",
+            "insertion_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_net": "world_frame_net_contact_force_proxy_vector_norm_and_episode_peak_n",
+            "insertion_vector_frame": "world",
+            "is_wrist_six_axis_ft_sensor": false
+          },
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "geometry_metric_source": "raw_socket_plug_world_pose_recomputed",
+          "observation_noise": {
+            "distribution": "independent_zero_mean_gaussian",
+            "position_std_m": 0.0015,
+            "rotation_std_rad": 0.017453293
+          },
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "phase_gate_state_source": "simulator_ground_truth",
+          "physics_dt_s": 0.008333333333333333,
+          "recorder_max_steps": 1800,
+          "terminal_state_source": "pre_autoreset_snapshot",
+          "transition_semantics": "observation_t_action_t_physics_state_t_plus_1"
+        },
+        "external_reference": null,
+        "kind": "actual_simulator_rollout",
+        "observation_source": "simulator_state_with_noise",
+        "owns_demonstration": true,
+        "runtime_versions": {
+          "isaac_lab": "0.47.2",
+          "isaac_sim": "5.1.0.0",
+          "physics_backend": "PhysX through Isaac Sim",
+          "torch": "2.7.0+cu128"
+        },
+        "source_hashes": {
+          "assets/generated/build-report.json": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "assets/generated/plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+          "assets/generated/robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+          "assets/generated/scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+          "assets/generated/socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+          "assets/generated/table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950",
+          "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "configs/runtime.json": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "scripts/record_baseline.py": "8da574d40d27b6c8b113fe7d3aea18ad680353ffb6b4652a9b4e32f86dea45d8",
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+          "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a"
+        },
+        "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36"
+      },
+      "evaluation": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.030764520010334407,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 6.471010208129883,
+          "grasp_both": 1.0,
+          "lateral_error_m": 0.001001392128042786,
+          "orientation_error_rad": 0.003433742345313662
+        },
+        "success": true,
+        "terminal_timestamp_s": 44.3,
+        "termination_reason": "independent_success",
+        "valid": true
+      }
+    },
+    {
+      "id": "baseline-seed-20261027-episode-0002",
+      "source_and_asset_hashes_match_current_files": true,
+      "provenance": {
+        "contact_force_source": "grip_filtered_finger_magnitude_and_insertion_physx_contact_loads",
+        "experiment_parameters": {
+          "baseline_action": "zero_residual_12d",
+          "baseline_controller_state_source": "simulator_ground_truth",
+          "contact_measurements": {
+            "grip": "per_hand_filtered_finger_contact_magnitude_and_episode_peak_n",
+            "insertion_load": "sum_of_absolute_plug_socket_contact_normal_magnitudes_and_episode_peak_n",
+            "insertion_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_net": "world_frame_net_contact_force_proxy_vector_norm_and_episode_peak_n",
+            "insertion_vector_frame": "world",
+            "is_wrist_six_axis_ft_sensor": false
+          },
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "geometry_metric_source": "raw_socket_plug_world_pose_recomputed",
+          "observation_noise": {
+            "distribution": "independent_zero_mean_gaussian",
+            "position_std_m": 0.0015,
+            "rotation_std_rad": 0.017453293
+          },
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "phase_gate_state_source": "simulator_ground_truth",
+          "physics_dt_s": 0.008333333333333333,
+          "recorder_max_steps": 1800,
+          "terminal_state_source": "pre_autoreset_snapshot",
+          "transition_semantics": "observation_t_action_t_physics_state_t_plus_1"
+        },
+        "external_reference": null,
+        "kind": "actual_simulator_rollout",
+        "observation_source": "simulator_state_with_noise",
+        "owns_demonstration": true,
+        "runtime_versions": {
+          "isaac_lab": "0.47.2",
+          "isaac_sim": "5.1.0.0",
+          "physics_backend": "PhysX through Isaac Sim",
+          "torch": "2.7.0+cu128"
+        },
+        "source_hashes": {
+          "assets/generated/build-report.json": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "assets/generated/plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+          "assets/generated/robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+          "assets/generated/scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+          "assets/generated/socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+          "assets/generated/table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950",
+          "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "configs/runtime.json": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "scripts/record_baseline.py": "8da574d40d27b6c8b113fe7d3aea18ad680353ffb6b4652a9b4e32f86dea45d8",
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+          "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a"
+        },
+        "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36"
+      },
+      "evaluation": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.030988619944839275,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 6.8133087158203125,
+          "grasp_both": 1.0,
+          "lateral_error_m": 0.0010002742156582933,
+          "orientation_error_rad": 0.003372658071657974
+        },
+        "success": true,
+        "terminal_timestamp_s": 44.53333333333333,
+        "termination_reason": "independent_success",
+        "valid": true
+      }
+    }
+  ],
+  "artifact_sha256": {
+    "artifacts/cloud/baseline-rollouts-final.h5": "a32d3aa785247f8a5491b768fae737403347cef6d76e7de10eff3c3c79585228",
+    "artifacts/cloud/baseline-rollouts-final.h5.summary.json": "db76fe663f7e90e2473c6aa35e500f57f66a58d2066dce8429bdbd9c9c5bdad8",
+    "artifacts/cloud/baseline-recording-final.log": "6152dd600065d663576f52942a265c0bac9062fa53404cea643ef8f6b765e293",
+    "artifacts/cloud/final-validation-source.tar.gz": "2d48957e2811bdfee0030db67cca7954d24a0f0e70842830db9c4c10cab08bd7"
+  },
+  "notes": [
+    "original invalid baseline-rollouts.h5 retained without relabelling",
+    "integer-step dwell reconciles environment and offline evaluator without changing 0.4s criterion",
+    "production sources, recording script, configs and generated asset hashes match final working tree"
+  ]
+}

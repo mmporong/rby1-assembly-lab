@@ -1,0 +1,409 @@
+{
+  "scope": "four_environment_contact_filter_and_termination_isolation_negative_and_positive_controls",
+  "process_exit_code": 0,
+  "report": {
+    "passed": true,
+    "probe": "parallel_scene_collision_isolation",
+    "physics_backend": "PhysX via Isaac Sim",
+    "num_envs": 4,
+    "headless": true,
+    "scene": {
+      "replicate_physics": false,
+      "clone_in_fabric": false,
+      "environment_spacing_m": 2.5,
+      "cross_environment_filter_prim": "/World/collisions",
+      "global_collision_path": "/World/Ground"
+    },
+    "asset_provenance": {
+      "asset_id": "rby1_model_m_v1_2",
+      "source_repository": "https://github.com/RainbowRobotics/rby1-sim-isaac",
+      "source_revision": "e2415548e5d6db712ecbff2074741b70261d0cbf",
+      "source_url": "https://raw.githubusercontent.com/RainbowRobotics/rby1-sim-isaac/e2415548e5d6db712ecbff2074741b70261d0cbf/assets/model_v_1_2_m.usd",
+      "original_usd_path": "/home/ubuntu/rby1-assembly-lab/assets/cache/rby1/model_v_1_2_m.usd",
+      "original_usd_expected_sha256": "d72d5e97fded5d4e6e5f59d0248753d3ba7814d00b6bf7eeee9652ac265f069a",
+      "original_usd_actual_sha256": "d72d5e97fded5d4e6e5f59d0248753d3ba7814d00b6bf7eeee9652ac265f069a",
+      "generated_robot_usd_path": "/home/ubuntu/rby1-assembly-lab/assets/generated/robot.usda",
+      "generated_robot_expected_sha256": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+      "generated_robot_actual_sha256": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d"
+    },
+    "source_sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+      "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "tests/isaac/probe_parallel_scene.py": "5381c4646d90f49c332051c1d363a1fa25a8f6d996f8baa1df87a31542ecef26",
+      "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36"
+    },
+    "wheel_collision_groups": {
+      "original_source": {
+        "count": 4,
+        "groups": [
+          {
+            "path": "/RBY1_M_v1_2/wheel_fl_link/WheelCollisionGroup",
+            "env_root": null,
+            "active": true,
+            "include_count": 49,
+            "includes_are_env_local": null,
+            "self_filtered": true
+          },
+          {
+            "path": "/RBY1_M_v1_2/wheel_fr_link/WheelCollisionGroup",
+            "env_root": null,
+            "active": true,
+            "include_count": 49,
+            "includes_are_env_local": null,
+            "self_filtered": true
+          },
+          {
+            "path": "/RBY1_M_v1_2/wheel_rl_link/WheelCollisionGroup",
+            "env_root": null,
+            "active": true,
+            "include_count": 49,
+            "includes_are_env_local": null,
+            "self_filtered": true
+          },
+          {
+            "path": "/RBY1_M_v1_2/wheel_rr_link/WheelCollisionGroup",
+            "env_root": null,
+            "active": true,
+            "include_count": 49,
+            "includes_are_env_local": null,
+            "self_filtered": true
+          }
+        ]
+      },
+      "runtime": {
+        "count": 16,
+        "groups": [
+          {
+            "path": "/World/envs/env_0/Robot/wheel_fl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_0",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_0/Robot/wheel_fr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_0",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_0/Robot/wheel_rl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_0",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_0/Robot/wheel_rr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_0",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_1/Robot/wheel_fl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_1",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_1/Robot/wheel_fr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_1",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_1/Robot/wheel_rl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_1",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_1/Robot/wheel_rr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_1",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_2/Robot/wheel_fl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_2",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_2/Robot/wheel_fr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_2",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_2/Robot/wheel_rl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_2",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_2/Robot/wheel_rr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_2",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_3/Robot/wheel_fl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_3",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_3/Robot/wheel_fr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_3",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_3/Robot/wheel_rl_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_3",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          },
+          {
+            "path": "/World/envs/env_3/Robot/wheel_rr_link/WheelCollisionGroup",
+            "env_root": "/World/envs/env_3",
+            "active": false,
+            "include_count": 49,
+            "includes_are_env_local": true,
+            "self_filtered": true
+          }
+        ]
+      }
+    },
+    "normal_step": {
+      "observation_shape": [
+        4,
+        76
+      ],
+      "forbidden_contact_load_n": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "episode_length": [
+        1,
+        1,
+        1,
+        1
+      ]
+    },
+    "fault_injection": {
+      "kind": "test_only_env0_plug_pose_into_left_palm",
+      "target_env": 0,
+      "target_body": "ee_left",
+      "plug_pose_world_wxyz": [
+        1.2470132112503052,
+        -1.0299984216690063,
+        0.7275568842887878,
+        0.9999873042106628,
+        8.771432476351038e-06,
+        0.004622629377990961,
+        0.0019515480380505323
+      ],
+      "root_velocity_world": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "sensor_value_injection": false,
+      "force_injection": false
+    },
+    "cross_environment_negative_control": {
+      "plug_env": 0,
+      "palm_env": 1,
+      "plug_pose_world_wxyz": [
+        1.2470132112503052,
+        1.4700015783309937,
+        0.7275568842887878,
+        0.9999873042106628,
+        8.771432476351038e-06,
+        0.004622629377990961,
+        0.0019515480380505323
+      ],
+      "forbidden_contact_load_n": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "unfiltered_left_palm_net_forces_w_n": [
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ]
+      ],
+      "terminated": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "truncated": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "reset_before_same_environment_positive_control": true
+    },
+    "fault_result": {
+      "terminal_fault_step": 1,
+      "forbidden_contact_load_n": [
+        689.1465454101562,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "forbidden_contact_threshold_n": 1.0,
+      "returned_terminated": [
+        true,
+        false,
+        false,
+        false
+      ],
+      "returned_truncated": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "termination_reason_code": [
+        7,
+        0,
+        0,
+        0
+      ],
+      "phase_code": [
+        7,
+        0,
+        0,
+        0
+      ],
+      "healthy_episode_length_expected": [
+        2,
+        2,
+        2
+      ],
+      "healthy_episode_length_actual": [
+        2,
+        2,
+        2
+      ]
+    },
+    "checks": {
+      "headless": true,
+      "four_environments": true,
+      "fast_physics_replication_disabled": true,
+      "articulation_self_collision_disabled": true,
+      "cross_environment_filter_prim_exists": true,
+      "normal_observation_shape_is_4x76": true,
+      "normal_observation_is_finite": true,
+      "normal_step_is_nonterminal": true,
+      "normal_forbidden_load_shape_is_4": true,
+      "normal_forbidden_load_is_finite": true,
+      "normal_forbidden_load_is_zero": true,
+      "normal_episode_length_is_one": true,
+      "cross_environment_overlap_is_nonterminal": true,
+      "cross_environment_overlap_filtered_load_is_zero": true,
+      "cross_environment_overlap_unfiltered_palm_contact_is_zero": true,
+      "original_usd_hash_matches_manifest": true,
+      "generated_robot_hash_matches_build_report": true,
+      "original_has_exact_four_wheel_collision_groups": true,
+      "original_groups_are_active": true,
+      "original_groups_have_49_includes": true,
+      "original_groups_are_self_filtered": true,
+      "runtime_has_exact_16_expected_groups": true,
+      "runtime_groups_have_49_includes": true,
+      "runtime_groups_are_self_filtered": true,
+      "runtime_groups_are_inactive_for_environment_filtering": true,
+      "environment_reports_exact_disabled_wheel_groups": true,
+      "runtime_group_includes_are_env_local": true,
+      "terminal_load_shape_is_4": true,
+      "terminal_load_is_finite": true,
+      "env0_forbidden_load_is_positive": true,
+      "env0_forbidden_load_exceeds_threshold": true,
+      "env0_terminates_only": true,
+      "env0_reason_is_forbidden_contact": true,
+      "env0_phase_is_abort": true,
+      "healthy_env_loads_remain_zero": true,
+      "healthy_env_episode_lengths_continue": true,
+      "sensor_source_is_exact_filtered_pair_load": true
+    },
+    "failed_checks": []
+  },
+  "artifact_sha256": {
+    "artifacts/cloud/parallel-scene-probe-v3.json": "e1984bab5ad92350826711831a680aef730f334c22be151048b7d5d2f6d3517d",
+    "artifacts/cloud/parallel-scene-probe-v3.log": "24d6f28bc1930a3a06799abd9b1cb79841d6b0e4b3e015448e6dff4393940b1d"
+  },
+  "note": "689 N-class load is caused by intentional deep overlap in a negative test; not a normal operating load"
+}

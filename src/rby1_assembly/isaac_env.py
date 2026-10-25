@@ -13,6 +13,9 @@ import json
 from pathlib import Path
 
 import torch
+from rby1_assembly.contact_loads import sum_contact_normal_loads
+from rby1_assembly.control_math import continuous_goal_dwell, continuous_grasp_loss, damped_joint_step
+from rby1_assembly.contracts import ACTION_DIM, OBSERVATION_DIM
 from pxr import Usd, UsdPhysics
 
 from isaacsim.core.utils.stage import get_current_stage
@@ -47,6 +50,12 @@ SIMPLE_ROOM_URL = next(
 )
 POLICY_OBSERVATION_SOURCE = "simulator_state_with_noise"
 BASELINE_CONTROLLER_STATE_SOURCE = "simulator_ground_truth"
+FORBIDDEN_CONTACT_LOAD_SOURCE = (
+    "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces"
+)
+FORBIDDEN_CONTACT_TRACE_SOURCE = (
+    "non_finger_body_net_force_and_finger_non_target_residual_proxy"
+)
 SOCKET_ENTRY_Y_M = -TASK_CONFIG["socket"]["length_m"] / 2.0
 PLUG_TIP_Y_M = TASK_CONFIG["plug"]["grip_length_m"] / 2.0 + TASK_CONFIG["plug"]["shaft_length_m"]
 # Generated from the referenced gripper mesh bound relative to the palm and
@@ -89,8 +98,8 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
 
     decimation = 4
     episode_length_s = TASK_CONFIG["evaluation"]["timeout_s"]
-    action_space = 12
-    observation_space = 59
+    action_space = ACTION_DIM
+    observation_space = OBSERVATION_DIM
     state_space = 0
     is_finite_horizon = True
     render_background = False
@@ -111,8 +120,10 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
     scene: InteractiveSceneCfg = InteractiveSceneCfg(
         num_envs=64,
         env_spacing=2.5,
-        replicate_physics=True,
-        clone_in_fabric=True,
+        # Preserve the official wheel/roller CollisionGroups, unsupported by
+        # PhysX's fast replication path. GPU vector simulation remains enabled.
+        replicate_physics=False,
+        clone_in_fabric=False,
     )
 
     robot: ArticulationCfg = ArticulationCfg(
@@ -136,46 +147,49 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
                 "torso_[0-5]": 0.0,
                 "left_arm_[0-6]": 0.0,
                 "right_arm_[0-6]": 0.0,
-                "gripper_finger_[lr]1": -0.035,
-                "gripper_finger_[lr]2": 0.035,
+                "gripper_finger_[lr]1": -0.048,
+                "gripper_finger_[lr]2": 0.048,
             },
         ),
+        # Preserve the authored USD angular drives. USD gains are per degree;
+        # PhysX converts them to per-radian values. Overriding with 100/10
+        # in Isaac Lab would reduce the gains by about 57.3 times.
         actuators={
             "torso_proximal_hold": ImplicitActuatorCfg(
                 joint_names_expr=["torso_[0-2]"],
                 effort_limit_sim=841.0,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "torso_distal_hold": ImplicitActuatorCfg(
                 joint_names_expr=["torso_[3-5]"],
                 effort_limit_sim=369.0,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "arm_shoulder": ImplicitActuatorCfg(
                 joint_names_expr=["left_arm_[0-2]", "right_arm_[0-2]"],
                 effort_limit_sim=136.5217,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "arm_elbow": ImplicitActuatorCfg(
                 joint_names_expr=["left_arm_3", "right_arm_3"],
                 effort_limit_sim=78.0,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "arm_wrist_pitch_yaw": ImplicitActuatorCfg(
                 joint_names_expr=["left_arm_[45]", "right_arm_[45]"],
                 effort_limit_sim=70.0,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "arm_wrist_roll": ImplicitActuatorCfg(
                 joint_names_expr=["left_arm_6", "right_arm_6"],
                 effort_limit_sim=44.0,
-                stiffness=100.0,
-                damping=10.0,
+                stiffness=None,
+                damping=None,
             ),
             "grippers": ImplicitActuatorCfg(
                 joint_names_expr=["gripper_finger_[lr][12]"],
@@ -197,6 +211,7 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
         prim_path="{ENV_REGEX_NS}/Plug",
         spawn=sim_utils.UsdFileCfg(
             usd_path=str(ASSET_ROOT / "plug.usda"),
+            activate_contact_sensors=True,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(max_depenetration_velocity=1.0),
         ),
         init_state=RigidObjectCfg.InitialStateCfg(pos=tuple(TASK_CONFIG["plug"]["initial_position_m"])),
@@ -225,6 +240,14 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
     right_contact_r2: ContactSensorCfg = right_contact_r1.replace(
         prim_path="{ENV_REGEX_NS}/Robot/right_gripper/ee_finger_r2"
     )
+    insertion_contact: ContactSensorCfg = ContactSensorCfg(
+        prim_path="{ENV_REGEX_NS}/Plug",
+        max_contact_data_count_per_prim=128,
+        update_period=0.0,
+        history_length=2,
+        track_air_time=False,
+        filter_prim_paths_expr=["{ENV_REGEX_NS}/Socket"],
+    )
     forbidden_robot_contact: ContactSensorCfg = ContactSensorCfg(
         prim_path="{ENV_REGEX_NS}/Robot/link_.*",
         update_period=0.0,
@@ -243,10 +266,11 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
     residual_rotation_bound_rad = 0.034906585
     dls_damping = 0.05
     max_joint_delta_rad = 0.04
-    gripper_open_magnitude_m = 0.035
-    left_gripper_grasp_magnitude_m = 0.028
-    right_gripper_grasp_magnitude_m = 0.020
-    grasp_table_clearance_m = 0.003
+    insertion_integral_gain = 0.30
+    gripper_open_magnitude_m = 0.048
+    left_gripper_grasp_magnitude_m = 0.024
+    right_gripper_grasp_magnitude_m = 0.0165
+    grasp_table_clearance_m = 0.010
     pregrasp_lift_table_clearance_m = 0.030
     left_pregrasp_safe_wrist_z_m = (
         TASK_CONFIG["table"]["top_height_m"]
@@ -268,24 +292,39 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
     )
 
     # Phase gates use measured simulated state and contact-force proxies.
-    pregrasp_distance_m = 0.025
+    pregrasp_distance_m = 0.004
+    # A bent-elbow waypoint leaves the straight-arm singularity beside the
+    # robot before either hand travels across the table edge.
+    pregrasp_clearance_joint_pos_rad = (0.7, 0.0, 0.0, -2.1, 0.0, 1.4, 0.0)
     grip_contact_force_n = 1.0
     grip_lift_proof_m = 0.015
+    grip_settle_s = 0.20
+    grasp_loss_grace_s = 0.20
     phase_timeout_s = 5.0
+    align_timeout_s = 10.0
+    insert_timeout_s = 30.0
+    pregrasp_timeout_s = 20.0
     jam_contact_force_n = 20.0
     hard_contact_force_n = TASK_CONFIG["evaluation"]["max_contact_force_n"]
     assembled_depth_m = TASK_CONFIG["evaluation"]["assembled_depth_m"]
+    alignment_standoff_m = 0.008
+    insertion_target_margin_m = 0.005
+    insertion_speed_m_s = 0.004
+    insertion_max_tracking_lead_m = 0.006
+    insertion_advance_lateral_tolerance_m = 0.0015
+    insertion_advance_orientation_tolerance_rad = 0.020
+    insertion_resume_lateral_tolerance_m = 0.0010
+    insertion_resume_orientation_tolerance_rad = 0.015
     max_lateral_error_m = TASK_CONFIG["evaluation"]["max_lateral_error_m"]
     max_orientation_error_rad = TASK_CONFIG["evaluation"]["max_orientation_error_rad"]
     success_dwell_s = TASK_CONFIG["evaluation"]["dwell_s"]
     max_retries = 2
     socket_entry_y_m = SOCKET_ENTRY_Y_M
     plug_tip_y_m = PLUG_TIP_Y_M
-    assembly_socket_goal_m = (0.50, 0.05, 0.84)
+    assembly_socket_goal_m = (0.37, 0.05, 0.90)
     observation_position_noise_std_m = 0.0015
     observation_rotation_noise_std_rad = 0.017453293
     forbidden_contact_force_n = 1.0
-    forbidden_contact_measurement_available = True
 
 
 class Rby1AssemblyEnv(DirectRLEnv):
@@ -311,15 +350,21 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._left_ee_jacobian_id = self._left_ee_body_id - jacobian_offset
         self._right_ee_jacobian_id = self._right_ee_body_id - jacobian_offset
 
-        self._actions = torch.zeros((self.num_envs, 12), device=self.device)
+        self._actions = torch.zeros((self.num_envs, ACTION_DIM), device=self.device)
         self._phase = torch.full(
             (self.num_envs,), int(AssemblyPhase.PREGRASP), dtype=torch.long, device=self.device
         )
         self._phase_started_s = torch.zeros(self.num_envs, device=self.device)
         self._retry_count = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
-        self._success_since_s = torch.full((self.num_envs,), -1.0, device=self.device)
+        self._grip_contact_since_s = torch.full((self.num_envs,), -1.0, device=self.device)
+        self._grasp_loss_since_s = torch.full((self.num_envs,), -1.0, device=self.device)
+        self._insertion_command_depth_m = torch.zeros(self.num_envs, device=self.device)
+        self._insertion_advance_enabled = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
+        self._success_since_step = torch.full(
+            (self.num_envs,), -1, dtype=torch.long, device=self.device
+        )
         self._evaluation_success = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
-        self._evaluation_dwell_s = torch.zeros(self.num_envs, device=self.device)
+        self._evaluation_dwell_s = torch.zeros(self.num_envs, dtype=torch.float64, device=self.device)
         self._termination_reason_code = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
         self._pregrasp_above_reached = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         self._pregrasp_lift_reached = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
@@ -332,10 +377,21 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._object_to_ee_quat = torch.zeros((self.num_envs, 2, 4), device=self.device)
         self._object_to_ee_quat[:, :, 0] = 1.0
         self._joint_targets = self.robot.data.default_joint_pos.clone()
+        self._insert_joint_targets = self.robot.data.joint_pos[:, self._arm_joint_ids].clone()
         self._torso_hold_targets = self.robot.data.default_joint_pos[:, self._torso_joint_ids].clone()
         self._last_contact_proxy_n = torch.zeros((self.num_envs, 2), device=self.device)
+        self._last_insertion_contact_force_w = torch.zeros((self.num_envs, 3), device=self.device)
+        self._last_insertion_contact_force_n = torch.zeros(self.num_envs, device=self.device)
+        self._last_insertion_contact_load_n = torch.zeros(self.num_envs, device=self.device)
+        self._episode_insertion_contact_load_peak_n = torch.zeros(self.num_envs, device=self.device)
+        self._episode_grip_force_peak_n = torch.zeros(self.num_envs, device=self.device)
+        self._episode_insertion_contact_force_peak_n = torch.zeros(
+            self.num_envs, device=self.device
+        )
         self._episode_force_peak_n = torch.zeros(self.num_envs, device=self.device)
         self._last_actual_relative_pose = torch.zeros((self.num_envs, 7), device=self.device)
+        self._last_forbidden_contact_load_n = torch.zeros(self.num_envs, device=self.device)
+        self._episode_forbidden_contact_load_peak_n = torch.zeros(self.num_envs, device=self.device)
         self._forbidden_contact_seen = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
 
     def _setup_scene(self) -> None:
@@ -347,6 +403,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         left_l2_cfg = self._resolve_env_paths(self.cfg.left_contact_l2)
         right_r1_cfg = self._resolve_env_paths(self.cfg.right_contact_r1)
         right_r2_cfg = self._resolve_env_paths(self.cfg.right_contact_r2)
+        insertion_contact_cfg = self._resolve_env_paths(self.cfg.insertion_contact)
         forbidden_robot_cfg = self._resolve_env_paths(self.cfg.forbidden_robot_contact)
         forbidden_left_palm_cfg = self._resolve_env_paths(self.cfg.forbidden_left_palm_contact)
         forbidden_right_palm_cfg = self._resolve_env_paths(self.cfg.forbidden_right_palm_contact)
@@ -366,19 +423,27 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self.left_contact_l2 = ContactSensor(left_l2_cfg)
         self.right_contact_r1 = ContactSensor(right_r1_cfg)
         self.right_contact_r2 = ContactSensor(right_r2_cfg)
+        self.insertion_contact = ContactSensor(insertion_contact_cfg)
         self.forbidden_robot_contact = ContactSensor(forbidden_robot_cfg)
         self.forbidden_left_palm_contact = ContactSensor(forbidden_left_palm_cfg)
         self.forbidden_right_palm_contact = ContactSensor(forbidden_right_palm_cfg)
 
         spawn_ground_plane(prim_path="/World/Ground", cfg=GroundPlaneCfg())
+        stage = get_current_stage()
+        ground_collision_path = self._ground_collision_prim_path(stage, "/World/Ground")
+        self._forbidden_load_sensors = self._create_forbidden_load_sensors(
+            stage, ground_collision_path
+        )
         if self.cfg.render_background:
             background_cfg = sim_utils.UsdFileCfg(usd_path=self.cfg.background_usd_url)
             background_cfg.func("/World/Background", background_cfg)
-            stage = get_current_stage()
             for prim in Usd.PrimRange(stage.GetPrimAtPath("/World/Background")):
                 if prim.HasAPI(UsdPhysics.CollisionAPI):
                     UsdPhysics.CollisionAPI(prim).GetCollisionEnabledAttr().Set(False)
-        self.scene.clone_environments(copy_from_source=False)
+        if self.cfg.scene.replicate_physics:
+            self.scene.clone_environments(copy_from_source=False)
+        self._disable_redundant_wheel_collision_groups(stage)
+        self.scene.filter_collisions(global_prim_paths=["/World/Ground"])
         self.scene.articulations["robot"] = self.robot
         self.scene.rigid_objects["socket"] = self.socket
         self.scene.rigid_objects["plug"] = self.plug
@@ -386,11 +451,136 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self.scene.sensors["left_contact_l2"] = self.left_contact_l2
         self.scene.sensors["right_contact_r1"] = self.right_contact_r1
         self.scene.sensors["right_contact_r2"] = self.right_contact_r2
+        self.scene.sensors["insertion_contact"] = self.insertion_contact
         self.scene.sensors["forbidden_robot_contact"] = self.forbidden_robot_contact
         self.scene.sensors["forbidden_left_palm_contact"] = self.forbidden_left_palm_contact
         self.scene.sensors["forbidden_right_palm_contact"] = self.forbidden_right_palm_contact
+        for label, sensor in self._forbidden_load_sensors.items():
+            self.scene.sensors[f"forbidden_load_{label.replace('/', '_')}"] = sensor
         light_cfg = sim_utils.DomeLightCfg(intensity=2500.0, color=(0.85, 0.88, 0.92))
         light_cfg.func("/World/Light", light_cfg)
+
+    def _disable_redundant_wheel_collision_groups(self, stage: Usd.Stage) -> None:
+        """Keep one collision-group membership per shape in this fixed-base task.
+
+        The official wheel groups filter only members of their own articulation.
+        Articulation self-collision is already disabled here. Preserve the source
+        USD and disable these redundant groups only in the composed runtime stage.
+        """
+        if self.cfg.robot.spawn.articulation_props.enabled_self_collisions is not False:
+            raise RuntimeError("wheel group suppression requires articulation self-collision disabled")
+        group_paths = []
+        for env_path in self.scene.env_prim_paths:
+            for wheel in ("fl", "fr", "rr", "rl"):
+                wheel_path = f"{env_path}/Robot/wheel_{wheel}_link"
+                group_path = f"{wheel_path}/WheelCollisionGroup"
+                group = UsdPhysics.CollisionGroup.Get(stage, group_path)
+                if not group or not group.GetPrim().IsActive():
+                    raise RuntimeError(f"required active official wheel group missing: {group_path}")
+                includes = group.GetCollidersCollectionAPI().GetIncludesRel().GetTargets()
+                filtered = group.GetFilteredGroupsRel().GetTargets()
+                if len(includes) != 49 or [str(path) for path in filtered] != [group_path]:
+                    raise RuntimeError(f"unexpected official wheel group filter: {group_path}")
+                if any(
+                    not str(path).startswith(wheel_path + "/")
+                    or not stage.GetPrimAtPath(path).HasAPI(UsdPhysics.CollisionAPI)
+                    for path in includes
+                ):
+                    raise RuntimeError(f"wheel group contains unexpected collision members: {group_path}")
+                group_paths.append(group_path)
+        for group_path in group_paths:
+            stage.GetPrimAtPath(group_path).SetActive(False)
+        self.runtime_disabled_wheel_collision_groups = group_paths
+
+    def _ground_collision_prim_path(self, stage: Usd.Stage, ground_root_path: str) -> str:
+        ground_root = stage.GetPrimAtPath(ground_root_path)
+        if not ground_root.IsValid():
+            raise RuntimeError(f"ground prim was not spawned: {ground_root_path}")
+        collision_planes = [
+            prim
+            for prim in Usd.PrimRange(ground_root)
+            if prim.GetTypeName() == "Plane" and prim.HasAPI(UsdPhysics.CollisionAPI)
+        ]
+        if len(collision_planes) != 1:
+            paths = [str(prim.GetPath()) for prim in collision_planes]
+            raise RuntimeError(
+                f"expected one collision Plane below {ground_root_path}; found={paths}"
+            )
+        return str(collision_planes[0].GetPath())
+
+    def _create_forbidden_load_sensors(
+        self, stage: Usd.Stage, ground_collision_path: str
+    ) -> dict[str, ContactSensor]:
+        env0_robot_path = f"{self.scene.env_prim_paths[0]}/Robot"
+        robot_root = stage.GetPrimAtPath(env0_robot_path)
+        if not robot_root.IsValid():
+            raise RuntimeError(f"robot prim was not spawned: {env0_robot_path}")
+
+        link_paths = [
+            str(prim.GetPath())
+            for prim in Usd.PrimRange(robot_root)
+            if prim.GetName().startswith("link_") and prim.HasAPI(UsdPhysics.RigidBodyAPI)
+        ]
+        if not link_paths:
+            raise RuntimeError(f"no link_ rigid bodies found below {env0_robot_path}")
+
+        source_specs: list[tuple[str, str, tuple[str, ...]]] = []
+        common_filters = (
+            "{ENV_REGEX_NS}/Table/top",
+            ground_collision_path,
+        )
+        robot_filters = (
+            *common_filters,
+            "{ENV_REGEX_NS}/Socket",
+            "{ENV_REGEX_NS}/Plug",
+        )
+        for source_path in sorted(link_paths):
+            relative_path = source_path.removeprefix(f"{env0_robot_path}/")
+            source_specs.append(
+                (relative_path, f"{{ENV_REGEX_NS}}/Robot/{relative_path}", robot_filters)
+            )
+
+        gripper_specs = (
+            ("left_gripper/ee_left", robot_filters),
+            ("right_gripper/ee_right", robot_filters),
+            (
+                "left_gripper/ee_finger_l1",
+                (*common_filters, "{ENV_REGEX_NS}/Plug"),
+            ),
+            (
+                "left_gripper/ee_finger_l2",
+                (*common_filters, "{ENV_REGEX_NS}/Plug"),
+            ),
+            (
+                "right_gripper/ee_finger_r1",
+                (*common_filters, "{ENV_REGEX_NS}/Socket"),
+            ),
+            (
+                "right_gripper/ee_finger_r2",
+                (*common_filters, "{ENV_REGEX_NS}/Socket"),
+            ),
+        )
+        for relative_path, filters in gripper_specs:
+            source_path = f"{env0_robot_path}/{relative_path}"
+            source_prim = stage.GetPrimAtPath(source_path)
+            if not source_prim.IsValid() or not source_prim.HasAPI(UsdPhysics.RigidBodyAPI):
+                raise RuntimeError(f"forbidden-contact source is not a rigid body: {source_path}")
+            source_specs.append(
+                (relative_path, f"{{ENV_REGEX_NS}}/Robot/{relative_path}", filters)
+            )
+
+        sensors: dict[str, ContactSensor] = {}
+        for label, prim_path, filters in source_specs:
+            sensor_cfg = ContactSensorCfg(
+                prim_path=prim_path,
+                max_contact_data_count_per_prim=128,
+                update_period=0.0,
+                history_length=0,
+                track_air_time=False,
+                filter_prim_paths_expr=list(filters),
+            )
+            sensors[label] = ContactSensor(self._resolve_env_paths(sensor_cfg))
+        return sensors
 
     def _resolve_env_paths(self, cfg):
         resolved = cfg.copy()
@@ -406,6 +596,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._advance_phases()
         self._actions = self._bound_residual_actions(actions)
         left_twist, right_twist = self._desired_ee_twists()
+        baseline_left_twist, baseline_right_twist = left_twist.clone(), right_twist.clone()
         left_twist[:, :3] += self._actions[:, :3] * self.cfg.residual_translation_bound_m
         left_twist[:, 3:] += self._actions[:, 3:6] * self.cfg.residual_rotation_bound_rad
         right_twist[:, :3] += self._actions[:, 6:9] * self.cfg.residual_translation_bound_m
@@ -418,9 +609,70 @@ class Rby1AssemblyEnv(DirectRLEnv):
         right_delta = self._damped_least_squares(right_jacobian, right_twist)
 
         current = self.robot.data.joint_pos
+        lifting_beside_base = (
+            (self._phase == int(AssemblyPhase.PREGRASP)) & ~self._pregrasp_lift_reached
+        )
+        clearance_q = torch.tensor(self.cfg.pregrasp_clearance_joint_pos_rad, device=self.device)
+        for joint_ids, delta in ((self._left_arm_joint_ids, left_delta),
+                                 (self._right_arm_joint_ids, right_delta)):
+            clearance_delta = torch.clamp(
+                clearance_q - current[:, joint_ids],
+                -self.cfg.max_joint_delta_rad, self.cfg.max_joint_delta_rad,
+            )
+            delta[lifting_beside_base] = clearance_delta[lifting_beside_base]
         self._joint_targets[:] = current
         self._joint_targets[:, self._left_arm_joint_ids] = current[:, self._left_arm_joint_ids] + left_delta
         self._joint_targets[:, self._right_arm_joint_ids] = current[:, self._right_arm_joint_ids] + right_delta
+        insertion = self._phase == int(AssemblyPhase.INSERT)
+        if torch.any(insertion):
+            arm_positions = current[:, self._arm_joint_ids]
+            stiffness = self.robot.data.joint_stiffness[:, self._arm_joint_ids]
+            gravity = self.robot.root_physx_view.get_gravity_compensation_forces()[:, self._arm_joint_ids]
+            effort_limits = self.robot.data.joint_effort_limits[:, self._arm_joint_ids]
+            if (
+                not torch.isfinite(stiffness).all() or torch.any(stiffness <= 0)
+                or not torch.isfinite(gravity).all() or not torch.isfinite(effort_limits).all()
+                or torch.any(effort_limits <= 0)
+            ):
+                raise RuntimeError("insertion integral requires finite positive drive limits and stiffness")
+            baseline_delta = torch.cat(
+                (
+                    self._damped_least_squares(left_jacobian, baseline_left_twist),
+                    self._damped_least_squares(right_jacobian, baseline_right_twist),
+                ), dim=1,
+            )
+            residual_delta = torch.cat(
+                (
+                    self._damped_least_squares(left_jacobian, left_twist - baseline_left_twist),
+                    self._damped_least_squares(right_jacobian, right_twist - baseline_right_twist),
+                ), dim=1,
+            )
+            # Bound the stored position-drive demand after gravity bias. The
+            # physical implicit drive still applies its own total force cap.
+            position_headroom = ((effort_limits - gravity.abs()).clamp_min(0.0) / stiffness)
+            position_headroom = position_headroom.clamp(max=self.cfg.max_joint_delta_rad)
+            integral_targets = self._insert_joint_targets + self.cfg.insertion_integral_gain * baseline_delta
+            integral_targets = torch.maximum(
+                torch.minimum(integral_targets, arm_positions + position_headroom),
+                arm_positions - position_headroom,
+            )
+            arm_limits = self.robot.data.soft_joint_pos_limits[:, self._arm_joint_ids]
+            integral_targets = torch.maximum(
+                torch.minimum(integral_targets, arm_limits[:, :, 1]), arm_limits[:, :, 0]
+            )
+            self._insert_joint_targets[insertion] = integral_targets[insertion]
+            # Policy corrections are one-step offsets, never accumulated into
+            # the baseline integral state.
+            corrected_targets = torch.maximum(
+                torch.minimum(integral_targets + residual_delta, arm_positions + position_headroom),
+                arm_positions - position_headroom,
+            )
+            corrected_targets = torch.maximum(
+                torch.minimum(corrected_targets, arm_limits[:, :, 1]), arm_limits[:, :, 0]
+            )
+            arm_targets = self._joint_targets[:, self._arm_joint_ids]
+            arm_targets[insertion] = corrected_targets[insertion]
+            self._joint_targets[:, self._arm_joint_ids] = arm_targets
         self._joint_targets[:, self._torso_joint_ids] = self._torso_hold_targets
         close_mask = self._phase >= int(AssemblyPhase.CLOSE)
         open_targets = torch.tensor(
@@ -443,7 +695,18 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._joint_targets = torch.maximum(torch.minimum(self._joint_targets, upper), lower)
 
     def _apply_action(self) -> None:
-        self.robot.set_joint_position_target(self._joint_targets)
+        # Convert model gravity feedforward into an implicit-drive position
+        # bias. There is no extra effort command outside the capped drive.
+        controlled = self._torso_joint_ids + self._arm_joint_ids
+        gravity = self.robot.root_physx_view.get_gravity_compensation_forces()
+        stiffness = self.robot.data.joint_stiffness[:, controlled]
+        if torch.any(stiffness <= 0):
+            raise RuntimeError("gravity position bias requires positive joint stiffness")
+        targets = self._joint_targets.clone()
+        targets[:, controlled] += gravity[:, controlled] / stiffness
+        limits = self.robot.data.soft_joint_pos_limits
+        targets = torch.maximum(torch.minimum(targets, limits[:, :, 1]), limits[:, :, 0])
+        self.robot.set_joint_position_target(targets)
 
     def _get_observations(self) -> dict[str, torch.Tensor]:
         relative_pos, relative_quat = self._relative_object_pose()
@@ -466,9 +729,16 @@ class Rby1AssemblyEnv(DirectRLEnv):
                 arm_pos,
                 arm_vel,
                 self._last_contact_proxy_n,
+                self._last_insertion_contact_load_n.unsqueeze(1),
                 self._grip_proven.float(),
                 phase_one_hot,
                 self._actions,
+                self._insertion_command_depth_m.unsqueeze(1),
+                self._insertion_advance_enabled.float().unsqueeze(1),
+                torch.where(
+                    (self._phase == int(AssemblyPhase.INSERT)).unsqueeze(1),
+                    self._insert_joint_targets - arm_pos, torch.zeros_like(arm_pos),
+                ),
             ),
             dim=-1,
         )
@@ -480,18 +750,26 @@ class Rby1AssemblyEnv(DirectRLEnv):
         depth = relative_pos[:, 1]
         lateral = torch.linalg.vector_norm(relative_pos[:, (0, 2)], dim=1)
         angle = quat_error_magnitude(relative_quat, self._identity_quat())
+        current_contact_force = torch.maximum(
+            self._last_contact_proxy_n.max(dim=1).values,
+            self._last_insertion_contact_load_n,
+        )
         force_penalty = torch.clamp(
-            self._last_contact_proxy_n.max(dim=1).values / self.cfg.hard_contact_force_n, 0.0, 2.0
+            current_contact_force / self.cfg.hard_contact_force_n, 0.0, 2.0
         )
         action_penalty = torch.sum(self._actions.square(), dim=1)
-        proven = torch.all(self._grip_proven, dim=1).float()
         success = self._evaluation_success
+        failed = ((self._phase == int(AssemblyPhase.ABORT)) | self._episode_time_limit_reached()) & ~success
         return (
             -4.0 * lateral
             - 0.4 * angle
-            + 2.0 * torch.clamp(depth, min=0.0)
-            + 0.2 * proven
+            + 2.0 * torch.clamp(
+                depth, min=0.0,
+                max=self.cfg.assembled_depth_m + self.cfg.insertion_target_margin_m,
+            )
             + 10.0 * success.float()
+            - 2.0 * failed.float()
+            - 0.01
             - 0.05 * force_penalty
             - 0.002 * action_penalty
         )
@@ -505,8 +783,26 @@ class Rby1AssemblyEnv(DirectRLEnv):
         right_force = torch.maximum(right_r1_force, right_r2_force)
         self._last_contact_proxy_n[:, 0] = left_force
         self._last_contact_proxy_n[:, 1] = right_force
-        current_force = torch.maximum(left_force, right_force)
-        self._episode_force_peak_n = torch.maximum(self._episode_force_peak_n, current_force)
+        insertion_force_w = self._filtered_force_vector(self.insertion_contact)
+        insertion_force = torch.linalg.vector_norm(insertion_force_w, dim=1)
+        self._last_insertion_contact_force_w[:] = insertion_force_w
+        self._last_insertion_contact_force_n[:] = insertion_force
+        insertion_load = self._insertion_contact_load()
+        self._last_insertion_contact_load_n[:] = insertion_load
+        current_grip_force = torch.maximum(left_force, right_force)
+        self._episode_grip_force_peak_n = torch.maximum(
+            self._episode_grip_force_peak_n, current_grip_force
+        )
+        self._episode_insertion_contact_force_peak_n = torch.maximum(
+            self._episode_insertion_contact_force_peak_n, insertion_force
+        )
+        self._episode_insertion_contact_load_peak_n = torch.maximum(
+            self._episode_insertion_contact_load_peak_n, insertion_load
+        )
+        self._episode_force_peak_n = torch.maximum(
+            self._episode_grip_force_peak_n,
+            self._episode_insertion_contact_load_peak_n,
+        )
 
         left_contact = (left_l1_force >= self.cfg.grip_contact_force_n) & (
             left_l2_force >= self.cfg.grip_contact_force_n
@@ -533,9 +829,21 @@ class Rby1AssemblyEnv(DirectRLEnv):
         depth = relative_pos[:, 1]
         lateral = torch.linalg.vector_norm(relative_pos[:, (0, 2)], dim=1)
         angle = quat_error_magnitude(relative_quat, self._identity_quat())
-        forbidden_now = self._forbidden_contact_magnitude() > self.cfg.forbidden_contact_force_n
+        forbidden_contact_load = self._forbidden_contact_load()
+        self._last_forbidden_contact_load_n[:] = forbidden_contact_load
+        self._episode_forbidden_contact_load_peak_n = torch.maximum(
+            self._episode_forbidden_contact_load_peak_n, forbidden_contact_load
+        )
+        independent_eval_valid = torch.isfinite(forbidden_contact_load)
+        forbidden_now = (~independent_eval_valid) | (
+            forbidden_contact_load > self.cfg.forbidden_contact_force_n
+        )
         self._forbidden_contact_seen |= forbidden_now
-        hard_overload = self._episode_force_peak_n > self.cfg.hard_contact_force_n
+        grip_hard_overload = self._episode_grip_force_peak_n > self.cfg.hard_contact_force_n
+        insertion_hard_overload = (
+            self._episode_insertion_contact_load_peak_n > self.cfg.hard_contact_force_n
+        )
+        hard_overload = grip_hard_overload | insertion_hard_overload
         geometry_ok = (
             (depth >= self.cfg.assembled_depth_m)
             & (lateral <= self.cfg.max_lateral_error_m)
@@ -548,17 +856,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
             & (lift_right >= self.cfg.grip_lift_proof_m)
         )
         instantaneous_ok = geometry_ok & handling_ok & ~hard_overload & ~self._forbidden_contact_seen
-        now = self._sim_time_s()
-        self._advance_evaluation_dwell(instantaneous_ok, now)
-        independent_eval_valid = torch.full(
-            (self.num_envs,),
-            bool(self.cfg.forbidden_contact_measurement_available),
-            dtype=torch.bool,
-            device=self.device,
-        )
-        self._evaluation_success = independent_eval_valid & (
-            self._evaluation_dwell_s >= self.cfg.success_dwell_s
-        )
+        self._advance_evaluation_dwell(instantaneous_ok & independent_eval_valid)
         aborted = self._phase == int(AssemblyPhase.ABORT)
         evaluator_failure = self._forbidden_contact_seen | hard_overload
         terminated = self._evaluation_success | aborted | evaluator_failure
@@ -586,7 +884,16 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
         self.extras["success"] = self._evaluation_success.clone()
         self.extras["completed"] = bool(torch.any(self._evaluation_success).item())
-        self.extras["contact_force_source"] = "contact_force_proxy"
+        self.extras["contact_force_source"] = (
+            "filtered_finger_object_and_plug_socket_contact_sensors"
+        )
+        self.extras["insertion_contact_force_source"] = (
+            "plug_body_filtered_against_socket_net_normal_force_world_frame"
+        )
+        self.extras["insertion_contact_load_source"] = "physx_plug_socket_sum_abs_contact_normals"
+        self.extras["forbidden_contact_load_source"] = FORBIDDEN_CONTACT_LOAD_SOURCE
+        self.extras["forbidden_contact_load_n"] = forbidden_contact_load.clone()
+        self.extras["forbidden_contact_load_peak_n"] = self._episode_forbidden_contact_load_peak_n.clone()
         self.extras["baseline_controller_state_source"] = BASELINE_CONTROLLER_STATE_SOURCE
         self.extras["phase_gate_state_source"] = BASELINE_CONTROLLER_STATE_SOURCE
         self.extras["evaluation"] = {
@@ -597,6 +904,20 @@ class Rby1AssemblyEnv(DirectRLEnv):
             "actual_lateral_error_m": lateral.clone(),
             "actual_orientation_error_rad": angle.clone(),
             "contact_force_proxy_peak_n": self._episode_force_peak_n.clone(),
+            "contact_force_proxy_peak_format": (
+                "max_of_grip_and_plug_socket_sum_abs_contact_normals_n"
+            ),
+            "grip_contact_force_peak_n": self._episode_grip_force_peak_n.clone(),
+            "insertion_contact_force_n": self._last_insertion_contact_force_n.clone(),
+            "insertion_contact_load_n": self._last_insertion_contact_load_n.clone(),
+            "insertion_contact_load_peak_n": self._episode_insertion_contact_load_peak_n.clone(),
+            "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_contact_force_peak_n": (
+                self._episode_insertion_contact_force_peak_n.clone()
+            ),
+            "forbidden_contact_load_n": forbidden_contact_load.clone(),
+            "forbidden_contact_load_peak_n": self._episode_forbidden_contact_load_peak_n.clone(),
+            "forbidden_contact_load_source": FORBIDDEN_CONTACT_LOAD_SOURCE,
             "forbidden_contact": self._forbidden_contact_seen.clone(),
             "grasp_both": handling_ok.clone(),
             "completion_source": "simulator_ground_truth_evaluator",
@@ -606,6 +927,20 @@ class Rby1AssemblyEnv(DirectRLEnv):
             "actual_lateral_error_m": lateral.clone(),
             "actual_orientation_error_rad": angle.clone(),
             "contact_force_proxy_peak_n": self._episode_force_peak_n.clone(),
+            "contact_force_proxy_peak_format": (
+                "max_of_grip_and_plug_socket_sum_abs_contact_normals_n"
+            ),
+            "grip_contact_force_peak_n": self._episode_grip_force_peak_n.clone(),
+            "insertion_contact_force_n": self._last_insertion_contact_force_n.clone(),
+            "insertion_contact_load_n": self._last_insertion_contact_load_n.clone(),
+            "insertion_contact_load_peak_n": self._episode_insertion_contact_load_peak_n.clone(),
+            "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_contact_force_peak_n": (
+                self._episode_insertion_contact_force_peak_n.clone()
+            ),
+            "forbidden_contact_load_n": forbidden_contact_load.clone(),
+            "forbidden_contact_load_peak_n": self._episode_forbidden_contact_load_peak_n.clone(),
+            "forbidden_contact_load_source": FORBIDDEN_CONTACT_LOAD_SOURCE,
             "grasp_both": handling_ok.clone(),
             "forbidden_contact": self._forbidden_contact_seen.clone(),
         }
@@ -629,26 +964,69 @@ class Rby1AssemblyEnv(DirectRLEnv):
             ),
             "gripper_positions_m": self.robot.data.joint_pos[:, self._gripper_joint_ids].clone(),
             "gripper_velocities_m_s": self.robot.data.joint_vel[:, self._gripper_joint_ids].clone(),
+            "ee_poses_world_wxyz": torch.cat((
+                self.robot.data.body_pos_w[:, [self._left_ee_body_id, self._right_ee_body_id]],
+                self.robot.data.body_quat_w[:, [self._left_ee_body_id, self._right_ee_body_id]],
+            ), dim=2).clone(),
+            "forbidden_robot_body_names": tuple(self.forbidden_robot_contact.body_names),
+            "forbidden_robot_forces_w": self.forbidden_robot_contact.data.net_forces_w.clone(),
+            "forbidden_palm_forces_w": torch.stack((
+                self.forbidden_left_palm_contact.data.net_forces_w[:, 0],
+                self.forbidden_right_palm_contact.data.net_forces_w[:, 0],
+            ), dim=1).clone(),
+            "finger_contact_force_n": torch.stack(
+                (left_l1_force, left_l2_force, right_r1_force, right_r2_force), dim=1
+            ).clone(),
+            "finger_non_target_force_w": torch.stack([
+                (sensor.data.net_forces_w - sensor.data.force_matrix_w.sum(dim=2))[:, 0]
+                for sensor in (self.left_contact_l1, self.left_contact_l2,
+                               self.right_contact_r1, self.right_contact_r2)
+            ], dim=1).clone(),
             "object_order": ("socket", "plug"),
             "object_poses_world_wxyz": object_poses.clone(),
             "contact_force_proxy_n": self._last_contact_proxy_n.clone(),
             "contact_force_proxy_format": "per_hand_peak_filtered_finger_magnitude_n",
+            "grip_contact_force_peak_n": self._episode_grip_force_peak_n.clone(),
+            "insertion_contact_force_n": self._last_insertion_contact_force_n.clone(),
+            "insertion_contact_load_n": self._last_insertion_contact_load_n.clone(),
+            "insertion_contact_load_peak_n": self._episode_insertion_contact_load_peak_n.clone(),
+            "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+            "insertion_contact_force_w": self._last_insertion_contact_force_w.clone(),
+            "insertion_contact_force_peak_n": (
+                self._episode_insertion_contact_force_peak_n.clone()
+            ),
+            "insertion_contact_force_source": (
+                "plug_body_filtered_against_socket_net_normal_force_world_frame"
+            ),
             "phase": self._phase.clone(),
             "phase_name_by_code": {int(phase): phase.name.lower() for phase in AssemblyPhase},
             "grip_proven": self._evaluation_grip_proven.clone(),
             "controller_grip_proven": self._grip_proven.clone(),
+            "continuous_grasp_loss_since_s": self._grasp_loss_since_s.clone(),
+            "insertion_command_depth_m": self._insertion_command_depth_m.clone(),
+            "insertion_advance_enabled": self._insertion_advance_enabled.clone(),
+            "insert_joint_target_error_rad": (
+                self._insert_joint_targets - self.robot.data.joint_pos[:, self._arm_joint_ids]
+            ).clone(),
             "grip_live": grip_live.clone(),
             "actual_depth_m": depth.clone(),
             "actual_lateral_error_m": lateral.clone(),
             "actual_orientation_error_rad": angle.clone(),
             "contact_force_proxy_peak_n": self._episode_force_peak_n.clone(),
-            "forbidden_contact": self._forbidden_contact_seen.clone(),
-            "forbidden_contact_measured": independent_eval_valid.clone(),
-            "forbidden_contact_source": (
-                "non_finger_body_net_force_and_finger_non_target_residual_proxy"
+            "contact_force_proxy_peak_format": (
+                "max_of_grip_and_plug_socket_sum_abs_contact_normals_n"
             ),
+            "forbidden_contact": self._forbidden_contact_seen.clone(),
+            "forbidden_contact_load_n": forbidden_contact_load.clone(),
+            "forbidden_contact_load_peak_n": self._episode_forbidden_contact_load_peak_n.clone(),
+            "forbidden_contact_load_source": FORBIDDEN_CONTACT_LOAD_SOURCE,
+            "forbidden_contact_measured": independent_eval_valid.clone(),
+            "forbidden_contact_source": FORBIDDEN_CONTACT_LOAD_SOURCE,
+            "forbidden_contact_trace_source": FORBIDDEN_CONTACT_TRACE_SOURCE,
             "self_collision_enabled": False,
             "hard_overload": hard_overload.clone(),
+            "grip_hard_overload": grip_hard_overload.clone(),
+            "insertion_hard_overload": insertion_hard_overload.clone(),
             "independent_eval_valid": independent_eval_valid.clone(),
             "independent_eval_success": self._evaluation_success.clone(),
             "independent_eval_dwell_s": self._evaluation_dwell_s.clone(),
@@ -695,11 +1073,16 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._reset_rigid_object(self.socket, env_ids, y_noise=0.010)
         self._reset_rigid_object(self.plug, env_ids, y_noise=0.010)
         self._joint_targets[env_ids] = joint_pos
+        self._insert_joint_targets[env_ids] = joint_pos[:, self._arm_joint_ids]
         self._torso_hold_targets[env_ids] = joint_pos[:, self._torso_joint_ids]
         self._phase[env_ids] = int(AssemblyPhase.PREGRASP)
         self._phase_started_s[env_ids] = self._sim_time_s()
         self._retry_count[env_ids] = 0
-        self._success_since_s[env_ids] = -1.0
+        self._success_since_step[env_ids] = -1
+        self._grip_contact_since_s[env_ids] = -1.0
+        self._grasp_loss_since_s[env_ids] = -1.0
+        self._insertion_command_depth_m[env_ids] = 0.0
+        self._insertion_advance_enabled[env_ids] = False
         self._evaluation_success[env_ids] = False
         self._evaluation_dwell_s[env_ids] = 0.0
         self._termination_reason_code[env_ids] = int(TerminationReason.NONE)
@@ -710,9 +1093,17 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._object_to_ee_pos[env_ids] = 0.0
         self._object_to_ee_quat[env_ids] = 0.0
         self._object_to_ee_quat[env_ids, :, 0] = 1.0
+        self._episode_grip_force_peak_n[env_ids] = 0.0
+        self._episode_insertion_contact_force_peak_n[env_ids] = 0.0
         self._episode_force_peak_n[env_ids] = 0.0
+        self._last_forbidden_contact_load_n[env_ids] = 0.0
+        self._episode_forbidden_contact_load_peak_n[env_ids] = 0.0
         self._forbidden_contact_seen[env_ids] = False
         self._last_contact_proxy_n[env_ids] = 0.0
+        self._last_insertion_contact_force_w[env_ids] = 0.0
+        self._last_insertion_contact_force_n[env_ids] = 0.0
+        self._last_insertion_contact_load_n[env_ids] = 0.0
+        self._episode_insertion_contact_load_peak_n[env_ids] = 0.0
         self._last_actual_relative_pose[env_ids] = 0.0
         self._actions[env_ids] = 0.0
         self._object_start_z[env_ids, 0] = self.socket.data.default_root_state[env_ids, 2]
@@ -742,6 +1133,12 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
         self._last_contact_proxy_n[:, 0] = left_force
         self._last_contact_proxy_n[:, 1] = right_force
+        insertion_force_w = self._filtered_force_vector(self.insertion_contact)
+        insertion_force = torch.linalg.vector_norm(insertion_force_w, dim=1)
+        self._last_insertion_contact_force_w[:] = insertion_force_w
+        self._last_insertion_contact_force_n[:] = insertion_force
+        insertion_load = self._insertion_contact_load()
+        self._last_insertion_contact_load_n[:] = insertion_load
 
         left_ee = self.robot.data.body_pos_w[:, self._left_ee_body_id]
         right_ee = self.robot.data.body_pos_w[:, self._right_ee_body_id]
@@ -774,10 +1171,14 @@ class Rby1AssemblyEnv(DirectRLEnv):
             AssemblyPhase.CLOSE,
             now,
         )
+        closed_contact = (self._phase == int(AssemblyPhase.CLOSE)) & left_contact & right_contact
+        self._grip_contact_since_s = torch.where(
+            closed_contact,
+            torch.where(self._grip_contact_since_s < 0, now, self._grip_contact_since_s),
+            -1.0,
+        )
         self._transition_where(
-            (self._phase == int(AssemblyPhase.CLOSE))
-            & left_contact
-            & right_contact,
+            closed_contact & ((now - self._grip_contact_since_s) >= self.cfg.grip_settle_s),
             AssemblyPhase.CHECK_LIFT,
             now,
         )
@@ -822,37 +1223,55 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
         self._transition_where(aligned, AssemblyPhase.INSERT, now)
 
-        current_force = torch.maximum(left_force, right_force)
+        current_grip_force = torch.maximum(left_force, right_force)
         continuous_grasp = left_contact & right_contact & (lift_left >= self.cfg.grip_lift_proof_m) & (
             lift_right >= self.cfg.grip_lift_proof_m
         )
 
-        hard_overload = current_force > self.cfg.hard_contact_force_n
+        hard_overload = (current_grip_force > self.cfg.hard_contact_force_n) | (
+            insertion_load > self.cfg.hard_contact_force_n
+        )
         self._transition_where(
             hard_overload, AssemblyPhase.ABORT, now, TerminationReason.HARD_FORCE_LIMIT
         )
         jam = (
             (self._phase == int(AssemblyPhase.INSERT))
-            & (current_force > self.cfg.jam_contact_force_n)
+            & (insertion_load > self.cfg.jam_contact_force_n)
             & ~hard_overload
         )
         self._start_recovery(jam, now)
-        lost_grasp = (
+        grasp_monitor_active = (
             (self._phase >= int(AssemblyPhase.ALIGN))
             & (self._phase <= int(AssemblyPhase.RETRACT))
-            & ~continuous_grasp
-            & ((now - self._phase_started_s) > 0.20)
+        )
+        self._grasp_loss_since_s, lost_grasp = continuous_grasp_loss(
+            grasp_monitor_active, continuous_grasp, self._grasp_loss_since_s,
+            now, self.cfg.grasp_loss_grace_s,
         )
         self._transition_where(lost_grasp, AssemblyPhase.ABORT, now, TerminationReason.GRASP_LOST)
         retract_done = (self._phase == int(AssemblyPhase.RETRACT)) & (relative_pos[:, 1] <= -0.015)
         self._transition_where(retract_done, AssemblyPhase.ALIGN, now)
 
-        timed_out = (now - self._phase_started_s) >= self.cfg.phase_timeout_s
+        phase_timeout = torch.where(
+            self._phase == int(AssemblyPhase.ALIGN),
+            self.cfg.align_timeout_s,
+            torch.where(
+                self._phase == int(AssemblyPhase.INSERT),
+                self.cfg.insert_timeout_s, self.cfg.phase_timeout_s,
+            ),
+        )
+        timed_out = (now - self._phase_started_s) >= phase_timeout
         recoverable = timed_out & (
             (self._phase == int(AssemblyPhase.ALIGN)) | (self._phase == int(AssemblyPhase.INSERT))
         )
         self._start_recovery(recoverable, now)
-        pregrasp_failed = timed_out & (self._phase <= int(AssemblyPhase.CHECK_LIFT))
+        preparation_timeout = torch.where(
+            self._phase == int(AssemblyPhase.PREGRASP),
+            self.cfg.pregrasp_timeout_s, self.cfg.phase_timeout_s,
+        )
+        pregrasp_failed = ((now - self._phase_started_s) >= preparation_timeout) & (
+            self._phase <= int(AssemblyPhase.CHECK_LIFT)
+        )
         self._transition_where(
             pregrasp_failed, AssemblyPhase.ABORT, now, TerminationReason.PREGRASP_TIMEOUT
         )
@@ -910,22 +1329,61 @@ class Rby1AssemblyEnv(DirectRLEnv):
             self._phase <= int(AssemblyPhase.RETRACT)
         )
         socket_goal = self.scene.env_origins + torch.tensor(self.cfg.assembly_socket_goal_m, device=self.device)
-        plug_goal = self._plug_center_goal(socket_goal, -0.010)
+        plug_goal = self._plug_center_goal(socket_goal, -self.cfg.alignment_standoff_m)
         insert = self._phase == int(AssemblyPhase.INSERT)
-        plug_goal[insert] = self._plug_center_goal(socket_goal[insert], self.cfg.assembled_depth_m)
+        # The commanded depth includes tracking margin; the independent
+        # evaluator still requires the original measured insertion depth.
+        relative_position, relative_orientation = self._relative_object_pose()
+        lateral_error = torch.linalg.vector_norm(relative_position[:, (0, 2)], dim=1)
+        orientation_error = quat_error_magnitude(relative_orientation, self._identity_quat())
+        pause_advance = (
+            (lateral_error >= self.cfg.insertion_advance_lateral_tolerance_m)
+            | (orientation_error >= self.cfg.insertion_advance_orientation_tolerance_rad)
+        )
+        resume_advance = (
+            (lateral_error <= self.cfg.insertion_resume_lateral_tolerance_m)
+            & (orientation_error <= self.cfg.insertion_resume_orientation_tolerance_rad)
+        )
+        self._insertion_advance_enabled = insert & (
+            (self._insertion_advance_enabled & ~pause_advance) | resume_advance
+        )
+        # This reference ramp is a baseline servo heuristic. Policy residuals
+        # are applied later; measured force/contact limits remain independent.
+        next_depth = self._insertion_command_depth_m + (
+            self._insertion_advance_enabled.float() * self.cfg.insertion_speed_m_s * self.step_dt
+        )
+        next_depth = torch.minimum(
+            next_depth, relative_position[:, 1] + self.cfg.insertion_max_tracking_lead_m
+        ).clamp(max=self.cfg.assembled_depth_m + self.cfg.insertion_target_margin_m)
+        self._insertion_command_depth_m[insert] = next_depth[insert]
+        # During insertion the measured support object defines the mating
+        # frame, so support-arm tracking error is not added to the plug error.
+        plug_offset_in_socket = torch.zeros((self.num_envs, 3), device=self.device)
+        plug_offset_in_socket[:, 1] = (
+            self.cfg.socket_entry_y_m + next_depth - self.cfg.plug_tip_y_m
+        )
+        measured_mating_goal = self.socket.data.root_pos_w + quat_apply(
+            self.socket.data.root_quat_w, plug_offset_in_socket
+        )
+        plug_goal[insert] = measured_mating_goal[insert]
+        plug_goal_quat = target_quat.clone()
+        plug_goal_quat[insert] = self.socket.data.root_quat_w[insert]
         retract = self._phase == int(AssemblyPhase.RETRACT)
         plug_goal[retract] = self._plug_center_goal(socket_goal[retract], -0.030)
+        # Re-estimate the grasp transform from measured simulator poses so
+        # millimetre-scale settling/slip is corrected at the object, rather
+        # than treating the lift-proof transform as a rigid attachment.
+        left_grasp_pos, left_grasp_quat = subtract_frame_transforms(
+            self.socket.data.root_pos_w, self.socket.data.root_quat_w, left_pos, left_quat
+        )
+        right_grasp_pos, right_grasp_quat = subtract_frame_transforms(
+            self.plug.data.root_pos_w, self.plug.data.root_quat_w, right_pos, right_quat
+        )
         left_goal, left_goal_quat = combine_frame_transforms(
-            socket_goal,
-            target_quat,
-            self._object_to_ee_pos[:, 0],
-            self._object_to_ee_quat[:, 0],
+            socket_goal, target_quat, left_grasp_pos, left_grasp_quat,
         )
         right_goal, right_goal_quat = combine_frame_transforms(
-            plug_goal,
-            target_quat,
-            self._object_to_ee_pos[:, 1],
-            self._object_to_ee_quat[:, 1],
+            plug_goal, plug_goal_quat, right_grasp_pos, right_grasp_quat,
         )
         left_target[manipulation] = left_goal[manipulation]
         right_target[manipulation] = right_goal[manipulation]
@@ -944,10 +1402,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
         return left_twist, right_twist
 
     def _damped_least_squares(self, jacobian: torch.Tensor, twist: torch.Tensor) -> torch.Tensor:
-        identity = torch.eye(6, device=self.device).unsqueeze(0).expand(self.num_envs, -1, -1)
-        lhs = jacobian @ jacobian.transpose(1, 2) + (self.cfg.dls_damping**2) * identity
-        delta = jacobian.transpose(1, 2) @ torch.linalg.solve(lhs, twist.unsqueeze(-1))
-        return torch.clamp(delta.squeeze(-1), -self.cfg.max_joint_delta_rad, self.cfg.max_joint_delta_rad)
+        return damped_joint_step(
+            jacobian, twist, self.cfg.dls_damping, self.cfg.max_joint_delta_rad
+        )
 
     def _relative_object_pose(self) -> tuple[torch.Tensor, torch.Tensor]:
         plug_tip_local = torch.tensor([0.0, self.cfg.plug_tip_y_m, 0.0], device=self.device).repeat(
@@ -971,7 +1428,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._last_actual_relative_pose[:, 3:] = relative_quat
         return relative_pos, relative_quat
 
-    def _plug_center_goal(self, socket_center_w: torch.Tensor, depth_m: float) -> torch.Tensor:
+    def _plug_center_goal(
+        self, socket_center_w: torch.Tensor, depth_m: float | torch.Tensor
+    ) -> torch.Tensor:
         goal = socket_center_w.clone()
         goal[:, 1] += self.cfg.socket_entry_y_m + depth_m - self.cfg.plug_tip_y_m
         return goal
@@ -983,8 +1442,8 @@ class Rby1AssemblyEnv(DirectRLEnv):
         left_above[:, 2] += 0.050
         right_above[:, 2] += 0.050
         return (
-            (torch.linalg.vector_norm(left_grasp_center - left_above, dim=1) < 0.015)
-            & (torch.linalg.vector_norm(right_grasp_center - right_above, dim=1) < 0.015)
+            (torch.linalg.vector_norm(left_grasp_center - left_above, dim=1) < 0.005)
+            & (torch.linalg.vector_norm(right_grasp_center - right_above, dim=1) < 0.005)
         )
 
     def _pregrasp_lift_targets(
@@ -1012,20 +1471,17 @@ class Rby1AssemblyEnv(DirectRLEnv):
         right_target[:, 2] += self.cfg.right_grasp_center_above_object_m
         return left_target, right_target
 
-    def _advance_evaluation_dwell(self, instantaneous_ok: torch.Tensor, now: float) -> None:
-        self._success_since_s = torch.where(
-            instantaneous_ok & (self._success_since_s < 0.0),
-            torch.full_like(self._success_since_s, now),
-            torch.where(
-                instantaneous_ok,
-                self._success_since_s,
-                torch.full_like(self._success_since_s, -1.0),
-            ),
-        )
-        self._evaluation_dwell_s = torch.where(
+    def _advance_evaluation_dwell(self, instantaneous_ok: torch.Tensor) -> None:
+        (
+            self._success_since_step,
+            self._evaluation_dwell_s,
+            self._evaluation_success,
+        ) = continuous_goal_dwell(
             instantaneous_ok,
-            torch.clamp(now - self._success_since_s, min=0.0),
-            torch.zeros_like(self._evaluation_dwell_s),
+            self.episode_length_buf,
+            self._success_since_step,
+            step_dt_s=self.step_dt,
+            required_dwell_s=self.cfg.success_dwell_s,
         )
 
     def _bound_residual_actions(self, actions: torch.Tensor) -> torch.Tensor:
@@ -1039,11 +1495,43 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
         return torch.where(manipulation.unsqueeze(1), bounded, torch.zeros_like(bounded))
 
+    def _insertion_contact_load(self) -> torch.Tensor:
+        forces, _, _, _, counts, starts = self.insertion_contact.contact_physx_view.get_contact_data(
+            dt=self.cfg.sim.dt
+        )
+        return sum_contact_normal_loads(forces, counts, starts, self.num_envs)
+
     def _filtered_force_magnitude(self, sensor: ContactSensor) -> torch.Tensor:
         force_matrix = sensor.data.force_matrix_w
         if force_matrix is None:
             raise RuntimeError("filtered contact force data is unavailable; verify the sensor object filter")
         return torch.linalg.vector_norm(force_matrix, dim=-1).reshape(self.num_envs, -1).amax(dim=1)
+
+    def _filtered_force_vector(self, sensor: ContactSensor) -> torch.Tensor:
+        force_matrix = sensor.data.force_matrix_w
+        if force_matrix is None:
+            raise RuntimeError("filtered contact force data is unavailable; verify the sensor object filter")
+        return force_matrix.reshape(self.num_envs, -1, 3).sum(dim=1)
+
+    def _forbidden_contact_load(self) -> torch.Tensor:
+        per_source_loads = []
+        for label, sensor in self._forbidden_load_sensors.items():
+            forces, _, _, _, counts, starts = sensor.contact_physx_view.get_contact_data(
+                dt=self.cfg.sim.dt
+            )
+            try:
+                load = sum_contact_normal_loads(forces, counts, starts, self.num_envs)
+            except (TypeError, ValueError) as exc:
+                raise RuntimeError(
+                    f"invalid forbidden-contact buffer for source {label}: {exc}"
+                ) from exc
+            per_source_loads.append(load)
+        if not per_source_loads:
+            raise RuntimeError("forbidden-contact load sensors are unavailable")
+        total_load = torch.stack(per_source_loads, dim=1).sum(dim=1)
+        if not torch.isfinite(total_load).all():
+            raise RuntimeError("forbidden-contact load aggregation produced a non-finite value")
+        return total_load
 
     def _forbidden_contact_magnitude(self) -> torch.Tensor:
         maxima = []
@@ -1090,6 +1578,11 @@ class Rby1AssemblyEnv(DirectRLEnv):
         reason: TerminationReason = TerminationReason.NONE,
     ) -> None:
         if torch.any(mask):
+            self._insert_joint_targets[mask] = self.robot.data.joint_pos[mask][:, self._arm_joint_ids]
+            if phase == AssemblyPhase.INSERT:
+                relative_position, _ = self._relative_object_pose()
+                self._insertion_command_depth_m[mask] = relative_position[mask, 1]
+                self._insertion_advance_enabled[mask] = False
             self._phase[mask] = int(phase)
             self._phase_started_s[mask] = now
             if phase == AssemblyPhase.ABORT and reason != TerminationReason.NONE:

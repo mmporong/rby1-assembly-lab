@@ -1,0 +1,592 @@
+{
+  "scope": "single_seed_zero_residual_nominal_free_fit_physics_baseline_not_jam_recovery_or_policy_result",
+  "process_exit_code": 0,
+  "report": {
+    "completed": true,
+    "physics_backend": "PhysX via Isaac Sim",
+    "observation_source": "simulator_state_with_noise",
+    "baseline_controller_state_source": "simulator_ground_truth",
+    "phase_gate_state_source": "simulator_ground_truth",
+    "contact_force_source": "contact_force_proxy",
+    "num_envs": 1,
+    "steps_requested": 1800,
+    "steps_cli_override": null,
+    "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+    "actual_steps": 1322,
+    "max_contact_force_proxy_n": 6.391331195831299,
+    "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+    "max_grip_contact_force_n": 6.391331195831299,
+    "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+    "max_insertion_contact_force_n": 0.0,
+    "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+    "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+    "max_insertion_contact_load_n": 0.0,
+    "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+    "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+    "max_forbidden_contact_load_n": 0.0,
+    "forbidden_contact_force_threshold_n": 1.0,
+    "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+    "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+    "visual_background_enabled": true,
+    "trace_path": "artifacts/cloud/physics-trace-22.jsonl",
+    "trace_record_count": 138,
+    "video_path": "artifacts/cloud/assembly-final-closeup.mp4",
+    "video_frame_count": 1322,
+    "video_fps": 30.0,
+    "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
+    "video_terminal_step_frames_omitted": 1,
+    "video_camera": {
+      "preset": "assembly",
+      "eye_world_m": [
+        0.95,
+        -0.6,
+        1.25
+      ],
+      "lookat_world_m": [
+        0.36,
+        0.0,
+        0.87
+      ],
+      "resolution_px": [
+        1280,
+        960
+      ]
+    },
+    "last_pre_autoreset_phase_counts": {
+      "pregrasp": 0,
+      "close": 0,
+      "check_lift": 0,
+      "align": 0,
+      "insert": 0,
+      "retract": 0,
+      "done": 1,
+      "abort": 0
+    },
+    "terminal_phase_counts": {
+      "pregrasp": 0,
+      "close": 0,
+      "check_lift": 0,
+      "align": 0,
+      "insert": 0,
+      "retract": 0,
+      "done": 1,
+      "abort": 0
+    },
+    "grip_proof_peak_count": 1,
+    "runtime_validated": true,
+    "provenance": {
+      "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+      "physics_dt_s": 0.008333333333333333,
+      "control_decimation": 4,
+      "control_dt_s": 0.03333333333333333,
+      "configured_task_timeout_s": 60.0,
+      "seed": 20261025,
+      "seed_source": "configs/task.json:data.train_seed",
+      "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+      "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+      "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+      "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+      "source_sha256": {
+        "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+        "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+        "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+        "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+        "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+        "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+        "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+        "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+        "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+        "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+        "scripts/run_sim.py": "d0c7e1843e78b9275f52017f2909aaa9ea1b949b635c9d1923fadcfbfe0f7371"
+      },
+      "generated_asset_sha256": {
+        "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+        "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+        "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+        "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+        "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+      },
+      "torch_version": "2.7.0+cu128"
+    }
+  },
+  "terminal_trace": {
+    "env_index": 0,
+    "timestamp_s": 44.06666946411133,
+    "phase_code": 6,
+    "phase_name": "done",
+    "terminal": true,
+    "termination_reason_code": 1,
+    "termination_reason": "independent_success",
+    "retry_count": 0,
+    "continuous_grasp_loss_since_s": -1.0,
+    "insertion_command_depth_m": 0.03363344073295593,
+    "insertion_advance_enabled": true,
+    "revolute_joint_positions_rad": [
+      -2.6631161745171994e-05,
+      0.001576741342432797,
+      0.003541376208886504,
+      0.0026246565394103527,
+      -2.2862817786517553e-05,
+      -6.724446575390175e-05,
+      -0.5017163157463074,
+      -0.016255052760243416,
+      -0.42336538434028625,
+      -1.2507855892181396,
+      0.20277684926986694,
+      1.6651837825775146,
+      0.5777891874313354,
+      -0.6182692646980286,
+      0.016008980572223663,
+      0.5712093114852905,
+      -1.128736972808838,
+      -0.3291688859462738,
+      1.6004925966262817,
+      -0.7243383526802063
+    ],
+    "gripper_positions_m": [
+      -0.029922062531113625,
+      0.029934506863355637,
+      -0.02239500917494297,
+      0.02240637131035328
+    ],
+    "ee_poses": {
+      "left_world_wxyz": [
+        0.36945581436157227,
+        0.051990807056427,
+        1.1451468467712402,
+        0.9999978542327881,
+        0.001686003990471363,
+        -0.0011784828966483474,
+        6.513628613902256e-05
+      ],
+      "right_world_wxyz": [
+        0.37031179666519165,
+        -0.015743963420391083,
+        1.14480459690094,
+        0.9999943375587463,
+        -0.002843503374606371,
+        -0.0010832517873495817,
+        -0.001401239074766636
+      ]
+    },
+    "object_poses_world_wxyz": {
+      "socket": [
+        0.36999988555908203,
+        0.04999971389770508,
+        0.9000000953674316,
+        1.0,
+        4.732182787847705e-07,
+        7.005021416262025e-07,
+        -3.7641794392584416e-07
+      ],
+      "plug": [
+        0.37080830335617065,
+        -0.01434299349784851,
+        0.8996663689613342,
+        0.9999982118606567,
+        -0.0015314029296860099,
+        -0.00037345485179685056,
+        -0.0010055789025500417
+      ]
+    },
+    "grip_proven": [
+      true,
+      true
+    ],
+    "grip_live": [
+      true,
+      true
+    ],
+    "independent_eval_dwell_s": 0.4,
+    "independent_eval_success": true,
+    "insert_joint_target_error_active": true,
+    "insert_joint_target_error_rad": [
+      -0.0034572482109069824,
+      -0.0007229819893836975,
+      0.0006176233291625977,
+      7.510185241699219e-05,
+      0.00014898180961608887,
+      0.0001016855239868164,
+      -1.0073184967041016e-05,
+      -0.004273891448974609,
+      0.001444213092327118,
+      0.00019663572311401367,
+      0.0018295049667358398,
+      -0.0008888542652130127,
+      -0.0007157325744628906,
+      -0.0005643963813781738
+    ],
+    "contact_force_proxy_n": [
+      5.742310523986816,
+      5.717991352081299
+    ],
+    "grip_contact_force_peak_n": 6.391331195831299,
+    "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+    "insertion_contact_force_n": 0.0,
+    "insertion_contact_force_w": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "insertion_contact_force_peak_n": 0.0,
+    "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+    "insertion_contact_load_n": 0.0,
+    "insertion_contact_load_peak_n": 0.0,
+    "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+    "forbidden_contact_load_n": 0.0,
+    "forbidden_contact_load_peak_n": 0.0,
+    "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+    "finger_contact_force_n": [
+      5.742310523986816,
+      5.727212429046631,
+      5.717991352081299,
+      5.704094886779785
+    ],
+    "finger_contact_order": "left_l1,left_l2,right_r1,right_r2",
+    "finger_non_target_force_w": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "finger_non_target_force_definition": "net_normal_force_world_frame_minus_filtered_target_force_world_frame",
+    "actual_depth_m": 0.030656849965453148,
+    "actual_lateral_error_m": 0.0010798133444041014,
+    "actual_orientation_error_rad": 0.0037401013541966677,
+    "forbidden_contact_breakdown": {
+      "robot_body_force_top3_n": [
+        {
+          "body_name": "link_torso_2",
+          "normal_force_magnitude_n": 0.0
+        },
+        {
+          "body_name": "link_torso_1",
+          "normal_force_magnitude_n": 0.0
+        },
+        {
+          "body_name": "link_torso_0",
+          "normal_force_magnitude_n": 0.0
+        }
+      ],
+      "left_palm_normal_force_magnitude_n": 0.0,
+      "right_palm_normal_force_magnitude_n": 0.0,
+      "force_definition": "net_normal_contact_force_world_frame"
+    },
+    "live_state_note": "pre_autoreset_snapshot_state"
+  },
+  "alternate_camera_report": {
+    "completed": true,
+    "physics_backend": "PhysX via Isaac Sim",
+    "observation_source": "simulator_state_with_noise",
+    "baseline_controller_state_source": "simulator_ground_truth",
+    "phase_gate_state_source": "simulator_ground_truth",
+    "contact_force_source": "contact_force_proxy",
+    "num_envs": 1,
+    "steps_requested": 1800,
+    "steps_cli_override": null,
+    "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+    "actual_steps": 1322,
+    "max_contact_force_proxy_n": 6.391331195831299,
+    "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+    "max_grip_contact_force_n": 6.391331195831299,
+    "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+    "max_insertion_contact_force_n": 0.0,
+    "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+    "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+    "max_insertion_contact_load_n": 0.0,
+    "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+    "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+    "max_forbidden_contact_load_n": 0.0,
+    "forbidden_contact_force_threshold_n": 1.0,
+    "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+    "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+    "visual_background_enabled": true,
+    "trace_path": "artifacts/cloud/physics-trace-23.jsonl",
+    "trace_record_count": 138,
+    "video_path": "artifacts/cloud/assembly-final-overview.mp4",
+    "video_frame_count": 1322,
+    "video_fps": 30.0,
+    "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
+    "video_terminal_step_frames_omitted": 1,
+    "video_camera": {
+      "preset": "overview",
+      "eye_world_m": [
+        2.2,
+        -2.0,
+        1.8
+      ],
+      "lookat_world_m": [
+        0.35,
+        0.0,
+        0.9
+      ],
+      "resolution_px": [
+        960,
+        720
+      ]
+    },
+    "last_pre_autoreset_phase_counts": {
+      "pregrasp": 0,
+      "close": 0,
+      "check_lift": 0,
+      "align": 0,
+      "insert": 0,
+      "retract": 0,
+      "done": 1,
+      "abort": 0
+    },
+    "terminal_phase_counts": {
+      "pregrasp": 0,
+      "close": 0,
+      "check_lift": 0,
+      "align": 0,
+      "insert": 0,
+      "retract": 0,
+      "done": 1,
+      "abort": 0
+    },
+    "grip_proof_peak_count": 1,
+    "runtime_validated": true,
+    "provenance": {
+      "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+      "physics_dt_s": 0.008333333333333333,
+      "control_decimation": 4,
+      "control_dt_s": 0.03333333333333333,
+      "configured_task_timeout_s": 60.0,
+      "seed": 20261025,
+      "seed_source": "configs/task.json:data.train_seed",
+      "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+      "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+      "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+      "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+      "source_sha256": {
+        "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+        "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+        "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+        "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+        "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+        "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+        "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+        "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+        "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+        "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+        "scripts/run_sim.py": "d0c7e1843e78b9275f52017f2909aaa9ea1b949b635c9d1923fadcfbfe0f7371"
+      },
+      "generated_asset_sha256": {
+        "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+        "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+        "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+        "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+        "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+      },
+      "torch_version": "2.7.0+cu128"
+    }
+  },
+  "alternate_camera_terminal": {
+    "env_index": 0,
+    "timestamp_s": 44.06666946411133,
+    "phase_code": 6,
+    "phase_name": "done",
+    "terminal": true,
+    "termination_reason_code": 1,
+    "termination_reason": "independent_success",
+    "retry_count": 0,
+    "continuous_grasp_loss_since_s": -1.0,
+    "insertion_command_depth_m": 0.03363344073295593,
+    "insertion_advance_enabled": true,
+    "revolute_joint_positions_rad": [
+      -2.6631161745171994e-05,
+      0.001576741342432797,
+      0.003541376208886504,
+      0.0026246565394103527,
+      -2.2862817786517553e-05,
+      -6.724446575390175e-05,
+      -0.5017163157463074,
+      -0.016255052760243416,
+      -0.42336538434028625,
+      -1.2507855892181396,
+      0.20277684926986694,
+      1.6651837825775146,
+      0.5777891874313354,
+      -0.6182692646980286,
+      0.016008980572223663,
+      0.5712093114852905,
+      -1.128736972808838,
+      -0.3291688859462738,
+      1.6004925966262817,
+      -0.7243383526802063
+    ],
+    "gripper_positions_m": [
+      -0.029922062531113625,
+      0.029934506863355637,
+      -0.02239500917494297,
+      0.02240637131035328
+    ],
+    "ee_poses": {
+      "left_world_wxyz": [
+        0.36945581436157227,
+        0.051990807056427,
+        1.1451468467712402,
+        0.9999978542327881,
+        0.001686003990471363,
+        -0.0011784828966483474,
+        6.513628613902256e-05
+      ],
+      "right_world_wxyz": [
+        0.37031179666519165,
+        -0.015743963420391083,
+        1.14480459690094,
+        0.9999943375587463,
+        -0.002843503374606371,
+        -0.0010832517873495817,
+        -0.001401239074766636
+      ]
+    },
+    "object_poses_world_wxyz": {
+      "socket": [
+        0.36999988555908203,
+        0.04999971389770508,
+        0.9000000953674316,
+        1.0,
+        4.732182787847705e-07,
+        7.005021416262025e-07,
+        -3.7641794392584416e-07
+      ],
+      "plug": [
+        0.37080830335617065,
+        -0.01434299349784851,
+        0.8996663689613342,
+        0.9999982118606567,
+        -0.0015314029296860099,
+        -0.00037345485179685056,
+        -0.0010055789025500417
+      ]
+    },
+    "grip_proven": [
+      true,
+      true
+    ],
+    "grip_live": [
+      true,
+      true
+    ],
+    "independent_eval_dwell_s": 0.4,
+    "independent_eval_success": true,
+    "insert_joint_target_error_active": true,
+    "insert_joint_target_error_rad": [
+      -0.0034572482109069824,
+      -0.0007229819893836975,
+      0.0006176233291625977,
+      7.510185241699219e-05,
+      0.00014898180961608887,
+      0.0001016855239868164,
+      -1.0073184967041016e-05,
+      -0.004273891448974609,
+      0.001444213092327118,
+      0.00019663572311401367,
+      0.0018295049667358398,
+      -0.0008888542652130127,
+      -0.0007157325744628906,
+      -0.0005643963813781738
+    ],
+    "contact_force_proxy_n": [
+      5.742310523986816,
+      5.717991352081299
+    ],
+    "grip_contact_force_peak_n": 6.391331195831299,
+    "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+    "insertion_contact_force_n": 0.0,
+    "insertion_contact_force_w": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "insertion_contact_force_peak_n": 0.0,
+    "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+    "insertion_contact_load_n": 0.0,
+    "insertion_contact_load_peak_n": 0.0,
+    "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+    "forbidden_contact_load_n": 0.0,
+    "forbidden_contact_load_peak_n": 0.0,
+    "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+    "finger_contact_force_n": [
+      5.742310523986816,
+      5.727212429046631,
+      5.717991352081299,
+      5.704094886779785
+    ],
+    "finger_contact_order": "left_l1,left_l2,right_r1,right_r2",
+    "finger_non_target_force_w": [
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "finger_non_target_force_definition": "net_normal_force_world_frame_minus_filtered_target_force_world_frame",
+    "actual_depth_m": 0.030656849965453148,
+    "actual_lateral_error_m": 0.0010798133444041014,
+    "actual_orientation_error_rad": 0.0037401013541966677,
+    "forbidden_contact_breakdown": {
+      "robot_body_force_top3_n": [
+        {
+          "body_name": "link_torso_2",
+          "normal_force_magnitude_n": 0.0
+        },
+        {
+          "body_name": "link_torso_1",
+          "normal_force_magnitude_n": 0.0
+        },
+        {
+          "body_name": "link_torso_0",
+          "normal_force_magnitude_n": 0.0
+        }
+      ],
+      "left_palm_normal_force_magnitude_n": 0.0,
+      "right_palm_normal_force_magnitude_n": 0.0,
+      "force_definition": "net_normal_contact_force_world_frame"
+    },
+    "live_state_note": "pre_autoreset_snapshot_state"
+  },
+  "source_hashes_match_current_files": true,
+  "artifact_sha256": {
+    "artifacts/cloud/physics-smoke-22.json": "c2aa4079f80f30d8f0911d513c2809e9f7b315c3adeec774766c942db280e61f",
+    "artifacts/cloud/physics-trace-22.jsonl": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+    "artifacts/cloud/physics-smoke-23.json": "cb95c3ee54b4ffe1f5efebed4232d4c78985f79e7f113b77ef16056fb73170ab",
+    "artifacts/cloud/physics-trace-23.jsonl": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+    "artifacts/cloud/assembly-final-closeup.mp4": "686ebfb107b38d51d319cd319b421902c2f456d9b5dc49856aa1f3bc4e7ecf0c",
+    "artifacts/cloud/assembly-final-overview.mp4": "a10511757b7b87cc2cfadea9cf4cd39012cf41db1715af633a9ebe872a49a1f1",
+    "artifacts/cloud/final-validation-source.tar.gz": "2d48957e2811bdfee0030db67cca7954d24a0f0e70842830db9c4c10cab08bd7"
+  }
+}

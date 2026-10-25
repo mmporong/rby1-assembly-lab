@@ -53,6 +53,17 @@ def terminal_snapshot() -> dict[str, object]:
             [[[0.0, 0.0, 0.75, 1.0, 0.0, 0.0, 0.0], [0.001, -0.064, 0.75, 1.0, 0.0, 0.0, 0.0]]]
         ),
         "contact_force_proxy_n": np.asarray([[3.0, 4.0]]),
+        "grip_contact_force_peak_n": np.asarray([5.0]),
+        "insertion_contact_force_n": np.asarray([5.0]),
+        "insertion_contact_force_w": np.asarray([[3.0, 4.0, 0.0]]),
+        "insertion_contact_force_peak_n": np.asarray([6.0]),
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "insertion_contact_load_n": np.asarray([6.0]),
+        "insertion_contact_load_peak_n": np.asarray([12.0]),
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "forbidden_contact_load_n": np.asarray([0.25]),
+        "forbidden_contact_load_peak_n": np.asarray([0.5]),
+        "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
         "phase": np.asarray([6]),
         "evaluation": evaluation(),
     }
@@ -79,6 +90,10 @@ class RecordingTests(unittest.TestCase):
     def test_terminal_snapshot_is_required_after_autoreset(self) -> None:
         with self.assertRaisesRegex(RecordingContractError, "resets before step returns"):
             terminal_snapshot_from_extras({"evaluation": evaluation()}, GEOMETRY)
+        incomplete = terminal_snapshot()
+        del incomplete["insertion_contact_force_w"]
+        with self.assertRaisesRegex(RecordingContractError, "measured contact fields"):
+            terminal_snapshot_from_extras({"terminal_snapshot": incomplete}, GEOMETRY)
 
     def test_terminal_snapshot_uses_saved_state_and_converts_quaternion(self) -> None:
         extras = {"terminal_snapshot": terminal_snapshot()}
@@ -88,6 +103,14 @@ class RecordingTests(unittest.TestCase):
         np.testing.assert_allclose(snapshot.object_poses_world_xyzw[0, 3:], [0.0, 0.0, 0.0, 1.0])
         np.testing.assert_allclose(snapshot.object_poses_world_xyzw[1, 3:], [0.0, 0.0, 0.0, 1.0])
         self.assertTrue(snapshot.reported_geometry_consistent)
+        np.testing.assert_allclose(snapshot.insertion_contact_force_w, [3.0, 4.0, 0.0])
+        self.assertEqual(snapshot.insertion_contact_force_n, 5.0)
+        self.assertEqual(snapshot.insertion_contact_force_peak_n, 6.0)
+        self.assertEqual(snapshot.insertion_contact_load_n, 6.0)
+        self.assertEqual(snapshot.insertion_contact_load_peak_n, 12.0)
+        self.assertEqual(snapshot.forbidden_contact_load_n, 0.25)
+        self.assertEqual(snapshot.forbidden_contact_load_peak_n, 0.5)
+        self.assertEqual(snapshot.grip_contact_force_peak_n, 5.0)
         self.assertEqual(snapshot.phase, "done")
 
     def test_live_snapshot_reads_physics_state(self) -> None:
@@ -97,6 +120,14 @@ class RecordingTests(unittest.TestCase):
             socket=SimpleNamespace(data=SimpleNamespace(root_pos_w=np.zeros((1, 3)), root_quat_w=identity)),
             plug=SimpleNamespace(data=SimpleNamespace(root_pos_w=np.asarray([[0.001, -0.064, 0.0]]), root_quat_w=identity)),
             _last_contact_proxy_n=np.asarray([[2.0, 3.0]]),
+            _episode_grip_force_peak_n=np.asarray([4.0]),
+            _last_insertion_contact_force_n=np.asarray([5.0]),
+            _last_insertion_contact_force_w=np.asarray([[3.0, 4.0, 0.0]]),
+            _episode_insertion_contact_force_peak_n=np.asarray([6.0]),
+            _last_insertion_contact_load_n=np.asarray([6.0]),
+            _episode_insertion_contact_load_peak_n=np.asarray([12.0]),
+            _last_forbidden_contact_load_n=np.asarray([0.25]),
+            _episode_forbidden_contact_load_peak_n=np.asarray([0.5]),
             _phase=np.asarray([4]),
             _grip_proven=np.asarray([[True, True]]),
             _torso_joint_ids=np.arange(6),
@@ -104,7 +135,16 @@ class RecordingTests(unittest.TestCase):
             _gripper_joint_ids=np.arange(20, 24),
             cfg=SimpleNamespace(hard_contact_force_n=40.0),
         )
-        snapshot = live_snapshot(env, {"evaluation": evaluation()}, GEOMETRY)
+        snapshot = live_snapshot(
+            env,
+            {
+                "evaluation": evaluation(),
+                "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+                "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+                "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+            },
+            GEOMETRY,
+        )
         self.assertEqual(snapshot.phase, "insert")
         self.assertTrue(snapshot.ground_truth.grasp_both)
         self.assertFalse(snapshot.ground_truth.forbidden_contact)
@@ -116,6 +156,14 @@ class RecordingTests(unittest.TestCase):
             socket=SimpleNamespace(data=SimpleNamespace(root_pos_w=np.zeros((1, 3)), root_quat_w=np.asarray([[1.0, 0.0, 0.0, 0.0]]))),
             plug=SimpleNamespace(data=SimpleNamespace(root_pos_w=np.zeros((1, 3)), root_quat_w=np.asarray([[1.0, 0.0, 0.0, 0.0]]))),
             _last_contact_proxy_n=np.zeros((1, 2)),
+            _episode_grip_force_peak_n=np.zeros(1),
+            _last_insertion_contact_force_n=np.zeros(1),
+            _last_insertion_contact_force_w=np.zeros((1, 3)),
+            _episode_insertion_contact_force_peak_n=np.zeros(1),
+            _last_insertion_contact_load_n=np.zeros(1),
+            _episode_insertion_contact_load_peak_n=np.zeros(1),
+            _last_forbidden_contact_load_n=np.zeros(1),
+            _episode_forbidden_contact_load_peak_n=np.zeros(1),
             _phase=np.asarray([0]),
             _grip_proven=np.asarray([[False, False]]),
             _torso_joint_ids=np.arange(6),
@@ -125,7 +173,16 @@ class RecordingTests(unittest.TestCase):
         incomplete = evaluation()
         del incomplete["forbidden_contact"]
         with self.assertRaisesRegex(RecordingContractError, "forbidden_contact"):
-            live_snapshot(env, {"evaluation": incomplete}, GEOMETRY)
+            live_snapshot(
+                env,
+                {
+                    "evaluation": incomplete,
+                    "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+                    "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+                    "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+                },
+                GEOMETRY,
+            )
 
     def test_terminal_evaluation_fails_closed_without_independent_evaluator(self) -> None:
         snapshot = terminal_snapshot_from_extras({"terminal_snapshot": terminal_snapshot()}, GEOMETRY)
@@ -247,7 +304,7 @@ class RecordingTests(unittest.TestCase):
 
             def reset(self, *, seed: int):
                 self.episode += 1
-                return {"policy": np.asarray([[10.0 + self.episode]])}, {}
+                return {"policy": np.full((1, 76), 10.0 + self.episode)}, {}
 
             def step(self, action):
                 marker = 100.0 + self.episode
@@ -264,7 +321,7 @@ class RecordingTests(unittest.TestCase):
                 # 반환 시점의 env 속성은 이미 reset됐다고 가정한다.
                 self.reset_state_marker = -1.0
                 return (
-                    {"policy": np.asarray([[-999.0]])},
+                    {"policy": np.full((1, 76), -999.0)},
                     np.asarray([0.0]),
                     np.asarray([True]),
                     np.asarray([False]),

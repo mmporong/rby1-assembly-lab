@@ -11,6 +11,7 @@ from importlib import metadata as importlib_metadata
 import json
 from pathlib import Path
 import sys
+import traceback
 
 from isaaclab.app import AppLauncher
 
@@ -39,6 +40,7 @@ sys.path.insert(0, str(PROJECT_ROOT / "src"))
 import torch  # noqa: E402
 from rsl_rl.runners import OnPolicyRunner  # noqa: E402
 from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper  # noqa: E402
+import omni.kit.app  # noqa: E402
 from rby1_assembly.isaac_env import Rby1AssemblyEnv, Rby1AssemblyEnvCfg  # noqa: E402
 
 
@@ -55,7 +57,7 @@ def _runtime_version(*distribution_names: str) -> str:
     return "unavailable"
 
 
-def main() -> None:
+def main() -> int:
     runner_cfg = json.loads(args.config.read_text(encoding="utf-8"))
     cfg = Rby1AssemblyEnvCfg()
     cfg.scene.num_envs = args.num_envs
@@ -111,8 +113,7 @@ def main() -> None:
         assets_path = PROJECT_ROOT / "configs/assets.json"
         runtime_path = PROJECT_ROOT / "configs/runtime.json"
         build_report_path = PROJECT_ROOT / "assets/generated/build-report.json"
-        source_paths = [
-            PROJECT_ROOT / "src/rby1_assembly/isaac_env.py",
+        source_paths = sorted((PROJECT_ROOT / "src").rglob("*.py")) + [
             PROJECT_ROOT / "scripts/evaluate_policy.py",
         ]
         report = {
@@ -174,13 +175,31 @@ def main() -> None:
         }
         args.report.parent.mkdir(parents=True, exist_ok=True)
         args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(report, indent=2))
+        print(json.dumps(report, indent=2), flush=True)
+        return 0
     finally:
         wrapped.close()
 
 
 if __name__ == "__main__":
+    exit_code = 1
     try:
-        main()
+        exit_code = main()
+    except Exception:
+        traceback.print_exc()
+        sys.stderr.flush()
+        exit_code = 1
     finally:
-        simulation_app.close()
+        try:
+            omni.kit.app.get_app().post_quit(exit_code)
+        except Exception:
+            print("Failed to set Isaac Kit exit code", file=sys.stderr, flush=True)
+            traceback.print_exc()
+            exit_code = 1
+        try:
+            simulation_app.close()
+        except Exception:
+            print("Failed to close Isaac application", file=sys.stderr, flush=True)
+            traceback.print_exc()
+            exit_code = 1
+    raise SystemExit(exit_code)
