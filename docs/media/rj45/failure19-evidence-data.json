@@ -1,0 +1,596 @@
+{
+  "schema_version": 1,
+  "title": "Failure 19 measured plug escape evidence",
+  "scope": "descriptive evidence from one recorded Isaac Sim/PhysX failure reproduction",
+  "claim_boundary": {
+    "policy_failure_claim": false,
+    "hardware_calibration_claim": false,
+    "materials": "simulation_design_assumptions",
+    "physics_state": "recorded_rigid_body_pose_and_filtered_contact_force"
+  },
+  "source_hashes_sha256": {
+    "report.json": "bceefdaa27148b6787e408f827bf99a24162a175206d717ee184da5b0539869d",
+    "trace.jsonl": "64163fb6933dacd38a9bc49f6c959264e3f7ae8e676a17e025e19c0a6cb23a8d",
+    "labels.json": "e8c0aaa331a969c63d41eb080eacc704a7c21d23c99d98d711faf5a98b8e2c55"
+  },
+  "source_report": {
+    "completed": false,
+    "termination_reason": "grip_close_timeout",
+    "physics_backend": "PhysX via Isaac Sim",
+    "trace_record_count": 899,
+    "trace_every_control_steps": 1
+  },
+  "window": {
+    "requested_time_s": [
+      23.5,
+      25.1
+    ],
+    "sampled_time_s": [
+      23.500001907348633,
+      25.100000381469727
+    ],
+    "sample_count": 49,
+    "control_rate_hz": 30
+  },
+  "calculations": {
+    "plug_delta_z_mm": "(plug_z_m - initial_plug_z_m) * 1000",
+    "rotation_from_initial_deg": "degrees(2 * acos(clamp(abs(dot(q_initial, q_t)), 0, 1))) using normalized wxyz quaternions",
+    "right_finger_contacts": "finger_contact_force_n indices 2 and 3; order left_l1,left_l2,right_r1,right_r2"
+  },
+  "initial_reference": {
+    "control_step": 0,
+    "time_s": 0.0,
+    "plug_z_m": 0.7900000214576721,
+    "plug_quaternion_wxyz": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "events": {
+    "right_contact_loss": {
+      "definition": "first sample after observed positive right-finger contact where R1 and R2 both equal zero",
+      "control_step": 729,
+      "time_s": 24.30000114440918,
+      "plug_delta_z_mm": -1.398026943206787,
+      "plug_rotation_from_initial_deg": 8.19505865505261,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    "departure_onset": {
+      "definition": "first sample where plug_delta_z_mm <= -5",
+      "control_step": 732,
+      "time_s": 24.400001525878906,
+      "plug_delta_z_mm": -5.375862121582031,
+      "plug_rotation_from_initial_deg": 59.256288022811454,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    "peak_rotation": {
+      "control_step": 731,
+      "time_s": 24.366668701171875,
+      "plug_delta_z_mm": 0.15693902969360352,
+      "plug_rotation_from_initial_deg": 129.83886764550854,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    "maximum_drop": {
+      "control_step": 735,
+      "time_s": 24.500001907348633,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.8779861903378,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close",
+      "drop_magnitude_mm": 36.92501783370972
+    },
+    "right_contact_peak_in_window_n": {
+      "r1": 4.752676963806152,
+      "r2": 5.190120220184326
+    }
+  },
+  "series": [
+    {
+      "control_step": 705,
+      "time_s": 23.500001907348633,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005049722884287338,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 706,
+      "time_s": 23.533334732055664,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005045101557352134,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 707,
+      "time_s": 23.566667556762695,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005133956113169742,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 708,
+      "time_s": 23.600000381469727,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005131911164869159,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 709,
+      "time_s": 23.63333511352539,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005047008367457644,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 710,
+      "time_s": 23.666667938232422,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005042384552678342,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 711,
+      "time_s": 23.700000762939453,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.000514025624907352,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 712,
+      "time_s": 23.733335494995117,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005130661072998458,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 713,
+      "time_s": 23.76666831970215,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005044668090901789,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 714,
+      "time_s": 23.80000114440918,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005039839646341448,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 715,
+      "time_s": 23.83333396911621,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005137334173795888,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 716,
+      "time_s": 23.866668701171875,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005127790391254757,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 717,
+      "time_s": 23.900001525878906,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005048481318351472,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 718,
+      "time_s": 23.933334350585938,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.000503821949118939,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 719,
+      "time_s": 23.96666717529297,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005134524009824597,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 720,
+      "time_s": 24.000001907348633,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005125117223023963,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 721,
+      "time_s": 24.033334732055664,
+      "plug_delta_z_mm": -5.9604644775390625e-05,
+      "plug_rotation_from_initial_deg": 0.0005045997270019175,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 722,
+      "time_s": 24.066667556762695,
+      "plug_delta_z_mm": 0.011146068572998047,
+      "plug_rotation_from_initial_deg": 0.06714662924435026,
+      "right_finger_r1_contact_n": 1.0167444944381714,
+      "right_finger_r2_contact_n": 0.9958046674728394,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 723,
+      "time_s": 24.100000381469727,
+      "plug_delta_z_mm": 0.1919865608215332,
+      "plug_rotation_from_initial_deg": 0.7686992228314917,
+      "right_finger_r1_contact_n": 1.4838457107543945,
+      "right_finger_r2_contact_n": 1.5068613290786743,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 724,
+      "time_s": 24.13333511352539,
+      "plug_delta_z_mm": 0.20015239715576172,
+      "plug_rotation_from_initial_deg": 0.8511218121357774,
+      "right_finger_r1_contact_n": 1.9809647798538208,
+      "right_finger_r2_contact_n": 2.0284831523895264,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 725,
+      "time_s": 24.166667938232422,
+      "plug_delta_z_mm": 0.05793571472167969,
+      "plug_rotation_from_initial_deg": 0.8180181515079864,
+      "right_finger_r1_contact_n": 2.7361419200897217,
+      "right_finger_r2_contact_n": 2.751784324645996,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 726,
+      "time_s": 24.200000762939453,
+      "plug_delta_z_mm": -0.08434057235717773,
+      "plug_rotation_from_initial_deg": 2.1465845052484864,
+      "right_finger_r1_contact_n": 4.752676963806152,
+      "right_finger_r2_contact_n": 5.190120220184326,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 727,
+      "time_s": 24.233335494995117,
+      "plug_delta_z_mm": 0.1251697540283203,
+      "plug_rotation_from_initial_deg": 2.4742237454262863,
+      "right_finger_r1_contact_n": 3.286621332168579,
+      "right_finger_r2_contact_n": 3.2473089694976807,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 728,
+      "time_s": 24.26666831970215,
+      "plug_delta_z_mm": 0.13959407806396484,
+      "plug_rotation_from_initial_deg": 2.944993278951647,
+      "right_finger_r1_contact_n": 3.290518283843994,
+      "right_finger_r2_contact_n": 3.272852897644043,
+      "right_grip_live": true,
+      "phase": "close"
+    },
+    {
+      "control_step": 729,
+      "time_s": 24.30000114440918,
+      "plug_delta_z_mm": -1.398026943206787,
+      "plug_rotation_from_initial_deg": 8.19505865505261,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 730,
+      "time_s": 24.33333396911621,
+      "plug_delta_z_mm": 2.4318695068359375,
+      "plug_rotation_from_initial_deg": 105.7474450016851,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 731,
+      "time_s": 24.366668701171875,
+      "plug_delta_z_mm": 0.15693902969360352,
+      "plug_rotation_from_initial_deg": 129.83886764550854,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 732,
+      "time_s": 24.400001525878906,
+      "plug_delta_z_mm": -5.375862121582031,
+      "plug_rotation_from_initial_deg": 59.256288022811454,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 733,
+      "time_s": 24.433334350585938,
+      "plug_delta_z_mm": -20.236432552337646,
+      "plug_rotation_from_initial_deg": 71.4155143262925,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 734,
+      "time_s": 24.46666717529297,
+      "plug_delta_z_mm": -36.84753179550171,
+      "plug_rotation_from_initial_deg": 108.55099067436859,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 735,
+      "time_s": 24.500001907348633,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.8779861903378,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 736,
+      "time_s": 24.533334732055664,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.8779766617727,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 737,
+      "time_s": 24.566667556762695,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87797268954341,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 738,
+      "time_s": 24.600000381469727,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87796713321913,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 739,
+      "time_s": 24.63333511352539,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798063400149,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 740,
+      "time_s": 24.666667938232422,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87796316098901,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 741,
+      "time_s": 24.700000762939453,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.8779861903388,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 742,
+      "time_s": 24.733335494995117,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87795918875673,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 743,
+      "time_s": 24.76666831970215,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798221810897,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 744,
+      "time_s": 24.80000114440918,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87797666177315,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 745,
+      "time_s": 24.83333396911621,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798063400311,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 746,
+      "time_s": 24.866668701171875,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798221810847,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 747,
+      "time_s": 24.900001525878906,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87797666177333,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 748,
+      "time_s": 24.933334350585938,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798063400177,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 749,
+      "time_s": 24.96666717529297,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798777444638,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 750,
+      "time_s": 25.000001907348633,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87797666177278,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 751,
+      "time_s": 25.033334732055664,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798777445322,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 752,
+      "time_s": 25.066667556762695,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798063400155,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    },
+    {
+      "control_step": 753,
+      "time_s": 25.100000381469727,
+      "plug_delta_z_mm": -36.92501783370972,
+      "plug_rotation_from_initial_deg": 108.87798221811035,
+      "right_finger_r1_contact_n": 0.0,
+      "right_finger_r2_contact_n": 0.0,
+      "right_grip_live": false,
+      "phase": "close"
+    }
+  ],
+  "outputs_sha256": {
+    "failure19-evidence.png": "15e608476b2daef5268e989e8f76c6d22013c4af5b563982f9c769b4c3112a98",
+    "failure19-evidence.svg": "c6c4c84c1f4b8254b930053073eb4dd91660af738bdad9013602a8ac8a478bc1"
+  }
+}
