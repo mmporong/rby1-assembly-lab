@@ -32,5 +32,26 @@
   },
   "task_physics": {
     "mass_randomization_enabled": false
+  },
+  "held_reset_staging": {
+    "control_steps": 1,
+    "object_positions_local_m": [
+      [
+        0.8,
+        0.8,
+        2.5
+      ],
+      [
+        1.0,
+        0.8,
+        2.5
+      ]
+    ],
+    "provenance": {
+      "source": "simulation_design_assumption",
+      "defined_at": "2026-10-26",
+      "valid_for": "Fixed-base RB-Y1 M v1.2 held-state initialization in the current table scene; requires contact-free verification before recorded-state restoration",
+      "unit": "m"
+    }
   }
 }

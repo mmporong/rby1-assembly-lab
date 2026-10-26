@@ -492,6 +492,24 @@ def _trace_record(
             }
         )
         if snapshot is not None:
+            # Policy inputs belong to the completed step, before autoreset.
+            # Never substitute the next episode's live observation here.
+            if "policy_input_observation" in snapshot:
+                for key in (
+                    "policy_input_observation",
+                    "requested_expanded_residual_action",
+                    "applied_bounded_residual_action",
+                ):
+                    environments[-1][key] = _tensor_list(snapshot[key][env_index])
+                environments[-1]["policy_input_timestamp_s"] = float(
+                    snapshot["policy_input_timestamp_s"][env_index].item()
+                )
+                for key in (
+                    "policy_input_valid",
+                    "training_estimator_valid",
+                    "training_policy_activated",
+                ):
+                    environments[-1][key] = bool(snapshot[key][env_index].item())
             criteria = env.extras["terminal_evaluation"]["criteria"]
             environments[-1]["independent_eval_criteria"] = {
                 name: bool(value[env_index].item()) for name, value in criteria.items()

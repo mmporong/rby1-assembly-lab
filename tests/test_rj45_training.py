@@ -85,6 +85,27 @@ class TrainingConfigurationTests(unittest.TestCase):
         for actual, expected in zip(config["calibration_bias"]["rotation_max_levels_rad"], expected_rotation):
             self.assertAlmostEqual(actual, expected, places=15)
         self.assertFalse(config["task_physics"]["mass_randomization_enabled"])
+        self.assertEqual(config["held_reset_staging"]["control_steps"], 1)
+        self.assertEqual(config["held_reset_staging"]["provenance"]["source"], "simulation_design_assumption")
+
+    def test_staging_rejects_ambiguous_units_unverified_duration_and_overlapping_objects(self):
+        original = json.loads(CONFIG_PATH.read_text())
+        variants = []
+        for field, value in (("control_steps", True), ("control_steps", 2), ("object_positions_local_m", [[0, 0, 2], [0, 0, 2]]), ("object_positions_local_m", [[0, 0, 2], [1, 2]])):
+            config = copy.deepcopy(original)
+            config["held_reset_staging"][field] = value
+            variants.append(config)
+        for field, value in (("unit", "mm"), ("defined_at", "yesterday"), ("source", "hardware_measurement")):
+            config = copy.deepcopy(original)
+            config["held_reset_staging"]["provenance"][field] = value
+            variants.append(config)
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "training.json"
+            for config in variants:
+                with self.subTest(staging=config["held_reset_staging"]):
+                    path.write_text(json.dumps(config))
+                    with self.assertRaises(ValueError):
+                        load_training_config(path)
 
     def test_rejects_nonfinite_overflow_and_unknown_keys(self):
         with tempfile.TemporaryDirectory() as temporary:

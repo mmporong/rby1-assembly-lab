@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import math
 from typing import Any, Mapping
 
@@ -153,6 +154,424 @@ def _warmup_timeout_mask(pending, passed, warmup_steps, timeout_steps: int):
     return pending & ~passed & (warmup_steps >= timeout_steps)
 
 
+def _held_reset_stage_transition(queued, waited_control_steps, control_steps: int):
+    """Return restore-ready rows and the next per-row staging counters."""
+
+    import torch
+
+    if type(control_steps) is not int or control_steps < 1:
+        raise ValueError("held reset staging control_steps must be a positive integer")
+    if queued.shape != waited_control_steps.shape:
+        raise ValueError("held reset staging tensors must have identical shapes")
+    if queued.dtype != torch.bool:
+        raise ValueError("held reset queued mask must be boolean")
+    ready = queued & (waited_control_steps >= control_steps)
+    still_waiting = queued & ~ready
+    next_waited = torch.where(
+        still_waiting,
+        waited_control_steps + 1,
+        waited_control_steps,
+    )
+    return ready, next_waited
+
+
+def _held_reset_contact_free_status(
+    finger_force_n,
+    finger_raw_contact_count,
+    insertion_force_world_n,
+    insertion_load_n,
+    insertion_raw_contact_count,
+    forbidden_load_n,
+):
+    """Require finite, exactly zero contact evidence before held restoration."""
+
+    import torch
+
+    num_envs = finger_force_n.shape[0]
+    if finger_force_n.shape != (num_envs, 4):
+        raise ValueError("finger_force_n must have shape (num_envs, 4)")
+    if finger_raw_contact_count.shape != (num_envs, 4):
+        raise ValueError("finger raw contact counts must have shape (num_envs, 4)")
+    if insertion_force_world_n.shape != (num_envs, 3):
+        raise ValueError("insertion force must have shape (num_envs, 3)")
+    for name, value in (
+        ("insertion_load_n", insertion_load_n),
+        ("insertion_raw_contact_count", insertion_raw_contact_count),
+        ("forbidden_load_n", forbidden_load_n),
+    ):
+        if value.shape != (num_envs,):
+            raise ValueError(f"{name} must have shape (num_envs,)")
+    finite = (
+        torch.isfinite(finger_force_n).all(dim=1)
+        & torch.isfinite(insertion_force_world_n).all(dim=1)
+        & torch.isfinite(insertion_load_n)
+        & torch.isfinite(forbidden_load_n)
+    )
+    exactly_zero = (
+        (finger_force_n == 0.0).all(dim=1)
+        & (finger_raw_contact_count == 0).all(dim=1)
+        & (insertion_force_world_n == 0.0).all(dim=1)
+        & (insertion_load_n == 0.0)
+        & (insertion_raw_contact_count == 0)
+        & (forbidden_load_n == 0.0)
+    )
+    return finite, exactly_zero, finite & exactly_zero
+
+
+def _mask_inactive_policy_observation(observation, policy_active):
+    """Zero every 79D row that is not valid policy input."""
+
+    import torch
+
+    if observation.ndim != 2 or observation.shape[1] != 79:
+        raise ValueError("RJ45 policy observation must have shape (num_envs, 79)")
+    if policy_active.shape != (observation.shape[0],):
+        raise ValueError("policy_active must select the observation environment axis")
+    valid = policy_active.to(dtype=torch.bool)
+    return torch.where(valid[:, None], observation, torch.zeros_like(observation)), valid
+
+
+def _store_policy_input_telemetry(
+    observation,
+    valid,
+    timestamp_s: float,
+    observation_buffer,
+    valid_buffer,
+    timestamp_buffer,
+) -> None:
+    """Copy one already-produced policy input into device-resident buffers."""
+
+    if observation.shape != observation_buffer.shape:
+        raise ValueError("policy observation telemetry shape mismatch")
+    if valid.shape != valid_buffer.shape or timestamp_buffer.shape != valid.shape:
+        raise ValueError("policy input telemetry mask shape mismatch")
+    observation_buffer.copy_(observation)
+    valid_buffer.copy_(valid)
+    timestamp_buffer.fill_(float(timestamp_s))
+
+
+def _reset_policy_input_telemetry(
+    env_ids,
+    observation_buffer,
+    valid_buffer,
+    timestamp_buffer,
+) -> None:
+    """Clear only reset environments while preserving every other row."""
+
+    observation_buffer[env_ids] = 0.0
+    valid_buffer[env_ids] = False
+    timestamp_buffer[env_ids] = -1.0
+
+
+def _diagnostic_number(value: Any) -> dict[str, Any]:
+    """Encode one numeric reading as a JSON-safe value and finite-state flag."""
+
+    number = float(value)
+    if math.isfinite(number):
+        encoded: float | str = number
+        nonfinite = False
+    elif math.isnan(number):
+        encoded = "nan"
+        nonfinite = True
+    elif number > 0.0:
+        encoded = "+inf"
+        nonfinite = True
+    else:
+        encoded = "-inf"
+        nonfinite = True
+    return {"value": encoded, "nonfinite": nonfinite}
+
+
+def _diagnostic_vector(values) -> list[dict[str, Any]]:
+    return [_diagnostic_number(value) for value in values.detach().cpu().tolist()]
+
+
+def _diagnostic_abs_max(values) -> dict[str, Any] | None:
+    if values.numel() == 0:
+        return None
+    return _diagnostic_number(values.abs().amax().detach().cpu().item())
+
+
+def _diagnostic_nonfinite_readings(
+    named_values: Mapping[str, Any],
+) -> list[dict[str, Any]]:
+    """Record every raw non-finite reading with its source-local index."""
+
+    import torch
+
+    readings = []
+    for field, values in named_values.items():
+        values = torch.as_tensor(values)
+        for index in torch.nonzero(~torch.isfinite(values), as_tuple=False).tolist():
+            tensor_index = tuple(index)
+            readings.append(
+                {
+                    "field": field,
+                    "index": [int(component) for component in index],
+                    "reading": _diagnostic_number(values[tensor_index].item()),
+                }
+            )
+    return readings
+
+
+def _held_warmup_timeout_diagnostics(
+    *,
+    timed_out,
+    finger_force_n,
+    lift_left_m,
+    lift_right_m,
+    joint_velocity_si,
+    joint_reference_error_si,
+    prismatic_joint_mask,
+    socket_com_velocity_world,
+    plug_com_velocity_world,
+    relative_linear_velocity_m_s,
+    relative_angular_velocity_rad_s,
+    insertion_force_world_n,
+    insertion_load_n,
+    forbidden_load_n,
+    state_finite,
+    motion_finite,
+    motion_settled,
+    sensor_finite,
+    within_limits,
+    grip_live,
+    stable,
+    warmup_steps,
+    warmup_stable_steps,
+    required_stable_steps: int,
+    timeout_steps: int,
+    step_dt_s: float,
+    grip_lift_proof_m: float,
+    limits: Mapping[str, float],
+) -> dict[str, Any]:
+    """Capture every failed environment at a held-warmup timeout."""
+
+    environment_ids = timed_out.nonzero(as_tuple=False).squeeze(1).detach().cpu().tolist()
+    revolute_joint_mask = ~prismatic_joint_mask
+    environments = []
+    for env_id in environment_ids:
+        socket_linear = socket_com_velocity_world[env_id, :3]
+        socket_angular = socket_com_velocity_world[env_id, 3:]
+        plug_linear = plug_com_velocity_world[env_id, :3]
+        plug_angular = plug_com_velocity_world[env_id, 3:]
+        lift_left_ok = bool((lift_left_m[env_id] >= grip_lift_proof_m).item())
+        lift_right_ok = bool((lift_right_m[env_id] >= grip_lift_proof_m).item())
+        nonfinite_readings = _diagnostic_nonfinite_readings(
+            {
+                "finger_force_n": finger_force_n[env_id],
+                "lift_left_m": lift_left_m[env_id : env_id + 1],
+                "lift_right_m": lift_right_m[env_id : env_id + 1],
+                "joint_velocity_si": joint_velocity_si[env_id],
+                "joint_reference_error_si": joint_reference_error_si[env_id],
+                "socket_com_velocity_world": socket_com_velocity_world[env_id],
+                "plug_com_velocity_world": plug_com_velocity_world[env_id],
+                "relative_linear_velocity_m_s": relative_linear_velocity_m_s[env_id],
+                "relative_angular_velocity_rad_s": relative_angular_velocity_rad_s[
+                    env_id
+                ],
+                "insertion_force_world_n": insertion_force_world_n[env_id],
+                "insertion_load_n": insertion_load_n[env_id : env_id + 1],
+                "forbidden_load_n": forbidden_load_n[env_id : env_id + 1],
+            }
+        )
+        environments.append(
+            {
+                "env_id": int(env_id),
+                "nonfinite_readings": nonfinite_readings,
+                "steps": {
+                    "warmup": int(warmup_steps[env_id].item()),
+                    "stable": int(warmup_stable_steps[env_id].item()),
+                    "required_stable": int(required_stable_steps),
+                    "timeout": int(timeout_steps),
+                },
+                "finger_force_n": {
+                    name: _diagnostic_number(finger_force_n[env_id, index].item())
+                    for index, name in enumerate(("left_l1", "left_l2", "right_r1", "right_r2"))
+                },
+                "lift_m": {
+                    "left": _diagnostic_number(lift_left_m[env_id].item()),
+                    "right": _diagnostic_number(lift_right_m[env_id].item()),
+                },
+                "joint_unit_maxima": {
+                    "revolute_velocity_rad_s": _diagnostic_abs_max(
+                        joint_velocity_si[env_id, revolute_joint_mask]
+                    ),
+                    "prismatic_velocity_m_s": _diagnostic_abs_max(
+                        joint_velocity_si[env_id, prismatic_joint_mask]
+                    ),
+                    "revolute_reference_error_rad": _diagnostic_abs_max(
+                        joint_reference_error_si[env_id, revolute_joint_mask]
+                    ),
+                    "prismatic_reference_error_m": _diagnostic_abs_max(
+                        joint_reference_error_si[env_id, prismatic_joint_mask]
+                    ),
+                },
+                "object_com_velocity_world": {
+                    "socket": {
+                        "linear_m_s": _diagnostic_vector(socket_linear),
+                        "angular_rad_s": _diagnostic_vector(socket_angular),
+                        "linear_norm_m_s": _diagnostic_number(
+                            socket_linear.norm().item()
+                        ),
+                        "angular_norm_rad_s": _diagnostic_number(
+                            socket_angular.norm().item()
+                        ),
+                    },
+                    "plug": {
+                        "linear_m_s": _diagnostic_vector(plug_linear),
+                        "angular_rad_s": _diagnostic_vector(plug_angular),
+                        "linear_norm_m_s": _diagnostic_number(plug_linear.norm().item()),
+                        "angular_norm_rad_s": _diagnostic_number(plug_angular.norm().item()),
+                    },
+                },
+                "relative_velocity": {
+                    "linear_m_s": _diagnostic_vector(
+                        relative_linear_velocity_m_s[env_id]
+                    ),
+                    "angular_rad_s": _diagnostic_vector(
+                        relative_angular_velocity_rad_s[env_id]
+                    ),
+                },
+                "contact_loads": {
+                    "insertion_force_world_n": _diagnostic_vector(
+                        insertion_force_world_n[env_id]
+                    ),
+                    "insertion_load_n": _diagnostic_number(
+                        insertion_load_n[env_id].item()
+                    ),
+                    "forbidden_load_n": _diagnostic_number(
+                        forbidden_load_n[env_id].item()
+                    ),
+                },
+                "gates": {
+                    "state_finite": bool(state_finite[env_id].item()),
+                    "motion_finite": bool(motion_finite[env_id].item()),
+                    "motion_settled": bool(motion_settled[env_id].item()),
+                    "sensor_finite": bool(sensor_finite[env_id].item()),
+                    "within_limits": bool(within_limits[env_id].item()),
+                    "grip_live": bool(grip_live[env_id].item()),
+                    "lift_left_ok": lift_left_ok,
+                    "lift_right_ok": lift_right_ok,
+                    "stable": bool(stable[env_id].item()),
+                },
+            }
+        )
+    diagnostics = {
+        "schema_version": 1,
+        "kind": "held_grasp_warmup_timeout",
+        "failed_environment_ids": [int(env_id) for env_id in environment_ids],
+        "timing": {
+            "step_dt_s": _diagnostic_number(step_dt_s),
+            "required_stable_steps": int(required_stable_steps),
+            "timeout_steps": int(timeout_steps),
+        },
+        "thresholds": {
+            key: _diagnostic_number(value)
+            for key, value in {
+                **dict(limits),
+                "grip_lift_proof_m": grip_lift_proof_m,
+            }.items()
+        },
+        "environments": environments,
+    }
+    nonfinite_locations = [
+        {
+            "env_id": environment["env_id"],
+            "field": reading["field"],
+            "index": reading["index"],
+        }
+        for environment in environments
+        for reading in environment["nonfinite_readings"]
+    ]
+    diagnostics["nonfinite_summary"] = {
+        "count": len(nonfinite_locations),
+        "locations": nonfinite_locations,
+    }
+    return diagnostics
+
+
+class HeldGraspWarmupTimeoutError(RuntimeError):
+    """Runtime error carrying a JSON-safe timeout diagnostic summary."""
+
+    def __init__(self, diagnostics: Mapping[str, Any]):
+        self.diagnostics = dict(diagnostics)
+        encoded = json.dumps(
+            self.diagnostics,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        super().__init__(f"held-grasp warmup failed physical revalidation: {encoded}")
+
+
+def _held_reset_contact_flush_diagnostics(
+    failed,
+    finger_force_n,
+    finger_raw_contact_count,
+    insertion_force_world_n,
+    insertion_load_n,
+    insertion_raw_contact_count,
+    forbidden_load_n,
+) -> dict[str, Any]:
+    environment_ids = failed.nonzero(as_tuple=False).squeeze(1).detach().cpu().tolist()
+    finite, exactly_zero, _ = _held_reset_contact_free_status(
+        finger_force_n,
+        finger_raw_contact_count,
+        insertion_force_world_n,
+        insertion_load_n,
+        insertion_raw_contact_count,
+        forbidden_load_n,
+    )
+    return {
+        "schema_version": 1,
+        "kind": "held_reset_contact_flush_validation_failed",
+        "failed_environment_ids": [int(env_id) for env_id in environment_ids],
+        "environments": [
+            {
+                "env_id": int(env_id),
+                "finite": bool(finite[env_id].item()),
+                "exactly_zero": bool(exactly_zero[env_id].item()),
+                "finger_force_n": _diagnostic_vector(finger_force_n[env_id]),
+                "finger_raw_contact_count": [
+                    int(value)
+                    for value in finger_raw_contact_count[env_id]
+                    .detach()
+                    .cpu()
+                    .tolist()
+                ],
+                "insertion_force_world_n": _diagnostic_vector(
+                    insertion_force_world_n[env_id]
+                ),
+                "insertion_load_n": _diagnostic_number(
+                    insertion_load_n[env_id].item()
+                ),
+                "insertion_raw_contact_count": int(
+                    insertion_raw_contact_count[env_id].item()
+                ),
+                "forbidden_load_n": _diagnostic_number(
+                    forbidden_load_n[env_id].item()
+                ),
+            }
+            for env_id in environment_ids
+        ],
+    }
+
+
+class HeldResetContactFlushError(RuntimeError):
+    """Runtime error carrying exact-zero contact-flush diagnostics."""
+
+    def __init__(self, diagnostics: Mapping[str, Any]):
+        self.diagnostics = dict(diagnostics)
+        encoded = json.dumps(
+            self.diagnostics,
+            allow_nan=False,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        super().__init__(f"held reset contact flush validation failed: {encoded}")
+
+
 def make_rj45_training_env_type(
     base_cls: type,
     training_config: Mapping[str, Any],
@@ -175,6 +594,7 @@ def make_rj45_training_env_type(
         subtract_frame_transforms,
     )
 
+    from rby1_assembly.contact_loads import sum_contact_normal_loads
     from rby1_assembly.isaac_env import AssemblyPhase, TerminationReason
     from rby1_assembly.rj45_training import (
         HELD_GRASP_STABILITY_LIMITS,
@@ -192,6 +612,7 @@ def make_rj45_training_env_type(
         "observation_dim",
         "active_horizon_s",
         "warmup_s",
+        "held_reset_staging",
         "calibration_bias",
         "reward",
     }
@@ -224,11 +645,7 @@ def make_rj45_training_env_type(
             cfg.action_space = action_dim
             cfg.observation_space = 79
             if validated_held_state is not None:
-                cfg.episode_length_s = (
-                    float(config["active_horizon_s"])
-                    + float(config["warmup_s"])
-                    + 1.0
-                )
+                cfg.episode_length_s = float(config["active_horizon_s"])
             super().__init__(cfg, render_mode, **kwargs)
             self._initialize_training_state()
             self._training_initialized = True
@@ -263,6 +680,36 @@ def make_rj45_training_env_type(
             self._training_warmup_forbidden_load_peak_n = torch.zeros(
                 self.num_envs, device=self.device
             )
+            self._training_held_reset_stage_queued = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_held_reset_stage_restored = torch.full(
+                (self.num_envs,),
+                self._training_held_state is None,
+                dtype=torch.bool,
+                device=self.device,
+            )
+            self._training_held_reset_stage_waited_control_steps = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_held_reset_validation_passed = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_held_reset_validation_finger_force_n = torch.zeros(
+                (self.num_envs, 4), device=self.device
+            )
+            self._training_held_reset_validation_raw_contact_count = torch.zeros(
+                (self.num_envs, 5), dtype=torch.long, device=self.device
+            )
+            self._training_held_reset_validation_insertion_force_world_n = torch.zeros(
+                (self.num_envs, 3), device=self.device
+            )
+            self._training_held_reset_validation_insertion_load_n = torch.zeros(
+                self.num_envs, device=self.device
+            )
+            self._training_held_reset_validation_forbidden_load_n = torch.zeros(
+                self.num_envs, device=self.device
+            )
             self._training_frozen_object_to_ee_pos = torch.zeros(
                 (self.num_envs, 2, 3), device=self.device
             )
@@ -295,6 +742,15 @@ def make_rj45_training_env_type(
             )
             self._training_previous_action = torch.zeros(
                 (self.num_envs, 12), device=self.device
+            )
+            self._training_last_policy_observation = torch.zeros(
+                (self.num_envs, 79), device=self.device
+            )
+            self._training_last_policy_observation_valid = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_last_policy_observation_timestamp_s = torch.full(
+                (self.num_envs,), -1.0, device=self.device
             )
             self._training_action_delta = torch.zeros_like(
                 self._training_previous_action
@@ -589,6 +1045,7 @@ def make_rj45_training_env_type(
             return ~self._training_warmup_complete
 
         def _pre_physics_step(self, actions) -> None:
+            self._advance_held_reset_staging()
             pending = self._warmup_pending_mask()
             self._refresh_training_estimator()
             expanded = expand_residual_actions(
@@ -629,6 +1086,202 @@ def make_rj45_training_env_type(
                 self._grasp_loss_since_s[pending] = -1.0
                 self._retry_count[pending] = 0
                 self._insertion_advance_enabled[pending] = False
+
+        def _advance_held_reset_staging(self) -> None:
+            if self._training_held_state is None:
+                return
+            ready, next_waited = _held_reset_stage_transition(
+                self._training_held_reset_stage_queued,
+                self._training_held_reset_stage_waited_control_steps,
+                int(self._training_config["held_reset_staging"]["control_steps"]),
+            )
+            self._training_held_reset_stage_waited_control_steps[:] = next_waited
+            if not torch.any(ready):
+                return
+            (
+                finger_force_n,
+                finger_raw_contact_count,
+                insertion_force_world_n,
+                insertion_load_n,
+                insertion_raw_contact_count,
+                forbidden_load_n,
+            ) = self._held_reset_contact_flush_state()
+            _, _, validation_passed = _held_reset_contact_free_status(
+                finger_force_n,
+                finger_raw_contact_count,
+                insertion_force_world_n,
+                insertion_load_n,
+                insertion_raw_contact_count,
+                forbidden_load_n,
+            )
+            ready_ids = torch.nonzero(ready, as_tuple=False).squeeze(1)
+            self._training_held_reset_validation_passed[ready_ids] = (
+                validation_passed[ready_ids]
+            )
+            self._training_held_reset_validation_finger_force_n[ready_ids] = (
+                finger_force_n[ready_ids]
+            )
+            self._training_held_reset_validation_raw_contact_count[ready_ids, :4] = (
+                finger_raw_contact_count[ready_ids].to(
+                    dtype=self._training_held_reset_validation_raw_contact_count.dtype
+                )
+            )
+            self._training_held_reset_validation_raw_contact_count[ready_ids, 4] = (
+                insertion_raw_contact_count[ready_ids].to(
+                    dtype=self._training_held_reset_validation_raw_contact_count.dtype
+                )
+            )
+            self._training_held_reset_validation_insertion_force_world_n[
+                ready_ids
+            ] = insertion_force_world_n[ready_ids]
+            self._training_held_reset_validation_insertion_load_n[ready_ids] = (
+                insertion_load_n[ready_ids]
+            )
+            self._training_held_reset_validation_forbidden_load_n[ready_ids] = (
+                forbidden_load_n[ready_ids]
+            )
+            restore = ready & validation_passed
+            if torch.any(restore):
+                restore_ids = torch.nonzero(restore, as_tuple=False).squeeze(1)
+                self._restore_held_physical_state(restore_ids)
+                self._training_held_reset_stage_queued[restore_ids] = False
+                self._training_held_reset_stage_restored[restore_ids] = True
+            failed = ready & ~validation_passed
+            if torch.any(failed):
+                raise HeldResetContactFlushError(
+                    _held_reset_contact_flush_diagnostics(
+                        failed,
+                        finger_force_n,
+                        finger_raw_contact_count,
+                        insertion_force_world_n,
+                        insertion_load_n,
+                        insertion_raw_contact_count,
+                        forbidden_load_n,
+                    )
+                )
+
+        def _raw_target_contact_count(self, sensor, label: str):
+            _, _, _, _, counts, _ = sensor.contact_physx_view.get_contact_data(
+                dt=self.cfg.sim.dt
+            )
+            if counts.shape != (self.num_envs, 1):
+                raise RuntimeError(
+                    f"{label} raw contact counts must have shape "
+                    f"({self.num_envs}, 1), got {tuple(counts.shape)}"
+                )
+            if counts.dtype not in (
+                torch.int8,
+                torch.int16,
+                torch.int32,
+                torch.int64,
+                torch.uint8,
+            ):
+                raise RuntimeError(f"{label} raw contact counts must be integral")
+            return counts[:, 0]
+
+        def _contact_load_from_sensors_without_state_mutation(
+            self, sensors, label: str
+        ):
+            loads = []
+            for source, sensor in sensors.items():
+                forces, _, _, _, counts, starts = (
+                    sensor.contact_physx_view.get_contact_data(dt=self.cfg.sim.dt)
+                )
+                try:
+                    load = sum_contact_normal_loads(
+                        forces, counts, starts, self.num_envs
+                    )
+                except (TypeError, ValueError) as error:
+                    raise RuntimeError(
+                        f"invalid {label} contact buffer for {source}: {error}"
+                    ) from error
+                loads.append(load)
+            if not loads:
+                raise RuntimeError(f"{label} contact sensors are unavailable")
+            total = torch.stack(loads, dim=1).sum(dim=1)
+            if not torch.isfinite(total).all():
+                raise RuntimeError(f"{label} contact load is non-finite")
+            return total
+
+        def _held_reset_contact_flush_state(self):
+            finger_sensors = (
+                ("left_l1", self.left_contact_l1),
+                ("left_l2", self.left_contact_l2),
+                ("right_r1", self.right_contact_r1),
+                ("right_r2", self.right_contact_r2),
+            )
+            finger_force_n = torch.stack(
+                [self._filtered_force_magnitude(sensor) for _, sensor in finger_sensors],
+                dim=1,
+            )
+            finger_raw_contact_count = torch.stack(
+                [
+                    self._raw_target_contact_count(sensor, label)
+                    for label, sensor in finger_sensors
+                ],
+                dim=1,
+            )
+            insertion_force_world_n = self._filtered_force_vector(
+                self.insertion_contact
+            )
+            forces, _, _, _, counts, starts = (
+                self.insertion_contact.contact_physx_view.get_contact_data(
+                    dt=self.cfg.sim.dt
+                )
+            )
+            if counts.shape != (self.num_envs, 1):
+                raise RuntimeError(
+                    "insertion raw contact counts must have shape "
+                    f"({self.num_envs}, 1), got {tuple(counts.shape)}"
+                )
+            if counts.dtype not in (
+                torch.int8,
+                torch.int16,
+                torch.int32,
+                torch.int64,
+                torch.uint8,
+            ):
+                raise RuntimeError("insertion raw contact counts must be integral")
+            try:
+                insertion_load_n = sum_contact_normal_loads(
+                    forces, counts, starts, self.num_envs
+                )
+            except (TypeError, ValueError) as error:
+                raise RuntimeError(
+                    f"invalid insertion contact buffer: {error}"
+                ) from error
+            insertion_raw_contact_count = counts[:, 0]
+            external_forbidden_load_n = (
+                self._contact_load_from_sensors_without_state_mutation(
+                    self._forbidden_load_sensors,
+                    "external forbidden",
+                )
+            )
+            cross_hand_sensors = getattr(
+                self,
+                "_cross_hand_contact_sensors",
+                getattr(self, "_hand_contact_sensors", None),
+            )
+            if cross_hand_sensors is None:
+                forbidden_load_n = external_forbidden_load_n
+            else:
+                cross_hand_load_n = (
+                    self._contact_load_from_sensors_without_state_mutation(
+                        cross_hand_sensors,
+                        "cross-hand forbidden",
+                    )
+                )
+                forbidden_load_n = torch.maximum(
+                    external_forbidden_load_n, cross_hand_load_n
+                )
+            return (
+                finger_force_n,
+                finger_raw_contact_count,
+                insertion_force_world_n,
+                insertion_load_n,
+                insertion_raw_contact_count,
+                forbidden_load_n,
+            )
 
         def _transition_where(self, mask, phase, now, reason=None):
             if self._training_initialized:
@@ -699,10 +1352,23 @@ def make_rj45_training_env_type(
                 insertion_joint_reference_error_rad=insert_error,
                 policy_active=self._policy_active_mask().float()[:, None],
             )
+            observation, observation_valid = _mask_inactive_policy_observation(
+                observation,
+                self._policy_active_mask(),
+            )
             self.extras["observation_source"] = (
                 "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
             )
             self.extras["ground_truth_in_policy_observation"] = False
+            self.extras["policy_observation_valid"] = observation_valid.clone()
+            _store_policy_input_telemetry(
+                observation,
+                observation_valid,
+                self._sim_time_s(),
+                self._training_last_policy_observation,
+                self._training_last_policy_observation_valid,
+                self._training_last_policy_observation_timestamp_s,
+            )
             return {"policy": observation}
 
         def _get_rewards(self):
@@ -743,6 +1409,9 @@ def make_rj45_training_env_type(
             return reward
 
         def _held_warmup_check(self, pending) -> None:
+            pending = pending & self._training_held_reset_stage_restored
+            if not torch.any(pending):
+                return
             left_l1 = self._filtered_force_magnitude(self.left_contact_l1)
             left_l2 = self._filtered_force_magnitude(self.left_contact_l2)
             right_r1 = self._filtered_force_magnitude(self.right_contact_r1)
@@ -757,8 +1426,9 @@ def make_rj45_training_env_type(
             self._last_insertion_contact_load_n[:] = self._insertion_contact_load()
             self._last_forbidden_contact_load_n[:] = self._forbidden_contact_load()
             grip_force = self._last_contact_proxy_n.amax(dim=1)
+            finger_force_n = torch.stack((left_l1, left_l2, right_r1, right_r2), dim=1)
             sensor_finite, within_limits, grip_live = _warmup_sensor_status(
-                torch.stack((left_l1, left_l2, right_r1, right_r2), dim=1),
+                finger_force_n,
                 insertion_force_w,
                 self._last_insertion_contact_load_n,
                 self._last_forbidden_contact_load_n,
@@ -878,10 +1548,75 @@ def make_rj45_training_env_type(
                 timeout_steps,
             )
             if torch.any(timed_out):
-                ids = torch.nonzero(timed_out, as_tuple=False).squeeze(1).tolist()
-                raise RuntimeError(
-                    f"held-grasp warmup failed physical revalidation for environments {ids}"
+                diagnostics = _held_warmup_timeout_diagnostics(
+                    timed_out=timed_out,
+                    finger_force_n=finger_force_n,
+                    lift_left_m=lift_left,
+                    lift_right_m=lift_right,
+                    joint_velocity_si=self.robot.data.joint_vel,
+                    joint_reference_error_si=(
+                        self.robot.data.joint_pos - self._training_held_reference
+                    ),
+                    prismatic_joint_mask=self._training_prismatic_joint_mask,
+                    socket_com_velocity_world=self.socket.data.root_com_vel_w,
+                    plug_com_velocity_world=self.plug.data.root_com_vel_w,
+                    relative_linear_velocity_m_s=linear,
+                    relative_angular_velocity_rad_s=angular,
+                    insertion_force_world_n=insertion_force_w,
+                    insertion_load_n=self._last_insertion_contact_load_n,
+                    forbidden_load_n=self._last_forbidden_contact_load_n,
+                    state_finite=state_finite,
+                    motion_finite=motion_finite,
+                    motion_settled=motion_settled,
+                    sensor_finite=sensor_finite,
+                    within_limits=within_limits,
+                    grip_live=grip_live,
+                    stable=stable,
+                    warmup_steps=self._training_warmup_steps,
+                    warmup_stable_steps=self._training_warmup_stable_steps,
+                    required_stable_steps=required,
+                    timeout_steps=timeout_steps,
+                    step_dt_s=self.step_dt,
+                    grip_lift_proof_m=self.cfg.grip_lift_proof_m,
+                    limits={
+                        **HELD_GRASP_STABILITY_LIMITS,
+                        "max_relative_linear_speed_m_s": (
+                            self.cfg.max_relative_linear_speed_m_s
+                        ),
+                        "max_relative_angular_speed_rad_s": (
+                            self.cfg.max_relative_angular_speed_rad_s
+                        ),
+                    },
                 )
+                raise HeldGraspWarmupTimeoutError(diagnostics)
+
+        def _training_step_snapshot(self):
+            """Return the policy input used at this step's start.
+
+            DirectRLEnv calls _get_dones before the next _get_observations
+            call, so these cached tensors are the exact input previously
+            returned to the policy, not a recomputed state.
+            """
+
+            return {
+                "policy_input_observation": (
+                    self._training_last_policy_observation.clone()
+                ),
+                "policy_input_timestamp_s": (
+                    self._training_last_policy_observation_timestamp_s.clone()
+                ),
+                "policy_input_valid": (
+                    self._training_last_policy_observation_valid.clone()
+                ),
+                "training_estimator_valid": self._training_estimator_valid.clone(),
+                "training_policy_activated": (
+                    self._training_policy_activated.clone()
+                ),
+                "requested_expanded_residual_action": (
+                    self._training_previous_action.clone()
+                ),
+                "applied_bounded_residual_action": self._actions.clone(),
+            }
 
         def _get_dones(self):
             if not self._training_initialized:
@@ -905,6 +1640,7 @@ def make_rj45_training_env_type(
             terminal_snapshot = self.extras.get("terminal_snapshot")
             if isinstance(terminal_snapshot, dict):
                 terminal_snapshot.update(training_episode)
+                terminal_snapshot.update(self._training_step_snapshot())
             return terminated, truncated
 
         def _held_artifact_joint_state(self, env_ids):
@@ -925,15 +1661,7 @@ def make_rj45_training_env_type(
             )[order].repeat(len(env_ids), 1)
             return joint_pos, joint_vel, joint_ref
 
-        def _reset_physical_state(self, env_ids):
-            if self._training_held_state is None:
-                return super()._reset_physical_state(env_ids)
-            joint_pos, joint_vel, _ = self._held_artifact_joint_state(env_ids)
-            robot_root = self.robot.data.default_root_state[env_ids].clone()
-            robot_root[:, :3] += self.scene.env_origins[env_ids]
-            self.robot.write_root_pose_to_sim(robot_root[:, :7], env_ids)
-            self.robot.write_root_velocity_to_sim(robot_root[:, 7:], env_ids)
-            self.robot.write_joint_state_to_sim(joint_pos, joint_vel, None, env_ids)
+        def _held_artifact_object_state(self, env_ids):
             state = self._training_held_state["state"]
             object_poses = torch.tensor(
                 state["object_poses_world_wxyz"], device=self.device
@@ -942,19 +1670,81 @@ def make_rj45_training_env_type(
             object_velocities = torch.tensor(
                 state["object_com_velocities_world"], device=self.device
             ).repeat(len(env_ids), 1, 1)
+            return object_poses, object_velocities
+
+        def _assert_held_state_write_allowed(self, env_ids) -> None:
+            if not self._training_initialized:
+                return
+            activated = self._training_policy_activated[env_ids]
+            if torch.any(activated):
+                rejected = (
+                    env_ids[torch.nonzero(activated, as_tuple=False).squeeze(1)]
+                    .detach()
+                    .cpu()
+                    .tolist()
+                )
+                raise AssertionError(
+                    "held reset state writes require inactive policies; "
+                    f"activated environments={rejected}"
+                )
+
+        def _restore_held_physical_state(self, env_ids):
+            self._assert_held_state_write_allowed(env_ids)
+            joint_pos, joint_vel, _ = self._held_artifact_joint_state(env_ids)
+            robot_root = self.robot.data.default_root_state[env_ids].clone()
+            robot_root[:, :3] += self.scene.env_origins[env_ids]
+            self.robot.write_root_pose_to_sim(robot_root[:, :7], env_ids)
+            self.robot.write_root_velocity_to_sim(robot_root[:, 7:], env_ids)
+            self.robot.write_joint_state_to_sim(joint_pos, joint_vel, None, env_ids)
+            object_poses, object_velocities = self._held_artifact_object_state(env_ids)
             for index, obj in enumerate((self.socket, self.plug)):
                 obj.write_root_pose_to_sim(object_poses[:, index], env_ids)
                 obj.write_root_velocity_to_sim(object_velocities[:, index], env_ids)
             return joint_pos, joint_vel
 
+        def _queue_held_reset_stage(self, env_ids) -> None:
+            self._assert_held_state_write_allowed(env_ids)
+            local_positions = torch.tensor(
+                self._training_config["held_reset_staging"][
+                    "object_positions_local_m"
+                ],
+                device=self.device,
+            )
+            if local_positions.shape != (2, 3):
+                raise ValueError(
+                    "held reset staging object_positions_local_m must have shape (2, 3)"
+                )
+            object_poses, _ = self._held_artifact_object_state(env_ids)
+            for index, obj in enumerate((self.socket, self.plug)):
+                pose = object_poses[:, index].clone()
+                pose[:, :3] = (
+                    self.scene.env_origins[env_ids] + local_positions[index]
+                )
+                obj.write_root_pose_to_sim(pose, env_ids)
+            self._training_held_reset_stage_queued[env_ids] = True
+            self._training_held_reset_stage_restored[env_ids] = False
+            self._training_held_reset_stage_waited_control_steps[env_ids] = 0
+
+        def _reset_physical_state(self, env_ids):
+            if self._training_held_state is None:
+                return super()._reset_physical_state(env_ids)
+            joint_pos, joint_vel = self._restore_held_physical_state(env_ids)
+            if self._training_initialized:
+                self._queue_held_reset_stage(env_ids)
+            return joint_pos, joint_vel
+
         def _reset_idx(self, env_ids=None):
+            if self._training_initialized:
+                if env_ids is None:
+                    env_ids = self.robot._ALL_INDICES
+                if not isinstance(env_ids, torch.Tensor):
+                    env_ids = torch.as_tensor(
+                        env_ids, dtype=torch.long, device=self.device
+                    )
+                self._training_policy_activated[env_ids] = False
             super()._reset_idx(env_ids)
             if not self._training_initialized:
                 return
-            if env_ids is None:
-                env_ids = self.robot._ALL_INDICES
-            if not isinstance(env_ids, torch.Tensor):
-                env_ids = torch.as_tensor(env_ids, dtype=torch.long, device=self.device)
             self._configure_training_reset(env_ids)
 
         def _configure_training_reset(self, env_ids):
@@ -967,7 +1757,21 @@ def make_rj45_training_env_type(
             self._training_warmup_grip_force_peak_n[env_ids] = 0.0
             self._training_warmup_insertion_load_peak_n[env_ids] = 0.0
             self._training_warmup_forbidden_load_peak_n[env_ids] = 0.0
+            self._training_held_reset_validation_passed[env_ids] = False
+            self._training_held_reset_validation_finger_force_n[env_ids] = 0.0
+            self._training_held_reset_validation_raw_contact_count[env_ids] = 0
+            self._training_held_reset_validation_insertion_force_world_n[
+                env_ids
+            ] = 0.0
+            self._training_held_reset_validation_insertion_load_n[env_ids] = 0.0
+            self._training_held_reset_validation_forbidden_load_n[env_ids] = 0.0
             self._training_previous_action[env_ids] = 0.0
+            _reset_policy_input_telemetry(
+                env_ids,
+                self._training_last_policy_observation,
+                self._training_last_policy_observation_valid,
+                self._training_last_policy_observation_timestamp_s,
+            )
             self._training_action_delta[env_ids] = 0.0
             self._training_terminal_reward_emitted[env_ids] = False
             self._training_episode_index[env_ids] += 1
@@ -1020,7 +1824,70 @@ def make_rj45_training_env_type(
                 "action_mode": self._training_config["action_mode"],
                 "policy_action_dimension": action_dim,
                 "policy_observation_dimension": 79,
+                "policy_observation_contract": {
+                    "inactive_rows": "all_zeros",
+                    "validity_extra": "policy_observation_valid",
+                    "policy_active_field_index": 78,
+                    "policy_active_field_value_when_valid": 1.0,
+                },
                 "held_grasp_reset": self._training_held_state is not None,
+                "held_reset_staging": {
+                    "enabled": self._training_held_state is not None,
+                    "scope": "episode_initialization_before_policy_activation_only",
+                    "method": (
+                        "one_noncontact_control_step_then_exact_recorded_state_restore"
+                    ),
+                    "state_write_gate": "policy_inactive_only",
+                    "control_steps": int(
+                        self._training_config["held_reset_staging"]["control_steps"]
+                    ),
+                    "object_positions_local_m": self._training_config[
+                        "held_reset_staging"
+                    ]["object_positions_local_m"],
+                    "provenance": self._training_config["held_reset_staging"][
+                        "provenance"
+                    ],
+                    "contact_free_validation": {
+                        "requirement": "finite_and_exactly_zero_before_restore",
+                        "passed": (
+                            self._training_held_reset_validation_passed.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "finger_force_n": (
+                            self._training_held_reset_validation_finger_force_n.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "raw_contact_count": (
+                            self._training_held_reset_validation_raw_contact_count.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "raw_contact_count_order": [
+                            "left_l1",
+                            "left_l2",
+                            "right_r1",
+                            "right_r2",
+                            "insertion",
+                        ],
+                        "insertion_force_world_n": (
+                            self._training_held_reset_validation_insertion_force_world_n.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "insertion_load_n": (
+                            self._training_held_reset_validation_insertion_load_n.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "forbidden_load_n": (
+                            self._training_held_reset_validation_forbidden_load_n.detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                    },
+                },
                 "learned_scope": "pre_portal_alignment_and_insertion",
                 "learned_recovery": False,
                 "camera_observation_claim": False,

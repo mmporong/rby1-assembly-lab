@@ -7,6 +7,7 @@ relative pose is intentionally confined to the reward/evaluation caller.
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import date
 import hashlib
 import json
 import math
@@ -38,6 +39,7 @@ _TOP_LEVEL_KEYS = {
     "calibration_bias",
     "reward",
     "task_physics",
+    "held_reset_staging",
 }
 _BIAS_KEYS = {"translation_levels_m", "rotation_max_levels_rad", "initial_level"}
 _REWARD_KEYS = {
@@ -161,6 +163,38 @@ def load_training_config(path: Path) -> dict[str, Any]:
     _exact_keys(physics, _PHYSICS_KEYS, "task_physics")
     if physics["mass_randomization_enabled"] is not False:
         raise ValueError("first-version task physics must keep masses fixed")
+
+    staging = _mapping(config["held_reset_staging"], "held_reset_staging")
+    _exact_keys(staging, {"control_steps", "object_positions_local_m", "provenance"}, "held_reset_staging")
+    if type(staging["control_steps"]) is not int or staging["control_steps"] != 1:
+        raise ValueError("held_reset_staging.control_steps must be the verified one-step flush")
+    positions = staging["object_positions_local_m"]
+    if not isinstance(positions, list) or len(positions) != 2:
+        raise ValueError("held_reset_staging requires two object positions")
+    normalized_positions = []
+    for index, position in enumerate(positions):
+        if not isinstance(position, list) or len(position) != 3:
+            raise ValueError("held_reset_staging object positions must be 3D")
+        normalized_positions.append([
+            _finite_number(value, f"held_reset_staging.object_positions_local_m[{index}]")
+            for value in position
+        ])
+    if normalized_positions[0] == normalized_positions[1]:
+        raise ValueError("held_reset_staging object positions must be distinct")
+    staging["object_positions_local_m"] = normalized_positions
+    provenance = _mapping(staging["provenance"], "held_reset_staging.provenance")
+    _exact_keys(provenance, {"source", "defined_at", "valid_for", "unit"}, "held_reset_staging.provenance")
+    if provenance["source"] != "simulation_design_assumption" or provenance["unit"] != "m":
+        raise ValueError("held_reset_staging must disclose simulation-design positions in m")
+    if not isinstance(provenance["valid_for"], str) or not provenance["valid_for"].strip():
+        raise ValueError("held_reset_staging.provenance.valid_for must be nonempty")
+    try:
+        if not isinstance(provenance["defined_at"], str):
+            raise ValueError("date must be a string")
+        if date.fromisoformat(provenance["defined_at"]).isoformat() != provenance["defined_at"]:
+            raise ValueError("date must use ISO format")
+    except ValueError as error:
+        raise ValueError("held_reset_staging.provenance.defined_at must be an ISO date") from error
 
     config["_config_sha256"] = hashlib.sha256(raw).hexdigest()
     return config
