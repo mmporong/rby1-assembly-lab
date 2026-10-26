@@ -5,7 +5,7 @@
   "status": {
     "completed": true,
     "reinforcement_learning_trained": true,
-    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 같은 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 이전 표준 79D PPO v3는 32개 짝지은 조건에서 기준 13회, 학습 정책 12회 성공했다. 새 INSERT-only tip-target 79D PPO는 학습과 평가를 마쳤지만 기준 12회, 학습 정책 0회 성공해 이번 개발 실험에서 악화됐다. 85D privileged 진단 본 학습은 실행 중이며 결과는 아직 검증하지 않았다. 실물 성능은 미검증이다.",
+    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 같은 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 이전 표준 79D PPO v3는 32개 짝지은 조건에서 기준 13회, 학습 정책 12회 성공했다. 새 INSERT-only tip-target 79D와 privileged 85D PPO는 각각 기준 12회, 학습 정책 0회 성공해 이번 단일 held·단일 seed 개발 실험에서 모두 악화됐다. 85D의 추가 정보만으로 결과가 나아지지 않았지만 학습 원리나 표준 관측의 가능성을 부정하는 근거는 아니다. 실물 성능은 미검증이다.",
     "reinforcement_learning_improvement_verified": false
   },
   "evaluation_contract": {
@@ -2057,9 +2057,12 @@
     "standard_observation_dimension": 79,
     "diagnostic_observation_dimension": 85,
     "diagnostic_observation_privileged": true,
-    "diagnostic_85d_gpu_training_status": "running",
-    "diagnostic_85d_gpu_training_completed": false,
-    "diagnostic_85d_performance_verified": false,
+    "diagnostic_85d_gpu_training_status": "completed",
+    "diagnostic_85d_gpu_training_completed": true,
+    "diagnostic_85d_paired_evaluation_completed": true,
+    "diagnostic_85d_paired_performance_evaluated": true,
+    "diagnostic_85d_policy_improvement_verified": false,
+    "diagnostic_85d_production_generalization_verified": false,
     "diagnostic_85d_run_directory": "artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08",
     "diagnostic_85d_smoke": {
       "completed": true,
@@ -2088,7 +2091,92 @@
         "sha256": "3f4b830ecf373ddc784fad1bfb125241d3eb9159a577e6031f3c77d5d3328e0a"
       }
     },
-    "diagnostic_85d_interpretation_limit": "The six appended values are simulator-sampled privileged calibration-bias latents, not real sensors or inferred bias. Standard79 may still contain bias-correlated cues in joint positions after scripted ALIGN, so an 85D result cannot by itself prove that bias is unobservable from standard79.",
+    "diagnostic_85d_interpretation_limit": "The six appended values are simulator-sampled privileged calibration-bias latents, not real sensors or inferred bias. Standard79 may still contain bias-correlated cues in joint positions after scripted ALIGN, so an 85D result cannot by itself prove that bias is unobservable from standard79. No improvement in this one-held-state, one-seed, 20-update diagnostic does not prove that the learning approach is impossible.",
+    "diagnostic_85d_result": {
+      "status": "completed_and_paired_development_evaluation_found_no_improvement",
+      "scope": "privileged85 target-offset single-seed diagnostic from one held grasp state; not a production sensor policy, final heldout, or hardware validation",
+      "training_updates": 20,
+      "training_transitions": 163840,
+      "evaluation_seed": 20261028,
+      "attempts_per_mode": 32,
+      "baseline_successes": 12,
+      "learned_successes": 0,
+      "baseline_invalid_episodes": 0,
+      "learned_invalid_episodes": 0,
+      "learned_termination_counts": {
+        "episode_timeout": 32
+      },
+      "baseline_max_forbidden_load_n": 0.0,
+      "learned_max_forbidden_load_n": 0.0,
+      "learned_max_insertion_load_n": 2.968129873275757,
+      "paired_success_rate_difference": -0.375,
+      "paired_bootstrap_95_percentile_interval": [
+        -0.53125,
+        -0.21875
+      ],
+      "bootstrap_resamples": 100000,
+      "bootstrap_seed": 20261029,
+      "independent_raw_review": "APPROVE",
+      "baseline_cross_check": {
+        "cases": 32,
+        "same_case_ids": true,
+        "outcome_field_differences_excluding_attempt_index": 0
+      },
+      "artifacts": {
+        "paired_comparison": {
+          "filename": "artifacts/rj45-bias-observability-ablation/paired-comparison42.json",
+          "sha256": "45c719ed112cffa940d05e7475fd1e5be425360989f1f0448db0c1e1774d6200"
+        },
+        "baseline_report": {
+          "filename": "artifacts/rj45-bias-observability-ablation/validation-biased-zero42.json",
+          "sha256": "3e4ca4edd166e5a7417c2ae2efbadf238775c948a4026ec018754e7d1c97e85f"
+        },
+        "learned_report": {
+          "filename": "artifacts/rj45-bias-observability-ablation/validation-learned42.json",
+          "sha256": "739ee289df758df5f148aa75e963162aa89ccb6f2d5e095678c60022f2ead04b"
+        },
+        "paired_analyzer": {
+          "filename": "artifacts/rj45-bias-observability-ablation/compare_paired.py",
+          "sha256": "6ef4578fa84dc203a9b2128cc152fd61d97964c9436abe04e189d03655aa7e97"
+        },
+        "baseline_cross_check": {
+          "filename": "artifacts/rj45-bias-observability-ablation/baseline-cross-check.json",
+          "sha256": "a0db6b36e17e1b96e3d4c1a240e248bb02cb335ffa00b0c7f6bd3caa3f3fc972"
+        },
+        "checkpoint_manifest": {
+          "filename": "artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08/checkpoint_manifest.json",
+          "sha256": "5ef18450a745a16dc2cf2e9c26eda41bed0b77bc3337d9b7d1caa2d07fec51ee"
+        },
+        "training_provenance": {
+          "filename": "artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08/training_provenance.json",
+          "sha256": "bb92dad91fad76ebfe182bd81c7fa2ff330829991093daa6e5bea27eacc3f031"
+        },
+        "training_review_summary": {
+          "filename": "artifacts/rj45-bias-observability-ablation/training-review-summary.json",
+          "sha256": "6b051fb2ad71b691e9c87c6f57db83cb1be924af9e721030191b535402e5043a"
+        },
+        "final_checkpoint": {
+          "filename": "artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08/model_19.pt",
+          "sha256": "88f0d99fe11779d5b4ea3246def794b94d8b8510eaa95658fe319fd8537df178"
+        }
+      }
+    },
+    "observation_mode_comparison_media": {
+      "comparison_png": {
+        "filename": "docs/media/rj45/target-offset42-observation-comparison.png",
+        "sha256": "ac9bf7e59382ceee65caf9de6295fd48c706db10974241cbe96a0f8a54efa289"
+      },
+      "comparison_svg": {
+        "filename": "docs/media/rj45/target-offset42-observation-comparison.svg",
+        "sha256": "341efa8400b49b24bdc11213b2b200ee4ee6e107a163070701f9c22cc248a15f"
+      },
+      "comparison_data": {
+        "filename": "docs/media/rj45/target-offset42-observation-comparison-data.json",
+        "sha256": "3bd13dd11d3476028a86dfd2bac941a9b9c90ac77ae06bbd333208e4177d8261"
+      }
+    },
+    "next_primary_goal_decision_status": "awaiting_user_choice_between_mechanical_v2_primary_and_strict_50um_primary",
+    "current_source_success_criteria_unchanged": true,
     "new_standard_79d_training_status": "completed",
     "new_standard_79d_training_completed": true,
     "new_standard_79d_policy_improvement_verified": false,
