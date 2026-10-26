@@ -649,5 +649,76 @@
         "sha256": "57283513d10a924b7483f6c3db78c02b8f26cc5d78fa3563822bf46a66db851b"
       }
     }
+  },
+  "held_reset_runtime": {
+    "physics_hz": 240.0,
+    "control_hz": 30.0,
+    "observation_dim": 79,
+    "action_dim": 6,
+    "actions": "zero",
+    "provenance": {
+      "checker_sha256": "43f4081bdda6998a20bbd94ec78f2b2467d21f5a381f1de05830612f045d1fc6",
+      "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+      "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+      "training_config_sha256": "b03c4f50b2aac3022da47822048155df7243fc8866241079bd8db828371c5556",
+      "nominal_report_sha256": "046e16230196d137c20383ed2981af540877584f7948bfc192696b1ceb4dadf2",
+      "held_artifact_sha256": "034131f20133375aab5954f33c04feadcb70af37fc8d6e0d3fa2504463f77c7b",
+      "parallel_spec_sha256": null,
+      "runtime_versions": {
+        "isaacsim": "5.1.0.0",
+        "isaaclab": "0.47.2",
+        "isaaclab-rl": "0.4.4",
+        "rsl-rl-lib": "3.0.1",
+        "torch": "2.7.0+cu128",
+        "numpy": "1.26.0",
+        "h5py": "3.14.0"
+      }
+    },
+    "single_env": {
+      "passed": true,
+      "cycles": 1000,
+      "physical_warmup_cycles": 1000,
+      "control_steps": 7000,
+      "steps_per_cycle": [
+        7,
+        7
+      ],
+      "peak_loads_n": {
+        "grip": 3.7833595275878906,
+        "insertion": 0.0,
+        "forbidden": 0.0
+      }
+    },
+    "partial_reset_4env": {
+      "passed": true,
+      "cycles": 4,
+      "per_environment_reset_count": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "control_steps": 27,
+      "steps_per_cycle": [
+        6,
+        7
+      ],
+      "preserved_native_physx_fields": [
+        "robot_joint_position",
+        "robot_joint_velocity",
+        "robot_root_state",
+        "socket_root_state",
+        "plug_root_state"
+      ],
+      "untouched_native_state_preserved": true,
+      "untouched_episode_time_advanced": true,
+      "no_untouched_automatic_reset": true
+    },
+    "artifact_sha256": {
+      "reviewed-reset-1000.json": "a976a1f4bae138a0be3911b3b6f833ee128b3622618fb24b4733c2574f1a6b36",
+      "reviewed-reset-1000.log": "1d8113423b2911ff5f3e559e95207d82f7c3e3d9921180dfe5d42b7f3312c7f2",
+      "reviewed-4env.json": "99fcd0d594588ef57985ad1ff77ea224e8001c8f5d56304c92d8b7162ffc708d"
+    },
+    "scope": "1환경 1000회 물리 held reset/warmup과 4환경 각 1회 부분 초기화 격리 검증. PPO 학습이나 정책 성능을 검증한 결과가 아니다."
   }
 }
