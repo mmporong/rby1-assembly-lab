@@ -722,8 +722,8 @@
     "scope": "이전 단일 단계 초기화 구현의 1환경 1000회 물리 held reset/warmup과 4환경 각 1회 부분 초기화 격리 검증. 이후 추가한 비접촉 staging 구현, PPO 학습 완료 또는 정책 성능을 검증한 결과가 아니다."
   },
   "staged_held_reset_runtime": {
-    "status": "partial_reset_4env_and_post_motion_reset_64env_passed",
-    "scope": "Policy-inactive initialization only: one non-contact control interval, measured contact gate, exact recorded-state restoration, then strict physical warmup. Full-task pickup success is verified separately.",
+    "status": "historical_pre_controller_phase_fix_partial_reset_4env_and_post_motion_reset_64env_passed",
+    "scope": "Historical pre-controller-phase-fix source only. Policy-inactive initialization only: one non-contact control interval, measured contact gate, exact recorded-state restoration, then strict physical warmup. Full-task pickup success is verified separately.",
     "physics_hz": 240.0,
     "control_hz": 30.0,
     "partial_reset_4env": {
@@ -1683,7 +1683,7 @@
   "residual_ppo_pilot": {
     "training_completed": true,
     "policy_improvement_verified": false,
-    "validation_status": "running",
+    "validation_status": "learned_evaluation_preflight_rejected_proof_schema; held_oracle_diagnostic_later_revealed_controller_phase_initialization_defect",
     "num_envs": 64,
     "updates": 20,
     "steps_per_env_per_update": 128,
@@ -1697,6 +1697,106 @@
     "initial_and_final_model_weights_differ": true,
     "input_immutability_verified": true,
     "held_initial_state_count": 1,
-    "scope": "Residual alignment/insertion from one recorded held state with calibration bias. Training completion alone does not demonstrate policy improvement, learned pickup, camera perception, or hardware transfer."
+    "scope": "Residual alignment/insertion from one recorded held state with calibration bias. Training completion alone does not demonstrate policy improvement, learned pickup, camera perception, or hardware transfer.",
+    "training_environment_status": "historical_initial_implementation_with_held_controller_phase_defect; not a policy-performance result"
+  },
+  "held_controller_phase_validation": {
+    "status": "oracle_held_start_4_of_4_passed_after_controller_phase_fix",
+    "scope": "Single recorded held state; zero calibration bias and zero residual, seed20261028. Not learned policy improvement or full-table parallel pickup validation.",
+    "report_sha256": "0b35ba6158bea946e5009ac877c63f67227a7f17679e2785b245dc9e3697c855",
+    "nominal_report_sha256": "f2f8844ad8365a36bb1bbba3e62086dbf5a03917287b94eda2d55324d332d3b5",
+    "held_artifact_sha256": "fd27804e91944fb6c028ca58acad7d7d5164b684647e3b828e9ddf57bad2e038",
+    "attempts": 4,
+    "successes": 4,
+    "invalid_episodes": 0,
+    "per_environment_accepted_attempt_count": [
+      1,
+      1,
+      1,
+      1
+    ],
+    "evaluation_horizon_s": 24.0,
+    "input_immutability_verified": true,
+    "source_sha256": {
+      "scripts/evaluate_policy.py": "e450a4101d7e92670cb8f6d591ad24b196057ae132600db7a2d8aa60d51b9eb3",
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "9a218ca11429986a812b4a47e126063ecd6c5ea5aee98763022220aeb2be72a8",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "df9f49b484d2e2b3bdf422c217c564e219f5d9f359586f2d1a55b7c908655387",
+      "src/rby1_assembly/rj45_training.py": "1806fc32b9da27d8fb6d6f54f921f25344d1d7c1cf13f083581cacb19e039d35",
+      "src/rby1_assembly/rj45_training_env.py": "6d9d4653026833996e4ecadbc1da89cb24c3b5f98dacd85f1defdd8ad69d3dbb",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    },
+    "outcomes": [
+      {
+        "environment_index": 1,
+        "episode_index": 1,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012335658073425293,
+        "final_lateral_error_m": 6.030560598446755e-06,
+        "final_dwell_s": 0.4,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      {
+        "environment_index": 2,
+        "episode_index": 1,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012334823608398438,
+        "final_lateral_error_m": 6.210654191818321e-06,
+        "final_dwell_s": 0.4,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      {
+        "environment_index": 0,
+        "episode_index": 1,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012324094772338867,
+        "final_lateral_error_m": 8.38746564113535e-06,
+        "final_dwell_s": 0.4,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      {
+        "environment_index": 3,
+        "episode_index": 1,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012324929237365723,
+        "final_lateral_error_m": 6.946724170120433e-06,
+        "final_dwell_s": 0.4,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    ]
   }
 }

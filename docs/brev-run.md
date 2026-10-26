@@ -203,3 +203,22 @@ OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/train.py \
 ```
 
 환경 수를 늘릴 때는 같은 명목·파지 증거와 검증된 병렬 접촉 specification을 전달한다. 실행 중 코드·설정·입력 증거를 바꾸지 않는다. 평가기는 환경별 고정 episode quota로 표본을 수집하고, 정책과 무학습 기준 제어에 같은 seed·보정 오차 조건을 사용한다. 전체 과제 평가는 테이블에서의 파지부터 시작하며, 학습 범위인 파지 후 정렬·삽입과 구분해 결과를 해석한다.
+
+
+## 파지 상태에서 정렬·삽입만 비교하기
+
+`evaluate_policy.py`의 기본 시작 방식은 `--evaluation-start table`이다. 전체 과제의 파지 실패와 학습한 정렬·삽입의 기여를 구분하려면 `--evaluation-start held`를 사용한다. 이 모드는 검증된 파지 artifact를 실제 초기 상태로 복원하며 활성 구간 제한은 24초다. table 모드는 기존 전체 과제 제한인 120초를 사용한다. 학습 정책만 검증된 체크포인트를 위치 인자로 지정하고, 두 zero-residual 기준 제어는 체크포인트를 불러오지 않는다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/evaluate_policy.py \
+  --headless --device cuda:0 --task rj45 --num-envs 16 --episodes 32 \
+  --seed 20261028 --evaluation-start held --baseline-mode biased_zero \
+  --rj45-nominal-evidence artifacts/rj45/nominal.json \
+  --rj45-held-state artifacts/rj45/held.json \
+  --rj45-training-config configs/rj45-training-v1.json \
+  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-control-hooks/evidence-spec.json \
+  --report artifacts/rj45/held-biased-zero-evaluation.json
+```
+
+조건별 비교에는 같은 시작 방식·시드·환경·episode index·보정 오차 case를 사용한다. 시작 방식은 `paired_condition`과 canonical ID에 포함된다. 각 episode의 물리 종료 이유인 `termination_reason`과 평가 계약 위반인 `invalid_reason`은 별도로 기록한다. held 초기화 실패나 유효 정책 입력이 한 번도 없었던 표본은 invalid로 남기며, 정책이 활성화된 뒤 생긴 파지 손실은 정책 실패로 집계한다. 전체 성공률은 invalid를 포함한 요청 표본 수를 분모로 해석하고, 유효 표본만의 성공률은 보조 지표로 본다. 이 명령은 사용 예시이며 성능 개선이 검증됐다는 뜻은 아니다.

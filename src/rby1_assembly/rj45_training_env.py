@@ -774,6 +774,17 @@ def make_rj45_training_env_type(
                 self.robot.num_joints, dtype=torch.bool, device=self.device
             )
             if self._training_held_state is not None:
+                # A held episode starts beyond the table approach controller.
+                # Reconstruct its path state separately from physical grip proof.
+                if not hasattr(self, "_initial_clearance_reached"):
+                    self._initial_clearance_reached = torch.zeros(
+                        self.num_envs, dtype=torch.bool, device=self.device
+                    )
+                    self._work_clearance_reached = torch.zeros_like(
+                        self._initial_clearance_reached
+                    )
+                    self._torso_progress = torch.zeros(self.num_envs, device=self.device)
+                    self._approach_progress = torch.zeros((self.num_envs, 2), device=self.device)
                 units_by_name = dict(
                     zip(
                         self._training_held_state["joint_names"],
@@ -1809,6 +1820,7 @@ def make_rj45_training_env_type(
 
             _, _, joint_ref = self._held_artifact_joint_state(env_ids)
             self._training_held_reference[env_ids] = joint_ref
+            self._initialize_held_controller_phase(env_ids)
             self._joint_targets[env_ids] = joint_ref
             self._insert_joint_targets[env_ids] = joint_ref[:, self._arm_joint_ids]
             self._torso_hold_targets[env_ids] = joint_ref[:, self._torso_joint_ids]
@@ -1837,6 +1849,26 @@ def make_rj45_training_env_type(
                 gt_pos, gt_quat, self._training_config
             )[env_ids]
 
+        def _initialize_held_controller_phase(self, env_ids):
+            """Start a new ALIGN episode beyond the verified INSERT setup path."""
+
+            if self._training_held_state["selection"]["phase_name"] != "insert":
+                raise ValueError("held controller initialization requires a verified INSERT state")
+            expected_torso = torch.tensor(
+                self.cfg.rj45_task["controller"]["torso_work_joint_positions_rad"],
+                dtype=self._training_held_reference.dtype,
+                device=self.device,
+            ).expand(len(env_ids), -1)
+            if not torch.equal(
+                self._training_held_reference[env_ids][:, self._torso_joint_ids],
+                expected_torso,
+            ):
+                raise ValueError("recorded held torso reference differs from the configured work pose")
+            self._initial_clearance_reached[env_ids] = True
+            self._work_clearance_reached[env_ids] = True
+            self._torso_progress[env_ids] = 1.0
+            self._approach_progress[env_ids] = 1.0
+
         def rj45_training_report(self):
             return {
                 "policy_observation_source": (
@@ -1855,6 +1887,10 @@ def make_rj45_training_env_type(
                     "policy_active_field_value_when_valid": 1.0,
                 },
                 "held_grasp_reset": self._training_held_state is not None,
+                "held_controller_initialization": (
+                    "reconstruct_completed_setup_path_for_new_alignment_episode"
+                    if self._training_held_state is not None else "normal_table_setup"
+                ),
                 "held_reset_staging": {
                     "enabled": self._training_held_state is not None,
                     "scope": "episode_initialization_before_policy_activation_only",

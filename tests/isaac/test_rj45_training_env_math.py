@@ -72,6 +72,54 @@ STABILITY_LIMITS = {
 
 
 class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
+    def test_held_controller_phase_keeps_torso_work_reference_and_other_rows(self):
+        from rby1_assembly.rj45_env import advance_joint_reference
+
+        work = torch.tensor([0.0, 0.9, -1.8, 0.9, 0.0, 0.0])
+        environment = SimpleNamespace(
+            _training_held_state={"selection": {"phase_name": "insert"}},
+            _training_held_reference=work.repeat(3, 1),
+            _torso_joint_ids=list(range(6)),
+            cfg=SimpleNamespace(rj45_task={"controller": {"torso_work_joint_positions_rad": work.tolist()}}),
+            device="cpu",
+            _initial_clearance_reached=torch.tensor([False, False, True]),
+            _work_clearance_reached=torch.tensor([False, False, True]),
+            _torso_progress=torch.tensor([0.4, 0.0, 0.6]),
+            _approach_progress=torch.tensor([[0.4, 0.5], [0.0, 0.0], [0.6, 0.7]]),
+            _grip_proven=torch.zeros((3, 2), dtype=torch.bool),
+        )
+        _, before = advance_joint_reference(
+            work.repeat(3, 1), torch.zeros(6), work,
+            environment._torso_progress, environment._work_clearance_reached,
+            0.015, 0.05,
+        )
+        self.assertTrue(torch.equal(before[1], torch.zeros(6)))
+        initialize = _compiled_training_environment_method("_initialize_held_controller_phase")
+        initialize(environment, torch.tensor([1]))
+        _, after = advance_joint_reference(
+            work.repeat(3, 1), torch.zeros(6), work,
+            environment._torso_progress, environment._work_clearance_reached,
+            0.015, 0.05,
+        )
+        self.assertTrue(torch.equal(after[1], work))
+        self.assertTrue(torch.equal(environment._torso_progress, torch.tensor([0.4, 1.0, 0.6])))
+        self.assertTrue(torch.equal(environment._approach_progress, torch.tensor([[0.4, 0.5], [1.0, 1.0], [0.6, 0.7]])))
+        self.assertEqual(environment._initial_clearance_reached.tolist(), [False, True, True])
+        self.assertFalse(environment._grip_proven.any())
+
+    def test_held_controller_phase_rejects_wrong_stage_or_torso_reference(self):
+        initialize = _compiled_training_environment_method("_initialize_held_controller_phase")
+        environment = SimpleNamespace(_training_held_state={"selection": {"phase_name": "close"}})
+        with self.assertRaises(ValueError):
+            initialize(environment, torch.tensor([0]))
+        environment._training_held_state["selection"]["phase_name"] = "insert"
+        environment._training_held_reference = torch.zeros((1, 6))
+        environment._torso_joint_ids = list(range(6))
+        environment.device = "cpu"
+        environment.cfg = SimpleNamespace(rj45_task={"controller": {"torso_work_joint_positions_rad": [0.0, 0.9, -1.8, 0.9, 0.0, 0.0]}})
+        with self.assertRaises(ValueError):
+            initialize(environment, torch.tensor([0]))
+
     def test_contact_flush_requires_finite_exact_zero_force_load_and_counts(self):
         zeros = {
             "finger_force_n": torch.zeros((8, 4)),
