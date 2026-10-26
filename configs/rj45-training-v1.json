@@ -5,7 +5,8 @@
   "active_horizon_s": 24.0,
   "warmup_s": 0.2,
   "action_mode": "right_only_6d",
-  "observation_dim": 79,
+  "base_observation_dim": 79,
+  "diagnostic_observation_mode": "standard",
   "calibration_bias": {
     "translation_levels_m": [
       0.00015,

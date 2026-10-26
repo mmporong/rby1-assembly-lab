@@ -37,6 +37,7 @@ def _load_evaluation_quota_helpers(root: Path):
         "_fixed_environment_episode_quotas",
         "_environment_episode_is_within_quota",
         "_configure_verified_parallel_rj45_task",
+        "_validate_rj45_diagnostic_baseline_mode",
     }
     functions = [
         node
@@ -600,6 +601,21 @@ class EvaluationQuotaTests(unittest.TestCase):
         self.configure_parallel_task = helpers[
             "_configure_verified_parallel_rj45_task"
         ]
+        self.validate_diagnostic_baseline = helpers[
+            "_validate_rj45_diagnostic_baseline_mode"
+        ]
+
+    def test_privileged_bias_diagnostic_rejects_oracle_before_environment(self) -> None:
+        standard = {"diagnostic_observation_mode": "standard"}
+        diagnostic = {
+            "diagnostic_observation_mode": "persistent_calibration_bias"
+        }
+        for mode in ("oracle", "biased_zero", "learned"):
+            self.validate_diagnostic_baseline(standard, mode)
+        for mode in ("biased_zero", "learned"):
+            self.validate_diagnostic_baseline(diagnostic, mode)
+        with self.assertRaisesRegex(ValueError, "oracle disables the sampled bias"):
+            self.validate_diagnostic_baseline(diagnostic, "oracle")
 
     def test_episode_budget_is_fixed_per_environment(self) -> None:
         self.assertEqual(self.quotas(10, 4), (3, 3, 2, 2))

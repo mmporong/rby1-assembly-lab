@@ -8,6 +8,10 @@ import unittest
 
 import numpy as np
 
+from rby1_assembly.rj45_training import (
+    PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
+    PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE,
+)
 from rby1_assembly.rj45_task import (
     _validate_rj45_training_contract,
     load_rj45_task,
@@ -614,6 +618,38 @@ class Rj45ProvenanceTests(unittest.TestCase):
         ):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 verify(lineage, current)
+
+    def test_privileged_85d_diagnostic_contract_is_distinct_and_strict(self):
+        contract = valid_training_contract()
+        contract.update(
+            policy_observation_schema_version=2,
+            policy_observation_dimension=85,
+            diagnostic_observation_mode="persistent_calibration_bias",
+            privileged_diagnostic_observation=(
+                PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION
+            ),
+            ground_truth_usage=PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE,
+        )
+        _validate_rj45_training_contract(contract)
+        for name, mutate in (
+            ("wrong_mode", lambda value: value.update(diagnostic_observation_mode="standard")),
+            ("missing_disclosure", lambda value: value.pop("privileged_diagnostic_observation")),
+            ("wrong_dimension", lambda value: value.update(policy_observation_dimension=79)),
+            ("wrong_schema", lambda value: value.update(policy_observation_schema_version=1)),
+            (
+                "false_ground_truth_claim",
+                lambda value: value.update(
+                    ground_truth_usage=(
+                        "scripted_setup_control_and_safety_then_reward_and_"
+                        "independent_evaluation_only"
+                    )
+                ),
+            ),
+        ):
+            damaged = copy.deepcopy(contract)
+            mutate(damaged)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
 
     def test_actual_v2_training_contract_schema_is_strictly_validated(self):
         contract = valid_training_contract()

@@ -222,3 +222,5 @@ OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/evaluate_policy.py \
 ```
 
 조건별 비교에는 같은 시작 방식·시드·환경·episode index·보정 오차 case를 사용한다. 시작 방식은 `paired_condition`과 canonical ID에 포함된다. 각 episode의 물리 종료 이유인 `termination_reason`과 평가 계약 위반인 `invalid_reason`은 별도로 기록한다. held 초기화 실패나 유효 정책 입력이 한 번도 없었던 표본은 invalid로 남기며, 정책이 활성화된 뒤 생긴 파지 손실은 정책 실패로 집계한다. 전체 성공률은 invalid를 포함한 요청 표본 수를 분모로 해석하고, 유효 표본만의 성공률은 보조 지표로 본다. 이 명령은 사용 예시이며 성능 개선이 검증됐다는 뜻은 아니다.
+
+진단용 `configs/rj45-training-bias-observability.json`은 `persistent_calibration_bias` 모드로, 시뮬레이터의 episode별 보정 오차 6D를 정규화해 입력에 추가한다. `base_observation_dim`은 두 설정 모두 79이며 실제 정책 폭은 표준 79D, 진단 85D다. 진단 체크포인트는 관측 schema v2와 privileged 정보 사용 계약을 요구하고, 표준 schema v1과 혼용하지 않는다. 진단 설정의 `oracle` 평가는 시작 전에 거부한다. 이 기능은 CPU 검증을 마친 상태이며 GPU 학습은 제어기 보정 유지 능력을 확인한 뒤 수행한다.

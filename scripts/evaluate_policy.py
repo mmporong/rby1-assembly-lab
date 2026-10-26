@@ -55,6 +55,22 @@ def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -
     return tuple(dependencies)
 
 
+def _validate_rj45_diagnostic_baseline_mode(
+    training_config: dict[str, object], baseline_mode: str
+) -> None:
+    """Reject an oracle that disables the sampled latent exposed by the 85D policy."""
+
+    if (
+        training_config.get("diagnostic_observation_mode")
+        == "persistent_calibration_bias"
+        and baseline_mode == "oracle"
+    ):
+        raise ValueError(
+            "persistent_calibration_bias diagnostic observation is incompatible "
+            "with oracle mode because oracle disables the sampled bias"
+        )
+
+
 def _fixed_environment_episode_quotas(total_episodes: int, num_envs: int) -> tuple[int, ...]:
     """Distribute a fixed episode budget by environment index."""
 
@@ -522,7 +538,14 @@ def main() -> int:
     )
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task, load_rj45_task
-        from rby1_assembly.rj45_training import load_training_config
+        from rby1_assembly.rj45_training import (
+            load_training_config,
+            policy_ground_truth_usage,
+            policy_observation_dimension,
+            policy_observation_schema_version,
+            policy_observation_source,
+            privileged_diagnostic_observation_metadata,
+        )
         from rby1_assembly.rj45_training_env import (
             _calibration_bias_case_seed,
             make_rj45_training_env_type,
@@ -538,6 +561,9 @@ def main() -> int:
 
         task = load_rj45_task(task_path)
         training_config = load_training_config(args.rj45_training_config)
+        _validate_rj45_diagnostic_baseline_mode(
+            training_config, args.baseline_mode
+        )
         if args.rj45_held_state is not None:
             held_state, held_state_proof = load_verified_held_grasp_artifact(
                 PROJECT_ROOT, task, args.rj45_held_state
@@ -599,10 +625,13 @@ def main() -> int:
         )
         if learned_mode:
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
+            observation_dimension = policy_observation_dimension(training_config)
             training_contract = {
                 "schema_version": 1,
-                "policy_observation_schema_version": 1,
-                "policy_observation_dimension": 79,
+                "policy_observation_schema_version": policy_observation_schema_version(
+                    training_config
+                ),
+                "policy_observation_dimension": observation_dimension,
                 "policy_action_dimension": action_dimension,
                 "action_mode": training_config["action_mode"],
                 "episode_scope": training_config["episode_scope"],
@@ -612,7 +641,7 @@ def main() -> int:
                 "calibration_bias": "episode_fixed_one_shot_se3",
                 "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
                 "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
-                "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+                "ground_truth_usage": policy_ground_truth_usage(training_config),
                 "held_grasp_reset_proof": held_state_proof,
                 "training_config_sha256": training_config["_config_sha256"],
                 "parallel_contact_evidence": (
@@ -621,6 +650,9 @@ def main() -> int:
                 "learned_recovery": False,
                 "retract_controller": "baseline_only",
             }
+            training_contract.update(
+                privileged_diagnostic_observation_metadata(training_config)
+            )
             verify_checkpoint_lineage(
                 lineage,
                 task_id="rj45-v1",
@@ -635,7 +667,10 @@ def main() -> int:
                         "position_std_m": cfg.observation_position_noise_std_m,
                         "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
                     },
-                    "baseline_controller_state_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+                    "baseline_controller_state_source": (
+                        "joint_encoder_frozen_grasp_estimator_with_episode_fixed_"
+                        "calibration_bias"
+                    ),
                     "task_config_path": str(task_path.relative_to(PROJECT_ROOT)),
                     "policy_config_path": _lineage_path_key(args.config),
                     "collision_monitor_mode": lineage["collision_monitor_mode"],
@@ -892,7 +927,10 @@ def main() -> int:
             "seed": cfg.seed,
             "evaluation_num_envs": cfg.scene.num_envs,
             "observation_source": (
-                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                policy_observation_source(training_config)
+                if args.task == "rj45"
+                and policy_observation_dimension(training_config) == 85
+                else "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
                 if args.task == "rj45" and args.baseline_mode != "oracle"
                 else "joint_encoder_frozen_grasp_estimator_without_calibration_bias"
                 if args.task == "rj45"
@@ -953,9 +991,12 @@ def main() -> int:
                 "path": _lineage_path_key(args.rj45_training_config),
                 "sha256": training_config["_config_sha256"],
                 "action_mode": training_config["action_mode"],
-                "observation_dimension": training_config["observation_dim"],
+                "observation_dimension": policy_observation_dimension(training_config),
                 "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
             }
+            report["rj45_training_config"].update(
+                privileged_diagnostic_observation_metadata(training_config)
+            )
             report["episode_outcomes"] = episode_outcomes
             report["paired_condition_key"] = (
                 "evaluation_start,task_config_sha256,base_evaluation_seed,"

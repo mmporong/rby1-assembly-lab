@@ -8,12 +8,19 @@ import unittest
 
 from rby1_assembly.rj45_training import (
     load_training_config,
+    policy_ground_truth_usage,
+    policy_observation_dimension,
+    policy_observation_ground_truth_flags,
+    policy_observation_schema_version,
+    policy_observation_source,
+    privileged_diagnostic_observation_metadata,
     validate_held_grasp_artifact,
 )
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/rj45-training-v1.json"
+DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-bias-observability.json"
 HASH = "a" * 64
 
 
@@ -79,7 +86,23 @@ class TrainingConfigurationTests(unittest.TestCase):
         self.assertEqual(config["_config_sha256"], hashlib.sha256(CONFIG_PATH.read_bytes()).hexdigest())
         self.assertEqual(config["episode_scope"], "held_grasp_alignment_insertion")
         self.assertEqual(config["action_mode"], "right_only_6d")
-        self.assertEqual(config["observation_dim"], 79)
+        self.assertEqual(config["base_observation_dim"], 79)
+        self.assertEqual(config["diagnostic_observation_mode"], "standard")
+        self.assertEqual(policy_observation_dimension(config), 79)
+        self.assertEqual(policy_observation_schema_version(config), 1)
+        self.assertEqual(privileged_diagnostic_observation_metadata(config), {})
+        self.assertEqual(
+            policy_observation_ground_truth_flags(config),
+            {
+                "ground_truth_in_policy_observation": False,
+                "object_pose_ground_truth_in_policy_observation": False,
+                "privileged_simulation_latent_in_policy_observation": False,
+            },
+        )
+        self.assertEqual(
+            policy_ground_truth_usage(config),
+            "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+        )
         self.assertEqual(config["calibration_bias"]["translation_levels_m"], [0.00015, 0.00035, 0.0006])
         expected_rotation = [math.radians(value) for value in (0.25, 0.5, 0.8)]
         for actual, expected in zip(config["calibration_bias"]["rotation_max_levels_rad"], expected_rotation):
@@ -87,6 +110,36 @@ class TrainingConfigurationTests(unittest.TestCase):
         self.assertFalse(config["task_physics"]["mass_randomization_enabled"])
         self.assertEqual(config["held_reset_staging"]["control_steps"], 1)
         self.assertEqual(config["held_reset_staging"]["provenance"]["source"], "simulation_design_assumption")
+
+    def test_bias_observability_config_changes_only_the_explicit_diagnostic_flag(self):
+        standard_raw = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+        diagnostic_raw = json.loads(DIAGNOSTIC_CONFIG_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(
+            {key: value for key, value in diagnostic_raw.items() if key != "diagnostic_observation_mode"},
+            {key: value for key, value in standard_raw.items() if key != "diagnostic_observation_mode"},
+        )
+        self.assertEqual(standard_raw["diagnostic_observation_mode"], "standard")
+        self.assertEqual(
+            diagnostic_raw["diagnostic_observation_mode"],
+            "persistent_calibration_bias",
+        )
+        diagnostic = load_training_config(DIAGNOSTIC_CONFIG_PATH)
+        self.assertEqual(policy_observation_dimension(diagnostic), 85)
+        self.assertEqual(policy_observation_schema_version(diagnostic), 2)
+        self.assertIn("privileged", policy_observation_source(diagnostic))
+        self.assertIn("privileged", policy_ground_truth_usage(diagnostic))
+        self.assertEqual(
+            set(privileged_diagnostic_observation_metadata(diagnostic)),
+            {"diagnostic_observation_mode", "privileged_diagnostic_observation"},
+        )
+        self.assertEqual(
+            policy_observation_ground_truth_flags(diagnostic),
+            {
+                "ground_truth_in_policy_observation": True,
+                "object_pose_ground_truth_in_policy_observation": False,
+                "privileged_simulation_latent_in_policy_observation": True,
+            },
+        )
 
     def test_staging_rejects_ambiguous_units_unverified_duration_and_overlapping_objects(self):
         original = json.loads(CONFIG_PATH.read_text())
@@ -136,6 +189,7 @@ class TrainingConfigurationTests(unittest.TestCase):
         cases = (
             ("levels", lambda value: value["calibration_bias"].update(translation_levels_m=[0.00035, 0.00015, 0.0006])),
             ("initial_level", lambda value: value["calibration_bias"].update(initial_level=3)),
+            ("diagnostic_mode", lambda value: value.update(diagnostic_observation_mode="sensor_bias")),
             ("warmup", lambda value: value.update(warmup_s=24.0)),
             ("reward", lambda value: value["reward"].update(force_scale_n=0.0)),
         )

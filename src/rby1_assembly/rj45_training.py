@@ -1,7 +1,9 @@
 """Pure training contracts and tensor math for RJ45 residual control.
 
-The policy observation accepts an estimated relative connector pose. Ground-truth
-relative pose is intentionally confined to the reward/evaluation caller.
+The standard policy observation accepts an estimated relative connector pose;
+object-pose ground truth remains confined to setup, reward, and evaluation. The
+explicit 85D diagnostic mode additionally exposes the simulator's sampled
+calibration-bias latent for observability experiments, never as a sensor claim.
 """
 
 from __future__ import annotations
@@ -35,7 +37,8 @@ _TOP_LEVEL_KEYS = {
     "active_horizon_s",
     "warmup_s",
     "action_mode",
-    "observation_dim",
+    "base_observation_dim",
+    "diagnostic_observation_mode",
     "calibration_bias",
     "reward",
     "task_physics",
@@ -55,6 +58,29 @@ _REWARD_KEYS = {
 }
 _PHYSICS_KEYS = {"mass_randomization_enabled"}
 _OBSERVATION_DIM = 79
+_DIAGNOSTIC_OBSERVATION_DIM = 85
+_DIAGNOSTIC_OBSERVATION_MODES = {
+    "standard": _OBSERVATION_DIM,
+    "persistent_calibration_bias": _DIAGNOSTIC_OBSERVATION_DIM,
+}
+PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION = (
+    "episode_sampled_calibration_bias_parameter_6d_normalized_by_level_maxima_"
+    "privileged_simulation_diagnostic_not_available_from_real_sensors"
+)
+STANDARD_POLICY_OBSERVATION_SOURCE = (
+    "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+)
+PERSISTENT_BIAS_DIAGNOSTIC_OBSERVATION_SOURCE = (
+    STANDARD_POLICY_OBSERVATION_SOURCE
+    + "_plus_privileged_episode_sampled_calibration_bias_latent"
+)
+STANDARD_GROUND_TRUTH_USAGE = (
+    "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only"
+)
+PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE = (
+    "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_"
+    "plus_privileged_episode_sampled_calibration_bias_latent"
+)
 _SHA256_LENGTH = 64
 
 
@@ -129,8 +155,16 @@ def load_training_config(path: Path) -> dict[str, Any]:
         raise ValueError("warmup_s must be shorter than active_horizon_s")
     if config["action_mode"] not in _ACTION_DIMS:
         raise ValueError(f"action_mode must be one of {sorted(_ACTION_DIMS)}")
-    if type(config["observation_dim"]) is not int or config["observation_dim"] != _OBSERVATION_DIM:
-        raise ValueError(f"observation_dim must be {_OBSERVATION_DIM}")
+    if (
+        type(config["base_observation_dim"]) is not int
+        or config["base_observation_dim"] != _OBSERVATION_DIM
+    ):
+        raise ValueError(f"base_observation_dim must be {_OBSERVATION_DIM}")
+    if config["diagnostic_observation_mode"] not in _DIAGNOSTIC_OBSERVATION_MODES:
+        raise ValueError(
+            "diagnostic_observation_mode must be standard or "
+            "persistent_calibration_bias"
+        )
 
     bias = _mapping(config["calibration_bias"], "calibration_bias")
     _exact_keys(bias, _BIAS_KEYS, "calibration_bias")
@@ -198,6 +232,68 @@ def load_training_config(path: Path) -> dict[str, Any]:
 
     config["_config_sha256"] = hashlib.sha256(raw).hexdigest()
     return config
+
+
+def policy_observation_dimension(config: Mapping[str, Any]) -> int:
+    """Return the strict policy width selected by the explicit diagnostic mode."""
+
+    mode = config.get("diagnostic_observation_mode")
+    try:
+        return _DIAGNOSTIC_OBSERVATION_MODES[mode]
+    except (KeyError, TypeError) as error:
+        raise ValueError("unsupported diagnostic_observation_mode") from error
+
+
+def policy_observation_schema_version(config: Mapping[str, Any]) -> int:
+    """Keep the deployed 79D schema at v1 and identify the privileged 85D schema."""
+
+    return 1 if policy_observation_dimension(config) == _OBSERVATION_DIM else 2
+
+
+def policy_observation_source(config: Mapping[str, Any]) -> str:
+    """Describe whether policy input includes the privileged sampled latent."""
+
+    return (
+        PERSISTENT_BIAS_DIAGNOSTIC_OBSERVATION_SOURCE
+        if policy_observation_dimension(config) == _DIAGNOSTIC_OBSERVATION_DIM
+        else STANDARD_POLICY_OBSERVATION_SOURCE
+    )
+
+
+def policy_ground_truth_usage(config: Mapping[str, Any]) -> str:
+    """Disclose privileged simulator-latent use without implying object-pose GT."""
+
+    return (
+        PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE
+        if policy_observation_dimension(config) == _DIAGNOSTIC_OBSERVATION_DIM
+        else STANDARD_GROUND_TRUTH_USAGE
+    )
+
+
+def privileged_diagnostic_observation_metadata(
+    config: Mapping[str, Any],
+) -> dict[str, str]:
+    """Return additive metadata only for the explicit privileged 85D mode."""
+
+    if policy_observation_dimension(config) == _OBSERVATION_DIM:
+        return {}
+    return {
+        "diagnostic_observation_mode": "persistent_calibration_bias",
+        "privileged_diagnostic_observation": PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
+    }
+
+
+def policy_observation_ground_truth_flags(
+    config: Mapping[str, Any],
+) -> dict[str, bool]:
+    """Separate broad privileged input from object-pose ground truth."""
+
+    privileged_latent = policy_observation_dimension(config) == _DIAGNOSTIC_OBSERVATION_DIM
+    return {
+        "ground_truth_in_policy_observation": privileged_latent,
+        "object_pose_ground_truth_in_policy_observation": False,
+        "privileged_simulation_latent_in_policy_observation": privileged_latent,
+    }
 
 
 def _torch():
@@ -441,6 +537,50 @@ def build_policy_observation(
     if observation.shape[-1] != _OBSERVATION_DIM:
         raise RuntimeError(f"internal observation dimension is {observation.shape[-1]}, expected {_OBSERVATION_DIM}")
     return observation
+
+
+def append_persistent_calibration_bias_diagnostic(
+    observation: Any,
+    translation_bias_entry_m: Any,
+    rotation_vector_bias_entry_rad: Any,
+    *,
+    translation_max_m: float,
+    rotation_max_rad: float,
+    mode: str,
+):
+    """Append the privileged episode sampler parameter only in diagnostic mode."""
+
+    torch = _torch()
+    observation = _last_dim(observation, _OBSERVATION_DIM, "observation")
+    if mode == "standard":
+        return observation
+    if mode != "persistent_calibration_bias":
+        raise ValueError("unsupported diagnostic observation mode")
+    translation = _last_dim(
+        translation_bias_entry_m, 3, "translation_bias_entry_m"
+    )
+    rotation = _last_dim(
+        rotation_vector_bias_entry_rad, 3, "rotation_vector_bias_entry_rad"
+    )
+    if translation.shape[:-1] != observation.shape[:-1] or rotation.shape[:-1] != observation.shape[:-1]:
+        raise ValueError("diagnostic bias fields must match the observation batch shape")
+    translation_max = _finite_number(
+        translation_max_m, "translation_max_m", positive=True
+    )
+    rotation_max = _finite_number(
+        rotation_max_rad, "rotation_max_rad", positive=True
+    )
+    if not bool(torch.isfinite(translation).all()) or not bool(torch.isfinite(rotation).all()):
+        raise ValueError("diagnostic bias fields must be finite")
+    tolerance = 1.0e-6
+    if bool((torch.linalg.vector_norm(translation, dim=-1) > translation_max * (1.0 + tolerance)).any()):
+        raise ValueError("translation bias exceeds its configured level maximum")
+    if bool((torch.linalg.vector_norm(rotation, dim=-1) > rotation_max * (1.0 + tolerance)).any()):
+        raise ValueError("rotation bias exceeds its configured level maximum")
+    diagnostic = torch.cat(
+        (translation / translation_max, rotation / rotation_max), dim=-1
+    )
+    return torch.cat((observation, diagnostic), dim=-1)
 
 
 def _sha256(value: Any, name: str) -> str:

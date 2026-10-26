@@ -49,6 +49,7 @@ def _compiled_training_environment_method(name):
         ),
         "_held_reset_contact_free_status": _held_reset_contact_free_status,
         "_held_reset_stage_transition": _held_reset_stage_transition,
+        "_calibration_bias_case_seed": _calibration_bias_case_seed,
     }
     exec(
         compile(
@@ -322,6 +323,61 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 torch.zeros((2, 79)),
                 torch.tensor([True]),
             )
+
+    def test_privileged_85d_observation_mask_zeros_full_inactive_rows(self):
+        observation = torch.arange(3 * 85, dtype=torch.float32).reshape(3, 85)
+        observation[1, 78] = 1.0
+        masked, valid = _mask_inactive_policy_observation(
+            observation,
+            torch.tensor([False, True, False]),
+            85,
+        )
+        self.assertEqual(valid.tolist(), [False, True, False])
+        self.assertTrue(torch.equal(masked[0], torch.zeros(85)))
+        self.assertTrue(torch.equal(masked[1], observation[1]))
+        self.assertTrue(torch.equal(masked[2], torch.zeros(85)))
+        self.assertEqual(masked[1, 78].item(), 1.0)
+
+    def test_episode_bias_partial_reset_mutates_only_target_rows(self):
+        sample = _compiled_training_environment_method("_sample_episode_bias")
+        environment = SimpleNamespace(
+            _training_translation_bias_entry=torch.tensor(
+                [[0.1, 0.2, 0.3], [9.0, 9.0, 9.0], [0.4, 0.5, 0.6]]
+            ),
+            _training_rotation_bias_entry=torch.tensor(
+                [[0.7, 0.8, 0.9], [9.0, 9.0, 9.0], [1.0, 1.1, 1.2]]
+            ),
+            _training_bias_enabled=True,
+            _training_config={
+                "calibration_bias": {
+                    "translation_levels_m": [0.00015],
+                    "rotation_max_levels_rad": [0.004],
+                }
+            },
+            _training_bias_level=0,
+            _training_episode_index=torch.tensor([4, 5, 6]),
+            _training_bias_base_seed=17,
+            device=torch.device("cpu"),
+        )
+        preserved_translation = environment._training_translation_bias_entry[[0, 2]].clone()
+        preserved_rotation = environment._training_rotation_bias_entry[[0, 2]].clone()
+        sample(environment, torch.tensor([1]))
+        torch.testing.assert_close(
+            environment._training_translation_bias_entry[[0, 2]],
+            preserved_translation,
+        )
+        torch.testing.assert_close(
+            environment._training_rotation_bias_entry[[0, 2]],
+            preserved_rotation,
+        )
+        self.assertLessEqual(
+            float(torch.linalg.vector_norm(environment._training_translation_bias_entry[1])),
+            0.00015,
+        )
+        self.assertLessEqual(
+            float(torch.linalg.vector_norm(environment._training_rotation_bias_entry[1])),
+            0.004,
+        )
 
     def test_policy_input_telemetry_stores_the_exact_masked_input(self):
         raw = torch.arange(2 * 79, dtype=torch.float32).reshape(2, 79)
@@ -634,23 +690,26 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 break
             prefix.append(statement)
         executable = ast.fix_missing_locations(ast.Module(body=prefix, type_ignores=[]))
-        cfg = SimpleNamespace(seed=7, action_space=None, observation_space=None)
-        namespace = {
-            "self": SimpleNamespace(),
-            "cfg": cfg,
-            "config": {
-                "active_horizon_s": 24.0,
-                "warmup_s": 0.2,
-            },
-            "validated_held_state": {"verified": True},
-            "calibration_bias_enabled": True,
-            "bias_level": 0,
-            "action_dim": 6,
-        }
-        exec(compile(executable, TRAINING_ENV_PATH, "exec"), namespace)
+        for observation_dim in (79, 85):
+            cfg = SimpleNamespace(seed=7, action_space=None, observation_space=None)
+            namespace = {
+                "self": SimpleNamespace(),
+                "cfg": cfg,
+                "config": {
+                    "active_horizon_s": 24.0,
+                    "warmup_s": 0.2,
+                },
+                "validated_held_state": {"verified": True},
+                "calibration_bias_enabled": True,
+                "bias_level": 0,
+                "action_dim": 6,
+                "observation_dim": observation_dim,
+            }
+            exec(compile(executable, TRAINING_ENV_PATH, "exec"), namespace)
 
-        self.assertEqual(cfg.episode_length_s, 24.0)
-        self.assertEqual(math.ceil(cfg.episode_length_s / (1.0 / 30.0)), 720)
+            self.assertEqual(cfg.observation_space, observation_dim)
+            self.assertEqual(cfg.episode_length_s, 24.0)
+            self.assertEqual(math.ceil(cfg.episode_length_s / (1.0 / 30.0)), 720)
 
     def test_actual_base_time_limit_method_uses_completed_step_boundary(self):
         base_path = PROJECT_ROOT / "src/rby1_assembly/isaac_env.py"

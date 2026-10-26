@@ -127,7 +127,13 @@ from rby1_assembly.rj45_task import (  # noqa: E402
 )
 from rby1_assembly.held_grasp import load_verified_held_grasp_artifact  # noqa: E402
 from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence  # noqa: E402
-from rby1_assembly.rj45_training import load_training_config  # noqa: E402
+from rby1_assembly.rj45_training import (  # noqa: E402
+    load_training_config,
+    policy_ground_truth_usage,
+    policy_observation_dimension,
+    policy_observation_schema_version,
+    privileged_diagnostic_observation_metadata,
+)
 from isaaclab.app import AppLauncher  # noqa: E402
 
 
@@ -381,10 +387,13 @@ def main() -> int:
         }
         if args.task == "rj45":
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
+            observation_dimension = policy_observation_dimension(training_config)
             lineage["rj45_training_contract"] = {
                 "schema_version": 1,
-                "policy_observation_schema_version": 1,
-                "policy_observation_dimension": 79,
+                "policy_observation_schema_version": policy_observation_schema_version(
+                    training_config
+                ),
+                "policy_observation_dimension": observation_dimension,
                 "policy_action_dimension": action_dimension,
                 "action_mode": training_config["action_mode"],
                 "episode_scope": training_config["episode_scope"],
@@ -394,13 +403,16 @@ def main() -> int:
                 "calibration_bias": "episode_fixed_one_shot_se3",
                 "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
                 "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
-                "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+                "ground_truth_usage": policy_ground_truth_usage(training_config),
                 "held_grasp_reset_proof": held_state_proof,
                 "training_config_sha256": training_config["_config_sha256"],
                 "parallel_contact_evidence": parallel_contact_evidence,
                 "learned_recovery": False,
                 "retract_controller": "baseline_only",
             }
+            lineage["rj45_training_contract"].update(
+                privileged_diagnostic_observation_metadata(training_config)
+            )
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
         runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)

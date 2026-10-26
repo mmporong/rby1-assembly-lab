@@ -218,13 +218,20 @@ def _held_reset_contact_free_status(
     return finite, exactly_zero, finite & exactly_zero
 
 
-def _mask_inactive_policy_observation(observation, policy_active):
-    """Zero every 79D row that is not valid policy input."""
+def _mask_inactive_policy_observation(
+    observation, policy_active, expected_dimension: int = 79
+):
+    """Zero every policy row that is not valid policy input."""
 
     import torch
 
-    if observation.ndim != 2 or observation.shape[1] != 79:
-        raise ValueError("RJ45 policy observation must have shape (num_envs, 79)")
+    if type(expected_dimension) is not int or expected_dimension not in (79, 85):
+        raise ValueError("RJ45 expected policy observation dimension must be 79 or 85")
+    if observation.ndim != 2 or observation.shape[1] != expected_dimension:
+        raise ValueError(
+            "RJ45 policy observation must have shape "
+            f"(num_envs, {expected_dimension})"
+        )
     if policy_active.shape != (observation.shape[0],):
         raise ValueError("policy_active must select the observation environment axis")
     valid = policy_active.to(dtype=torch.bool)
@@ -598,10 +605,16 @@ def make_rj45_training_env_type(
     from rby1_assembly.isaac_env import AssemblyPhase, TerminationReason
     from rby1_assembly.rj45_training import (
         HELD_GRASP_STABILITY_LIMITS,
+        PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
         apply_relative_pose_bias,
+        append_persistent_calibration_bias_diagnostic,
         build_policy_observation,
         expand_residual_actions,
         normalized_insertion_potential,
+        policy_observation_dimension,
+        policy_ground_truth_usage,
+        policy_observation_ground_truth_flags,
+        policy_observation_source,
         residual_reward,
         validate_held_grasp_artifact,
     )
@@ -609,7 +622,8 @@ def make_rj45_training_env_type(
     config = dict(training_config)
     required = {
         "action_mode",
-        "observation_dim",
+        "base_observation_dim",
+        "diagnostic_observation_mode",
         "active_horizon_s",
         "warmup_s",
         "held_reset_staging",
@@ -621,8 +635,9 @@ def make_rj45_training_env_type(
     if config["action_mode"] not in ("right_only_6d", "both_arms_12d"):
         raise ValueError("unsupported RJ45 residual action mode")
     action_dim = 6 if config["action_mode"] == "right_only_6d" else 12
-    if config["observation_dim"] != 79:
-        raise ValueError("RJ45 residual policy observation must be 79D")
+    if config["base_observation_dim"] != 79:
+        raise ValueError("RJ45 base residual policy observation must be 79D")
+    observation_dim = policy_observation_dimension(config)
     levels = config["calibration_bias"]
     if type(bias_level) is not int or not 0 <= bias_level < len(levels["translation_levels_m"]):
         raise ValueError("bias_level must select a configured calibration level")
@@ -643,7 +658,7 @@ def make_rj45_training_env_type(
                 raise ValueError("RJ45 residual training requires a non-negative integer cfg.seed")
             self._training_bias_base_seed = int(cfg.seed)
             cfg.action_space = action_dim
-            cfg.observation_space = 79
+            cfg.observation_space = observation_dim
             if validated_held_state is not None:
                 cfg.episode_length_s = float(config["active_horizon_s"])
             super().__init__(cfg, render_mode, **kwargs)
@@ -750,7 +765,7 @@ def make_rj45_training_env_type(
                 (self.num_envs, 12), device=self.device
             )
             self._training_last_policy_observation = torch.zeros(
-                (self.num_envs, 79), device=self.device
+                (self.num_envs, observation_dim), device=self.device
             )
             self._training_last_policy_observation_valid = torch.zeros(
                 self.num_envs, dtype=torch.bool, device=self.device
@@ -1369,14 +1384,38 @@ def make_rj45_training_env_type(
                 insertion_joint_reference_error_rad=insert_error,
                 policy_active=self._policy_active_mask().float()[:, None],
             )
+            bias_level = self._training_bias_level
+            observation = append_persistent_calibration_bias_diagnostic(
+                observation,
+                self._training_translation_bias_entry,
+                self._training_rotation_bias_entry,
+                translation_max_m=self._training_config["calibration_bias"][
+                    "translation_levels_m"
+                ][bias_level],
+                rotation_max_rad=self._training_config["calibration_bias"][
+                    "rotation_max_levels_rad"
+                ][bias_level],
+                mode=self._training_config["diagnostic_observation_mode"],
+            )
             observation, observation_valid = _mask_inactive_policy_observation(
                 observation,
                 self._policy_active_mask(),
+                observation_dim,
             )
-            self.extras["observation_source"] = (
-                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+            self.extras["observation_source"] = policy_observation_source(
+                self._training_config
             )
-            self.extras["ground_truth_in_policy_observation"] = False
+            self.extras.update(
+                policy_observation_ground_truth_flags(self._training_config)
+            )
+            self.extras["diagnostic_observation_mode"] = self._training_config[
+                "diagnostic_observation_mode"
+            ]
+            self.extras["privileged_diagnostic_observation"] = (
+                PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION
+                if observation_dim == 85
+                else None
+            )
             self.extras["policy_observation_valid"] = observation_valid.clone()
             _store_policy_input_telemetry(
                 observation,
@@ -1871,20 +1910,32 @@ def make_rj45_training_env_type(
 
         def rj45_training_report(self):
             return {
-                "policy_observation_source": (
-                    "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                "policy_observation_source": policy_observation_source(
+                    self._training_config
                 ),
-                "ground_truth_usage": (
-                    "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only"
+                "ground_truth_usage": policy_ground_truth_usage(
+                    self._training_config
                 ),
+                **policy_observation_ground_truth_flags(self._training_config),
                 "action_mode": self._training_config["action_mode"],
                 "policy_action_dimension": action_dim,
-                "policy_observation_dimension": 79,
+                "policy_observation_dimension": observation_dim,
+                "diagnostic_observation_mode": self._training_config[
+                    "diagnostic_observation_mode"
+                ],
+                "privileged_diagnostic_observation": (
+                    PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION
+                    if observation_dim == 85
+                    else None
+                ),
                 "policy_observation_contract": {
                     "inactive_rows": "all_zeros",
                     "validity_extra": "policy_observation_valid",
                     "policy_active_field_index": 78,
                     "policy_active_field_value_when_valid": 1.0,
+                    "persistent_calibration_bias_field_indices": (
+                        [79, 85] if observation_dim == 85 else None
+                    ),
                 },
                 "held_grasp_reset": self._training_held_state is not None,
                 "held_controller_initialization": (

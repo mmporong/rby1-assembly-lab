@@ -5,6 +5,7 @@ import torch
 
 from rby1_assembly.rj45_training import (
     apply_relative_pose_bias,
+    append_persistent_calibration_bias_diagnostic,
     build_policy_observation,
     expand_residual_actions,
     normalized_insertion_potential,
@@ -29,6 +30,49 @@ def config():
 
 
 class Rj45TrainingMathTests(unittest.TestCase):
+    def test_privileged_bias_diagnostic_appends_normalized_sampled_parameter(self):
+        base = torch.arange(2 * 79, dtype=torch.float64).reshape(2, 79)
+        translation = torch.tensor([[0.00015, 0.0, 0.0], [0.0, 0.0, 0.0]], dtype=torch.float64)
+        rotation = torch.tensor([[0.0, -0.004, 0.0], [0.0, 0.0, 0.0]], dtype=torch.float64)
+        diagnostic = append_persistent_calibration_bias_diagnostic(
+            base,
+            translation,
+            rotation,
+            translation_max_m=0.00015,
+            rotation_max_rad=0.004,
+            mode="persistent_calibration_bias",
+        )
+        self.assertEqual(tuple(diagnostic.shape), (2, 85))
+        torch.testing.assert_close(diagnostic[:, :79], base)
+        torch.testing.assert_close(
+            diagnostic[:, 79:],
+            torch.tensor(
+                [[1.0, 0.0, 0.0, 0.0, -1.0, 0.0], [0.0] * 6],
+                dtype=torch.float64,
+            ),
+        )
+        standard = append_persistent_calibration_bias_diagnostic(
+            base,
+            translation,
+            rotation,
+            translation_max_m=0.00015,
+            rotation_max_rad=0.004,
+            mode="standard",
+        )
+        self.assertIs(standard, base)
+
+    def test_privileged_bias_diagnostic_rejects_out_of_contract_parameters(self):
+        base = torch.zeros((1, 79))
+        zero = torch.zeros((1, 3))
+        with self.assertRaisesRegex(ValueError, "exceeds"):
+            append_persistent_calibration_bias_diagnostic(
+                base,
+                torch.tensor([[0.0002, 0.0, 0.0]]),
+                zero,
+                translation_max_m=0.00015,
+                rotation_max_rad=0.004,
+                mode="persistent_calibration_bias",
+            )
     def test_right_only_actions_expand_to_right_slots(self):
         action = torch.arange(12, dtype=torch.float64).reshape(2, 6)
         expanded = expand_residual_actions(action, "right_only_6d")

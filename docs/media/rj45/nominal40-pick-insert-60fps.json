@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "scope": "Nominal40 full-task scripted simulator-state controller, zero residual, no calibration bias; not learned-policy performance",
+  "render_provenance": {
+    "source_archive_sha256": "c3bb027b4647292ee43f540a4d9b47605cc1cd2928c88c9c0ce79dc05ce6352a",
+    "original_entry_sha256": "0e27f8531cce421bd24ef0eb7e1ea9d4f0869895acea7396d5b03f51072966a8",
+    "render_entry_sha256": "b93b1cbdbe78d87d98bf940035e65802afc78ac232a3c799d6c551b083ddf61e",
+    "scope": "nominal40 zero-residual full-task success rerender; two viewer coordinates only; not learned policy"
+  },
+  "report_sha256": "ccf636fdc6f05d902c7a5ed164c1897e4828a5ba35ba15fb5f40dcfa835ddc9c",
+  "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+  "trace_identical_to_verified_nominal40": true,
+  "completed": true,
+  "source_frames": 2714,
+  "source_fps": 60,
+  "delivery": {
+    "path": "docs/media/rj45/nominal40-pick-insert-60fps.mp4",
+    "sha256": "18b1c3a8a46a600b7e6773c7bb75d9cd40e8158fdf593dd8779cab57d5336058",
+    "source_start_frame_inclusive": 1200,
+    "source_end_frame_exclusive": 2714,
+    "frame_count": 1514,
+    "duration_s": 25.233333333333334,
+    "fps": 60,
+    "resolution_px": [
+      1920,
+      1080
+    ],
+    "modifications": "trim frame range, reset timestamps, add explanatory captions; no interpolation or speed change"
+  },
+  "strict_success_evidence": "docs/evidence/rj45-validation.json held_controller_phase_validation nominal40 source lineage; full raw trace retained locally"
+}

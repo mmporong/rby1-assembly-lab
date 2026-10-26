@@ -11,6 +11,12 @@ from typing import Any
 
 import numpy as np
 
+from rby1_assembly.rj45_training import (
+    PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
+    PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE,
+    STANDARD_GROUND_TRUTH_USAGE,
+)
+
 
 _FRAME_NAMES = ("socket_entry", "plug_tip", "left_grasp", "right_grasp")
 _ASSET_NAMES = ("robot", "socket", "plug", "table", "build_report")
@@ -280,7 +286,7 @@ def verify_checkpoint_lineage(
 
 
 def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
-    expected_keys = {
+    standard_keys = {
         "schema_version",
         "policy_observation_schema_version",
         "policy_observation_dimension",
@@ -300,18 +306,41 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         "learned_recovery",
         "retract_controller",
     }
+    diagnostic_keys = standard_keys | {
+        "diagnostic_observation_mode",
+        "privileged_diagnostic_observation",
+    }
+    observation_schema = contract.get("policy_observation_schema_version")
+    observation_dimension = contract.get("policy_observation_dimension")
+    expected_keys = (
+        standard_keys
+        if (observation_schema, observation_dimension) == (1, 79)
+        else diagnostic_keys
+        if (observation_schema, observation_dimension) == (2, 85)
+        else set()
+    )
     if set(contract) != expected_keys:
         raise ValueError("RJ45 training contract fields are incomplete or unexpected")
     _reject_nonfinite_numbers(contract, "rj45_training_contract")
     if (
         type(contract["schema_version"]) is not int
         or contract["schema_version"] != 1
-        or type(contract["policy_observation_schema_version"]) is not int
-        or contract["policy_observation_schema_version"] != 1
     ):
-        raise ValueError("RJ45 training contract schemas must be version 1")
-    if type(contract["policy_observation_dimension"]) is not int or contract["policy_observation_dimension"] != 79:
-        raise ValueError("RJ45 policy observation dimension must be 79")
+        raise ValueError("RJ45 training contract schema must be version 1")
+    if (observation_schema, observation_dimension) not in ((1, 79), (2, 85)):
+        raise ValueError("RJ45 policy observation schema and dimension disagree")
+    if observation_dimension == 85:
+        if contract["diagnostic_observation_mode"] != "persistent_calibration_bias":
+            raise ValueError("RJ45 85D observation must use the persistent bias diagnostic mode")
+        if (
+            contract["privileged_diagnostic_observation"]
+            != PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION
+        ):
+            raise ValueError("RJ45 privileged diagnostic observation disclosure is invalid")
+        if contract["ground_truth_usage"] != PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE:
+            raise ValueError("RJ45 privileged diagnostic ground-truth usage is invalid")
+    elif contract["ground_truth_usage"] != STANDARD_GROUND_TRUTH_USAGE:
+        raise ValueError("RJ45 standard ground-truth usage is invalid")
     action_dimensions = {"right_only_6d": 6, "both_arms_12d": 12}
     action_mode = contract["action_mode"]
     if (
@@ -330,7 +359,6 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         "estimator": "frozen_kinematic_grasp_estimator",
         "calibration_bias": "episode_fixed_one_shot_se3",
         "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
-        "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
         "retract_controller": "baseline_only",
     }
     for name, expected in exact_values.items():
