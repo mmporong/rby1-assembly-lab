@@ -508,8 +508,12 @@ def _trace_record(
                     "policy_input_valid",
                     "training_estimator_valid",
                     "training_policy_activated",
+                    "held_initialization_passed",
                 ):
                     environments[-1][key] = bool(snapshot[key][env_index].item())
+                environments[-1]["valid_policy_input_step_count"] = int(
+                    snapshot["valid_policy_input_step_count"][env_index].item()
+                )
             criteria = env.extras["terminal_evaluation"]["criteria"]
             environments[-1]["independent_eval_criteria"] = {
                 name: bool(value[env_index].item()) for name, value in criteria.items()

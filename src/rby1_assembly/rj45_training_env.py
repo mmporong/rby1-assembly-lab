@@ -658,6 +658,12 @@ def make_rj45_training_env_type(
             self._training_policy_activated = torch.zeros_like(
                 self._training_estimator_valid
             )
+            self._training_held_initialization_passed = torch.zeros_like(
+                self._training_estimator_valid
+            )
+            self._training_valid_policy_input_step_count = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
             self._training_realign_pending = torch.zeros_like(
                 self._training_estimator_valid
             )
@@ -1526,6 +1532,7 @@ def make_rj45_training_env_type(
                 self._freeze_training_estimator(passed)
                 self._training_policy_activated[passed] = True
                 self._training_warmup_complete[passed] = True
+                self._training_held_initialization_passed[passed] = True
                 self._phase[passed] = int(AssemblyPhase.ALIGN)
                 self._phase_started_s[passed] = self._sim_time_s()
                 self.episode_length_buf[passed] = 0
@@ -1590,6 +1597,15 @@ def make_rj45_training_env_type(
                 )
                 raise HeldGraspWarmupTimeoutError(diagnostics)
 
+        def _count_policy_input_step(self):
+            self._training_valid_policy_input_step_count.add_(
+                self._training_last_policy_observation_valid.to(dtype=torch.long)
+            )
+
+        def _reset_policy_attribution(self, env_ids):
+            self._training_held_initialization_passed[env_ids] = False
+            self._training_valid_policy_input_step_count[env_ids] = 0
+
         def _training_step_snapshot(self):
             """Return the policy input used at this step's start.
 
@@ -1599,6 +1615,12 @@ def make_rj45_training_env_type(
             """
 
             return {
+                "held_initialization_passed": (
+                    self._training_held_initialization_passed.clone()
+                ),
+                "valid_policy_input_step_count": (
+                    self._training_valid_policy_input_step_count.clone()
+                ),
                 "policy_input_observation": (
                     self._training_last_policy_observation.clone()
                 ),
@@ -1621,6 +1643,7 @@ def make_rj45_training_env_type(
         def _get_dones(self):
             if not self._training_initialized:
                 return super()._get_dones()
+            self._count_policy_input_step()
             pending = self._warmup_pending_mask()
             terminated, truncated = super()._get_dones()
             if torch.any(pending):
@@ -1748,6 +1771,7 @@ def make_rj45_training_env_type(
             self._configure_training_reset(env_ids)
 
         def _configure_training_reset(self, env_ids):
+            self._reset_policy_attribution(env_ids)
             self._training_estimator_valid[env_ids] = False
             self._training_policy_activated[env_ids] = False
             self._training_realign_pending[env_ids] = False

@@ -10,13 +10,12 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EVALUATE_POLICY_PATH = PROJECT_ROOT / "scripts/evaluate_policy.py"
 
 
-def _compiled_terminal_attempt_metrics():
+def _compiled_function(name):
     tree = ast.parse(EVALUATE_POLICY_PATH.read_text(encoding="utf-8"))
     function = next(
         node
         for node in tree.body
-        if isinstance(node, ast.FunctionDef)
-        and node.name == "_rj45_terminal_attempt_metrics"
+        if isinstance(node, ast.FunctionDef) and node.name == name
     )
     namespace = {"math": math}
     exec(
@@ -27,7 +26,11 @@ def _compiled_terminal_attempt_metrics():
         ),
         namespace,
     )
-    return namespace["_rj45_terminal_attempt_metrics"]
+    return namespace[name]
+
+
+def _compiled_terminal_attempt_metrics():
+    return _compiled_function("_rj45_terminal_attempt_metrics")
 
 
 def _terminal_snapshot():
@@ -91,6 +94,211 @@ class Rj45EvaluationMetricTests(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             extract(snapshot, 0)
+
+
+class Rj45TerminalEvidenceTests(unittest.TestCase):
+    def test_extracts_policy_and_both_grip_proofs_from_selected_row(self):
+        extract = _compiled_function("_rj45_terminal_attempt_evidence")
+        snapshot = {
+            "training_policy_activated": torch.tensor([False, True, False]),
+            "training_estimator_valid": torch.tensor([True, True, False]),
+            "policy_input_valid": torch.tensor([False, True, False]),
+            "held_initialization_passed": torch.tensor([False, True, True]),
+            "valid_policy_input_step_count": torch.tensor([0, 7, 3]),
+            "controller_grip_proven": torch.tensor(
+                [[False, False], [True, False], [False, True]]
+            ),
+            "grip_proven": torch.tensor(
+                [[False, True], [True, True], [False, False]]
+            ),
+        }
+
+        evidence = extract(snapshot, 1)
+
+        self.assertEqual(
+            evidence,
+            {
+                "training_policy_activated": True,
+                "training_estimator_valid": True,
+                "policy_input_valid": True,
+                "held_initialization_passed": True,
+                "controller_grip_proven": [True, False],
+                "evaluation_grip_proven": [True, True],
+                "valid_policy_input_step_count": 7,
+            },
+        )
+
+    def test_missing_or_malformed_terminal_evidence_is_rejected(self):
+        extract = _compiled_function("_rj45_terminal_attempt_evidence")
+        snapshot = {
+            "training_policy_activated": torch.tensor([False]),
+            "training_estimator_valid": torch.tensor([True]),
+            "policy_input_valid": torch.tensor([False]),
+            "held_initialization_passed": torch.tensor([True]),
+            "valid_policy_input_step_count": torch.tensor([1]),
+            "controller_grip_proven": torch.tensor([[True, False]]),
+            "grip_proven": torch.tensor([[True, True]]),
+        }
+        del snapshot["training_estimator_valid"]
+        with self.assertRaises(KeyError):
+            extract(snapshot, 0)
+
+        snapshot["training_estimator_valid"] = torch.tensor([True])
+        snapshot["grip_proven"] = torch.tensor([[1, 1]])
+        with self.assertRaises(ValueError):
+            extract(snapshot, 0)
+
+        snapshot["grip_proven"] = torch.tensor([[True, True]])
+        for invalid_count in (
+            torch.tensor([-1]),
+            torch.tensor([True]),
+            torch.tensor([1.0]),
+        ):
+            snapshot["valid_policy_input_step_count"] = invalid_count
+            with self.subTest(invalid_count=invalid_count), self.assertRaises(ValueError):
+                extract(snapshot, 0)
+
+    def test_partial_rows_keep_independent_initialization_and_exposure_evidence(self):
+        extract = _compiled_function("_rj45_terminal_attempt_evidence")
+        snapshot = {
+            "training_policy_activated": torch.tensor([False, True, False]),
+            "training_estimator_valid": torch.tensor([False, True, True]),
+            "policy_input_valid": torch.tensor([False, False, True]),
+            "held_initialization_passed": torch.tensor([False, True, True]),
+            "valid_policy_input_step_count": torch.tensor([0, 9, 2]),
+            "controller_grip_proven": torch.tensor(
+                [[False, False], [False, True], [True, True]]
+            ),
+            "grip_proven": torch.tensor(
+                [[False, False], [False, False], [True, False]]
+            ),
+        }
+
+        evidence = extract(snapshot, 1)
+
+        self.assertTrue(evidence["held_initialization_passed"])
+        self.assertEqual(evidence["valid_policy_input_step_count"], 9)
+        self.assertFalse(evidence["policy_input_valid"])
+        self.assertEqual(evidence["controller_grip_proven"], [False, True])
+        self.assertEqual(evidence["evaluation_grip_proven"], [False, False])
+
+
+class Rj45StartContractTests(unittest.TestCase):
+    def test_held_requires_initialization_and_positive_policy_exposure(self):
+        status = _compiled_function("_rj45_start_contract_status")
+        base = {
+            "held_initialization_passed": True,
+            "valid_policy_input_step_count": 4,
+            "training_policy_activated": False,
+            "training_estimator_valid": False,
+            "policy_input_valid": False,
+            "controller_grip_proven": [False, False],
+            "evaluation_grip_proven": [False, False],
+        }
+
+        self.assertEqual(status("held", base), (True, None))
+        self.assertEqual(
+            status("held", {**base, "held_initialization_passed": False}),
+            (False, "held_initialization_not_passed"),
+        )
+        self.assertEqual(
+            status("held", {**base, "valid_policy_input_step_count": 0}),
+            (False, "no_valid_policy_input_exposure"),
+        )
+
+    def test_table_does_not_apply_held_initialization_or_exposure_gate(self):
+        status = _compiled_function("_rj45_start_contract_status")
+        prepolicy_terminal = {
+            "held_initialization_passed": False,
+            "valid_policy_input_step_count": 0,
+            "training_policy_activated": False,
+            "training_estimator_valid": False,
+            "policy_input_valid": False,
+            "controller_grip_proven": [False, False],
+            "evaluation_grip_proven": [False, False],
+        }
+
+        self.assertEqual(status("table", prepolicy_terminal), (True, None))
+
+
+class EvaluationInvalidReasonTests(unittest.TestCase):
+    def test_start_contract_failures_are_preserved_per_case(self):
+        start_status = _compiled_function("_rj45_start_contract_status")
+        invalid_reason = _compiled_function("_evaluation_invalid_reason")
+
+        for evidence, expected in (
+            (
+                {
+                    "held_initialization_passed": False,
+                    "valid_policy_input_step_count": 3,
+                },
+                "held_initialization_not_passed",
+            ),
+            (
+                {
+                    "held_initialization_passed": True,
+                    "valid_policy_input_step_count": 0,
+                },
+                "no_valid_policy_input_exposure",
+            ),
+        ):
+            start_valid, start_reason = start_status("held", evidence)
+            self.assertFalse(start_valid)
+            self.assertEqual(
+                invalid_reason(
+                    valid=False,
+                    finite=True,
+                    start_contract_invalid_reason=start_reason,
+                    evaluator_termination_reason="timeout",
+                ),
+                expected,
+            )
+
+    def test_valid_physical_failure_has_no_invalid_reason(self):
+        invalid_reason = _compiled_function("_evaluation_invalid_reason")
+
+        self.assertIsNone(
+            invalid_reason(
+                valid=True,
+                finite=True,
+                start_contract_invalid_reason=None,
+                evaluator_termination_reason="grasp_loss",
+            )
+        )
+        self.assertEqual(
+            invalid_reason(
+                valid=False,
+                finite=True,
+                start_contract_invalid_reason=None,
+                evaluator_termination_reason="sensor_invalid",
+            ),
+            "sensor_invalid",
+        )
+        self.assertEqual(
+            invalid_reason(
+                valid=False,
+                finite=False,
+                start_contract_invalid_reason="held_initialization_not_passed",
+                evaluator_termination_reason="timeout",
+            ),
+            "nonfinite_episode_metrics",
+        )
+
+
+class EvaluationStartCliContractTests(unittest.TestCase):
+    def test_held_start_is_rejected_for_toy_or_without_rj45_held_proof(self):
+        error = _compiled_function("_evaluation_start_configuration_error")
+
+        self.assertEqual(
+            error("toy", "held", True),
+            "--evaluation-start held requires --task rj45",
+        )
+        self.assertEqual(
+            error("rj45", "held", False),
+            "held RJ45 evaluation requires --rj45-held-state",
+        )
+        self.assertIsNone(error("rj45", "held", True))
+        self.assertIsNone(error("rj45", "table", False))
 
 
 if __name__ == "__main__":

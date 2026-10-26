@@ -329,6 +329,8 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             "_training_step_snapshot"
         )
         environment = SimpleNamespace(
+            _training_held_initialization_passed=torch.tensor([False, True]),
+            _training_valid_policy_input_step_count=torch.tensor([0, 10]),
             _training_last_policy_observation=torch.arange(
                 2 * 79, dtype=torch.float32
             ).reshape(2, 79),
@@ -346,10 +348,14 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         environment._training_last_policy_observation.fill_(-1.0)
         environment._training_previous_action.fill_(-1.0)
         environment._actions.fill_(-1.0)
+        environment._training_held_initialization_passed.fill_(False)
+        environment._training_valid_policy_input_step_count.zero_()
 
         self.assertEqual(
             set(snapshot),
             {
+                "held_initialization_passed",
+                "valid_policy_input_step_count",
                 "policy_input_observation",
                 "policy_input_timestamp_s",
                 "policy_input_valid",
@@ -360,6 +366,8 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             },
         )
         self.assertEqual(snapshot["policy_input_observation"][1, 78].item(), 157.0)
+        self.assertEqual(snapshot["held_initialization_passed"].tolist(), [False, True])
+        self.assertEqual(snapshot["valid_policy_input_step_count"].tolist(), [0, 10])
         self.assertEqual(
             snapshot["requested_expanded_residual_action"][1, 11].item(),
             23.0,
@@ -368,6 +376,22 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             snapshot["applied_bounded_residual_action"][1, 11].item(),
             0.25,
         )
+
+    def test_policy_attribution_counts_valid_inputs_and_survives_terminal_grip_loss(self):
+        environment = SimpleNamespace(
+            _training_last_policy_observation_valid=torch.tensor([True, False, True]),
+            _training_held_initialization_passed=torch.tensor([True, True, True]),
+            _training_valid_policy_input_step_count=torch.tensor([4, 9, 12]),
+            _grip_proven=torch.zeros((3, 2), dtype=torch.bool),
+        )
+        count_step = _compiled_training_environment_method("_count_policy_input_step")
+        count_step(environment)
+        self.assertEqual(environment._training_valid_policy_input_step_count.tolist(), [5, 9, 13])
+        self.assertEqual(environment._training_held_initialization_passed.tolist(), [True] * 3)
+        reset = _compiled_training_environment_method("_reset_policy_attribution")
+        reset(environment, torch.tensor([1]))
+        self.assertEqual(environment._training_valid_policy_input_step_count.tolist(), [5, 0, 13])
+        self.assertEqual(environment._training_held_initialization_passed.tolist(), [True, False, True])
 
     def test_actual_restore_helper_writes_recorded_velocities_unchanged(self):
         calls = []

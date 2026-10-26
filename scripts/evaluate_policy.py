@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Evaluate a saved RSL-RL checkpoint with deterministic environment seeds."""
+"""Evaluate a learned RSL-RL policy or deterministic baseline with fixed seeds."""
 
 import argparse
 from importlib import metadata as importlib_metadata
@@ -114,6 +114,92 @@ def _rj45_terminal_attempt_metrics(snapshot, env_id: int) -> tuple[dict[str, obj
     return metrics, all_finite
 
 
+def _rj45_terminal_attempt_evidence(snapshot, env_id: int) -> dict[str, object]:
+    """Extract mandatory terminal state evidence for one environment."""
+
+    evidence: dict[str, object] = {}
+    for output_name, snapshot_key in (
+        ("training_policy_activated", "training_policy_activated"),
+        ("training_estimator_valid", "training_estimator_valid"),
+        ("policy_input_valid", "policy_input_valid"),
+        ("held_initialization_passed", "held_initialization_passed"),
+    ):
+        row_value = snapshot[snapshot_key][env_id]
+        if row_value.numel() != 1 or type(row_value.item()) is not bool:
+            raise ValueError(f"terminal evidence {snapshot_key} must be scalar bool")
+        evidence[output_name] = row_value.item()
+    for output_name, snapshot_key in (
+        ("controller_grip_proven", "controller_grip_proven"),
+        ("evaluation_grip_proven", "grip_proven"),
+    ):
+        row_values = snapshot[snapshot_key][env_id].detach().cpu().tolist()
+        if (
+            not isinstance(row_values, list)
+            or len(row_values) != 2
+            or any(type(value) is not bool for value in row_values)
+        ):
+            raise ValueError(f"terminal evidence {snapshot_key} must contain two bools")
+        evidence[output_name] = row_values
+    count_value = snapshot["valid_policy_input_step_count"][env_id]
+    if (
+        count_value.numel() != 1
+        or type(count_value.item()) is not int
+        or count_value.item() < 0
+    ):
+        raise ValueError(
+            "terminal evidence valid_policy_input_step_count must be a non-negative integer"
+        )
+    evidence["valid_policy_input_step_count"] = count_value.item()
+    return evidence
+
+
+def _rj45_start_contract_status(
+    evaluation_start: str, terminal_evidence: dict[str, object]
+) -> tuple[bool, str | None]:
+    """Validate held-start initialization and policy exposure without outcome bias."""
+
+    if evaluation_start == "table":
+        return True, None
+    if evaluation_start != "held":
+        raise ValueError("unsupported RJ45 evaluation start")
+    if terminal_evidence["held_initialization_passed"] is not True:
+        return False, "held_initialization_not_passed"
+    valid_input_steps = terminal_evidence["valid_policy_input_step_count"]
+    if type(valid_input_steps) is not int or valid_input_steps <= 0:
+        return False, "no_valid_policy_input_exposure"
+    return True, None
+
+
+def _evaluation_invalid_reason(
+    *,
+    valid: bool,
+    finite: bool,
+    start_contract_invalid_reason: str | None,
+    evaluator_termination_reason: str,
+) -> str | None:
+    """Return one invalidity reason while preserving the physical termination reason."""
+
+    if valid:
+        return None
+    if not finite:
+        return "nonfinite_episode_metrics"
+    if start_contract_invalid_reason is not None:
+        return start_contract_invalid_reason
+    return evaluator_termination_reason
+
+
+def _evaluation_start_configuration_error(
+    task: str, evaluation_start: str, held_state_supplied: bool
+) -> str | None:
+    """Return a pre-launch CLI error for an invalid evaluation start contract."""
+
+    if evaluation_start == "held" and task != "rj45":
+        return "--evaluation-start held requires --task rj45"
+    if task == "rj45" and evaluation_start == "held" and not held_state_supplied:
+        return "held RJ45 evaluation requires --rj45-held-state"
+    return None
+
+
 def _configure_verified_parallel_rj45_task(
     cfg,
     task,
@@ -219,7 +305,7 @@ parser.add_argument("--report", type=Path, default=Path("artifacts/evaluation.js
 parser.add_argument(
     "--rj45-nominal-evidence",
     type=Path,
-    help="Completed current-source RJ45 nominal run report used to authorize the checkpoint.",
+    help="Completed current-source RJ45 nominal run report used to authorize evaluation.",
 )
 parser.add_argument(
     "--rj45-training-config",
@@ -227,6 +313,12 @@ parser.add_argument(
     default=Path("configs/rj45-training-v1.json"),
 )
 parser.add_argument("--rj45-held-state", type=Path)
+parser.add_argument(
+    "--evaluation-start",
+    choices=("table", "held"),
+    default="table",
+    help="Start RJ45 attempts from the table scene or a verified held-grasp reset.",
+)
 parser.add_argument("--parallel-contact-evidence", type=Path)
 parser.add_argument(
     "--baseline-mode",
@@ -253,6 +345,11 @@ if args.seed is not None and args.seed < 0:
     parser.error("--seed must be non-negative")
 if args.task == "toy" and args.checkpoint is None:
     parser.error("toy evaluation requires a checkpoint")
+evaluation_start_error = _evaluation_start_configuration_error(
+    args.task, args.evaluation_start, args.rj45_held_state is not None
+)
+if evaluation_start_error is not None:
+    parser.error(evaluation_start_error)
 if args.task == "rj45" and args.baseline_mode == "learned" and args.checkpoint is None:
     parser.error("learned RJ45 evaluation requires a checkpoint")
 if args.task == "rj45" and args.baseline_mode == "learned" and args.rj45_held_state is None:
@@ -302,6 +399,7 @@ def _write_evaluation_failure_report(error: Exception) -> None:
         args.report,
         {
             "task_id": "rj45-v1" if args.task == "rj45" else "toy",
+            "evaluation_start": args.evaluation_start,
             "runtime_validated": False,
             "evaluation_valid": False,
             "input_immutability": (
@@ -414,6 +512,7 @@ def main() -> int:
     env_type = Rby1AssemblyEnv
     selected_task = input_snapshot.json_for(task_path)
     verified_checkpoint_evidence = None
+    held_state = None
     held_state_proof = None
     parallel_contact_evidence = None
     cfg.seed = (
@@ -440,7 +539,7 @@ def main() -> int:
         task = load_rj45_task(task_path)
         training_config = load_training_config(args.rj45_training_config)
         if args.rj45_held_state is not None:
-            _, held_state_proof = load_verified_held_grasp_artifact(
+            held_state, held_state_proof = load_verified_held_grasp_artifact(
                 PROJECT_ROOT, task, args.rj45_held_state
             )
         if parallel_spec_payload is not None:
@@ -564,7 +663,7 @@ def main() -> int:
         env_type = make_rj45_training_env_type(
             env_type,
             training_config,
-            held_state=None,
+            held_state=(held_state if args.evaluation_start == "held" else None),
             calibration_bias_enabled=args.baseline_mode != "oracle",
             bias_level=training_config["calibration_bias"]["initial_level"],
         )
@@ -572,6 +671,23 @@ def main() -> int:
     env = env_type(cfg)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=runner_cfg.get("clip_actions", 1.0))
     try:
+        evaluation_horizon_s = float(cfg.episode_length_s)
+        if args.task == "rj45":
+            expected_horizon_s = float(
+                training_config["active_horizon_s"]
+                if args.evaluation_start == "held"
+                else task["evaluation"]["timeout_s"]
+            )
+            if not math.isclose(
+                evaluation_horizon_s,
+                expected_horizon_s,
+                rel_tol=0.0,
+                abs_tol=1.0e-12,
+            ):
+                raise RuntimeError(
+                    "RJ45 evaluation horizon does not match the selected start state: "
+                    f"expected {expected_horizon_s}, got {evaluation_horizon_s}"
+                )
         if learned_mode:
             runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=None, device=env.device)
             runner.load(str(args.checkpoint))
@@ -632,6 +748,9 @@ def main() -> int:
                      "actual_lateral_error_m", "actual_orientation_error_rad"))
                 bias_finite = True
                 rj45_attempt_metrics = None
+                terminal_evidence = None
+                start_contract_valid = True
+                start_contract_invalid_reason = None
                 if args.task == "rj45":
                     rj45_attempt_metrics, rj45_metrics_finite = (
                         _rj45_terminal_attempt_metrics(snapshot, env_id)
@@ -646,7 +765,26 @@ def main() -> int:
                     )
                     finite = finite and bias_finite
                     finite = finite and int(snapshot["episode_index"][env_id].item()) >= 0
-                valid = finite and bool(extras["evaluation"]["valid"][env_id].item())
+                    terminal_evidence = _rj45_terminal_attempt_evidence(snapshot, env_id)
+                    start_contract_valid, start_contract_invalid_reason = (
+                        _rj45_start_contract_status(
+                            args.evaluation_start, terminal_evidence
+                        )
+                    )
+                valid = (
+                    finite
+                    and start_contract_valid
+                    and bool(extras["evaluation"]["valid"][env_id].item())
+                )
+                physical_termination_reason = str(
+                    extras["terminal_evaluation"]["termination_reason"][env_id]
+                )
+                invalid_reason = _evaluation_invalid_reason(
+                    valid=valid,
+                    finite=finite,
+                    start_contract_invalid_reason=start_contract_invalid_reason,
+                    evaluator_termination_reason=physical_termination_reason,
+                )
                 succeeded = valid and bool(extras["success"][env_id].item())
                 valid_successes += int(succeeded)
                 valid_failures += int(valid and not succeeded)
@@ -657,54 +795,75 @@ def main() -> int:
                     elapsed_times_s.append(elapsed)
                     recovery_attempts += int(retries > 0)
                     recovered_successes += int(retries > 0 and succeeded)
-                if not valid:
-                    reasons = extras["terminal_evaluation"]["termination_reason"]
-                    reason = str(reasons[env_id]) if finite else "nonfinite_episode_metrics"
-                    invalid_reasons[reason] = invalid_reasons.get(reason, 0) + 1
+                if invalid_reason is not None:
+                    invalid_reasons[invalid_reason] = (
+                        invalid_reasons.get(invalid_reason, 0) + 1
+                    )
                 if finite:
                     force_peaks.append(force_peak)
                 if args.task == "rj45":
                     episode_index = int(snapshot["episode_index"][env_id].item())
-                    episode_outcomes.append(
-                        {
-                            "attempt_index": attempts - 1,
-                            "environment_index": env_id,
-                            "episode_index": episode_index,
-                            "paired_condition": {
-                                "task_config_sha256": task["_config_sha256"],
-                                "base_evaluation_seed": cfg.seed,
-                                "environment_index": env_id,
-                                "episode_index": episode_index,
-                                "calibration_bias_level": training_config[
-                                    "calibration_bias"
-                                ]["initial_level"],
-                                "calibration_latent_case_seed": (
-                                    _calibration_bias_case_seed(
-                                        cfg.seed, env_id, episode_index
-                                    )
-                                    if episode_index >= 0
-                                    else None
-                                ),
-                                "calibration_latent_case_seed_formula": (
-                                    "base_seed + stream_offset + episode_index * "
-                                    "episode_stride + env_id"
-                                ),
+                    paired_condition = {
+                        "evaluation_start": args.evaluation_start,
+                        "task_config_sha256": task["_config_sha256"],
+                        "base_evaluation_seed": cfg.seed,
+                        "environment_index": env_id,
+                        "episode_index": episode_index,
+                        "calibration_bias_level": training_config["calibration_bias"][
+                            "initial_level"
+                        ],
+                        "calibration_latent_case_seed": (
+                            _calibration_bias_case_seed(cfg.seed, env_id, episode_index)
+                            if episode_index >= 0
+                            else None
+                        ),
+                        "calibration_latent_case_seed_formula": (
+                            "base_seed + stream_offset + episode_index * "
+                            "episode_stride + env_id"
+                        ),
+                    }
+                    paired_condition_id = json.dumps(
+                        paired_condition, sort_keys=True, separators=(",", ":"), allow_nan=False
+                    )
+                    outcome = {
+                        "attempt_index": attempts - 1,
+                        "environment_index": env_id,
+                        "episode_index": episode_index,
+                        "paired_condition": paired_condition,
+                        "paired_condition_id": paired_condition_id,
+                        "calibration_bias_translation_entry_m": (
+                            snapshot["calibration_bias_translation_entry_m"][env_id]
+                            .detach().cpu().tolist() if bias_finite else None
+                        ),
+                        "calibration_bias_rotation_vector_entry_rad": (
+                            snapshot["calibration_bias_rotation_vector_entry_rad"][env_id]
+                            .detach().cpu().tolist() if bias_finite else None
+                        ),
+                        "valid": valid,
+                        "success": succeeded,
+                        "termination_reason": physical_termination_reason,
+                        "invalid_reason": invalid_reason,
+                        **terminal_evidence,
+                        **rj45_attempt_metrics,
+                    }
+                    episode_outcomes.append(outcome)
+                    print(
+                        json.dumps(
+                            {
+                                "event": "rj45_evaluation_episode_accepted",
+                                "paired_condition_id": paired_condition_id,
+                                "paired_condition": paired_condition,
+                                "valid": valid,
+                                "success": succeeded,
+                                "termination_reason": outcome["termination_reason"],
+                                "invalid_reason": invalid_reason,
+                                "terminal_metrics": rj45_attempt_metrics,
+                                "terminal_evidence": terminal_evidence,
                             },
-                            "calibration_bias_translation_entry_m": (
-                                snapshot["calibration_bias_translation_entry_m"][env_id]
-                                .detach().cpu().tolist() if bias_finite else None
-                            ),
-                            "calibration_bias_rotation_vector_entry_rad": (
-                                snapshot["calibration_bias_rotation_vector_entry_rad"][env_id]
-                                .detach().cpu().tolist() if bias_finite else None
-                            ),
-                            "valid": valid,
-                            "success": succeeded,
-                            "termination_reason": str(
-                                extras["terminal_evaluation"]["termination_reason"][env_id]
-                            ),
-                            **rj45_attempt_metrics,
-                        }
+                            sort_keys=True,
+                            allow_nan=False,
+                        ),
+                        flush=True,
                     )
         valid_episodes = valid_successes + valid_failures
         build_report_path = input_snapshot.build_report_path
@@ -781,6 +940,8 @@ def main() -> int:
         }
         if args.task == "rj45":
             report["baseline_mode"] = args.baseline_mode
+            report["evaluation_start"] = args.evaluation_start
+            report["evaluation_horizon_s"] = evaluation_horizon_s
             report["per_environment_episode_quota"] = list(episode_quotas)
             report["per_environment_accepted_attempt_count"] = (
                 accepted_attempts_per_environment
@@ -797,7 +958,8 @@ def main() -> int:
             }
             report["episode_outcomes"] = episode_outcomes
             report["paired_condition_key"] = (
-                "task_config_sha256,base_evaluation_seed,environment_index,episode_index,"
+                "evaluation_start,task_config_sha256,base_evaluation_seed,"
+                "environment_index,episode_index,"
                 "calibration_bias_level,calibration_latent_case_seed,"
                 "calibration_latent_case_seed_formula"
             )

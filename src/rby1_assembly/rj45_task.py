@@ -15,6 +15,20 @@ import numpy as np
 _FRAME_NAMES = ("socket_entry", "plug_tip", "left_grasp", "right_grasp")
 _ASSET_NAMES = ("robot", "socket", "plug", "table", "build_report")
 _GENERATED_ASSET_NAMES = ("robot", "socket", "plug", "table")
+_HELD_GRASP_STABILITY_LIMIT_NAMES = (
+    "max_object_linear_speed_m_s",
+    "max_object_angular_speed_rad_s",
+    "max_revolute_joint_speed_rad_s",
+    "max_prismatic_joint_speed_m_s",
+    "max_revolute_tracking_error_rad",
+    "max_prismatic_tracking_error_m",
+)
+_PARALLEL_CONTACT_SOURCE_PATHS = (
+    "checks/probe_parallel_hand_contacts.py",
+    "src/rby1_assembly/isaac_env.py",
+    "src/rby1_assembly/hand_collision.py",
+    "src/rby1_assembly/contact_loads.py",
+)
 _APPROACH_WAYPOINT_GROUP = (
     "left_above_joint_positions_rad",
     "right_above_joint_positions_rad",
@@ -329,20 +343,69 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
     _validate_sha256(contract["training_config_sha256"], "training_config_sha256")
     held_proof = _mapping(contract["held_grasp_reset_proof"], "held_grasp_reset_proof")
     if set(held_proof) != {
-        "artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256", "selection_control_step"
+        "artifact_sha256",
+        "nominal_report_sha256",
+        "nominal_trace_sha256",
+        "selection_control_step",
+        "stability_limits",
     }:
         raise ValueError("held-grasp reset proof fields are incomplete or unexpected")
     for name in ("artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256"):
         _validate_sha256(held_proof[name], f"held_grasp_reset_proof.{name}")
     if type(held_proof["selection_control_step"]) is not int or held_proof["selection_control_step"] <= 0:
         raise ValueError("held-grasp selection control step must be positive")
+    stability_limits = _mapping(
+        held_proof["stability_limits"], "held_grasp_reset_proof.stability_limits"
+    )
+    if set(stability_limits) != set(_HELD_GRASP_STABILITY_LIMIT_NAMES):
+        raise ValueError("held-grasp stability limit fields are incomplete or unexpected")
+    for name in _HELD_GRASP_STABILITY_LIMIT_NAMES:
+        _number(
+            stability_limits[name],
+            f"held_grasp_reset_proof.stability_limits.{name}",
+            positive=True,
+        )
     parallel = contract["parallel_contact_evidence"]
     if parallel is not None:
         parallel = _mapping(parallel, "parallel_contact_evidence")
-        if parallel.get("schema_version") != 1 or parallel.get("validated_probe_num_envs") != 4:
+        expected_parallel_keys = {
+            "schema_version",
+            "validated_probe_num_envs",
+            "runtime_num_envs_requires_native_ordering_check",
+            "scope",
+            "report_sha256",
+            "trace_sha256",
+            "sat_report_sha256",
+            "trace_row_count",
+            "current_source_sha256",
+        }
+        if set(parallel) != expected_parallel_keys:
+            raise ValueError("parallel contact evidence fields are incomplete or unexpected")
+        if (
+            type(parallel["schema_version"]) is not int
+            or parallel["schema_version"] != 1
+            or type(parallel["validated_probe_num_envs"]) is not int
+            or parallel["validated_probe_num_envs"] != 4
+            or parallel["runtime_num_envs_requires_native_ordering_check"] is not True
+            or parallel["scope"]
+            != "4env routing proof; target num_envs runtime asserted; full task validation pending"
+        ):
             raise ValueError("parallel contact evidence metadata is invalid")
         for name in ("report_sha256", "trace_sha256", "sat_report_sha256"):
-            _validate_sha256(parallel.get(name), f"parallel_contact_evidence.{name}")
+            _validate_sha256(parallel[name], f"parallel_contact_evidence.{name}")
+        if type(parallel["trace_row_count"]) is not int or parallel["trace_row_count"] <= 0:
+            raise ValueError("parallel contact evidence trace row count must be positive")
+        source_sha256 = _mapping(
+            parallel["current_source_sha256"],
+            "parallel_contact_evidence.current_source_sha256",
+        )
+        if set(source_sha256) != set(_PARALLEL_CONTACT_SOURCE_PATHS):
+            raise ValueError("parallel contact evidence source fields are incomplete or unexpected")
+        for path in _PARALLEL_CONTACT_SOURCE_PATHS:
+            _validate_sha256(
+                source_sha256[path],
+                f"parallel_contact_evidence.current_source_sha256.{path}",
+            )
 
 
 def verify_runtime_versions(versions: dict[str, str], runtime: dict[str, Any]) -> None:

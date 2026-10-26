@@ -9,6 +9,7 @@ import unittest
 import numpy as np
 
 from rby1_assembly.rj45_task import (
+    _validate_rj45_training_contract,
     load_rj45_task,
     plug_root_goal_pose,
     relative_mating_velocity,
@@ -118,11 +119,41 @@ def valid_training_contract() -> dict:
             "nominal_report_sha256": "2" * 64,
             "nominal_trace_sha256": "3" * 64,
             "selection_control_step": 900,
+            "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005,
+            },
         },
         "training_config_sha256": "4" * 64,
         "parallel_contact_evidence": None,
         "learned_recovery": False,
         "retract_controller": "baseline_only",
+    }
+
+
+def valid_parallel_contact_evidence() -> dict:
+    return {
+        "schema_version": 1,
+        "validated_probe_num_envs": 4,
+        "runtime_num_envs_requires_native_ordering_check": True,
+        "scope": (
+            "4env routing proof; target num_envs runtime asserted; "
+            "full task validation pending"
+        ),
+        "report_sha256": "5" * 64,
+        "trace_sha256": "6" * 64,
+        "sat_report_sha256": "7" * 64,
+        "trace_row_count": 292,
+        "current_source_sha256": {
+            "checks/probe_parallel_hand_contacts.py": "8" * 64,
+            "src/rby1_assembly/isaac_env.py": "9" * 64,
+            "src/rby1_assembly/hand_collision.py": "a" * 64,
+            "src/rby1_assembly/contact_loads.py": "b" * 64,
+        },
     }
 
 
@@ -583,6 +614,153 @@ class Rj45ProvenanceTests(unittest.TestCase):
         ):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 verify(lineage, current)
+
+    def test_actual_v2_training_contract_schema_is_strictly_validated(self):
+        contract = valid_training_contract()
+        contract["parallel_contact_evidence"] = valid_parallel_contact_evidence()
+
+        _validate_rj45_training_contract(contract)
+
+        mutations = (
+            (
+                "missing_stability_limits",
+                lambda item: item["held_grasp_reset_proof"].pop("stability_limits"),
+            ),
+            (
+                "unknown_held_proof_field",
+                lambda item: item["held_grasp_reset_proof"].__setitem__("unknown", True),
+            ),
+            (
+                "missing_stability_limit",
+                lambda item: item["held_grasp_reset_proof"]["stability_limits"].pop(
+                    "max_object_linear_speed_m_s"
+                ),
+            ),
+            (
+                "unknown_stability_limit",
+                lambda item: item["held_grasp_reset_proof"]["stability_limits"].__setitem__(
+                    "unknown_m_s", 0.1
+                ),
+            ),
+            (
+                "zero_stability_limit",
+                lambda item: item["held_grasp_reset_proof"]["stability_limits"].__setitem__(
+                    "max_object_linear_speed_m_s", 0.0
+                ),
+            ),
+            (
+                "boolean_stability_limit",
+                lambda item: item["held_grasp_reset_proof"]["stability_limits"].__setitem__(
+                    "max_object_linear_speed_m_s", True
+                ),
+            ),
+            (
+                "nonfinite_stability_limit",
+                lambda item: item["held_grasp_reset_proof"]["stability_limits"].__setitem__(
+                    "max_object_linear_speed_m_s", math.inf
+                ),
+            ),
+            (
+                "unknown_parallel_field",
+                lambda item: item["parallel_contact_evidence"].__setitem__(
+                    "unknown", True
+                ),
+            ),
+            (
+                "missing_parallel_source",
+                lambda item: item["parallel_contact_evidence"][
+                    "current_source_sha256"
+                ].pop("src/rby1_assembly/contact_loads.py"),
+            ),
+            (
+                "boolean_trace_rows",
+                lambda item: item["parallel_contact_evidence"].__setitem__(
+                    "trace_row_count", True
+                ),
+            ),
+        )
+        for name, mutate in mutations:
+            damaged = copy.deepcopy(contract)
+            mutate(damaged)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
+
+        sha_locations = (
+            ("held_grasp_reset_proof", "artifact_sha256"),
+            ("held_grasp_reset_proof", "nominal_report_sha256"),
+            ("held_grasp_reset_proof", "nominal_trace_sha256"),
+            ("parallel_contact_evidence", "report_sha256"),
+            ("parallel_contact_evidence", "trace_sha256"),
+            ("parallel_contact_evidence", "sat_report_sha256"),
+        )
+        for container, name in sha_locations:
+            damaged = copy.deepcopy(contract)
+            damaged[container][name] = "BAD"
+            with self.subTest(sha=f"{container}.{name}"), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
+        for path in valid_parallel_contact_evidence()["current_source_sha256"]:
+            damaged = copy.deepcopy(contract)
+            damaged["parallel_contact_evidence"]["current_source_sha256"][path] = "BAD"
+            with self.subTest(source_sha=path), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
+
+    def test_actual_v2_provenance_shape_passes_full_lineage_validation(self):
+        digest = {
+            "configs/ppo-rj45-v1.json": "a" * 64,
+            "scripts/train.py": "b" * 64,
+            "src/rby1_assembly/rj45_training_env.py": "c" * 64,
+        }
+        evidence = {
+            "report_sha256": "d" * 64,
+            "trace_sha256": "e" * 64,
+            "trace_records": 981,
+        }
+        training_contract = valid_training_contract()
+        training_contract["parallel_contact_evidence"] = valid_parallel_contact_evidence()
+        runtime = {
+            "runtime_versions": {
+                "isaacsim": "5.1.0.0",
+                "isaaclab": "0.47.2",
+                "torch": "2.7.0+cu128",
+            },
+            "physics_dt_s": 1 / 120,
+            "control_decimation": 4,
+            "control_dt_s": 1 / 30,
+            "observation_noise": {
+                "distribution": (
+                    "independent_zero_mean_gaussian_position_and_rotation_vector"
+                ),
+                "position_std_m": 0.0005,
+                "rotation_vector_std_rad": 0.002,
+            },
+            "baseline_controller_state_source": (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+            ),
+            "task_config_path": "configs/tasks/rj45-v1.json",
+            "policy_config_path": "configs/ppo-rj45-v1.json",
+            "collision_monitor_mode": "passive_parallel_native_ordering_verified",
+            "num_envs": 64,
+            "rj45_training_contract": training_contract,
+        }
+        lineage = {
+            "schema_version": 1,
+            "seed": 20261026,
+            "task_id": "rj45-v1",
+            "task_config_sha256": "f" * 64,
+            "source_and_config_sha256": digest,
+            "checkpoint_scope": "checkpoints created in this run directory",
+            "rj45_nominal_evidence": evidence,
+            **runtime,
+        }
+
+        verify_checkpoint_lineage(
+            lineage,
+            task_id="rj45-v1",
+            task_config_sha256="f" * 64,
+            source_sha256=digest,
+            runtime_contract=runtime,
+            rj45_nominal_evidence=evidence,
+        )
 
     def test_checkpoint_lineage_requires_exact_rj45_training_contract(self):
         digest = {"src/rby1_assembly/rj45_training_env.py": "a" * 64}

@@ -150,6 +150,8 @@ def _terminal_snapshot():
         "policy_input_valid": torch.tensor([True]),
         "training_estimator_valid": torch.tensor([True]),
         "training_policy_activated": torch.tensor([True]),
+        "held_initialization_passed": torch.tensor([True]),
+        "valid_policy_input_step_count": torch.tensor([13]),
         "requested_expanded_residual_action": requested_action,
         "applied_bounded_residual_action": applied_action,
     }
@@ -176,6 +178,8 @@ class RunSimTrainingTraceTests(unittest.TestCase):
         self.assertTrue(environment["policy_input_valid"])
         self.assertTrue(environment["training_estimator_valid"])
         self.assertTrue(environment["training_policy_activated"])
+        self.assertTrue(environment["held_initialization_passed"])
+        self.assertEqual(environment["valid_policy_input_step_count"], 13)
         self.assertEqual(
             environment["requested_expanded_residual_action"],
             snapshot["requested_expanded_residual_action"][0].tolist(),
