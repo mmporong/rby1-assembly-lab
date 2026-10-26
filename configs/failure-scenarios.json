@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "scope": "scripted command-fault demonstrations; simulation design assumptions, not learned-policy evaluations",
+  "right_gripper_open": {
+    "trigger_min_plug_height_m": 0.86
+  },
+  "insertion_lateral_disturbance": {
+    "trigger_insertion_depth_m": 0.008,
+    "max_position_error_command_m": 0.0075,
+    "ramp_duration_s": 1.0
+  },
+  "hand_collision": {
+    "target_wrist_position_world_m": [
+      0.35,
+      0.0,
+      1.2
+    ],
+    "max_cartesian_error_m": 0.01
+  }
+}

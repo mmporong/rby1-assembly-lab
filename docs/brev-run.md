@@ -69,7 +69,7 @@ Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 
 
 ## 확인한 실행 범위
 
-2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 로컬 Python 3.11 + USD 검사 환경의 일반 테스트 62개와 Torch 기반 제어·접촉 계산 테스트 19개가 통과했다.
+2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 현재 로컬 Python 3.11 + USD 검사 환경의 일반 테스트 76개와 Torch 기반 제어·접촉 계산 테스트 25개가 통과했다.
 
 기준 성공 실행 22의 단일 환경 zero-residual 제어기는 고정 조인트나 물체 자세 덮어쓰기 없이 네 손가락의 마찰 접촉을 유지했다. 두 부품을 각각 초기 높이보다 15 mm 이상 들어 올린 뒤 실제 삽입 깊이 30.66 mm, 횡오차 1.08 mm, 유지 시간 0.4초로 44.07초에 독립 성공 판정을 통과했다. 실행 seed는 `20261025`이며 근거 묶음은 `docs/evidence/nominal-baseline.json`에 있다.
 
@@ -77,7 +77,7 @@ Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 
 
 근접 촬영 실행 24와 전체 구도 실행 25는 같은 성공 동작을 다시 기록했다. 공식 Isaac Simple Room을 충돌 없는 시각 배경으로 사용하며, 근접 카메라의 원본은 1280×960·120 fps다. 공유용 4배속 근접 영상과 정상 속도 전체 구도 영상은 H.264·60 fps이며 각각 약 13초와 44초다. 이전 30 fps 4배속 편집보다 표시 프레임 사이의 시뮬레이션 시간 간격이 절반으로 줄었다. 이 카메라는 관찰용 viewer이며 제어 입력이 아니다. 프레임 수·타임스탬프·소스 해시·기존 성공 trace 대조 결과는 [영상 검사 근거](evidence/video-cadence.json)에 있다.
 
-기준선 기록 `baseline-rollouts-final.h5`는 서로 다른 3개 seed가 모두 독립 성공·유효 판정을 통과했다. 결정적 분할은 train 2개·eval 1개이며 학습 가능 episode는 train 2개다. 각 episode의 source hash와 함께 보관한 원본 source archive도 검증했다. 정확한 파일 경로·hash·episode 수치의 정본은 [기준선 데이터 근거](evidence/baseline-dataset.json)다. 최종 기록의 소스·설정·에셋 해시는 현재 파일과 모두 일치한다. 평가기 불일치를 발견했던 초기 HDF5는 진단용으로 보존한다.
+기준선 기록 `baseline-rollouts-final.h5`는 서로 다른 3개 seed가 모두 독립 성공·유효 판정을 통과했다. 결정적 분할은 train 2개·eval 1개이며 학습 가능 episode는 train 2개다. 각 episode의 source hash와 함께 보관한 원본 source archive도 검증했다. 정확한 파일 경로·hash·episode 수치의 정본은 [기준선 데이터 근거](evidence/baseline-dataset.json)다. 기록 당시의 소스·설정·에셋 해시와 원본 소스 묶음을 보관한다. 평가기 불일치를 발견했던 초기 HDF5는 진단용으로 보존한다.
 
 PPO v2 runtime smoke는 `artifacts/cloud/ppo-smoke-v2/2026-10-25_08-02-57`에서 4환경·1 iteration·환경당 24 step, 총 96 transition을 실행했다. 프로세스는 exit 0으로 끝났고 체크포인트 tensor는 모두 유한했으며 optimizer 상태와 parameter update를 확인했다. 초기 episode 일부만 지난 실행이므로 조립 성공률이나 잔차 정책 성능의 근거가 아니다.
 
@@ -135,6 +135,32 @@ OMNI_KIT_ACCEPT_EULA=YES python scripts/train.py --headless --num-envs 64 --max-
 ```
 
 체크포인트 선택과 평가 조건은 실험 전에 고정한다. `scripts/evaluate_policy.py`는 체크포인트 경로와 별도 평가 seed를 받는다. 현재 확인한 1-iteration smoke를 학습 완료나 성공률로 기록하지 않는다. 잼 난이도를 고정한 뒤 여러 학습 seed로 규모를 늘리고, 학습에 쓰지 않은 조건에서 zero-residual 기준 제어와 비교해야 한다.
+
+## 명령 오류로 실패 재현
+
+실패 촬영은 학습 정책 평가와 분리한 단일 환경 음성 시험이다. `configs/failure-scenarios.json`에 조건을 고정하고 `--command-fault`로 선택한다. 파지한 오른손을 여는 `right_gripper_open`과, 공중에서 양손에 같은 목표를 주는 `hand_collision`이 공개 영상의 두 사례다. `insertion_lateral_disturbance`는 삽입 정체를 조사한 진단 옵션이며 대표 실패 영상에는 쓰지 않는다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/run_sim.py \
+  --headless --enable_cameras --num-envs 1 --background \
+  --camera-view assembly --video-fps 120 --command-fault hand_collision \
+  --trace artifacts/failure-hands.jsonl --video artifacts/failure-hands.mp4 \
+  --report artifacts/failure-hands.json
+python3 scripts/export_failure_media.py \
+  --report artifacts/failure-hands.json --trace artifacts/failure-hands.jsonl \
+  --video artifacts/failure-hands.mp4 \
+  --output artifacts/failure-hands-60fps.mp4 \
+  --metadata artifacts/failure-hands-60fps.json
+```
+
+원격 촬영은 Isaac 환경을 사용하고, 마지막 편집 명령은 FFmpeg·OpenCV·Pillow와 Noto CJK 글꼴이 있는 로컬 편집 환경에서 실행할 수 있다. 원본·보고서·trace를 같은 경로로 회수해 해시를 확인한다.
+
+명령 오류 시험의 trace는 제어 단계마다 기록한다. `--trace-every`는 일반 실행의 기록 간격을 바꾸며, 명령 오류 시험에서는 1만 허용한다. 촬영은 물리 120 Hz의 실제 프레임을 사용하고, 편집본은 0.5배속·60 fps로 재생한다. 마지막 정지 화면 외에 동작 프레임을 복제하거나 보간하지 않는다. 측정값은 표시 프레임 시각보다 늦지 않은 최신 관측값을 유지한다.
+
+양손 충돌 전용 환경은 runtime 복제본에서 자체 충돌을 켜고 66개 강체 중 좌우 그리퍼 9쌍만 충돌을 허용한다. 나머지 내부 2,136쌍은 필터링하며 외부 접촉 관계와 원본 USD는 유지한다. 왼쪽 손바닥·두 손가락에서 오른손 3개 강체로의 접촉 법선 하중을 합산하고, 외부 금지 접촉과 구분한다. 기존 1 N 금지 접촉 모니터에는 두 하중의 최댓값을 제공한다. 명령 전 접촉 0 N, 양손 간격 감소, 실제 양손 하중 1 N 초과, 외부 금지 접촉 1 N 이하와 `forbidden_contact` 종료를 채택 조건으로 삼는다. 관절 속도의 비유한 값과 잘못된 접촉 버퍼는 실행을 실패 처리한다.
+
+파지 해제 시험은 관절 목표만 OPEN으로 바꾸며 물체·센서·판정값을 변경하지 않는다. 관측된 낙하량과 연속 파지 소실 시간, 기존 모니터의 `grasp_lost` 판정을 함께 기록한다. 각 영상의 설정·실측·소스 해시 정본은 [실패 근거](evidence/failure-cases.json)와 편집본 옆 JSON이다.
 
 ## 회수와 종료
 

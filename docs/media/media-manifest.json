@@ -1,5 +1,5 @@
 {
-  "scope": "actual Isaac Sim nominal-baseline media; no learned-policy or sim-to-real result",
+  "scope": "actual Isaac Sim nominal success and deliberate command-fault negative-test media; no learned-policy or sim-to-real result",
   "media": [
     {
       "file": "nominal-baseline-4x-60fps.mp4",
@@ -121,198 +121,120 @@
       "bytes": 203972
     },
     {
-      "file": "failure-early-01.mp4",
-      "kind": "historical_debug_failure",
-      "source_run": "03",
-      "sha256": "252fb38663c1a92609889acaeb1d6a9b1aa67fce517c7e43b8e56cc52be7d7c4",
-      "bytes": 402873,
+      "file": "failure-gripper-open-60fps.mp4",
+      "sha256": "88c5e2a998e6bd3dafaac36fb585121b973837c8ec1da227fa8489d2298e7c33",
+      "bytes": 837438,
       "ffprobe": {
         "programs": [],
         "streams": [
           {
-            "width": 1280,
-            "height": 720,
-            "avg_frame_rate": "30/1",
-            "nb_frames": "39"
+            "codec_name": "h264",
+            "width": 1600,
+            "height": 900,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "393"
           }
         ],
         "format": {
-          "duration": "1.300000",
-          "size": "402873"
+          "duration": "6.550000",
+          "size": "837438"
         }
       },
-      "report": {
-        "completed": false,
-        "physics_backend": "PhysX via Isaac Sim",
-        "observation_source": "simulator_state_with_noise",
-        "baseline_controller_state_source": "simulator_ground_truth",
-        "phase_gate_state_source": "simulator_ground_truth",
-        "contact_force_source": "contact_force_proxy",
-        "num_envs": 1,
-        "steps_requested": 900,
-        "actual_steps": 39,
-        "max_contact_force_proxy_n": 0.0,
-        "visual_background_enabled": false,
-        "trace_path": "artifacts/cloud/physics-trace-03.jsonl",
-        "trace_record_count": 5,
-        "video_path": "artifacts/cloud/physics-03.mp4",
-        "video_frame_count": 39,
-        "video_fps": 30.0,
-        "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
-        "video_terminal_step_frames_omitted": 1,
-        "last_pre_autoreset_phase_counts": {
-          "pregrasp": 0,
-          "close": 0,
-          "check_lift": 0,
-          "align": 0,
-          "insert": 0,
-          "retract": 0,
-          "done": 0,
-          "abort": 1
+      "frame_analysis": {
+        "decoded_frames": 393,
+        "pts_delta_min_s": 0.016665999999999848,
+        "pts_delta_max_s": 0.0166670000000001,
+        "intentional_end_hold_frames": 180,
+        "active_exact_duplicate_pairs_at_160x90": 0,
+        "full_decode_errors": 0,
+        "faststart_moov_before_mdat": true
+      },
+      "metadata": "failure-gripper-open-60fps.json",
+      "metadata_sha256": "33807a2bcccb908be4caf69f5a6132c6d86acd12f62e5699eeaa65df122f5307",
+      "scope": "검증용 명령 오류 실험 · 실제 PhysX 접촉 · 학습 정책 없음",
+      "source": {
+        "video": {
+          "path": "artifacts/cloud/failure-gripper-open.mp4",
+          "sha256": "c934d3120c66297bb38f9f99e016b9a5eb636574a4b737333d6b767a8343305a",
+          "width": 1280,
+          "height": 960,
+          "fps": 120.0,
+          "frame_count": 2176,
+          "duration_s": 18.133333,
+          "codec_name": "h264",
+          "pix_fmt": "yuv420p"
         },
-        "terminal_phase_counts": {
-          "pregrasp": 0,
-          "close": 0,
-          "check_lift": 0,
-          "align": 0,
-          "insert": 0,
-          "retract": 0,
-          "done": 0,
-          "abort": 1
+        "report": {
+          "path": "artifacts/cloud/failure-gripper-open.json",
+          "sha256": "f7ebaa27503969088e18af71ede4e70b6f59a9a4c2ba27c2a53a15511331dceb"
         },
-        "grip_proof_peak_count": 0,
-        "runtime_validated": true,
-        "provenance": {
-          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
-          "physics_dt_s": 0.008333333333333333,
-          "control_decimation": 4,
-          "control_dt_s": 0.03333333333333333,
-          "seed": 20261025,
-          "seed_source": "configs/task.json:data.train_seed",
-          "task_config_sha256": "ce645ba7ac782466a87c31dedb66e3ea0bb6b1cae7db07a7b87f460acddf7749",
-          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
-          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
-          "build_report_sha256": "34891e52142e3a295c31112fd60372f428b90625123a12096dd6801cfb01972c",
-          "source_sha256": {
-            "src/rby1_assembly/isaac_env.py": "9491e508ba6a729c06ea298cd939d8f5d471323395f327455367ad4d084e2f95",
-            "scripts/run_sim.py": "580c8cb1f43cdebe392a2c972fcdd340f47e6d96869c4437eccbb1d33782bb81"
-          },
-          "generated_asset_sha256": {
-            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
-            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
-            "scene.usda": "dce556a19325523a6e71ab121efc092e45a28bb6200f45a41ab10059cf9cf20b",
-            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
-            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
-          },
-          "torch_version": "2.7.0+cu128"
+        "trace": {
+          "path": "artifacts/cloud/failure-gripper-open.jsonl",
+          "sha256": "a2ffb5853c0fd8bd5075f48829d73072dc1455a6875f492a35542163c9ac15ff"
         }
       },
-      "scope": "early controller debugging failure; not current policy or jam-recovery evaluation"
+      "playback_multiplier": 0.5,
+      "kind": "scripted_command_fault_negative_test"
     },
     {
-      "file": "failure-early-02.mp4",
-      "kind": "historical_debug_failure",
-      "source_run": "07",
-      "sha256": "ff9bd9578378c0b37819050044f20f84f0b1e89f0cf933959cb4241cd318b9d3",
-      "bytes": 561323,
+      "file": "failure-hand-collision-60fps.mp4",
+      "sha256": "5b2664218a5655e2d34d629f2247d957abe9507888ff44b7e20b65799ba525b5",
+      "bytes": 1044706,
       "ffprobe": {
         "programs": [],
         "streams": [
           {
-            "width": 960,
-            "height": 720,
-            "avg_frame_rate": "30/1",
-            "nb_frames": "601"
+            "codec_name": "h264",
+            "width": 1600,
+            "height": 900,
+            "pix_fmt": "yuv420p",
+            "r_frame_rate": "60/1",
+            "avg_frame_rate": "60/1",
+            "nb_frames": "540"
           }
         ],
         "format": {
-          "duration": "20.033333",
-          "size": "561323"
+          "duration": "9.000000",
+          "size": "1044706"
         }
       },
-      "report": {
-        "completed": false,
-        "physics_backend": "PhysX via Isaac Sim",
-        "observation_source": "simulator_state_with_noise",
-        "baseline_controller_state_source": "simulator_ground_truth",
-        "phase_gate_state_source": "simulator_ground_truth",
-        "contact_force_source": "contact_force_proxy",
-        "num_envs": 1,
-        "steps_requested": 900,
-        "actual_steps": 601,
-        "max_contact_force_proxy_n": 1.5565418004989624,
-        "visual_background_enabled": false,
-        "trace_path": "artifacts/cloud/physics-trace-07.jsonl",
-        "trace_record_count": 62,
-        "video_path": "artifacts/cloud/physics-07.mp4",
-        "video_frame_count": 601,
-        "video_fps": 30.0,
-        "video_terminal_step_frame_policy": "omitted_because_env_step_returns_after_terminal_autoreset",
-        "video_terminal_step_frames_omitted": 1,
-        "video_camera": {
-          "eye_world_m": [
-            2.2,
-            -2.0,
-            1.8
-          ],
-          "lookat_world_m": [
-            0.35,
-            0.0,
-            0.9
-          ],
-          "resolution_px": [
-            960,
-            720
-          ]
+      "frame_analysis": {
+        "decoded_frames": 540,
+        "pts_delta_min_s": 0.01666599999999896,
+        "pts_delta_max_s": 0.0166670000000001,
+        "intentional_end_hold_frames": 180,
+        "active_exact_duplicate_pairs_at_160x90": 0,
+        "full_decode_errors": 0,
+        "faststart_moov_before_mdat": true
+      },
+      "metadata": "failure-hand-collision-60fps.json",
+      "metadata_sha256": "b8f4a6fb042b18c6699c06f2b10e55502ea88990a3f19744dbb9b1e15ebc4ee6",
+      "scope": "양손 간 실제 PhysX 접촉 · 검증용 잘못된 수렴 명령 · 학습 정책 없음",
+      "source": {
+        "video": {
+          "path": "artifacts/cloud/failure-hands.mp4",
+          "sha256": "cb362d86eee30d3bf4079a8a2c998de6fdee893ea1f5d42079b62594eaf3dd87",
+          "width": 1280,
+          "height": 960,
+          "fps": 120.0,
+          "frame_count": 2240,
+          "duration_s": 18.666667,
+          "codec_name": "h264",
+          "pix_fmt": "yuv420p"
         },
-        "last_pre_autoreset_phase_counts": {
-          "pregrasp": 0,
-          "close": 0,
-          "check_lift": 0,
-          "align": 0,
-          "insert": 0,
-          "retract": 0,
-          "done": 0,
-          "abort": 1
+        "report": {
+          "path": "artifacts/cloud/failure-hands.json",
+          "sha256": "512ebf379ac539acf0bd281887fa19f19e748ebdf46c942d54dd461a1d0a4bbd"
         },
-        "terminal_phase_counts": {
-          "pregrasp": 0,
-          "close": 0,
-          "check_lift": 0,
-          "align": 0,
-          "insert": 0,
-          "retract": 0,
-          "done": 0,
-          "abort": 1
-        },
-        "grip_proof_peak_count": 0,
-        "runtime_validated": true,
-        "provenance": {
-          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
-          "physics_dt_s": 0.008333333333333333,
-          "control_decimation": 4,
-          "control_dt_s": 0.03333333333333333,
-          "seed": 20261025,
-          "seed_source": "configs/task.json:data.train_seed",
-          "task_config_sha256": "aaa1073dd6505d92234e66dd27922b00bddf9722b49188e3333d08adb0be9517",
-          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
-          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
-          "build_report_sha256": "6a20147d2436e49f8295664e476ee7c7d3d4220e6ea7460a0e75a7b949f82258",
-          "source_sha256": {
-            "src/rby1_assembly/isaac_env.py": "44f3252e6b2de12525f7c1a604942e979ce606d7eed1d93f96dbe0b658f01d09",
-            "scripts/run_sim.py": "80f15ceb26dca2287802fdb0e7003f766bf2620f5d0cbc4b5e103020f328c633"
-          },
-          "generated_asset_sha256": {
-            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
-            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
-            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
-            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
-            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
-          },
-          "torch_version": "2.7.0+cu128"
+        "trace": {
+          "path": "artifacts/cloud/failure-hands.jsonl",
+          "sha256": "832c3fdfdb42ea838685db852fbf117ddf0f3a6900303728a45df83223feeefb"
         }
       },
-      "scope": "early controller debugging failure; not current policy or jam-recovery evaluation"
+      "playback_multiplier": 0.5,
+      "kind": "scripted_command_fault_negative_test"
     }
   ],
   "success_evidence": "../evidence/nominal-baseline.json",
@@ -505,5 +427,25 @@
       "resampling": "native rendered frames selected at uniform timestamps; no generated/interpolated motion frames"
     }
   ],
-  "video_cadence_evidence": "../evidence/video-cadence.json"
+  "video_cadence_evidence": "../evidence/video-cadence.json",
+  "archived_historical_failure_media": [
+    {
+      "file": "failure-early-01.mp4",
+      "kind": "historical_debug_failure",
+      "source_run": "03",
+      "sha256": "252fb38663c1a92609889acaeb1d6a9b1aa67fce517c7e43b8e56cc52be7d7c4",
+      "bytes": 402873,
+      "local_archive_path": "artifacts/cloud/previous-early-failures/failure-early-01.mp4"
+    },
+    {
+      "file": "failure-early-02.mp4",
+      "kind": "historical_debug_failure",
+      "source_run": "07",
+      "sha256": "ff9bd9578378c0b37819050044f20f84f0b1e89f0cf933959cb4241cd318b9d3",
+      "bytes": 561323,
+      "local_archive_path": "artifacts/cloud/previous-early-failures/failure-early-02.mp4"
+    }
+  ],
+  "failure_evidence": "../evidence/failure-cases.json",
+  "failure_capture_note": "The two negative tests use command faults and measured PhysX outcomes. Each native source is 120 fps and shown at 0.5x/60 fps without synthesized or duplicated motion frames. The final 3 s holds the terminal frame. Raw data, source archives and trace hashes are recorded in failure-cases.json."
 }

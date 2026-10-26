@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "scope": "read-only presentation export of recorded command-fault evidence",
+  "scenario": "right_gripper_open",
+  "title_ko": "오른쪽 그리퍼 OPEN 명령 오류",
+  "disclosure_ko": "검증용 명령 오류 실험 · 실제 PhysX 접촉 · 학습 정책 없음",
+  "source": {
+    "video": {
+      "path": "artifacts/cloud/failure-gripper-open.mp4",
+      "sha256": "c934d3120c66297bb38f9f99e016b9a5eb636574a4b737333d6b767a8343305a",
+      "width": 1280,
+      "height": 960,
+      "fps": 120.0,
+      "frame_count": 2176,
+      "duration_s": 18.133333,
+      "codec_name": "h264",
+      "pix_fmt": "yuv420p"
+    },
+    "report": {
+      "path": "artifacts/cloud/failure-gripper-open.json",
+      "sha256": "f7ebaa27503969088e18af71ede4e70b6f59a9a4c2ba27c2a53a15511331dceb"
+    },
+    "trace": {
+      "path": "artifacts/cloud/failure-gripper-open.jsonl",
+      "sha256": "a2ffb5853c0fd8bd5075f48829d73072dc1455a6875f492a35542163c9ac15ff"
+    }
+  },
+  "exporter": {
+    "path": "scripts/export_failure_media.py",
+    "sha256": "b6b7dbd1bfe57923ae300f4d00765cab510c6e95218e15ce1f35b8a796f58dbd"
+  },
+  "clip": {
+    "source_start_frame": 1963,
+    "source_last_frame": 2175,
+    "source_start_simulation_time_s": 16.366666666666667,
+    "fault_simulation_time_s": 17.866666666666667,
+    "terminal_simulation_time_s": 18.13333511352539,
+    "max_motion_window_s": null,
+    "clip_selection_policy": "fault_event_minus_1.5s_through_terminal",
+    "playback_speed": 0.5,
+    "output_fps": 60,
+    "output_frame_count": 393,
+    "final_hold_s": 3.0,
+    "native_frame_policy": "source frames only; every 1 native frame selected; no interpolation; terminal source frame held for summary",
+    "trace_alignment_policy": "latest 30 Hz observation at or before each native source-frame simulation time"
+  },
+  "fault_parameters": {
+    "trigger_min_plug_height_m": 0.86
+  },
+  "forbidden_contact_force_threshold_n": 1.0,
+  "design_reference": {
+    "task_config_path": "configs/task.json",
+    "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+    "assembled_target_depth_m": 0.03
+  },
+  "actual_termination_reason": "grasp_lost",
+  "output": {
+    "path": "docs/media/failure-gripper-open-60fps.mp4",
+    "sha256": "88c5e2a998e6bd3dafaac36fb585121b973837c8ec1da227fa8489d2298e7c33",
+    "width": 1600,
+    "height": 900,
+    "fps": 60.0,
+    "frame_count": 393,
+    "duration_s": 6.55,
+    "codec_name": "h264",
+    "pix_fmt": "yuv420p"
+  },
+  "reproduction_command": "/usr/bin/python3 scripts/export_failure_media.py --report artifacts/cloud/failure-gripper-open.json --trace artifacts/cloud/failure-gripper-open.jsonl --video artifacts/cloud/failure-gripper-open.mp4 --output docs/media/failure-gripper-open-60fps.mp4 --metadata docs/media/failure-gripper-open-60fps.json --focus-crop 440 450 320 240"
+}

@@ -28,6 +28,9 @@ parser.add_argument(
 parser.add_argument("--seed", type=int, help="Override configs/task.json data.train_seed.")
 parser.add_argument("--report", type=Path, default=Path("artifacts/smoke_report.json"))
 parser.add_argument("--trace", type=Path, help="Write sampled controller and physics state as JSONL.")
+parser.add_argument("--trace-every", type=int, help="Trace every N control steps; default 10, or 1 for command-fault tests.")
+parser.add_argument("--command-fault", choices=("right_gripper_open", "insertion_lateral_disturbance", "hand_collision"))
+parser.add_argument("--command-fault-config", type=Path, default=Path("configs/failure-scenarios.json"))
 parser.add_argument("--video", type=Path, help="Write the rendered single-environment run as a video.")
 parser.add_argument("--video-fps", type=int, choices=(30, 60, 120), default=120,
                     help="Native rendered physics frames per simulation second; controller stays at 30 Hz.")
@@ -47,6 +50,11 @@ if args.video is not None and args.num_envs != 1:
     parser.error("--video requires --num-envs 1")
 if args.video is not None and not getattr(args, "enable_cameras", False):
     parser.error("--video requires --enable_cameras")
+if args.trace_every is not None and args.trace_every < 1:
+    parser.error("--trace-every must be positive")
+if args.command_fault is not None and (args.num_envs != 1 or args.trace is None or args.trace_every not in (None, 1)):
+    parser.error("--command-fault requires one environment and --trace at every control step")
+trace_every = args.trace_every or (1 if args.command_fault else 10)
 launcher = AppLauncher(args)
 simulation_app = launcher.app
 
@@ -413,6 +421,24 @@ def _trace_record(
                 "live_state_note": live_state_note,
             }
         )
+        if hasattr(env, "hand_collision_state"):
+            hand_state = env.hand_collision_state()
+            for key in ("cross_hand_contact_load_n", "external_forbidden_contact_load_n", "hand_wrist_separation_m"):
+                environments[-1][key] = (
+                    float(snapshot[key][env_index].item()) if snapshot is not None else hand_state[key]
+                )
+            for key in ("cross_hand_contact_load_peak_n", "external_forbidden_contact_load_peak_n"):
+                environments[-1][key] = (
+                    float(snapshot[key][env_index].item()) if snapshot is not None else 0.0
+                )
+            if snapshot is not None:
+                environments[-1]["hand_collision_joint_velocity_finite"] = bool(
+                    snapshot["hand_collision_joint_velocity_finite"][env_index].item()
+                )
+                environments[-1]["max_abs_revolute_joint_velocity_rad_s"] = float(
+                    snapshot["max_abs_revolute_joint_velocity_rad_s"][env_index].item()
+                )
+            environments[-1]["self_collision_enabled"] = True
     return {
         "schema_version": 1,
         "control_step": control_step,
@@ -480,7 +506,16 @@ def main() -> int:
             cfg.viewer.eye = (0.95, -0.60, 1.25)
             cfg.viewer.lookat = (0.36, 0.0, 0.87)
             cfg.viewer.resolution = (1280, 960)
-    env = Rby1AssemblyEnv(cfg, render_mode="rgb_array" if args.video is not None else None)
+    fault_config = (
+        json.loads(args.command_fault_config.read_text(encoding="utf-8")) if args.command_fault else None
+    )
+    env_type = Rby1AssemblyEnv
+    if args.command_fault == "hand_collision":
+        from rby1_assembly.hand_collision import make_hand_collision_env_type
+
+        assert fault_config is not None
+        env_type = make_hand_collision_env_type(Rby1AssemblyEnv, fault_config["hand_collision"])
+    env = env_type(cfg, render_mode="rgb_array" if args.video is not None else None)
     completed = False
     max_contact_force_proxy_n = 0.0
     max_grip_contact_force_n = 0.0
@@ -498,11 +533,22 @@ def main() -> int:
     trace_record_count = 0
     video_writer = None
     video_capture = None
+    command_fault = None
     previous_rtx_render_setting = None
     video_frame_count = 0
     video_terminal_step_frames_omitted = 0
+    snapshot = None
     try:
         env.reset()
+        if args.command_fault and args.command_fault != "hand_collision":
+            from rby1_assembly.command_faults import CommandFaultExperiment
+
+            assert fault_config is not None
+            command_fault = CommandFaultExperiment(
+                env, args.command_fault, fault_config[args.command_fault],
+                {phase.name.lower(): int(phase) for phase in AssemblyPhase},
+            )
+            command_fault.install()
         if args.trace is not None:
             args.trace.parent.mkdir(parents=True, exist_ok=True)
             trace_file = args.trace.open("w", encoding="utf-8", buffering=1)
@@ -548,18 +594,21 @@ def main() -> int:
             terminal_mask = snapshot["terminal_mask"]
             phase_changed = snapshot_phase != previous_phase
             if trace_file is not None and (
-                control_step % 10 == 0 or bool(torch.any(phase_changed | terminal_mask).item())
+                control_step % trace_every == 0 or bool(torch.any(phase_changed | terminal_mask).item())
             ):
                 events = []
-                if control_step % 10 == 0:
+                if control_step % trace_every == 0:
                     events.append("periodic")
                 if bool(torch.any(phase_changed).item()):
                     events.append("phase_change")
                 if bool(torch.any(terminal_mask).item()):
                     events.append("terminal")
-                trace_file.write(
-                    json.dumps(_trace_record(env, control_step, events, snapshot)) + "\n"
-                )
+                record = _trace_record(env, control_step, events, snapshot)
+                if command_fault is not None:
+                    record["command_fault"] = command_fault.current_state()
+                elif hasattr(env, "hand_collision_state"):
+                    record["command_fault"] = snapshot["hand_collision_command_state"]
+                trace_file.write(json.dumps(record) + "\n")
                 trace_record_count += 1
             previous_phase = snapshot_phase.clone()
             if video_capture is not None:
@@ -614,8 +663,29 @@ def main() -> int:
             PROJECT_ROOT / "scripts/run_sim.py",
         ]
         sha256 = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+        if snapshot is None:
+            raise RuntimeError("simulation produced no control-step snapshot")
+        final_record = _trace_record(env, actual_steps, ["final_report"], snapshot)
+        experiment_report = (
+            command_fault.report() if command_fault is not None else
+            env.hand_collision_report() if hasattr(env, "hand_collision_report") else None
+        )
         report = {
             "completed": completed,
+            "command_fault_experiment": None if experiment_report is None else {
+                **experiment_report, "config_path": str(args.command_fault_config),
+                "config_sha256": sha256(args.command_fault_config),
+            },
+            "terminal_outcomes": [{
+                key: entry[key] for key in (
+                    "env_index", "timestamp_s", "phase_name", "terminal", "termination_reason",
+                    "grip_proven", "grip_live", "actual_depth_m", "actual_lateral_error_m",
+                    "cross_hand_contact_load_n", "cross_hand_contact_load_peak_n",
+                    "external_forbidden_contact_load_n", "external_forbidden_contact_load_peak_n",
+                    "hand_wrist_separation_m", "self_collision_enabled",
+                    "hand_collision_joint_velocity_finite", "max_abs_revolute_joint_velocity_rad_s",
+                ) if key in entry
+            } for entry in final_record["environments"]],
             "physics_backend": "PhysX via Isaac Sim",
             "observation_source": "simulator_state_with_noise",
             "baseline_controller_state_source": "simulator_ground_truth",
@@ -647,12 +717,14 @@ def main() -> int:
             "max_forbidden_contact_load_n": max_forbidden_contact_load_n,
             "forbidden_contact_force_threshold_n": float(cfg.forbidden_contact_force_n),
             "forbidden_contact_load_definition": (
-                "sum_of_absolute_filtered_pair_normal_forces_n"
+                snapshot.get("forbidden_contact_load_definition", "sum_of_absolute_filtered_pair_normal_forces_n")
             ),
+            "self_collision_enabled": bool(snapshot.get("self_collision_enabled", False)),
             "forbidden_contact_load_source": forbidden_contact_load_source,
             "visual_background_enabled": args.background,
             "trace_path": None if args.trace is None else str(args.trace),
             "trace_record_count": trace_record_count,
+            "trace_every_control_steps": trace_every,
             "video_path": None if args.video is None else str(args.video),
             "video_frame_count": video_frame_count,
             "video_fps": None if args.video is None else args.video_fps,
@@ -714,6 +786,7 @@ def main() -> int:
         cleanup_error = None
         for resource_name, close_resource in (
             ("video_capture", None if video_capture is None else video_capture.close),
+            ("command_fault", None if command_fault is None else command_fault.close),
             ("video_render_setting", None if previous_rtx_render_setting is None else
              lambda: env.sim.set_setting("/isaaclab/render/rtx_sensors", previous_rtx_render_setting)),
             ("video_writer", None if video_writer is None else video_writer.close),

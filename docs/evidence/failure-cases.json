@@ -1,0 +1,908 @@
+{
+  "schema_version": 1,
+  "scope": "two deliberate command-fault negative tests with measured PhysX outcomes; no learned-policy or hardware safety result",
+  "state_force_sensor_or_termination_injection": false,
+  "physics_dt_s": 0.008333333333333333,
+  "control_dt_s": 0.03333333333333333,
+  "seed": 20261025,
+  "physical_thresholds_are_simulation_design_assumptions": true,
+  "source_archive_note": "Archives preserve the code and configuration used for each capture. Later CLI/report guards do not alter the archived evidence. External assets are resolved by configs/assets.json, not bundled in the source archives.",
+  "positive_control": {
+    "completed": true,
+    "actual_steps": 1322,
+    "report": {
+      "path": "artifacts/cloud/failure-nominal-control.json",
+      "sha256": "ae6ec2186f7457c980b6b4984688af0a488947d031e244da0826413a78eeb301",
+      "bytes": 5653
+    },
+    "trace": {
+      "path": "artifacts/cloud/failure-nominal-control.jsonl",
+      "sha256": "18eaec4467e1af81d75858df1627a46d65f33d9bf836e360c986552530e2c777",
+      "bytes": 589185
+    },
+    "byte_identical_to_prior_nominal_trace": true
+  },
+  "cases": [
+    {
+      "scenario": "right_gripper_open",
+      "description_ko": "오른손 OPEN 명령 오류로 플러그가 실제로 낙하하고 기존 연속 파지 소실 모니터가 정지시킨 시험",
+      "fault_event": {
+        "event": "right_gripper_open_command_started",
+        "issued_at_simulation_time_s": 17.866666666666667,
+        "control_step_to_be_executed": 537,
+        "plug_height_m": 0.8615742325782776
+      },
+      "observed_metrics": {
+        "peak_plug_height_m": 0.8615742325782776,
+        "terminal_plug_height_m": 0.7749999761581421,
+        "observed_drop_from_peak_mm": 86.5742564201355,
+        "terminal_right_finger_contact_force_n": [
+          0.0,
+          0.0
+        ],
+        "continuous_grasp_loss_s": 0.2333354949951172,
+        "terminal_grip_proven": [
+          true,
+          true
+        ],
+        "terminal_grip_live": [
+          true,
+          false
+        ]
+      },
+      "terminal_state": {
+        "env_index": 0,
+        "timestamp_s": 18.13333511352539,
+        "phase_code": 7,
+        "phase_name": "abort",
+        "terminal": true,
+        "termination_reason_code": 3,
+        "termination_reason": "grasp_lost",
+        "retry_count": 0,
+        "continuous_grasp_loss_since_s": 17.899999618530273,
+        "insertion_command_depth_m": 0.0,
+        "insertion_advance_enabled": false,
+        "revolute_joint_positions_rad": [
+          -4.691562207881361e-05,
+          0.001470056944526732,
+          0.0030450623016804457,
+          0.002239835448563099,
+          -3.9320973883150145e-05,
+          -7.494031160604209e-05,
+          -0.4320403039455414,
+          -0.01637875847518444,
+          -0.310131698846817,
+          -1.2215602397918701,
+          0.11496725678443909,
+          1.6044986248016357,
+          0.4479214549064636,
+          -0.4047686755657196,
+          0.01604584977030754,
+          0.25498637557029724,
+          -1.2377711534500122,
+          -0.05536139756441116,
+          1.6005361080169678,
+          -0.4547847509384155
+        ],
+        "gripper_positions_m": [
+          -0.02992292121052742,
+          0.02993577904999256,
+          -0.034420184791088104,
+          0.03486541286110878
+        ],
+        "ee_poses": {
+          "left_world_wxyz": [
+            0.3702639639377594,
+            0.08774029463529587,
+            1.1191216707229614,
+            0.9999557137489319,
+            0.008776403032243252,
+            -0.000652445771265775,
+            0.0033357536885887384
+          ],
+          "right_world_wxyz": [
+            0.37041985988616943,
+            -0.10382530093193054,
+            1.1155483722686768,
+            0.9990450143814087,
+            -0.02202756702899933,
+            -0.007646437268704176,
+            -0.03695007786154747
+          ]
+        },
+        "object_poses_world_wxyz": {
+          "socket": [
+            0.3705551028251648,
+            0.08922683447599411,
+            0.8739704489707947,
+            0.9999693036079407,
+            0.007084130775183439,
+            0.000520259840413928,
+            0.0032777737360447645
+          ],
+          "plug": [
+            0.37360838055610657,
+            -0.1029646098613739,
+            0.7749999761581421,
+            0.9988195300102234,
+            -1.3526226894100546e-06,
+            -1.4758883537524525e-07,
+            0.04857484996318817
+          ]
+        },
+        "grip_proven": [
+          true,
+          true
+        ],
+        "grip_live": [
+          true,
+          false
+        ],
+        "independent_eval_dwell_s": 0.0,
+        "independent_eval_success": false,
+        "insert_joint_target_error_active": false,
+        "insert_joint_target_error_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "contact_force_proxy_n": [
+          5.742215633392334,
+          0.0
+        ],
+        "grip_contact_force_peak_n": 6.391331195831299,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "insertion_contact_force_n": 0.0,
+        "insertion_contact_force_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "insertion_contact_force_peak_n": 0.0,
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "insertion_contact_load_n": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "forbidden_contact_load_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+        "finger_contact_force_n": [
+          5.742215633392334,
+          5.725120544433594,
+          0.0,
+          0.0
+        ],
+        "finger_contact_order": "left_l1,left_l2,right_r1,right_r2",
+        "finger_non_target_force_w": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "finger_non_target_force_definition": "net_normal_force_world_frame_minus_filtered_target_force_world_frame",
+        "actual_depth_m": -0.098863884806633,
+        "actual_lateral_error_m": 0.09724022448062897,
+        "actual_orientation_error_rad": 0.0917385146021843,
+        "forbidden_contact_breakdown": {
+          "robot_body_force_top3_n": [
+            {
+              "body_name": "link_torso_2",
+              "normal_force_magnitude_n": 0.0
+            },
+            {
+              "body_name": "link_torso_1",
+              "normal_force_magnitude_n": 0.0
+            },
+            {
+              "body_name": "link_torso_0",
+              "normal_force_magnitude_n": 0.0
+            }
+          ],
+          "left_palm_normal_force_magnitude_n": 0.0,
+          "right_palm_normal_force_magnitude_n": 0.0,
+          "force_definition": "net_normal_contact_force_world_frame"
+        },
+        "live_state_note": "pre_autoreset_snapshot_state"
+      },
+      "report": {
+        "completed": false,
+        "command_fault_experiment": {
+          "scope": "scripted command-fault test, not a learned-policy failure or natural-failure frequency estimate",
+          "scenario": "right_gripper_open",
+          "parameters": {
+            "trigger_min_plug_height_m": 0.86
+          },
+          "triggered": true,
+          "events": [
+            {
+              "event": "right_gripper_open_command_started",
+              "issued_at_simulation_time_s": 17.866666666666667,
+              "control_step_to_be_executed": 537,
+              "plug_height_m": 0.8615742325782776
+            }
+          ],
+          "modified_channel": "right gripper joint position target",
+          "physical_state_force_sensor_or_termination_injection": false,
+          "config_path": "configs/failure-scenarios.json",
+          "config_sha256": "cb630b36d84e6ab19db51f8e49f577a97430bb88b8a8564353bc562f41044fc3"
+        },
+        "terminal_outcomes": [
+          {
+            "env_index": 0,
+            "timestamp_s": 18.13333511352539,
+            "phase_name": "abort",
+            "terminal": true,
+            "termination_reason": "grasp_lost",
+            "grip_proven": [
+              true,
+              true
+            ],
+            "grip_live": [
+              true,
+              false
+            ],
+            "actual_depth_m": -0.098863884806633,
+            "actual_lateral_error_m": 0.09724022448062897
+          }
+        ],
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 1800,
+        "steps_cli_override": null,
+        "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+        "actual_steps": 544,
+        "max_contact_force_proxy_n": 6.391331195831299,
+        "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+        "max_grip_contact_force_n": 6.391331195831299,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "max_insertion_contact_force_n": 0.0,
+        "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "max_insertion_contact_load_n": 0.0,
+        "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "max_forbidden_contact_load_n": 0.0,
+        "forbidden_contact_force_threshold_n": 1.0,
+        "forbidden_contact_load_definition": "sum_of_absolute_filtered_pair_normal_forces_n",
+        "forbidden_contact_load_source": "physx_rigid_contact_view_filtered_pairs_sum_abs_normal_forces",
+        "visual_background_enabled": true,
+        "trace_path": "artifacts/cloud/failure-gripper-open.jsonl",
+        "trace_record_count": 545,
+        "trace_every_control_steps": 1,
+        "video_path": "artifacts/cloud/failure-gripper-open.mp4",
+        "video_frame_count": 2176,
+        "video_fps": 120,
+        "video_capture_source": "native_physics_substeps_without_interpolation",
+        "video_render_stride_physics_steps": 1,
+        "video_first_physics_step": 1,
+        "video_last_physics_step": 2176,
+        "video_expected_frame_count": 2176,
+        "video_initial_frame_policy": "first_frame_after_first_capture_stride; no_initial_hold",
+        "video_warmup_render_count": 16,
+        "video_viewer_render_scheduling_enabled": true,
+        "video_terminal_step_frame_policy": "captured_before_terminal_autoreset; duplicate_reset_render_omitted",
+        "video_terminal_step_frames_omitted": 0,
+        "video_camera": {
+          "preset": "assembly",
+          "eye_world_m": [
+            0.95,
+            -0.6,
+            1.25
+          ],
+          "lookat_world_m": [
+            0.36,
+            0.0,
+            0.87
+          ],
+          "resolution_px": [
+            1280,
+            960
+          ]
+        },
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "grip_proof_peak_count": 1,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "configured_task_timeout_s": 60.0,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "source_sha256": {
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+            "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+            "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+            "scripts/run_sim.py": "16e07b126cc690e0137dec15a5a26ff7490439ce49e27573a4e445ce8864c600"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "source_files": {
+        "report": {
+          "path": "artifacts/cloud/failure-gripper-open.json",
+          "sha256": "f7ebaa27503969088e18af71ede4e70b6f59a9a4c2ba27c2a53a15511331dceb",
+          "bytes": 6787
+        },
+        "raw_video": {
+          "path": "artifacts/cloud/failure-gripper-open.mp4",
+          "sha256": "c934d3120c66297bb38f9f99e016b9a5eb636574a4b737333d6b767a8343305a",
+          "bytes": 20884680
+        },
+        "uncompressed_trace": {
+          "path": "artifacts/cloud/failure-gripper-open.jsonl",
+          "sha256": "a2ffb5853c0fd8bd5075f48829d73072dc1455a6875f492a35542163c9ac15ff",
+          "bytes": 2317322
+        }
+      },
+      "published_source_archive": {
+        "path": "docs/evidence/failure-gripper-open-source.tar.gz",
+        "sha256": "523d8b6ec240a5c9fa808af7868023668057cf9c4613f901fd382012b5e8471c",
+        "bytes": 62118
+      },
+      "published_trace_gzip": {
+        "path": "docs/evidence/failure-gripper-open-trace.jsonl.gz",
+        "sha256": "2b39444b9189e142107de728062a6d3f6049333051fe9b9d23f584982b640ef9",
+        "bytes": 290294,
+        "uncompressed_sha256": "a2ffb5853c0fd8bd5075f48829d73072dc1455a6875f492a35542163c9ac15ff"
+      },
+      "presentation_metadata": "../media/failure-gripper-open-60fps.json",
+      "presentation_video": "../media/failure-gripper-open-60fps.mp4"
+    },
+    {
+      "scenario": "hand_collision",
+      "description_ko": "공중에서 양손에 같은 목표를 주어 실제 그리퍼 접촉을 만들고 기존 1 N 금지 접촉 모니터가 정지시킨 시험",
+      "fault_event": {
+        "event": "both_hands_converge_command_started",
+        "issued_at_simulation_time_s": 5.566666666666666,
+        "control_step_to_be_executed": 168,
+        "target_wrist_position_world_m": [
+          0.35,
+          0.0,
+          1.2
+        ],
+        "cartesian_error_limit_definition": "per_axis_absolute_clamp",
+        "hand_separation_m": 0.5310371518135071
+      },
+      "observed_metrics": {
+        "pre_command_cross_hand_contact_peak_n": 0.0,
+        "cross_hand_contact_peak_n": 10.328516006469727,
+        "external_forbidden_contact_peak_n": 0.0,
+        "wrist_separation_at_command_start_m": 0.5310371518135071,
+        "terminal_wrist_separation_m": 0.05950925871729851,
+        "all_revolute_joint_velocities_finite": true,
+        "max_abs_revolute_joint_velocity_rad_s": 0.3032037317752838,
+        "capture_trace_identical_to_no_video_probe": true
+      },
+      "terminal_state": {
+        "env_index": 0,
+        "timestamp_s": 18.666667938232422,
+        "phase_code": 7,
+        "phase_name": "abort",
+        "terminal": true,
+        "termination_reason_code": 7,
+        "termination_reason": "forbidden_contact",
+        "retry_count": 0,
+        "continuous_grasp_loss_since_s": -1.0,
+        "insertion_command_depth_m": 0.0,
+        "insertion_advance_enabled": false,
+        "revolute_joint_positions_rad": [
+          -5.970539859845303e-06,
+          0.001325518125668168,
+          0.0030678685288876295,
+          0.00233440101146698,
+          1.4421443665924016e-05,
+          1.032749651130871e-06,
+          -0.5161737203598022,
+          -0.015944158658385277,
+          -0.486809641122818,
+          -1.452203392982483,
+          0.23558466136455536,
+          1.8701485395431519,
+          0.6979767680168152,
+          -0.5124624371528625,
+          0.015747707337141037,
+          0.4818427860736847,
+          -1.4568977355957031,
+          -0.23136283457279205,
+          1.8724753856658936,
+          -0.6922694444656372
+        ],
+        "gripper_positions_m": [
+          -0.04799795150756836,
+          0.048002149909734726,
+          -0.047997910529375076,
+          0.04800225421786308
+        ],
+        "ee_poses": {
+          "left_world_wxyz": [
+            0.35196685791015625,
+            0.029001841321587563,
+            1.1969150304794312,
+            0.9999469518661499,
+            0.00901881605386734,
+            -0.0003830345522146672,
+            0.004950122442096472
+          ],
+          "right_world_wxyz": [
+            0.3520222306251526,
+            -0.030506856739521027,
+            1.1971681118011475,
+            0.9999468326568604,
+            -0.008952015079557896,
+            -0.0007078997441567481,
+            -0.005054427310824394
+          ]
+        },
+        "object_poses_world_wxyz": {
+          "socket": [
+            0.3473934233188629,
+            0.11967574805021286,
+            0.7749999761581421,
+            0.9999999403953552,
+            4.900452310607761e-08,
+            -2.1438255259909056e-07,
+            1.352404410681629e-07
+          ],
+          "plug": [
+            0.3536481261253357,
+            -0.1297643482685089,
+            0.7749999761581421,
+            0.9999999403953552,
+            -1.9773221993091283e-06,
+            -5.630499799735844e-08,
+            1.5603623637616693e-07
+          ]
+        },
+        "grip_proven": [
+          false,
+          false
+        ],
+        "grip_live": [
+          false,
+          false
+        ],
+        "independent_eval_dwell_s": 0.0,
+        "independent_eval_success": false,
+        "insert_joint_target_error_active": false,
+        "insert_joint_target_error_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "contact_force_proxy_n": [
+          0.0,
+          0.0
+        ],
+        "grip_contact_force_peak_n": 0.0,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "insertion_contact_force_n": 0.0,
+        "insertion_contact_force_w": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "insertion_contact_force_peak_n": 0.0,
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "insertion_contact_load_n": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "forbidden_contact_load_n": 10.328516006469727,
+        "forbidden_contact_load_peak_n": 10.328516006469727,
+        "forbidden_contact_load_source": "max_of_external_forbidden_and_cross_hand_physx_contact_loads",
+        "finger_contact_force_n": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "finger_contact_order": "left_l1,left_l2,right_r1,right_r2",
+        "finger_non_target_force_w": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "finger_non_target_force_definition": "net_normal_force_world_frame_minus_filtered_target_force_world_frame",
+        "actual_depth_m": -0.15444010496139526,
+        "actual_lateral_error_m": 0.006254631094634533,
+        "actual_orientation_error_rad": 3.8239954847085755e-06,
+        "forbidden_contact_breakdown": {
+          "robot_body_force_top3_n": [
+            {
+              "body_name": "link_torso_2",
+              "normal_force_magnitude_n": 0.0
+            },
+            {
+              "body_name": "link_torso_1",
+              "normal_force_magnitude_n": 0.0
+            },
+            {
+              "body_name": "link_torso_0",
+              "normal_force_magnitude_n": 0.0
+            }
+          ],
+          "left_palm_normal_force_magnitude_n": 10.328511238098145,
+          "right_palm_normal_force_magnitude_n": 10.328511238098145,
+          "force_definition": "net_normal_contact_force_world_frame"
+        },
+        "live_state_note": "pre_autoreset_snapshot_state",
+        "cross_hand_contact_load_n": 10.328516006469727,
+        "external_forbidden_contact_load_n": 0.0,
+        "hand_wrist_separation_m": 0.05950925871729851,
+        "cross_hand_contact_load_peak_n": 10.328516006469727,
+        "external_forbidden_contact_load_peak_n": 0.0,
+        "hand_collision_joint_velocity_finite": true,
+        "max_abs_revolute_joint_velocity_rad_s": 0.0559748038649559,
+        "self_collision_enabled": true
+      },
+      "report": {
+        "completed": false,
+        "command_fault_experiment": {
+          "scope": "scripted command failure with measured PhysX hand-to-hand contact; not a learned-policy failure or natural-failure frequency estimate",
+          "scenario": "hand_collision",
+          "parameters": {
+            "target_wrist_position_world_m": [
+              0.35,
+              0.0,
+              1.2
+            ],
+            "max_cartesian_error_m": 0.01
+          },
+          "triggered": true,
+          "events": [
+            {
+              "event": "both_hands_converge_command_started",
+              "issued_at_simulation_time_s": 5.566666666666666,
+              "control_step_to_be_executed": 168,
+              "target_wrist_position_world_m": [
+                0.35,
+                0.0,
+                1.2
+              ],
+              "cartesian_error_limit_definition": "per_axis_absolute_clamp",
+              "hand_separation_m": 0.5310371518135071
+            }
+          ],
+          "modified_channel": "left and right end-effector position-error commands before DLS",
+          "cartesian_error_limit_definition": "per_axis_absolute_clamp",
+          "physical_state_force_sensor_or_termination_injection": false,
+          "physics_runtime_policy": "articulation self-collision enabled; only the 9 left-hand/right-hand rigid-body pairs are unfiltered",
+          "collision_filter": {
+            "robot_root_path": "/World/envs/env_0/Robot",
+            "self_collision_enabled": true,
+            "rigid_body_count": 66,
+            "allowed_cross_hand_pair_count": 9,
+            "filtered_internal_pair_count": 2136,
+            "allowed_cross_hand_pairs": [
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_left",
+                "/World/envs/env_0/Robot/right_gripper/ee_right"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_left",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_left",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+                "/World/envs/env_0/Robot/right_gripper/ee_right"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+                "/World/envs/env_0/Robot/right_gripper/ee_right"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+              ],
+              [
+                "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+                "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+              ]
+            ],
+            "filtered_pair_authoring": "one_direction_per_unordered_rigid_body_pair",
+            "external_collision_relationships_modified": false
+          },
+          "cross_hand_contact_load_source": "physx_left_hand_sources_filtered_to_right_hand_sum_abs_normal_forces",
+          "config_path": "configs/failure-scenarios.json",
+          "config_sha256": "e0df6acd75ddd956126f3de6d19cc5588c7f34ed640b5f379e6c276643e4e58f"
+        },
+        "terminal_outcomes": [
+          {
+            "env_index": 0,
+            "timestamp_s": 18.666667938232422,
+            "phase_name": "abort",
+            "terminal": true,
+            "termination_reason": "forbidden_contact",
+            "grip_proven": [
+              false,
+              false
+            ],
+            "grip_live": [
+              false,
+              false
+            ],
+            "actual_depth_m": -0.15444010496139526,
+            "actual_lateral_error_m": 0.006254631094634533,
+            "cross_hand_contact_load_n": 10.328516006469727,
+            "cross_hand_contact_load_peak_n": 10.328516006469727,
+            "external_forbidden_contact_load_n": 0.0,
+            "external_forbidden_contact_load_peak_n": 0.0,
+            "hand_wrist_separation_m": 0.05950925871729851,
+            "self_collision_enabled": true,
+            "hand_collision_joint_velocity_finite": true,
+            "max_abs_revolute_joint_velocity_rad_s": 0.0559748038649559
+          }
+        ],
+        "physics_backend": "PhysX via Isaac Sim",
+        "observation_source": "simulator_state_with_noise",
+        "baseline_controller_state_source": "simulator_ground_truth",
+        "phase_gate_state_source": "simulator_ground_truth",
+        "contact_force_source": "contact_force_proxy",
+        "num_envs": 1,
+        "steps_requested": 1800,
+        "steps_cli_override": null,
+        "steps_default_source": "ceil(task_timeout_s/control_dt_s)",
+        "actual_steps": 560,
+        "max_contact_force_proxy_n": 0.0,
+        "contact_force_proxy_definition": "max_of_grip_and_insertion_contact_load_n",
+        "max_grip_contact_force_n": 0.0,
+        "grip_contact_force_definition": "per_hand_peak_filtered_finger_object_normal_contact_magnitude_n",
+        "max_insertion_contact_force_n": 0.0,
+        "insertion_contact_force_definition": "norm_of_plug_socket_net_normal_contact_force_world_frame_n",
+        "insertion_contact_force_source": "plug_body_filtered_against_socket_net_normal_force_world_frame",
+        "max_insertion_contact_load_n": 0.0,
+        "insertion_contact_load_definition": "sum_of_absolute_plug_socket_contact_normal_scalars_n",
+        "insertion_contact_load_source": "physx_plug_socket_sum_abs_contact_normals",
+        "max_forbidden_contact_load_n": 10.328516006469727,
+        "forbidden_contact_force_threshold_n": 1.0,
+        "forbidden_contact_load_definition": "max(external_forbidden_contact_load_n, cross_hand_contact_load_n)",
+        "self_collision_enabled": true,
+        "forbidden_contact_load_source": "max_of_external_forbidden_and_cross_hand_physx_contact_loads",
+        "visual_background_enabled": true,
+        "trace_path": "artifacts/cloud/failure-hands.jsonl",
+        "trace_record_count": 561,
+        "trace_every_control_steps": 1,
+        "video_path": "artifacts/cloud/failure-hands.mp4",
+        "video_frame_count": 2240,
+        "video_fps": 120,
+        "video_capture_source": "native_physics_substeps_without_interpolation",
+        "video_render_stride_physics_steps": 1,
+        "video_first_physics_step": 1,
+        "video_last_physics_step": 2240,
+        "video_expected_frame_count": 2240,
+        "video_initial_frame_policy": "first_frame_after_first_capture_stride; no_initial_hold",
+        "video_warmup_render_count": 16,
+        "video_viewer_render_scheduling_enabled": true,
+        "video_terminal_step_frame_policy": "captured_before_terminal_autoreset; duplicate_reset_render_omitted",
+        "video_terminal_step_frames_omitted": 0,
+        "video_camera": {
+          "preset": "assembly",
+          "eye_world_m": [
+            0.95,
+            -0.6,
+            1.25
+          ],
+          "lookat_world_m": [
+            0.36,
+            0.0,
+            0.87
+          ],
+          "resolution_px": [
+            1280,
+            960
+          ]
+        },
+        "last_pre_autoreset_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "terminal_phase_counts": {
+          "pregrasp": 0,
+          "close": 0,
+          "check_lift": 0,
+          "align": 0,
+          "insert": 0,
+          "retract": 0,
+          "done": 0,
+          "abort": 1
+        },
+        "grip_proof_peak_count": 0,
+        "runtime_validated": true,
+        "provenance": {
+          "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+          "physics_dt_s": 0.008333333333333333,
+          "control_decimation": 4,
+          "control_dt_s": 0.03333333333333333,
+          "configured_task_timeout_s": 60.0,
+          "seed": 20261025,
+          "seed_source": "configs/task.json:data.train_seed",
+          "task_config_sha256": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+          "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+          "runtime_config_sha256": "9189ac663ff7cfaa60c73c0e1536f6bf2164cc798e4c37d96a470e259d33af70",
+          "build_report_sha256": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+          "source_sha256": {
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "56374d6391e8062dcb435f812159f4f582837951b1090d436d072dfcdb87bcdb",
+            "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/hand_collision.py": "62f9b8ebbb3313b374093d7371d5b65785a11390338a6409c9c88af3481cd080",
+            "src/rby1_assembly/isaac_env.py": "87912d7bbc0f40f087d5bbca006bbfe15aa257fa016ac73ff288c41c825b19bd",
+            "src/rby1_assembly/recording.py": "9d47706aa7faa40f46ac2877425a0fabd5d70f13a9d13ae7873c143cd3e19fc3",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+            "scripts/run_sim.py": "c5b25b0211f9e18a313da099f44bc7264546a1e6933438e9be8a951a337728e0"
+          },
+          "generated_asset_sha256": {
+            "plug.usda": "ff8308f30ff1b29085c30cc9953d272fb152251f9f826fa95ba16568f2eecac3",
+            "robot.usda": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d",
+            "scene.usda": "d3be016541ce58c26530a2d7518f75dbf0aa1100b1587f905826c5e3b0fa6eed",
+            "socket.usda": "ef913814176155262c2b7340fa17540da9e4db387b09b86cd0c0b80ed27d92c2",
+            "table.usda": "024200da4f295702db8ab07a7b63ecefb8c0d933f6bb4de979b1ed8acb95c950"
+          },
+          "torch_version": "2.7.0+cu128"
+        }
+      },
+      "source_files": {
+        "report": {
+          "path": "artifacts/cloud/failure-hands.json",
+          "sha256": "512ebf379ac539acf0bd281887fa19f19e748ebdf46c942d54dd461a1d0a4bbd",
+          "bytes": 9714
+        },
+        "raw_video": {
+          "path": "artifacts/cloud/failure-hands.mp4",
+          "sha256": "cb362d86eee30d3bf4079a8a2c998de6fdee893ea1f5d42079b62594eaf3dd87",
+          "bytes": 20824177
+        },
+        "uncompressed_trace": {
+          "path": "artifacts/cloud/failure-hands.jsonl",
+          "sha256": "832c3fdfdb42ea838685db852fbf117ddf0f3a6900303728a45df83223feeefb",
+          "bytes": 2625682
+        }
+      },
+      "published_source_archive": {
+        "path": "docs/evidence/failure-hand-collision-source.tar.gz",
+        "sha256": "d4f3f7c2ac84e3d171c8e59da83e58dff8a4db14866db076f38ff2f94b250fe3",
+        "bytes": 67568
+      },
+      "published_trace_gzip": {
+        "path": "docs/evidence/failure-hand-collision-trace.jsonl.gz",
+        "sha256": "ca8698de24097fa0d645ea84dc0f6ff5f2c37d067f462553f1867b5d642347c3",
+        "bytes": 301895,
+        "uncompressed_sha256": "832c3fdfdb42ea838685db852fbf117ddf0f3a6900303728a45df83223feeefb"
+      },
+      "presentation_metadata": "../media/failure-hand-collision-60fps.json",
+      "presentation_video": "../media/failure-hand-collision-60fps.mp4"
+    }
+  ],
+  "rejected_presentation_candidates": [
+    {
+      "case": "lateral disturbance",
+      "reason": "Measured insertion stall/timeouts were too subtle to explain visually; not used as one of the two representative failure videos."
+    },
+    {
+      "case": "hand collision probes v1/v2",
+      "reason": "No actual hand contact before pregrasp timeout; not labelled as collisions."
+    }
+  ]
+}
