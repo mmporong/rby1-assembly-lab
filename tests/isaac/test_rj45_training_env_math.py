@@ -17,15 +17,22 @@ from rby1_assembly.rj45_training_env import (
     _held_warmup_timeout_diagnostics,
     _mask_inactive_policy_observation,
     _reset_policy_input_telemetry,
+    _reset_applied_tip_offset_telemetry,
     _store_policy_input_telemetry,
     _warmup_motion_status,
     _warmup_sensor_status,
     _warmup_timeout_mask,
 )
+from rby1_assembly.rj45_training import (
+    ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+    POST_INTEGRAL_STEP_ACTION_APPLICATION,
+    apply_tip_target_pose_offset,
+)
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 TRAINING_ENV_PATH = PROJECT_ROOT / "src/rby1_assembly/rj45_training_env.py"
+ISAAC_ENV_PATH = PROJECT_ROOT / "src/rby1_assembly/isaac_env.py"
 
 
 def _compiled_training_environment_method(name):
@@ -50,11 +57,41 @@ def _compiled_training_environment_method(name):
         "_held_reset_contact_free_status": _held_reset_contact_free_status,
         "_held_reset_stage_transition": _held_reset_stage_transition,
         "_calibration_bias_case_seed": _calibration_bias_case_seed,
+        "ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+        "POST_INTEGRAL_STEP_ACTION_APPLICATION": POST_INTEGRAL_STEP_ACTION_APPLICATION,
+        "AssemblyPhase": SimpleNamespace(ALIGN=4, INSERT=5),
+        "apply_tip_target_pose_offset": apply_tip_target_pose_offset,
+        "combine_frame_transforms": lambda base_pos, base_quat, local_pos, local_quat: (
+            base_pos + local_pos,
+            base_quat,
+        ),
     }
     exec(
         compile(
             ast.fix_missing_locations(ast.Module(body=[method], type_ignores=[])),
             TRAINING_ENV_PATH,
+            "exec",
+        ),
+        namespace,
+    )
+    return namespace[name]
+
+
+def _compiled_base_environment_method(name):
+    tree = ast.parse(ISAAC_ENV_PATH.read_text(encoding="utf-8"))
+    wrapper = next(
+        node for node in tree.body
+        if isinstance(node, ast.ClassDef) and node.name == "Rby1AssemblyEnv"
+    )
+    method = next(
+        node for node in wrapper.body
+        if isinstance(node, ast.FunctionDef) and node.name == name
+    )
+    namespace = {"torch": torch}
+    exec(
+        compile(
+            ast.fix_missing_locations(ast.Module(body=[method], type_ignores=[])),
+            ISAAC_ENV_PATH,
             "exec",
         ),
         namespace,
@@ -73,6 +110,113 @@ STABILITY_LIMITS = {
 
 
 class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
+    def test_default_mating_target_offset_hook_is_no_op(self):
+        hook = _compiled_base_environment_method(
+            "_apply_policy_mating_target_pose_offsets"
+        )
+        position = torch.randn(3, 3)
+        quaternion = torch.randn(3, 4)
+        returned_position, returned_quaternion = hook(
+            SimpleNamespace(), position, quaternion
+        )
+        self.assertIs(returned_position, position)
+        self.assertIs(returned_quaternion, quaternion)
+
+    def test_target_offset_mode_disables_parent_twist_residual(self):
+        residual = _compiled_training_environment_method("_residual_actions_world")
+        actions = torch.randn(4, 12)
+        environment = SimpleNamespace(
+            _training_initialized=True,
+            _training_config={
+                "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            }
+        )
+        torch.testing.assert_close(residual(environment, actions), torch.zeros_like(actions))
+
+    def test_target_offset_hook_scales_right_action_and_changes_active_rows_only(self):
+        hook = _compiled_training_environment_method(
+            "_apply_policy_mating_target_pose_offsets"
+        )
+        identity = torch.tensor([[1.0, 0.0, 0.0, 0.0]]).repeat(2, 1)
+        plug_goal = torch.tensor([[0.4, 0.1, 0.8], [0.2, -0.1, 0.7]])
+        plug_quat = identity.clone()
+        actions = torch.zeros((2, 12))
+        actions[0, 6:12] = torch.tensor([1.0, -0.5, 0.25, 0.0, 0.0, 1.0])
+        environment = SimpleNamespace(
+            num_envs=2,
+            device="cpu",
+            _training_initialized=True,
+            _training_config={
+                "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            },
+            _training_applied_tip_offset_entry=torch.full((2, 6), 99.0),
+            _actions=actions,
+            cfg=SimpleNamespace(
+                residual_translation_bound_m=0.002,
+                residual_rotation_bound_rad=0.03,
+            ),
+            _policy_active_mask=lambda: torch.tensor([True, False]),
+            _control_object_poses=lambda: (
+                torch.zeros((2, 3)), identity, torch.zeros((2, 3)), identity
+            ),
+            _frame_tensors=lambda name: (
+                torch.tensor([[0.0, 0.02, 0.0]]).repeat(2, 1)
+                if name == "plug_tip" else torch.zeros((2, 3)),
+                identity,
+            ),
+        )
+        target_position, target_quaternion = hook(
+            environment, plug_goal, plug_quat
+        )
+        expected_offset = torch.tensor(
+            [[0.002, -0.001, 0.0005, 0.0, 0.0, 0.03], [0.0] * 6]
+        )
+        expected_position, expected_quaternion = apply_tip_target_pose_offset(
+            plug_goal,
+            plug_quat,
+            identity,
+            torch.tensor([[0.0, 0.02, 0.0]]).repeat(2, 1),
+            identity,
+            expected_offset,
+        )
+        torch.testing.assert_close(target_position[0], expected_position[0])
+        torch.testing.assert_close(target_quaternion[0], expected_quaternion[0])
+        torch.testing.assert_close(target_position[1], plug_goal[1])
+        torch.testing.assert_close(target_quaternion[1], plug_quat[1])
+        torch.testing.assert_close(
+            environment._training_applied_tip_offset_entry, expected_offset
+        )
+    def test_insert_only_policy_activation_and_lifetime_evaluation_eligibility(self):
+        active_method = _compiled_training_environment_method("_policy_active_mask")
+        eligible_method = _compiled_training_environment_method(
+            "_evaluation_eligibility_mask"
+        )
+        environment = SimpleNamespace(
+            _training_config={
+                "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            },
+            _training_initialized=True,
+            _training_policy_activated=torch.tensor([True, True, False]),
+            _phase=torch.tensor([4, 5, 5]),
+            _training_valid_policy_input_step_count=torch.tensor([0, 2, 3]),
+        )
+        self.assertEqual(active_method(environment).tolist(), [False, True, False])
+        self.assertEqual(eligible_method(environment).tolist(), [False, True, False])
+
+        environment._training_config["action_application_mode"] = (
+            POST_INTEGRAL_STEP_ACTION_APPLICATION
+        )
+        self.assertEqual(active_method(environment).tolist(), [True, True, False])
+        self.assertEqual(eligible_method(environment).tolist(), [True, True, False])
+
+    def test_applied_tip_offset_partial_reset_preserves_other_rows(self):
+        telemetry = torch.arange(18, dtype=torch.float32).reshape(3, 6)
+        first = telemetry[0].clone()
+        last = telemetry[2].clone()
+        _reset_applied_tip_offset_telemetry(torch.tensor([1]), telemetry)
+        torch.testing.assert_close(telemetry[0], first)
+        torch.testing.assert_close(telemetry[1], torch.zeros(6))
+        torch.testing.assert_close(telemetry[2], last)
     def test_held_controller_phase_keeps_torso_work_reference_and_other_rows(self):
         from rby1_assembly.rj45_env import advance_joint_reference
 
@@ -446,6 +590,9 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 24, dtype=torch.float32
             ).reshape(2, 12),
             _actions=torch.full((2, 12), 0.25),
+            _training_applied_tip_offset_entry=torch.arange(
+                12, dtype=torch.float32
+            ).reshape(2, 6),
         )
 
         snapshot = snapshot_method(environment)
@@ -467,6 +614,7 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 "training_policy_activated",
                 "requested_expanded_residual_action",
                 "applied_bounded_residual_action",
+                "applied_tip_target_offset_entry_6d",
             },
         )
         self.assertEqual(snapshot["policy_input_observation"][1, 78].item(), 157.0)
@@ -479,6 +627,9 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         self.assertEqual(
             snapshot["applied_bounded_residual_action"][1, 11].item(),
             0.25,
+        )
+        self.assertEqual(
+            snapshot["applied_tip_target_offset_entry_6d"][1, 5].item(), 11.0
         )
 
     def test_policy_attribution_counts_valid_inputs_and_survives_terminal_grip_loss(self):

@@ -5,6 +5,7 @@
   "active_horizon_s": 24.0,
   "warmup_s": 0.2,
   "action_mode": "right_only_6d",
+  "action_application_mode": "post_integral_step",
   "base_observation_dim": 79,
   "diagnostic_observation_mode": "standard",
   "calibration_bias": {

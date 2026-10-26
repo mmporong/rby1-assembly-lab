@@ -1398,6 +1398,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
         plug_goal[retract] = retract_goal[retract]
         plug_goal_quat[retract] = retract_goal_quat[retract]
+        plug_goal, plug_goal_quat = self._apply_policy_mating_target_pose_offsets(
+            plug_goal, plug_goal_quat
+        )
         # Re-estimate the grasp transform from measured simulator poses so
         # millimetre-scale settling/slip is corrected at the object, rather
         # than treating the lift-proof transform as a rigid attachment.
@@ -1428,6 +1431,13 @@ class Rby1AssemblyEnv(DirectRLEnv):
         left_twist[terminal] = 0.0
         right_twist[terminal] = 0.0
         return left_twist, right_twist
+
+    def _apply_policy_mating_target_pose_offsets(
+        self, plug_goal: torch.Tensor, plug_goal_quat: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Leave mating targets unchanged unless a training wrapper opts in."""
+
+        return plug_goal, plug_goal_quat
 
     def _damped_least_squares(self, jacobian: torch.Tensor, twist: torch.Tensor) -> torch.Tensor:
         return damped_joint_step(

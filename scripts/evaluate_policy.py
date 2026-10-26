@@ -539,6 +539,7 @@ def main() -> int:
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task, load_rj45_task
         from rby1_assembly.rj45_training import (
+            action_application_contract_metadata,
             load_training_config,
             policy_ground_truth_usage,
             policy_observation_dimension,
@@ -652,6 +653,9 @@ def main() -> int:
             }
             training_contract.update(
                 privileged_diagnostic_observation_metadata(training_config)
+            )
+            training_contract.update(
+                action_application_contract_metadata(training_config)
             )
             verify_checkpoint_lineage(
                 lineage,
@@ -996,6 +1000,9 @@ def main() -> int:
             }
             report["rj45_training_config"].update(
                 privileged_diagnostic_observation_metadata(training_config)
+            )
+            report["rj45_training_config"].update(
+                action_application_contract_metadata(training_config)
             )
             report["episode_outcomes"] = episode_outcomes
             report["paired_condition_key"] = (

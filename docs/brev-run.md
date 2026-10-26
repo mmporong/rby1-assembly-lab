@@ -202,6 +202,42 @@ OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/train.py \
   --rj45-training-config configs/rj45-training-v1.json
 ```
 
+### INSERT-only 팁 목표 제어 검사
+
+학습 전에 100 µm의 고정 x축 보정 오차와 이를 상쇄하는 분석용 오른팔 명령을 넣어 제어 권한을 검사한다. 기존 `post_integral_step`은 기본 동작으로 남아 있으며 적분 제어 뒤에 Cartesian twist 잔차를 더한다. `absolute_tip_pose_target_insert_only`는 INSERT 단계에서만 소켓 입구 좌표계의 6D 오프셋을 플러그 팁 목표에 적용한다. 오른팔 6D만 허용하고, 팁을 회전 중심으로 플러그 몸체 목표를 다시 계산하며 기존 twist 잔차는 0으로 만든다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python checks/probe_rj45_controller_authority.py \
+  --headless --device cuda:0 \
+  --nominal artifacts/rj45/rj45-pickup-42.json \
+  --held artifacts/rj45/rj45-held-42.json \
+  --training-config configs/rj45-training-target-offset-v1.json \
+  --report artifacts/rj45-controller-authority/repro-target-offset42.json \
+  --trace artifacts/rj45-controller-authority/repro-target-offset42.jsonl
+```
+
+명목 실행 42의 trace는 명목 실행 40의 원시 trace와 바이트가 같고 SHA-256은 `76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50`이다. 같은 명목 보고서와 파지 artifact를 사용한 GPU 물리 A/B에서 기존 모드는 유지 조건과 전체 엄격 평가가 모두 false였다. 유지 종료의 실제 x 오차는 -99.14 µm였다. 새 모드는 연속 2.7333초 동안 유지 조건을 만족했고 전체 엄격 평가도 true였으며, 유지 종료 x 오차는 +1.67 µm였다. 이 결과는 고정 명령을 유지할 수 있는지 확인한 제어 검사다. 강화학습 정책이나 scalar CPU 모델의 성능으로 해석하지 않는다.
+
+기존 모드의 A/B를 재현할 때는 위 명령의 training config를 `configs/rj45-training-v1.json`으로, 출력 파일을 `artifacts/rj45-controller-authority/repro-post-integral42.json`과 `artifacts/rj45-controller-authority/repro-post-integral42.jsonl`로 바꾼다. 정본 보고서와 trace를 덮어쓰지 않도록 재현 출력은 별도 이름으로 저장한다. 두 실행은 같은 명목 보고서와 파지 artifact를 입력으로 사용한다.
+
+새 표준 79D 학습에는 `configs/rj45-training-target-offset-v1.json`을 사용한다. 보정 오차 latent 6D를 추가하는 `configs/rj45-training-target-offset-bias-observability.json`은 85D privileged 진단 설정이다. 새 79D 20-update 실험은 `artifacts/rj45-target-offset-pilot/experiment-plan.json`에 조건을 고정한 뒤 현재 실행 중이다. 아직 체크포인트 결과나 개선 근거는 없으며 85D GPU 학습도 시작하지 않았다.
+
+4환경 실행에는 현재 제어 hook과 일치하는 `artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json`을 전달한다. 이 증거의 전체 물리 보고서 최대 하중은 20.08854294 N이다. trace는 기본 5 step 주기 외에 최초 접촉과 구간 끝점을 남겨 최대 19.72353172 N을 기록했으므로 두 값을 같은 표본으로 취급하지 않는다. 보고서·trace·SAT 보고서와 오프라인 toolchain의 정확한 해시는 [RJ45 검증 근거](evidence/rj45-validation.json)에 있다. 이전 `after-control-hooks` 묶음은 과거 실행을 재현할 때만 사용한다.
+
+새 79D 학습 명령은 다음과 같다. seed `20261026`은 `configs/ppo-rj45-v1.json`에서 읽는다. 현재 실행 중인 학습도 이 계약을 사용하며 아직 결과나 개선 주장이 없다.
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/train.py \
+  --headless --device cuda:0 --task rj45 --num-envs 64 --max-iterations 20 \
+  --config configs/ppo-rj45-v1.json \
+  --rj45-nominal-evidence artifacts/rj45/rj45-pickup-42.json \
+  --rj45-held-state artifacts/rj45/rj45-held-42.json \
+  --rj45-training-config configs/rj45-training-target-offset-v1.json \
+  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json \
+  --log-root artifacts/rj45-target-offset-pilot/logs
+```
+
 환경 수를 늘릴 때는 같은 명목·파지 증거와 검증된 병렬 접촉 specification을 전달한다. 실행 중 코드·설정·입력 증거를 바꾸지 않는다. 평가기는 환경별 고정 episode quota로 표본을 수집하고, 정책과 무학습 기준 제어에 같은 seed·보정 오차 조건을 사용한다. 전체 과제 평가는 테이블에서의 파지부터 시작하며, 학습 범위인 파지 후 정렬·삽입과 구분해 결과를 해석한다.
 
 
@@ -217,10 +253,10 @@ OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/evaluate_policy.py \
   --rj45-nominal-evidence artifacts/rj45/nominal.json \
   --rj45-held-state artifacts/rj45/held.json \
   --rj45-training-config configs/rj45-training-v1.json \
-  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-control-hooks/evidence-spec.json \
+  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json \
   --report artifacts/rj45/held-biased-zero-evaluation.json
 ```
 
 조건별 비교에는 같은 시작 방식·시드·환경·episode index·보정 오차 case를 사용한다. 시작 방식은 `paired_condition`과 canonical ID에 포함된다. 각 episode의 물리 종료 이유인 `termination_reason`과 평가 계약 위반인 `invalid_reason`은 별도로 기록한다. held 초기화 실패나 유효 정책 입력이 한 번도 없었던 표본은 invalid로 남기며, 정책이 활성화된 뒤 생긴 파지 손실은 정책 실패로 집계한다. 전체 성공률은 invalid를 포함한 요청 표본 수를 분모로 해석하고, 유효 표본만의 성공률은 보조 지표로 본다. 이 명령은 사용 예시이며 성능 개선이 검증됐다는 뜻은 아니다.
 
-진단용 `configs/rj45-training-bias-observability.json`은 `persistent_calibration_bias` 모드로, 시뮬레이터의 episode별 보정 오차 6D를 정규화해 입력에 추가한다. `base_observation_dim`은 두 설정 모두 79이며 실제 정책 폭은 표준 79D, 진단 85D다. 진단 체크포인트는 관측 schema v2와 privileged 정보 사용 계약을 요구하고, 표준 schema v1과 혼용하지 않는다. 진단 설정의 `oracle` 평가는 시작 전에 거부한다. 이 기능은 CPU 검증을 마친 상태이며 GPU 학습은 제어기 보정 유지 능력을 확인한 뒤 수행한다.
+진단용 `configs/rj45-training-bias-observability.json`과 `configs/rj45-training-target-offset-bias-observability.json`은 `persistent_calibration_bias` 모드로, 시뮬레이터의 episode별 보정 오차 6D를 정규화해 입력에 추가한다. `base_observation_dim`은 모든 설정에서 79이며 실제 정책 폭은 표준 79D, 진단 85D다. 진단 체크포인트는 관측 schema v2와 privileged 정보 사용 계약을 요구하고, 표준 schema v1과 혼용하지 않는다. 진단 설정의 `oracle` 평가는 시작 전에 거부한다. 85D 경로는 CPU 계약 검사를 마쳤지만 GPU 학습 결과는 아직 없다.

@@ -128,6 +128,7 @@ from rby1_assembly.rj45_task import (  # noqa: E402
 from rby1_assembly.held_grasp import load_verified_held_grasp_artifact  # noqa: E402
 from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence  # noqa: E402
 from rby1_assembly.rj45_training import (  # noqa: E402
+    action_application_contract_metadata,
     load_training_config,
     policy_ground_truth_usage,
     policy_observation_dimension,
@@ -412,6 +413,9 @@ def main() -> int:
             }
             lineage["rj45_training_contract"].update(
                 privileged_diagnostic_observation_metadata(training_config)
+            )
+            lineage["rj45_training_contract"].update(
+                action_application_contract_metadata(training_config)
             )
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)

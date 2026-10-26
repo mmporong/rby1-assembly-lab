@@ -30,6 +30,13 @@ HELD_GRASP_STABILITY_LIMITS = {
 
 
 _ACTION_DIMS = {"right_only_6d": 6, "both_arms_12d": 12}
+POST_INTEGRAL_STEP_ACTION_APPLICATION = "post_integral_step"
+ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY = "absolute_tip_pose_target_insert_only"
+TIP_TARGET_POSE_OFFSET_DESCRIPTION = "tip target pose offset INSERT-only"
+_ACTION_APPLICATION_MODES = {
+    POST_INTEGRAL_STEP_ACTION_APPLICATION,
+    ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+}
 _TOP_LEVEL_KEYS = {
     "schema_version",
     "task_id",
@@ -37,6 +44,7 @@ _TOP_LEVEL_KEYS = {
     "active_horizon_s",
     "warmup_s",
     "action_mode",
+    "action_application_mode",
     "base_observation_dim",
     "diagnostic_observation_mode",
     "calibration_bias",
@@ -155,6 +163,18 @@ def load_training_config(path: Path) -> dict[str, Any]:
         raise ValueError("warmup_s must be shorter than active_horizon_s")
     if config["action_mode"] not in _ACTION_DIMS:
         raise ValueError(f"action_mode must be one of {sorted(_ACTION_DIMS)}")
+    if config["action_application_mode"] not in _ACTION_APPLICATION_MODES:
+        raise ValueError(
+            "action_application_mode must be post_integral_step or "
+            "absolute_tip_pose_target_insert_only"
+        )
+    if (
+        config["action_application_mode"] == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+        and config["action_mode"] != "right_only_6d"
+    ):
+        raise ValueError(
+            "absolute_tip_pose_target_insert_only requires right_only_6d"
+        )
     if (
         type(config["base_observation_dim"]) is not int
         or config["base_observation_dim"] != _OBSERVATION_DIM
@@ -283,6 +303,26 @@ def privileged_diagnostic_observation_metadata(
     }
 
 
+def action_application_contract_metadata(
+    config: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Return additive contract fields only for the INSERT tip-target mode."""
+
+    mode = config.get("action_application_mode")
+    if mode == POST_INTEGRAL_STEP_ACTION_APPLICATION:
+        return {}
+    if mode != ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY:
+        raise ValueError("unsupported action_application_mode")
+    if config.get("action_mode") != "right_only_6d":
+        raise ValueError(
+            "absolute_tip_pose_target_insert_only requires right_only_6d"
+        )
+    return {
+        "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+        "policy_active_phases": ["insert"],
+    }
+
+
 def policy_observation_ground_truth_flags(
     config: Mapping[str, Any],
 ) -> dict[str, bool]:
@@ -365,6 +405,84 @@ def _rotation_vector_quaternion(rotation_vector: Any):
         0.5 - angle.square() / 48.0,
     )
     return torch.cat((torch.cos(half), rotation_vector * scale), dim=-1)
+
+
+def _quaternion_inverse_wxyz(quaternion: Any):
+    torch = _torch()
+    return torch.cat((quaternion[..., :1], -quaternion[..., 1:]), dim=-1)
+
+
+def apply_tip_target_pose_offset(
+    plug_body_position_world: Any,
+    plug_body_quaternion_world_wxyz: Any,
+    socket_entry_quaternion_world_wxyz: Any,
+    plug_tip_position_local: Any,
+    plug_tip_quaternion_local_wxyz: Any,
+    offset_entry_6d: Any,
+):
+    """Apply a socket-entry-frame 6D offset at the plug tip pivot."""
+
+    body_position = _last_dim(plug_body_position_world, 3, "plug_body_position_world")
+    body_quaternion = _last_dim(
+        plug_body_quaternion_world_wxyz, 4, "plug_body_quaternion_world_wxyz"
+    )
+    entry_quaternion = _last_dim(
+        socket_entry_quaternion_world_wxyz, 4, "socket_entry_quaternion_world_wxyz"
+    )
+    tip_position_local = _last_dim(plug_tip_position_local, 3, "plug_tip_position_local")
+    tip_quaternion_local = _last_dim(
+        plug_tip_quaternion_local_wxyz, 4, "plug_tip_quaternion_local_wxyz"
+    )
+    offset = _last_dim(offset_entry_6d, 6, "offset_entry_6d")
+    batch_shape = body_position.shape[:-1]
+    if any(
+        value.shape[:-1] != batch_shape
+        for value in (
+            body_quaternion,
+            entry_quaternion,
+            tip_position_local,
+            tip_quaternion_local,
+            offset,
+        )
+    ):
+        raise ValueError("tip target pose offset inputs must have matching batch shapes")
+    torch = _torch()
+    for quaternion, name in (
+        (body_quaternion, "plug_body_quaternion_world_wxyz"),
+        (entry_quaternion, "socket_entry_quaternion_world_wxyz"),
+        (tip_quaternion_local, "plug_tip_quaternion_local_wxyz"),
+    ):
+        norm = torch.linalg.vector_norm(quaternion, dim=-1, keepdim=True)
+        if bool((torch.abs(norm - 1.0) > 1.0e-4).any()):
+            raise ValueError(f"{name} must be unit length")
+
+    current_tip_position = body_position + _quaternion_rotate_wxyz(
+        body_quaternion, tip_position_local
+    )
+    current_tip_quaternion = _quaternion_multiply_wxyz(
+        body_quaternion, tip_quaternion_local
+    )
+    translated_tip_position = current_tip_position + _quaternion_rotate_wxyz(
+        entry_quaternion, offset[..., :3]
+    )
+    delta_entry = _rotation_vector_quaternion(offset[..., 3:])
+    delta_world = _quaternion_multiply_wxyz(
+        _quaternion_multiply_wxyz(entry_quaternion, delta_entry),
+        _quaternion_inverse_wxyz(entry_quaternion),
+    )
+    target_tip_quaternion = _quaternion_multiply_wxyz(
+        delta_world, current_tip_quaternion
+    )
+    target_body_quaternion = _quaternion_multiply_wxyz(
+        target_tip_quaternion, _quaternion_inverse_wxyz(tip_quaternion_local)
+    )
+    target_body_quaternion = target_body_quaternion / torch.linalg.vector_norm(
+        target_body_quaternion, dim=-1, keepdim=True
+    )
+    target_body_position = translated_tip_position - _quaternion_rotate_wxyz(
+        target_body_quaternion, tip_position_local
+    )
+    return target_body_position, target_body_quaternion
 
 
 def apply_relative_pose_bias(

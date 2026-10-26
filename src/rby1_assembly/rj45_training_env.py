@@ -11,6 +11,12 @@ _CALIBRATION_BIAS_STREAM_OFFSET = 45_123_017
 _CALIBRATION_BIAS_EPISODE_STRIDE = 1_000_003
 
 
+def _reset_applied_tip_offset_telemetry(env_ids, applied_tip_offset_entry_6d) -> None:
+    """Clear selected episode rows without disturbing parallel environments."""
+
+    applied_tip_offset_entry_6d[env_ids] = 0.0
+
+
 def _calibration_bias_case_seed(base_seed: int, env_id: int, episode_index: int) -> int:
     if any(type(value) is not int or value < 0 for value in (base_seed, env_id, episode_index)):
         raise ValueError("bias seed inputs must be non-negative integers")
@@ -604,9 +610,13 @@ def make_rj45_training_env_type(
     from rby1_assembly.contact_loads import sum_contact_normal_loads
     from rby1_assembly.isaac_env import AssemblyPhase, TerminationReason
     from rby1_assembly.rj45_training import (
+        ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
         HELD_GRASP_STABILITY_LIMITS,
         PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
+        POST_INTEGRAL_STEP_ACTION_APPLICATION,
+        TIP_TARGET_POSE_OFFSET_DESCRIPTION,
         apply_relative_pose_bias,
+        apply_tip_target_pose_offset,
         append_persistent_calibration_bias_diagnostic,
         build_policy_observation,
         expand_residual_actions,
@@ -622,6 +632,7 @@ def make_rj45_training_env_type(
     config = dict(training_config)
     required = {
         "action_mode",
+        "action_application_mode",
         "base_observation_dim",
         "diagnostic_observation_mode",
         "active_horizon_s",
@@ -634,6 +645,19 @@ def make_rj45_training_env_type(
         raise ValueError(f"training configuration is missing {sorted(required - set(config))}")
     if config["action_mode"] not in ("right_only_6d", "both_arms_12d"):
         raise ValueError("unsupported RJ45 residual action mode")
+    action_application_mode = config["action_application_mode"]
+    if action_application_mode not in (
+        POST_INTEGRAL_STEP_ACTION_APPLICATION,
+        ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+    ):
+        raise ValueError("unsupported RJ45 action application mode")
+    if (
+        action_application_mode == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+        and config["action_mode"] != "right_only_6d"
+    ):
+        raise ValueError(
+            "absolute_tip_pose_target_insert_only requires right_only_6d"
+        )
     action_dim = 6 if config["action_mode"] == "right_only_6d" else 12
     if config["base_observation_dim"] != 79:
         raise ValueError("RJ45 base residual policy observation must be 79D")
@@ -678,6 +702,9 @@ def make_rj45_training_env_type(
             )
             self._training_valid_policy_input_step_count = torch.zeros(
                 self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_applied_tip_offset_entry = torch.zeros(
+                (self.num_envs, 6), device=self.device
             )
             self._training_realign_pending = torch.zeros_like(
                 self._training_estimator_valid
@@ -1041,7 +1068,14 @@ def make_rj45_training_env_type(
             return (*left_world, *right_world)
 
         def _residual_actions_world(self, actions):
-            if not self._training_initialized or not torch.any(self._training_estimator_valid):
+            if not self._training_initialized:
+                return super()._residual_actions_world(actions)
+            if (
+                self._training_config["action_application_mode"]
+                == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            ):
+                return torch.zeros_like(actions)
+            if not torch.any(self._training_estimator_valid):
                 return super()._residual_actions_world(actions)
             bounded = actions.reshape(self.num_envs, 4, 3)
             entry_pos, entry_quat = self._frame_tensors("socket_entry")
@@ -1058,7 +1092,60 @@ def make_rj45_training_env_type(
                 dim=1,
             ).reshape(self.num_envs, 12)
 
+        def _apply_policy_mating_target_pose_offsets(
+            self, plug_goal, plug_goal_quat
+        ):
+            if not self._training_initialized:
+                return super()._apply_policy_mating_target_pose_offsets(
+                    plug_goal, plug_goal_quat
+                )
+            self._training_applied_tip_offset_entry.zero_()
+            if (
+                self._training_config["action_application_mode"]
+                != ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            ):
+                return super()._apply_policy_mating_target_pose_offsets(
+                    plug_goal, plug_goal_quat
+                )
+            active = self._policy_active_mask()
+            if not torch.any(active):
+                return plug_goal, plug_goal_quat
+            offset = self._actions[:, 6:12].clone()
+            offset[:, :3] *= self.cfg.residual_translation_bound_m
+            offset[:, 3:] *= self.cfg.residual_rotation_bound_rad
+            offset = torch.where(active[:, None], offset, torch.zeros_like(offset))
+            socket_pos, socket_quat, _, _ = self._control_object_poses()
+            entry_pos, entry_quat = self._frame_tensors("socket_entry")
+            del entry_pos
+            entry_world_quat = combine_frame_transforms(
+                socket_pos,
+                socket_quat,
+                torch.zeros((self.num_envs, 3), device=self.device),
+                entry_quat,
+            )[1]
+            tip_pos, tip_quat = self._frame_tensors("plug_tip")
+            target_position, target_quaternion = apply_tip_target_pose_offset(
+                plug_goal,
+                plug_goal_quat,
+                entry_world_quat,
+                tip_pos,
+                tip_quat,
+                offset,
+            )
+            self._training_applied_tip_offset_entry[:] = offset
+            return (
+                torch.where(active[:, None], target_position, plug_goal),
+                torch.where(active[:, None], target_quaternion, plug_goal_quat),
+            )
+
         def _policy_active_mask(self):
+            if (
+                self._training_config["action_application_mode"]
+                == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            ):
+                return self._training_policy_activated & (
+                    self._phase == int(AssemblyPhase.INSERT)
+                )
             return self._training_policy_activated & (
                 (self._phase == int(AssemblyPhase.ALIGN))
                 | (self._phase == int(AssemblyPhase.INSERT))
@@ -1067,7 +1154,13 @@ def make_rj45_training_env_type(
         def _evaluation_eligibility_mask(self):
             if not self._training_initialized:
                 return super()._evaluation_eligibility_mask()
-            return self._training_policy_activated.clone()
+            eligible = self._training_policy_activated.clone()
+            if (
+                self._training_config["action_application_mode"]
+                == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            ):
+                eligible &= self._training_valid_policy_input_step_count > 0
+            return eligible
 
         def _warmup_pending_mask(self):
             if not self._training_initialized or self._training_held_state is None:
@@ -1431,6 +1524,13 @@ def make_rj45_training_env_type(
             if not self._training_initialized:
                 return super()._get_rewards()
             activated = self._training_policy_activated
+            if (
+                self._training_config["action_application_mode"]
+                == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+            ):
+                activated = activated & (
+                    self._training_valid_policy_input_step_count > 0
+                )
             if not torch.any(activated):
                 return torch.zeros(self.num_envs, device=self.device)
             gt_pos, gt_quat = self._relative_object_pose()
@@ -1688,6 +1788,9 @@ def make_rj45_training_env_type(
                     self._training_previous_action.clone()
                 ),
                 "applied_bounded_residual_action": self._actions.clone(),
+                "applied_tip_target_offset_entry_6d": (
+                    self._training_applied_tip_offset_entry.clone()
+                ),
             }
 
         def _get_dones(self):
@@ -1707,6 +1810,9 @@ def make_rj45_training_env_type(
                 ),
                 "calibration_bias_rotation_vector_entry_rad": (
                     self._training_rotation_bias_entry.clone()
+                ),
+                "applied_tip_target_offset_entry_6d": (
+                    self._training_applied_tip_offset_entry.clone()
                 ),
             }
             self.extras["rj45_training_episode"] = training_episode
@@ -1840,6 +1946,9 @@ def make_rj45_training_env_type(
             self._training_held_reset_validation_insertion_load_n[env_ids] = 0.0
             self._training_held_reset_validation_forbidden_load_n[env_ids] = 0.0
             self._training_previous_action[env_ids] = 0.0
+            _reset_applied_tip_offset_telemetry(
+                env_ids, self._training_applied_tip_offset_entry
+            )
             _reset_policy_input_telemetry(
                 env_ids,
                 self._training_last_policy_observation,
@@ -1918,6 +2027,28 @@ def make_rj45_training_env_type(
                 ),
                 **policy_observation_ground_truth_flags(self._training_config),
                 "action_mode": self._training_config["action_mode"],
+                "action_application_mode": self._training_config[
+                    "action_application_mode"
+                ],
+                "action_application_description": (
+                    TIP_TARGET_POSE_OFFSET_DESCRIPTION
+                    if self._training_config["action_application_mode"]
+                    == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+                    else "post-integral Cartesian twist residual"
+                ),
+                "policy_active_phases": (
+                    ["insert"]
+                    if self._training_config["action_application_mode"]
+                    == ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+                    else ["align", "insert"]
+                ),
+                "action_application_telemetry": {
+                    "field": "applied_tip_target_offset_entry_6d",
+                    "frame": "socket_entry",
+                    "component_order": ["tx", "ty", "tz", "rx", "ry", "rz"],
+                    "units": ["m", "m", "m", "rad", "rad", "rad"],
+                    "inactive_rows": "all_zeros",
+                },
                 "policy_action_dimension": action_dim,
                 "policy_observation_dimension": observation_dim,
                 "diagnostic_observation_mode": self._training_config[

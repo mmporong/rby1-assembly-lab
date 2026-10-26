@@ -651,6 +651,24 @@ class Rj45ProvenanceTests(unittest.TestCase):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 _validate_rj45_training_contract(damaged)
 
+    def test_insert_only_tip_target_contract_is_additive_and_strict(self):
+        contract = valid_training_contract()
+        contract.update(
+            action_application_mode="absolute_tip_pose_target_insert_only",
+            policy_active_phases=["insert"],
+        )
+        _validate_rj45_training_contract(contract)
+        for name, mutate in (
+            ("missing_phases", lambda value: value.pop("policy_active_phases")),
+            ("align_enabled", lambda value: value.update(policy_active_phases=["align", "insert"])),
+            ("wrong_mode", lambda value: value.update(action_application_mode="post_integral_step")),
+            ("both_arms", lambda value: value.update(action_mode="both_arms_12d", policy_action_dimension=12)),
+        ):
+            damaged = copy.deepcopy(contract)
+            mutate(damaged)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
+
     def test_actual_v2_training_contract_schema_is_strictly_validated(self):
         contract = valid_training_contract()
         contract["parallel_contact_evidence"] = valid_parallel_contact_evidence()

@@ -4,8 +4,9 @@
   "title": "RJ45 양팔 파지·삽입 검증 요약",
   "status": {
     "completed": true,
-    "reinforcement_learning_trained": false,
-    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 동일한 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 소스도 변경되어 물리 주기만의 인과 효과나 수치 수렴으로 해석하지 않는다. 강화학습·실물 성능은 미검증이다."
+    "reinforcement_learning_trained": true,
+    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 같은 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 이전 표준 79D PPO v3는 학습을 마쳤지만 32개 짝지은 조건에서 기준 13회, 학습 정책 12회 성공해 개선을 확인하지 못했다. 새 INSERT-only tip-target 79D PPO는 현재 학습 중이며 결과와 개선 근거는 아직 없다. 85D 진단 학습은 시작하지 않았다. 실물 성능은 미검증이다.",
+    "reinforcement_learning_improvement_verified": false
   },
   "evaluation_contract": {
     "depth_window_m": [
@@ -612,8 +613,8 @@
       2
     ],
     "positive_peak_force_n": [
-      20.08854294,
-      19.72353172
+      20.088542938232422,
+      19.72353172302246
     ],
     "negative_environment_indices": [
       1,
@@ -632,6 +633,43 @@
     ],
     "scope": "4환경 base 양손 접촉 감지·격리와 실제 body pose 교차 검사. 전체 RJ45 과제의 병렬 성공이나 학습 성능은 미검증.",
     "artifacts": {
+      "report.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json",
+        "sha256": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed"
+      },
+      "trace.jsonl": {
+        "filename": "artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl",
+        "sha256": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72"
+      },
+      "actual-body-pose-sat-report.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json",
+        "sha256": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3"
+      },
+      "evidence-spec.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+        "sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383"
+      },
+      "offline-toolchain.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-persistent-target-hook/offline-toolchain.json",
+        "sha256": "97c10820a9aed911b40ed1a07f5644ad5df8fe9224a39f9ae866d51a1518ef53"
+      }
+    },
+    "proof_generation": "after-persistent-target-hook",
+    "peak_measurement_note": "20.088542938232422 N is the full-physics report peak for env0; the every-5-step trace plus first-contact/endpoints records a 19.72353172302246 N maximum.",
+    "offline_toolchain": {
+      "geometry_export": {
+        "python": "local pinned3.11 .venv",
+        "numpy": "1.26.0",
+        "usd-core": "25.5.1"
+      },
+      "sat_audit": {
+        "python": "system3.12 PYTHONNOUSERSITE=1",
+        "numpy": "1.26.4",
+        "scipy": "1.11.4"
+      },
+      "robot_usda_sha256": "1f04f50495feaedd61571200054071ceb55c08db46fb1d20990dee36a4dfc34d"
+    },
+    "historical_after_control_hooks_artifacts": {
       "report.json": {
         "filename": "artifacts/rj45-parallel-probe/after-control-hooks/report.json",
         "sha256": "f4242df7616f5d63446dae4126cd2b625d60752e8cc9b7cb3f3e8012de2b1d11"
@@ -1904,5 +1942,153 @@
     "final_checkpoint_sha256": "42f322c2d6242f372cb4c635fd35c9ff64e3edd6585f890f2b2653207ddeb610",
     "training_provenance_sha256": "94fee9546e10946efe8a864d6fc6917ec75a33a603772e0f072a84eaad1957e5",
     "next_step": "Diagnose observation/reward identifiability before scaling training; retain strict success and separate mechanical-seating geometry proposal."
+  },
+  "nominal_run_42": {
+    "completed": true,
+    "scope": "single-environment full-table nominal success used for current controller-authority and future training gates; not learned policy evidence",
+    "report": {
+      "filename": "artifacts/rj45/rj45-pickup-42.json",
+      "sha256": "0ca6acd0d586ef61f4d5ba68c54f8d0deaa2a7f383f8dec618fd3753b55805d6"
+    },
+    "trace": {
+      "filename": "artifacts/rj45/rj45-pickup-42.jsonl",
+      "sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+      "records": 1358,
+      "bytes": 34655706
+    },
+    "source_archive": {
+      "filename": "artifacts/rj45/rj45-42-source.tar.gz",
+      "sha256": "09aeeed2b9487c26d07cdc163681b658cdb72dc248261341ab4f437297eee640"
+    },
+    "held_artifact": {
+      "filename": "artifacts/rj45/rj45-held-42.json",
+      "sha256": "b7528f8f8c163f160a6bd6daa23b049150ef814c0e0f7cc14f0de8c471594b57",
+      "selection_control_step": 979
+    },
+    "raw_trace_byte_identical_to_nominal40": true,
+    "nominal40_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+    "source_sha256": {
+      "scripts/run_sim.py": "0e27f8531cce421bd24ef0eb7e1ea9d4f0869895acea7396d5b03f51072966a8",
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "14cb1eadf1dd22787168122c8cf7338c78f2b259b6b01d1725b2b35b7e38ea8d",
+      "src/rby1_assembly/rj45_training.py": "4ce8b479b242dde9a57536fd27ef739a4fd53b5d427f0238638cf405551b13eb",
+      "src/rby1_assembly/rj45_training_env.py": "30fd03f1819d66830da2a6aa5e99a8bc77f528c77b5fa16c558900b6c51b06e8",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    }
+  },
+  "controller_authority_ab": {
+    "status": "gpu_physics_ab_passed_for_new_mode",
+    "scope": "fixed 100 um entry-frame x calibration bias with analytic constant command; controller-command persistence only, not RL or sensor performance",
+    "fixed_bias_translation_entry_m": [
+      0.0001,
+      0.0,
+      0.0
+    ],
+    "post_integral_step": {
+      "hold_passed": false,
+      "maximum_continuous_hold_s": 0.13333333333333333,
+      "full_task_strict_success": false,
+      "hold_final_actual_x_m": -9.914164547808468e-05,
+      "report": {
+        "filename": "artifacts/rj45-controller-authority/post-integral42.json",
+        "sha256": "3d22b156d61c85b3757bcf54760b8b969cc2409871912c777e56b5d15a33bd63"
+      },
+      "trace": {
+        "filename": "artifacts/rj45-controller-authority/post-integral42.jsonl",
+        "sha256": "67385987a0560f05de483ca5b7055de1b77db11c7108a5e56b9e0fea167d7ace",
+        "records": 818
+      }
+    },
+    "absolute_tip_pose_target_insert_only": {
+      "hold_passed": true,
+      "maximum_continuous_hold_s": 2.7333333333333334,
+      "full_task_strict_success": true,
+      "hold_final_actual_x_m": 1.6696873217370012e-06,
+      "report": {
+        "filename": "artifacts/rj45-controller-authority/target-offset42.json",
+        "sha256": "1c37ee01709d7322b9b875daaedd851e844cacdd7f72df126aba69ea08464008"
+      },
+      "trace": {
+        "filename": "artifacts/rj45-controller-authority/target-offset42.jsonl",
+        "sha256": "1fd33faf8028123c769eb92384c2e340643ab03ac260d428e3b12d8c22206676",
+        "records": 468
+      }
+    },
+    "scalar_cpu_model_is_not_gpu_physics_proof": true,
+    "media": {
+      "comparison_png": {
+        "filename": "docs/media/rj45/controller-authority42-comparison.png",
+        "sha256": "d6ab95d6cabb2fc6a25f77a8caa5eaf0dac9211e836dbdef454eb52934c3399c"
+      },
+      "comparison_svg": {
+        "filename": "docs/media/rj45/controller-authority42-comparison.svg",
+        "sha256": "5b5d7a6e5d1b8dee81dcc97ace0d3ba4a9ad16e8979fdcd89a363839969db9e6"
+      },
+      "comparison_data": {
+        "filename": "docs/media/rj45/controller-authority42-comparison-data.json",
+        "sha256": "c761b025822df423738a64e8bec8b451ba11d76cff3464ffb726efb8600ca556"
+      }
+    }
+  },
+  "action_application_contract": {
+    "default_mode": "post_integral_step",
+    "new_mode": "absolute_tip_pose_target_insert_only",
+    "new_mode_description": "tip target pose offset INSERT-only",
+    "new_mode_action_contract": "right_only_6d",
+    "standard_observation_dimension": 79,
+    "diagnostic_observation_dimension": 85,
+    "diagnostic_observation_privileged": true,
+    "diagnostic_85d_gpu_training_completed": false,
+    "new_standard_79d_training_status": "running",
+    "new_standard_79d_training_completed": false,
+    "new_standard_79d_policy_improvement_verified": false,
+    "new_standard_79d_log_root": "artifacts/rj45-target-offset-pilot/logs",
+    "predeclared_experiment": {
+      "filename": "artifacts/rj45-target-offset-pilot/experiment-plan.json",
+      "sha256": "85fe680a4e930c6ba9802cd532c2a515c7e1bf9176017b51dcec4cd1f99be8c2"
+    },
+    "configs": {
+      "standard79_post_integral": {
+        "filename": "configs/rj45-training-v1.json",
+        "sha256": "28b0c3ad204f4593342623afa0e8607c8dc7da63627f97ba771071601010de23"
+      },
+      "diagnostic85_post_integral": {
+        "filename": "configs/rj45-training-bias-observability.json",
+        "sha256": "27d13188724a7e2f4dbac90bff19e89010154fc0a5c620e497a12d39d03657a8"
+      },
+      "standard79_tip_target": {
+        "filename": "configs/rj45-training-target-offset-v1.json",
+        "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "diagnostic85_tip_target": {
+        "filename": "configs/rj45-training-target-offset-bias-observability.json",
+        "sha256": "f95d6c61ad52477d1a37d63940a7dcd5ca365c49c539a7c7697dac5e6406044c"
+      }
+    },
+    "historical_v3_result": {
+      "baseline_successes": 13,
+      "learned_successes": 12,
+      "attempts_per_mode": 32,
+      "policy_improvement_verified": false
+    }
   }
 }

@@ -310,6 +310,10 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         "diagnostic_observation_mode",
         "privileged_diagnostic_observation",
     }
+    target_offset_keys = {
+        "action_application_mode",
+        "policy_active_phases",
+    }
     observation_schema = contract.get("policy_observation_schema_version")
     observation_dimension = contract.get("policy_observation_dimension")
     expected_keys = (
@@ -319,6 +323,11 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         if (observation_schema, observation_dimension) == (2, 85)
         else set()
     )
+    action_application_mode = contract.get("action_application_mode")
+    if action_application_mode == "absolute_tip_pose_target_insert_only":
+        expected_keys = expected_keys | target_offset_keys
+    elif action_application_mode is not None:
+        raise ValueError("RJ45 action application mode is invalid")
     if set(contract) != expected_keys:
         raise ValueError("RJ45 training contract fields are incomplete or unexpected")
     _reject_nonfinite_numbers(contract, "rj45_training_contract")
@@ -349,6 +358,9 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         or contract["policy_action_dimension"] != action_dimensions[action_mode]
     ):
         raise ValueError("RJ45 policy action mode and dimension disagree")
+    if action_application_mode == "absolute_tip_pose_target_insert_only":
+        if action_mode != "right_only_6d" or contract["policy_active_phases"] != ["insert"]:
+            raise ValueError("RJ45 tip-target action contract is invalid")
     if contract["episode_scope"] != "held_grasp_alignment_insertion":
         raise ValueError("RJ45 training episode scope is invalid")
     _number(contract["warmup_s"], "rj45_training_contract.warmup_s", nonnegative=True)

@@ -5,6 +5,7 @@ import torch
 
 from rby1_assembly.rj45_training import (
     apply_relative_pose_bias,
+    apply_tip_target_pose_offset,
     append_persistent_calibration_bias_diagnostic,
     build_policy_observation,
     expand_residual_actions,
@@ -30,6 +31,43 @@ def config():
 
 
 class Rj45TrainingMathTests(unittest.TestCase):
+    def test_tip_target_offset_uses_entry_frame_and_preserves_tip_pivot(self):
+        half = math.sqrt(0.5)
+        body_position = torch.tensor([[0.4, -0.2, 0.8]], dtype=torch.float64)
+        body_quaternion = torch.tensor([[half, 0.0, 0.0, half]], dtype=torch.float64)
+        entry_quaternion = torch.tensor([[half, half, 0.0, 0.0]], dtype=torch.float64)
+        tip_local = torch.tensor([[0.0, 0.03, 0.01]], dtype=torch.float64)
+        tip_local_quaternion = torch.tensor([[half, 0.0, half, 0.0]], dtype=torch.float64)
+        offset = torch.tensor([[0.01, 0.02, -0.03, 0.0, 0.0, math.pi / 2]], dtype=torch.float64)
+
+        new_position, new_quaternion = apply_tip_target_pose_offset(
+            body_position,
+            body_quaternion,
+            entry_quaternion,
+            tip_local,
+            tip_local_quaternion,
+            offset,
+        )
+        zero_position, zero_quaternion = apply_tip_target_pose_offset(
+            body_position,
+            body_quaternion,
+            entry_quaternion,
+            tip_local,
+            tip_local_quaternion,
+            torch.zeros_like(offset),
+        )
+        torch.testing.assert_close(zero_position, body_position, atol=1e-12, rtol=0)
+        torch.testing.assert_close(zero_quaternion, body_quaternion, atol=1e-12, rtol=0)
+        self.assertEqual(tuple(new_position.shape), (1, 3))
+        self.assertEqual(tuple(new_quaternion.shape), (1, 4))
+        self.assertAlmostEqual(torch.linalg.vector_norm(new_quaternion).item(), 1.0, places=12)
+
+        # Reconstructed target tip position equals old tip plus entry-frame translation.
+        from rby1_assembly.rj45_training import _quaternion_rotate_wxyz
+        old_tip = body_position + _quaternion_rotate_wxyz(body_quaternion, tip_local)
+        new_tip = new_position + _quaternion_rotate_wxyz(new_quaternion, tip_local)
+        expected_tip = old_tip + _quaternion_rotate_wxyz(entry_quaternion, offset[:, :3])
+        torch.testing.assert_close(new_tip, expected_tip, atol=1e-12, rtol=0)
     def test_privileged_bias_diagnostic_appends_normalized_sampled_parameter(self):
         base = torch.arange(2 * 79, dtype=torch.float64).reshape(2, 79)
         translation = torch.tensor([[0.00015, 0.0, 0.0], [0.0, 0.0, 0.0]], dtype=torch.float64)

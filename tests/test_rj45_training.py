@@ -7,6 +7,8 @@ import tempfile
 import unittest
 
 from rby1_assembly.rj45_training import (
+    ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+    action_application_contract_metadata,
     load_training_config,
     policy_ground_truth_usage,
     policy_observation_dimension,
@@ -21,6 +23,8 @@ from rby1_assembly.rj45_training import (
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/rj45-training-v1.json"
 DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-bias-observability.json"
+TARGET_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-v1.json"
+TARGET_DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-bias-observability.json"
 HASH = "a" * 64
 
 
@@ -86,6 +90,8 @@ class TrainingConfigurationTests(unittest.TestCase):
         self.assertEqual(config["_config_sha256"], hashlib.sha256(CONFIG_PATH.read_bytes()).hexdigest())
         self.assertEqual(config["episode_scope"], "held_grasp_alignment_insertion")
         self.assertEqual(config["action_mode"], "right_only_6d")
+        self.assertEqual(config["action_application_mode"], "post_integral_step")
+        self.assertEqual(action_application_contract_metadata(config), {})
         self.assertEqual(config["base_observation_dim"], 79)
         self.assertEqual(config["diagnostic_observation_mode"], "standard")
         self.assertEqual(policy_observation_dimension(config), 79)
@@ -141,6 +147,31 @@ class TrainingConfigurationTests(unittest.TestCase):
             },
         )
 
+    def test_target_offset_configs_change_only_action_application_mode(self):
+        for base_path, target_path in (
+            (CONFIG_PATH, TARGET_CONFIG_PATH),
+            (DIAGNOSTIC_CONFIG_PATH, TARGET_DIAGNOSTIC_CONFIG_PATH),
+        ):
+            base = json.loads(base_path.read_text(encoding="utf-8"))
+            target = json.loads(target_path.read_text(encoding="utf-8"))
+            self.assertEqual(
+                {k: v for k, v in base.items() if k != "action_application_mode"},
+                {k: v for k, v in target.items() if k != "action_application_mode"},
+            )
+            self.assertEqual(base["action_application_mode"], "post_integral_step")
+            self.assertEqual(
+                target["action_application_mode"],
+                ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+            )
+            loaded = load_training_config(target_path)
+            self.assertEqual(
+                action_application_contract_metadata(loaded),
+                {
+                    "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+                    "policy_active_phases": ["insert"],
+                },
+            )
+
     def test_staging_rejects_ambiguous_units_unverified_duration_and_overlapping_objects(self):
         original = json.loads(CONFIG_PATH.read_text())
         variants = []
@@ -182,6 +213,15 @@ class TrainingConfigurationTests(unittest.TestCase):
             config["task_physics"]["mass_randomization_enabled"] = True
             path.write_text(json.dumps(config), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "masses fixed"):
+                load_training_config(path)
+
+    def test_target_offset_mode_rejects_both_arm_actions(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "training.json"
+            config = json.loads(TARGET_CONFIG_PATH.read_text(encoding="utf-8"))
+            config["action_mode"] = "both_arms_12d"
+            path.write_text(json.dumps(config), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "requires right_only_6d"):
                 load_training_config(path)
 
     def test_rejects_bad_curriculum_and_reward_ranges(self):
