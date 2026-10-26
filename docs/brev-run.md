@@ -69,7 +69,7 @@ Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 
 
 ## 확인한 실행 범위
 
-2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 현재 로컬 Python 3.11 + USD 검사 환경의 일반 테스트 76개와 Torch 기반 제어·접촉 계산 테스트 25개가 통과했다.
+2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 당시 로컬 Python 3.11 + USD 검사와 Torch 기반 제어·접촉 계산 검사를 통과했다. 새 변경의 검증에는 현재 소스에서 테스트를 다시 실행한다.
 
 기준 성공 실행 22의 단일 환경 zero-residual 제어기는 고정 조인트나 물체 자세 덮어쓰기 없이 네 손가락의 마찰 접촉을 유지했다. 두 부품을 각각 초기 높이보다 15 mm 이상 들어 올린 뒤 실제 삽입 깊이 30.66 mm, 횡오차 1.08 mm, 유지 시간 0.4초로 44.07초에 독립 성공 판정을 통과했다. 실행 seed는 `20261025`이며 근거 묶음은 `docs/evidence/nominal-baseline.json`에 있다.
 
@@ -109,7 +109,7 @@ OMNI_KIT_ACCEPT_EULA=YES python scripts/run_sim.py \
 
 `--steps`를 생략하면 `configs/task.json`의 60초 제한을 제어 주기 1/30초로 나눈 1,800단계를 사용한다. 첫 실행은 장면 로딩·물리 step과 trace 기록을 확인한다. 두 번째 실행은 조립 성공을 요구하고 실제 렌더 프레임을 MP4로 저장한다. 영상은 단일 환경과 `--enable_cameras`가 필요하다. `--camera-view overview`는 960×720 전체 구도이고, `--camera-view assembly`는 1280×960 근접 구도다. `--background`의 Simple Room과 카메라는 시각화 전용이며 물리 판정이나 제어 관측을 바꾸지 않는다. 실패하면 기준 제어와 접촉 설정을 고치고 재검증한다. 스모크 결과의 `completed=false`를 성공으로 보고하지 않으며 실패 trace와 영상도 보존한다.
 
-`--video-fps`는 30·60·120 중에서 선택하며 기본값은 120이다. 영상 실행에서만 렌더 간격을 물리 4·2·1단계로 바꾼다. 물리 시간 간격 1/120초와 제어 decimation 4는 유지한다. viewer RGB render product를 만든 뒤 `/isaaclab/render/rtx_sensors` 설정으로 물리 루프의 렌더 필요 조건을 등록하고 종료 시 이전 값을 복원한다. 이는 viewer 촬영 예약이며 정책용 카메라 센서를 추가하지 않는다.
+`run_sim.py`, `train.py`, `evaluate_policy.py`는 `configs/runtime.json`의 물리·제어 주기를 환경 생성 전에 적용한다. 현재는 물리 240 Hz·decimation 8·제어 30 Hz다. `--video-fps`는 30·60·120 중에서 선택하며 기본값은 120이다. 현재 주기에서 렌더 간격은 각각 물리 8·4·2단계이며, 영상 설정이 물리·제어 주기를 바꾸지 않는다. 기존 toy 영상과 `record_baseline.py`의 기본 장면은 물리 120 Hz·decimation 4를 사용한 별도 기록이다. viewer RGB render product를 만든 뒤 `/isaaclab/render/rtx_sensors` 설정으로 물리 루프의 렌더 필요 조건을 등록하고 종료 시 이전 값을 복원한다. 이는 viewer 촬영 예약이며 정책용 카메라 센서를 추가하지 않는다.
 
 준비 렌더링 16회는 물리를 진행하지 않는다. 기록은 첫 렌더 간격 뒤부터 시작하고, 종료 판정 전 물리 단계까지 포함한다. 같은 물리 counter에서 일어나는 자동 reset 렌더는 기록하지 않는다. 각 제어 단계의 예상 프레임 수나 물리 counter 간격이 맞지 않으면 실행을 실패 처리한다. 60 fps 공유본은 실제 렌더 프레임을 일정한 시간 간격으로 선택하며, 마지막 정지 화면 이외의 프레임 복제나 동작 보간은 사용하지 않는다.
 
@@ -156,7 +156,7 @@ python3 scripts/export_failure_media.py \
 
 원격 촬영은 Isaac 환경을 사용하고, 마지막 편집 명령은 FFmpeg·OpenCV·Pillow와 Noto CJK 글꼴이 있는 로컬 편집 환경에서 실행할 수 있다. 원본·보고서·trace를 같은 경로로 회수해 해시를 확인한다.
 
-명령 오류 시험의 trace는 제어 단계마다 기록한다. `--trace-every`는 일반 실행의 기록 간격을 바꾸며, 명령 오류 시험에서는 1만 허용한다. 촬영은 물리 120 Hz의 실제 프레임을 사용하고, 편집본은 0.5배속·60 fps로 재생한다. 마지막 정지 화면 외에 동작 프레임을 복제하거나 보간하지 않는다. 측정값은 표시 프레임 시각보다 늦지 않은 최신 관측값을 유지한다.
+명령 오류 시험의 trace는 제어 단계마다 기록한다. `--trace-every`는 일반 실행의 기록 간격을 바꾸며, 명령 오류 시험에서는 1만 허용한다. 이미 제작한 toy 실패 영상은 물리 120 Hz에서 기록한 원본을 사용하고, 편집본은 0.5배속·60 fps로 재생한다. 현재 설정으로 위 명령을 실행하면 물리 240 Hz에서 2단계마다 120 fps의 실제 렌더 프레임을 기록한다. 마지막 정지 화면 외에 동작 프레임을 복제하거나 보간하지 않는다. 측정값은 표시 프레임 시각보다 늦지 않은 최신 관측값을 유지한다.
 
 양손 충돌 전용 환경은 runtime 복제본에서 자체 충돌을 켜고 66개 강체 중 좌우 그리퍼 9쌍만 충돌을 허용한다. 나머지 내부 2,136쌍은 필터링하며 외부 접촉 관계와 원본 USD는 유지한다. 왼쪽 손바닥·두 손가락에서 오른손 3개 강체로의 접촉 법선 하중을 합산하고, 외부 금지 접촉과 구분한다. 기존 1 N 금지 접촉 모니터에는 두 하중의 최댓값을 제공한다. 명령 전 접촉 0 N, 양손 간격 감소, 실제 양손 하중 1 N 초과, 외부 금지 접촉 1 N 이하와 `forbidden_contact` 종료를 채택 조건으로 삼는다. 관절 속도의 비유한 값과 잘못된 접촉 버퍼는 실행을 실패 처리한다.
 
@@ -165,3 +165,41 @@ python3 scripts/export_failure_media.py \
 ## 회수와 종료
 
 결과에는 소스·설정·에셋·체크포인트 해시, GPU와 패키지 버전, seed, 물리 시간 간격을 포함한다. 로그·영상·데이터를 로컬로 회수해 해시를 대조한다. 이 작업에서 시작한 실행과 서버는 승인된 비용 한도·종료 조건에 맞춰 종료하고 `brev ls --json`으로 중지 상태를 확인한다. 이미 실행 중인 다른 프로젝트와 공유하는 서버는 별도 조율 없이 중지하지 않는다.
+
+
+## RJ45 실행과 학습 전 검사
+
+RJ45는 기본 에셋과 전용 장면을 먼저 준비한다([자산 재현](rj45-task.md#재현)). 다음 명령은 이미 설치된 고정 버전 Isaac 환경을 전제로 한다. 시뮬레이터 정답 위치를 사용하는 명목 실행의 성공 기록에서 학습용 파지 상태를 추출한다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/run_sim.py \
+  --headless --device cuda:0 --task rj45 --num-envs 1 \
+  --require-completion --trace-every 1 \
+  --report artifacts/rj45/nominal.json \
+  --trace artifacts/rj45/nominal.jsonl \
+  --rj45-held-state-output artifacts/rj45/held.json
+```
+
+파지 상태는 관절 62개의 위치·속도·목표, 두 물체의 자세·COM 속도와 양손 자세를 기록한 원본 trace에서 선택한다. 초기화 때만 이 상태를 복원하며, 이후에는 물체 자세나 힘을 덮어쓰지 않는다. 명목 실행과 파지 상태의 파일·소스·설정 해시가 맞지 않으면 다음 검사가 시작되지 않는다.
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/check_rj45_reset.py \
+  --headless --device cuda:0 --num-envs 1 --reset-cycles 1000 \
+  --nominal artifacts/rj45/nominal.json --held artifacts/rj45/held.json \
+  --report artifacts/rj45/reset-1000.json
+```
+
+기본 모드는 실제 물리 warmup을 매 reset마다 수행한다. 물리 step 없이 reset API만 반복하는 `reset-api-stress`는 보조 검사이며 파지 복원 성공 근거로 쓰지 않는다. 4환경 부분 초기화 검사는 `--num-envs 4 --reset-cycles 4`와 `--parallel-contact-evidence`를 사용한다. 이때 초기화하지 않은 환경의 native PhysX 관절·루트·물체 상태 보존과 이후 제어 시간 진행도 확인한다. 병렬 접촉 증거 specification은 `report_path/report_sha256`, `trace_path/trace_sha256`, `sat_report_path/sat_report_sha256` 여섯 필드이며, 증거 파일과 관련 소스 해시를 함께 검증한다. 다른 소스에서 얻은 검사 결과를 현재 검증으로 재사용하지 않는다.
+
+초기화 검사가 통과하면 먼저 작은 PPO 실행으로 학습 파이프라인을 검사한다. 아래 1 iteration은 정책 개선을 입증하지 않는다.
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/train.py \
+  --headless --device cuda:0 --task rj45 --num-envs 1 --max-iterations 1 \
+  --rj45-nominal-evidence artifacts/rj45/nominal.json \
+  --rj45-held-state artifacts/rj45/held.json \
+  --rj45-training-config configs/rj45-training-v1.json
+```
+
+환경 수를 늘릴 때는 같은 명목·파지 증거와 검증된 병렬 접촉 specification을 전달한다. 실행 중 코드·설정·입력 증거를 바꾸지 않는다. 평가기는 환경별 고정 episode quota로 표본을 수집하고, 정책과 무학습 기준 제어에 같은 seed·보정 오차 조건을 사용한다. 전체 과제 평가는 테이블에서의 파지부터 시작하며, 학습 범위인 파지 후 정렬·삽입과 구분해 결과를 해석한다.

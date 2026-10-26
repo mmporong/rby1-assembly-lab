@@ -1,4 +1,6 @@
-# 실험 계약
+# 기존 toy 과제의 실험 계약
+
+이 문서의 76차원 관측·35 mm 삽입·정답 상태 기준 제어는 `configs/task.json`을 사용하는 기존 toy 과제의 계약이다. RJ45의 79차원 관측·고정 파지 추정기·초기화와 평가 계약은 [RJ45 과제 문서](rj45-task.md)를 따른다.
 
 ## 문제와 완료 기준
 
@@ -18,7 +20,7 @@ RB-Y1 M v1.2가 한 손에 하우징, 다른 손에 방향성이 있는 플러�
 
 현재 2단계에서 Isaac Sim·PhysX 장면과 RTX 렌더링, 양손 마찰 파지, 두 부품의 15 mm 이상 리프트와 nominal 삽입 완료를 확인했다. 단일 seed의 zero-residual 기준 제어기는 30.66 mm 깊이, 1.08 mm 횡오차, 0.4초 유지로 44.07초에 독립 성공 판정을 통과했다. 이때 삽입 하중은 0 N이어서 여유 끼워맞춤 기준선만 검증한다.
 
-기준선 HDF5에는 서로 다른 3개 seed의 독립 성공·유효 episode가 있으며 train 2개·eval 1개로 결정적으로 분리된다. 학습 가능한 episode는 train 2개이고, 원본 source archive와 episode hash를 검증했다. 정본은 [기준선 데이터 근거](evidence/baseline-dataset.json)다. 최종 기록은 현재 코어와 병렬 충돌 설정을 사용했으며 소스·설정·에셋 해시를 현재 파일과 대조했다.
+기준선 HDF5에는 서로 다른 3개 seed의 독립 성공·유효 episode가 있으며 train 2개·eval 1개로 결정적으로 분리된다. 학습 가능한 episode는 train 2개이고, 원본 source archive와 episode hash를 검증했다. 정본은 [기준선 데이터 근거](evidence/baseline-dataset.json)다. 이 기록의 소스·설정·에셋 해시는 당시 원본 소스 묶음과 대조한 값이다. 이후 RJ45 구현이 추가된 현재 소스와 같은 버전으로 간주하지 않는다.
 
 3단계는 4환경·1 iteration·96 transition의 PPO runtime smoke까지 진행했다. 프로세스 정상 종료, 유한한 checkpoint tensor, optimizer 상태와 update는 확인했지만 전체 episode, 잼 회복, 정책 성공률은 확인하지 않았다. 따라서 개발 순서의 3단계를 완료했거나 잔차 정책이 기준 제어보다 낫다고 판정하지 않는다.
 

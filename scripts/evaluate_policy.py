@@ -55,6 +55,56 @@ def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -
     return tuple(dependencies)
 
 
+def _fixed_environment_episode_quotas(total_episodes: int, num_envs: int) -> tuple[int, ...]:
+    """Distribute a fixed episode budget by environment index."""
+
+    if type(total_episodes) is not int or total_episodes <= 0:
+        raise ValueError("total_episodes must be a positive integer")
+    if type(num_envs) is not int or num_envs <= 0:
+        raise ValueError("num_envs must be a positive integer")
+    quotient, remainder = divmod(total_episodes, num_envs)
+    return tuple(quotient + int(env_id < remainder) for env_id in range(num_envs))
+
+
+def _environment_episode_is_within_quota(
+    env_id: int,
+    quotas: tuple[int, ...],
+    accepted_counts: tuple[int, ...] | list[int],
+) -> bool:
+    """Return whether the next completed episode from one environment is admissible."""
+
+    if type(env_id) is not int or env_id < 0 or env_id >= len(quotas):
+        raise ValueError("env_id is outside the quota table")
+    if len(accepted_counts) != len(quotas):
+        raise ValueError("accepted_counts must match the quota table")
+    if any(type(value) is not int or value < 0 for value in (*quotas, *accepted_counts)):
+        raise ValueError("quotas and accepted counts must be non-negative integers")
+    if accepted_counts[env_id] > quotas[env_id]:
+        raise ValueError("accepted count already exceeds its environment quota")
+    return accepted_counts[env_id] < quotas[env_id]
+
+
+def _configure_verified_parallel_rj45_task(
+    cfg,
+    task,
+    project_root,
+    *,
+    parallel_specification,
+    verified_parallel_contact_evidence,
+    configure_rj45_task,
+):
+    """Bind a verified parallel specification before task configuration."""
+
+    if parallel_specification is None:
+        if verified_parallel_contact_evidence is not None:
+            raise ValueError("parallel contact proof has no specification")
+    else:
+        if verified_parallel_contact_evidence is None:
+            raise ValueError("parallel contact specification was not verified")
+        cfg.rj45_parallel_contact_evidence = parallel_specification
+    return configure_rj45_task(cfg, task, project_root)
+
+
 _bootstrap_task = _preimport_option("--task", "toy")
 _bootstrap_config_default = (
     "configs/ppo-rj45-v1.json" if _bootstrap_task == "rj45" else "configs/ppo.json"
@@ -161,8 +211,12 @@ if args.num_envs is None:
     args.num_envs = 1 if args.task == "rj45" else 64
 if args.num_envs <= 0 or args.episodes <= 0:
     parser.error("--num-envs and --episodes must be positive")
-if args.task == "rj45" and args.num_envs != 1:
-    parser.error("parallel RJ45 collision validation pending; use --num-envs 1")
+if (
+    args.task == "rj45"
+    and args.num_envs > 1
+    and args.parallel_contact_evidence is None
+):
+    parser.error("parallel RJ45 evaluation requires --parallel-contact-evidence")
 if args.task == "rj45" and args.rj45_nominal_evidence is None:
     parser.error("--task rj45 requires --rj45-nominal-evidence")
 if args.seed is not None and args.seed < 0:
@@ -469,7 +523,14 @@ def main() -> int:
                 "held_grasp_reset_proof": held_state_proof,
                 "training_num_envs": lineage["num_envs"],
             }
-        env_type = configure_rj45_task(cfg, task, PROJECT_ROOT)
+        env_type = _configure_verified_parallel_rj45_task(
+            cfg,
+            task,
+            PROJECT_ROOT,
+            parallel_specification=parallel_spec_payload,
+            verified_parallel_contact_evidence=parallel_contact_evidence,
+            configure_rj45_task=configure_rj45_task,
+        )
         env_type = make_rj45_training_env_type(
             env_type,
             training_config,
@@ -494,6 +555,14 @@ def main() -> int:
             )
         observations = wrapped.get_observations()
         attempts = 0
+        episode_quotas = (
+            _fixed_environment_episode_quotas(args.episodes, args.num_envs)
+            if args.task == "rj45"
+            else None
+        )
+        accepted_attempts_per_environment = (
+            [0 for _ in range(args.num_envs)] if episode_quotas is not None else None
+        )
         valid_successes = 0
         valid_failures = 0
         invalid_episodes = 0
@@ -514,7 +583,15 @@ def main() -> int:
             for env_id in ended.tolist():
                 if attempts >= args.episodes:
                     break
+                if episode_quotas is not None and not _environment_episode_is_within_quota(
+                    env_id,
+                    episode_quotas,
+                    accepted_attempts_per_environment,
+                ):
+                    continue
                 attempts += 1
+                if accepted_attempts_per_environment is not None:
+                    accepted_attempts_per_environment[env_id] += 1
                 snapshot = extras["terminal_snapshot"]
                 force_peak = float(extras["evaluation"]["contact_force_proxy_peak_n"][env_id].item())
                 elapsed = float(snapshot["timestamp_s"][env_id].item())
@@ -668,6 +745,13 @@ def main() -> int:
         }
         if args.task == "rj45":
             report["baseline_mode"] = args.baseline_mode
+            report["per_environment_episode_quota"] = list(episode_quotas)
+            report["per_environment_accepted_attempt_count"] = (
+                accepted_attempts_per_environment
+            )
+            report["parallel_contact_evidence"] = (
+                parallel_contact_evidence if args.num_envs > 1 else None
+            )
             report["rj45_training_config"] = {
                 "path": _lineage_path_key(args.rj45_training_config),
                 "sha256": training_config["_config_sha256"],

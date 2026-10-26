@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import copy
 import hashlib
 import json
@@ -27,6 +28,26 @@ def _sha256(path: Path) -> str:
 def _write_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def _load_evaluation_quota_helpers(root: Path):
+    script = root / "scripts/evaluate_policy.py"
+    tree = ast.parse(script.read_text(encoding="utf-8"))
+    names = {
+        "_fixed_environment_episode_quotas",
+        "_environment_episode_is_within_quota",
+        "_configure_verified_parallel_rj45_task",
+    }
+    functions = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name in names
+    ]
+    if {node.name for node in functions} != names:
+        raise AssertionError("evaluation quota helpers are missing")
+    namespace = {}
+    exec(compile(ast.Module(body=functions, type_ignores=[]), script, "exec"), namespace)
+    return namespace
 
 
 def _synthetic_contract_fixture(project: Path) -> tuple[dict, Path, Path]:
@@ -570,6 +591,98 @@ class NominalEvidenceTests(unittest.TestCase):
                 verify_rj45_nominal_evidence(project, task, report_path)
 
 
+class EvaluationQuotaTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.root = Path(__file__).resolve().parents[1]
+        helpers = _load_evaluation_quota_helpers(self.root)
+        self.quotas = helpers["_fixed_environment_episode_quotas"]
+        self.within_quota = helpers["_environment_episode_is_within_quota"]
+        self.configure_parallel_task = helpers[
+            "_configure_verified_parallel_rj45_task"
+        ]
+
+    def test_episode_budget_is_fixed_per_environment(self) -> None:
+        self.assertEqual(self.quotas(10, 4), (3, 3, 2, 2))
+        self.assertEqual(self.quotas(2, 4), (1, 1, 0, 0))
+        self.assertEqual(self.quotas(4, 1), (4,))
+
+    def test_fast_environment_cannot_consume_another_environment_quota(self) -> None:
+        quotas = self.quotas(5, 3)
+        accepted = [0, 0, 0]
+        accepted_order = []
+        for env_id in (0, 0, 0, 0, 1, 1, 1, 2, 2):
+            if self.within_quota(env_id, quotas, accepted):
+                accepted[env_id] += 1
+                accepted_order.append(env_id)
+        self.assertEqual(quotas, (2, 2, 1))
+        self.assertEqual(accepted, [2, 2, 1])
+        self.assertEqual(accepted_order, [0, 0, 1, 1, 2])
+
+    def test_invalid_quota_state_is_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "positive integer"):
+            self.quotas(0, 4)
+        with self.assertRaisesRegex(ValueError, "already exceeds"):
+            self.within_quota(0, (1,), [2])
+
+    def test_verified_parallel_spec_is_bound_before_task_configuration(self) -> None:
+        class ConfigFixture:
+            pass
+
+        cfg = ConfigFixture()
+        task = {"task_id": "rj45-v1"}
+        project_root = self.root
+        specification = {"report_path": "parallel-report.json"}
+        verified_evidence = {"verified": True}
+        configured_type = object()
+        calls = []
+
+        def configure_stub(received_cfg, received_task, received_root):
+            if received_cfg is cfg:
+                self.assertIs(
+                    received_cfg.rj45_parallel_contact_evidence,
+                    specification,
+                )
+            self.assertIs(received_task, task)
+            self.assertEqual(received_root, project_root)
+            calls.append("configured")
+            return configured_type
+
+        result = self.configure_parallel_task(
+            cfg,
+            task,
+            project_root,
+            parallel_specification=specification,
+            verified_parallel_contact_evidence=verified_evidence,
+            configure_rj45_task=configure_stub,
+        )
+        self.assertIs(result, configured_type)
+        self.assertEqual(calls, ["configured"])
+
+        with self.assertRaisesRegex(ValueError, "was not verified"):
+            self.configure_parallel_task(
+                ConfigFixture(),
+                task,
+                project_root,
+                parallel_specification=specification,
+                verified_parallel_contact_evidence=None,
+                configure_rj45_task=configure_stub,
+            )
+        self.assertEqual(calls, ["configured"])
+
+        unproved_cfg = ConfigFixture()
+        result = self.configure_parallel_task(
+            unproved_cfg,
+            task,
+            project_root,
+            parallel_specification=None,
+            verified_parallel_contact_evidence=None,
+            configure_rj45_task=configure_stub,
+        )
+        self.assertIs(result, configured_type)
+        self.assertFalse(hasattr(unproved_cfg, "rj45_parallel_contact_evidence"))
+        self.assertEqual(calls, ["configured", "configured"])
+
+
 class TrainingPreflightTests(unittest.TestCase):
     def test_rj45_missing_nominal_gate_stops_before_launcher(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -641,6 +754,127 @@ class TrainingPreflightTests(unittest.TestCase):
         self.assertEqual(completed.returncode, 2)
         self.assertIn("--rj45-nominal-evidence", completed.stderr)
         self.assertNotIn("launcher started", completed.stderr)
+
+    def test_parallel_rj45_evaluation_without_proof_stops_before_launcher(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            fake_modules = Path(directory)
+            evidence = fake_modules / "evidence"
+            evidence.mkdir()
+            nominal_trace = evidence / "nominal.jsonl"
+            nominal_trace.write_text("{}\n", encoding="utf-8")
+            nominal_report = evidence / "nominal.json"
+            _write_json(nominal_report, {"trace_path": str(nominal_trace)})
+            isaaclab = fake_modules / "isaaclab"
+            isaaclab.mkdir()
+            (isaaclab / "__init__.py").write_text("", encoding="utf-8")
+            (isaaclab / "app.py").write_text(
+                "class AppLauncher:\n"
+                "    @staticmethod\n"
+                "    def add_app_launcher_args(parser):\n"
+                "        parser.add_argument('--device', default='cpu')\n"
+                "    def __init__(self, args):\n"
+                "        raise AssertionError('launcher started')\n",
+                encoding="utf-8",
+            )
+            environment = dict(os.environ)
+            environment["PYTHONPATH"] = os.pathsep.join(
+                (str(fake_modules), str(root / "src"))
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / "scripts/evaluate_policy.py"),
+                    "--task",
+                    "rj45",
+                    "--baseline-mode",
+                    "biased_zero",
+                    "--num-envs",
+                    "4",
+                    "--episodes",
+                    "4",
+                    "--rj45-nominal-evidence",
+                    str(nominal_report),
+                ],
+                cwd=root,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(completed.returncode, 2)
+        self.assertIn(
+            "parallel RJ45 evaluation requires --parallel-contact-evidence",
+            completed.stderr,
+        )
+        self.assertNotIn("launcher started", completed.stderr)
+
+    def test_parallel_rj45_evaluation_with_proof_reaches_launcher(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        with tempfile.TemporaryDirectory() as directory:
+            fake_modules = Path(directory)
+            evidence = fake_modules / "evidence"
+            evidence.mkdir()
+            nominal_trace = evidence / "nominal.jsonl"
+            nominal_trace.write_text("{}\n", encoding="utf-8")
+            nominal_report = evidence / "nominal.json"
+            _write_json(nominal_report, {"trace_path": str(nominal_trace)})
+            parallel_report = evidence / "parallel-report.json"
+            parallel_trace = evidence / "parallel-trace.jsonl"
+            sat_report = evidence / "sat-report.json"
+            _write_json(parallel_report, {})
+            parallel_trace.write_text("{}\n", encoding="utf-8")
+            _write_json(sat_report, {})
+            parallel_spec = evidence / "parallel-spec.json"
+            _write_json(
+                parallel_spec,
+                {
+                    "report_path": str(parallel_report),
+                    "trace_path": str(parallel_trace),
+                    "sat_report_path": str(sat_report),
+                },
+            )
+            isaaclab = fake_modules / "isaaclab"
+            isaaclab.mkdir()
+            (isaaclab / "__init__.py").write_text("", encoding="utf-8")
+            (isaaclab / "app.py").write_text(
+                "class AppLauncher:\n"
+                "    @staticmethod\n"
+                "    def add_app_launcher_args(parser):\n"
+                "        parser.add_argument('--device', default='cpu')\n"
+                "    def __init__(self, args):\n"
+                "        raise AssertionError('launcher started')\n",
+                encoding="utf-8",
+            )
+            environment = dict(os.environ)
+            environment["PYTHONPATH"] = os.pathsep.join(
+                (str(fake_modules), str(root / "src"))
+            )
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(root / "scripts/evaluate_policy.py"),
+                    "--task",
+                    "rj45",
+                    "--baseline-mode",
+                    "biased_zero",
+                    "--num-envs",
+                    "4",
+                    "--episodes",
+                    "4",
+                    "--rj45-nominal-evidence",
+                    str(nominal_report),
+                    "--parallel-contact-evidence",
+                    str(parallel_spec),
+                ],
+                cwd=root,
+                env=environment,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertNotEqual(completed.returncode, 2)
+        self.assertIn("launcher started", completed.stderr)
 
 
 if __name__ == "__main__":
