@@ -1,4 +1,4 @@
-"""Passive one-environment monitor for physical RB-Y1 hand-to-hand contact.
+"""Passive monitor for physical RB-Y1 hand-to-hand contact.
 
 The wrapper changes collision filtering only: it enables the nine audited
 left-hand/right-hand rigid-body pairs and measures their PhysX contacts. It
@@ -19,15 +19,22 @@ from rby1_assembly.hand_collision import (
     RIGHT_HAND_BODY_PATHS,
     configure_selective_hand_self_collisions,
 )
+from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence
+
+
+def _flatten_paths(value: Any) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (tuple, list)):
+        paths: list[str] = []
+        for item in value:
+            paths.extend(_flatten_paths(item))
+        return paths
+    raise TypeError(f"unexpected PhysX path container: {type(value).__name__}")
 
 
 def make_hand_contact_monitor_env_type(base_cls: type) -> type:
-    """Wrap a nominal environment with passive one-env hand contact sensing.
-
-    Multi-environment replication is intentionally rejected until selective
-    filtered-pair authoring and contact-buffer isolation are validated for
-    every cloned articulation.
-    """
+    """Wrap a nominal environment with passive hand-to-hand contact sensing."""
 
     if not isinstance(base_cls, type):
         raise TypeError("base_cls must be an environment type")
@@ -41,9 +48,21 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
         """Nominal controller plus measured cross-hand forbidden-contact load."""
 
         def __init__(self, cfg, render_mode=None, **kwargs):
-            if cfg.scene.num_envs != 1:
-                raise ValueError("hand contact monitoring currently requires exactly one environment")
+            requested_num_envs = int(cfg.scene.num_envs)
+            if requested_num_envs < 1:
+                raise ValueError("hand contact monitoring requires at least one environment")
+            self._parallel_contact_evidence = None
+            if requested_num_envs > 1:
+                if cfg.scene.replicate_physics:
+                    raise ValueError(
+                        "batched hand contact monitoring requires replicate_physics=False"
+                    )
+                specification = getattr(cfg, "rj45_parallel_contact_evidence", None)
+                self._parallel_contact_evidence = load_parallel_contact_evidence(
+                    specification
+                )
             super().__init__(cfg, render_mode, **kwargs)
+            self._validate_hand_contact_sensor_routing()
             self._last_cross_hand_contact_load_n = torch.zeros(
                 self.num_envs, device=self.device
             )
@@ -59,22 +78,26 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
 
         def _setup_scene(self):
             super()._setup_scene()
-            if len(self.scene.env_prim_paths) != 1:
-                raise RuntimeError("hand contact monitoring requires one composed environment")
-            robot_root_path = f"{self.scene.env_prim_paths[0]}/Robot"
-            self._hand_contact_filter_metadata = configure_selective_hand_self_collisions(
-                get_current_stage(), robot_root_path
-            )
+            if len(self.scene.env_prim_paths) != int(self.cfg.scene.num_envs):
+                raise RuntimeError("hand contact environment roots do not match cfg.scene.num_envs")
+            stage = get_current_stage()
+            filter_metadata = []
+            for env_path in self.scene.env_prim_paths:
+                filter_metadata.append(
+                    configure_selective_hand_self_collisions(stage, f"{env_path}/Robot")
+                )
+            self._hand_contact_filter_metadata = filter_metadata
             self.cfg.robot.spawn.articulation_props.enabled_self_collisions = True
 
-            right_filters = [
-                f"{robot_root_path}/{relative_path}"
-                for relative_path in RIGHT_HAND_BODY_PATHS
-            ]
+            if self.cfg.scene.num_envs == 1:
+                source_root = f"{self.scene.env_prim_paths[0]}/Robot"
+            else:
+                source_root = f"{self.scene.env_regex_ns}/Robot"
+            right_filters = [f"{source_root}/{path}" for path in RIGHT_HAND_BODY_PATHS]
             sensors = {}
             for relative_path in LEFT_HAND_BODY_PATHS:
                 sensor_cfg = ContactSensorCfg(
-                    prim_path=f"{robot_root_path}/{relative_path}",
+                    prim_path=f"{source_root}/{relative_path}",
                     max_contact_data_count_per_prim=128,
                     update_period=0.0,
                     history_length=0,
@@ -87,6 +110,46 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
                     f"nominal_cross_hand_{relative_path.replace('/', '_')}"
                 ] = sensor
             self._hand_contact_sensors = sensors
+
+        def _validate_hand_contact_sensor_routing(self) -> None:
+            for relative_path, sensor in self._hand_contact_sensors.items():
+                expected_sources = [
+                    f"{env_path}/Robot/{relative_path}"
+                    for env_path in self.scene.env_prim_paths
+                ]
+                backend = getattr(sensor.body_physx_view, "_backend", None)
+                if backend is None or not hasattr(backend, "prim_paths"):
+                    raise RuntimeError(
+                        f"PhysX backend source paths unavailable for {relative_path}"
+                    )
+                actual_source_groups = {
+                    "body": _flatten_paths(sensor.body_physx_view.prim_paths),
+                    "backend": _flatten_paths(backend.prim_paths),
+                    "contact": _flatten_paths(sensor.contact_physx_view.sensor_paths),
+                }
+                for label, actual in actual_source_groups.items():
+                    if actual != expected_sources:
+                        raise RuntimeError(
+                            f"hand contact {label} source ordering mismatch for "
+                            f"{relative_path}: expected={expected_sources}, actual={actual}"
+                        )
+                expected_filters = [
+                    f"{env_path}/Robot/{filter_path}"
+                    for env_path in self.scene.env_prim_paths
+                    for filter_path in RIGHT_HAND_BODY_PATHS
+                ]
+                actual_filters = _flatten_paths(sensor.contact_physx_view.filter_paths)
+                if (
+                    int(sensor.body_physx_view.count) != self.num_envs
+                    or int(sensor.contact_physx_view.sensor_count) != self.num_envs
+                    or int(sensor.contact_physx_view.filter_count)
+                    != len(RIGHT_HAND_BODY_PATHS)
+                    or actual_filters != expected_filters
+                ):
+                    raise RuntimeError(
+                        "hand contact filter routing mismatch for "
+                        f"{relative_path}: expected={expected_filters}, actual={actual_filters}"
+                    )
 
         def _cross_hand_contact_load(self):
             loads = []
@@ -142,10 +205,8 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
                     COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION
                 ),
                 "self_collision_enabled": True,
-                "hand_contact_monitor_mode": "passive_nominal_one_environment",
-                "selective_self_collision_filter": dict(
-                    self._hand_contact_filter_metadata
-                ),
+                "hand_contact_monitor_mode": self._hand_contact_monitor_mode(),
+                "selective_self_collision_filter": self._collision_filter_report(),
             }
             self.extras.update(contact_fields)
             evaluation = self.extras.get("evaluation")
@@ -159,6 +220,16 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
                     snapshot_evaluation.update(contact_fields)
             return terminated, truncated
 
+        def _hand_contact_monitor_mode(self) -> str:
+            if self.num_envs == 1:
+                return "passive_nominal_one_environment"
+            return "passive_batched_runtime_ordering_asserted"
+
+        def _collision_filter_report(self) -> Any:
+            if self.num_envs == 1:
+                return dict(self._hand_contact_filter_metadata[0])
+            return [dict(item) for item in self._hand_contact_filter_metadata]
+
         def _reset_idx(self, env_ids=None):
             super()._reset_idx(env_ids)
             if not hasattr(self, "_last_cross_hand_contact_load_n"):
@@ -171,36 +242,54 @@ def make_hand_contact_monitor_env_type(base_cls: type) -> type:
             self._episode_external_forbidden_contact_load_peak_n[env_ids] = 0.0
 
         def hand_contact_monitor_report(self) -> dict[str, Any]:
-            return {
+            report = {
                 "scope": (
-                    "passive nominal one-environment hand-to-hand PhysX contact monitor"
+                    "passive hand-to-hand PhysX contact monitor with runtime routing assertions"
                 ),
                 "command_pose_force_or_failure_injection": False,
+                "hand_contact_monitor_mode": self._hand_contact_monitor_mode(),
+                "num_envs": self.num_envs,
                 "multi_environment_validation_completed": False,
-                "required_num_envs": 1,
+                "multi_environment_routing_validation_completed": self.num_envs > 1,
+                "required_num_envs": 1 if self.num_envs == 1 else None,
                 "physics_runtime_policy": (
                     "articulation self-collision enabled; only the 9 left-hand/right-hand "
                     "rigid-body pairs are unfiltered"
                 ),
-                "collision_filter": dict(self._hand_contact_filter_metadata),
-                "cross_hand_contact_load_n": float(
-                    self._last_cross_hand_contact_load_n[0].item()
-                ),
-                "cross_hand_contact_load_peak_n": float(
-                    self._episode_cross_hand_contact_load_peak_n[0].item()
+                "collision_filter": self._collision_filter_report(),
+                "cross_hand_contact_load_n": self._last_cross_hand_contact_load_n.detach()
+                .cpu()
+                .tolist(),
+                "cross_hand_contact_load_peak_n": (
+                    self._episode_cross_hand_contact_load_peak_n.detach().cpu().tolist()
                 ),
                 "cross_hand_contact_load_source": CROSS_HAND_CONTACT_LOAD_SOURCE,
-                "external_forbidden_contact_load_n": float(
-                    self._last_external_forbidden_contact_load_n[0].item()
+                "external_forbidden_contact_load_n": (
+                    self._last_external_forbidden_contact_load_n.detach().cpu().tolist()
                 ),
-                "external_forbidden_contact_load_peak_n": float(
-                    self._episode_external_forbidden_contact_load_peak_n[0].item()
+                "external_forbidden_contact_load_peak_n": (
+                    self._episode_external_forbidden_contact_load_peak_n.detach()
+                    .cpu()
+                    .tolist()
                 ),
                 "forbidden_contact_load_source": COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE,
                 "forbidden_contact_load_definition": (
                     COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION
                 ),
             }
+            if self.num_envs == 1:
+                for key in (
+                    "cross_hand_contact_load_n",
+                    "cross_hand_contact_load_peak_n",
+                    "external_forbidden_contact_load_n",
+                    "external_forbidden_contact_load_peak_n",
+                ):
+                    report[key] = report[key][0]
+            else:
+                report["parallel_contact_evidence"] = dict(
+                    self._parallel_contact_evidence
+                )
+            return report
 
     HandContactMonitorEnv.__name__ = f"HandContactMonitor{base_cls.__name__}"
     HandContactMonitorEnv.__qualname__ = HandContactMonitorEnv.__name__

@@ -130,7 +130,7 @@
     "contact_offset_m": 2e-05,
     "rest_offset_m": 0,
     "solver_position_iteration_count": 24,
-    "solver_velocity_iteration_count": 1,
+    "solver_velocity_iteration_count": 0,
     "enable_external_forces_every_iteration": true
   },
   "evaluation": {

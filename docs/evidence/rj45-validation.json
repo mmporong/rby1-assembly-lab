@@ -3,9 +3,9 @@
   "task_id": "rj45-v1",
   "title": "RJ45 양팔 파지·삽입 검증 요약",
   "status": {
-    "completed": false,
+    "completed": true,
     "reinforcement_learning_trained": false,
-    "summary": "기본 그리퍼의 마찰 접촉으로 두 부품을 파지하고 15 mm 이상 들어 올린 뒤 12.3 mm 삽입 구간에 도달했지만, PhysX 보고 상대속도가 성공 한계를 넘어서 0.4초 안정 판정을 통과하지 못했다. 아래 실행은 RJ45 완료 성공이나 강화학습 성능의 근거가 아니다."
+    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 동일한 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 소스도 변경되어 물리 주기만의 인과 효과나 수치 수렴으로 해석하지 않는다. 강화학습·실물 성능은 미검증이다."
   },
   "evaluation_contract": {
     "depth_window_m": [
@@ -499,6 +499,155 @@
         "independent_success": false,
         "interpretation": "첫 삽입 시도에서 기하 조건을 오래 유지했지만 대표 원시 상대각속도는 약 19.6 rad/s로 한계를 넘었다. insert 제한 뒤 한 번 후퇴·재정렬해 두 번째 삽입을 시작했으나 진단 제한 안에 성공하지 못했다."
       }
+    },
+    {
+      "run_id": 28,
+      "purpose": "동일 성공 한계를 유지한 명목 삽입 검증",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45/rj45-pickup-28.json",
+          "sha256": "23220d29fa79ae38cf9da652f0a47f58daed532e44168a9d27739228f85a4c7b"
+        },
+        "trace": {
+          "filename": "artifacts/rj45/rj45-pickup-28.jsonl",
+          "sha256": "46b0a3537d39d1f6da214a49b67b412477dd320e0eb3191c28f94eedc58aa3e0"
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45/rj45-28-source.tar.gz",
+          "sha256": "604c8b037b40f09557412682a9d0d3a659e8184d4ed3ad3396459801de4bcce8"
+        }
+      },
+      "completed": true,
+      "seed": 20261026,
+      "control_hz": 30,
+      "solver": {
+        "position_iterations": 24,
+        "velocity_iterations": 0,
+        "external_forces_every_iteration": true
+      },
+      "result": {
+        "timestamp_s": 44.833335876464844,
+        "termination_reason": "independent_success",
+        "actual_depth_m": 0.012334562838077545,
+        "actual_lateral_error_m": 1.007670903163671e-06,
+        "actual_orientation_error_rad": 2.780597924356698e-06,
+        "independent_eval_dwell_s": 0.4,
+        "grip_contact_force_peak_n": 3.7756590843200684,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "independent_raw_numpy_audit": {
+        "physics_hz": 120,
+        "decimation": 4,
+        "raw_stable_checks_including_duplicate_endpoints": 65,
+        "max_relative_linear_speed_m_s": 0.001650763,
+        "max_relative_angular_speed_rad_s": 0.023680084,
+        "max_lateral_error_m": 4.08746e-06
+      },
+      "audit_scope": "원시 물체 자세·link 속도로 상대 운동을 재계산하고 source archive의 보고서 선언 해시와 대조. raw check 수에는 제어 주기 경계의 중복 endpoint가 포함되며 독립 물리 표본 수가 아니다."
+    },
+    {
+      "run_id": 29,
+      "purpose": "동일 성공 한계를 유지한 명목 삽입 검증",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45/rj45-pickup-29.json",
+          "sha256": "34fdaa1fa66e2823413e433085eafbf5b165d295b9a1b0375adb0bcf9cc88425"
+        },
+        "trace": {
+          "filename": "artifacts/rj45/rj45-pickup-29.jsonl",
+          "sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50"
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45/rj45-29-source.tar.gz",
+          "sha256": "ff12aa10aaac9afc4be4376ae18d09bd6956b5c046b8d4832d791b27903f9605"
+        }
+      },
+      "completed": true,
+      "seed": 20261026,
+      "control_hz": 30,
+      "solver": {
+        "position_iterations": 24,
+        "velocity_iterations": 0,
+        "external_forces_every_iteration": true
+      },
+      "result": {
+        "timestamp_s": 45.23333740234375,
+        "termination_reason": "independent_success",
+        "actual_depth_m": 0.012296274304389954,
+        "actual_lateral_error_m": 3.2322038805432385e-06,
+        "actual_orientation_error_rad": 1.0542525160417426e-05,
+        "independent_eval_dwell_s": 0.4,
+        "grip_contact_force_peak_n": 3.7756733894348145,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "independent_raw_numpy_audit": {
+        "physics_hz": 240,
+        "decimation": 8,
+        "raw_stable_checks_including_duplicate_endpoints": 117,
+        "max_relative_linear_speed_m_s": 0.000977014,
+        "max_relative_angular_speed_rad_s": 0.037303757,
+        "max_lateral_error_m": 1.026459e-05
+      },
+      "audit_scope": "원시 물체 자세·link 속도로 상대 운동을 재계산하고 source archive의 보고서 선언 해시와 대조. raw check 수에는 제어 주기 경계의 중복 endpoint가 포함되며 독립 물리 표본 수가 아니다."
     }
-  ]
+  ],
+  "comparison_constraints": {
+    "same_task_config": true,
+    "same_seed": true,
+    "same_control_hz": true,
+    "same_solver": true,
+    "source_changed_between_runs": true,
+    "timestep_causal_effect_verified": false,
+    "reinforcement_learning_improvement_verified": false,
+    "hardware_transfer_verified": false,
+    "solver_generalization_verified": false
+  },
+  "parallel_contact_routing": {
+    "passed": true,
+    "num_envs": 4,
+    "positive_environment_indices": [
+      0,
+      2
+    ],
+    "positive_peak_force_n": [
+      20.08854294,
+      19.72353172
+    ],
+    "negative_environment_indices": [
+      1,
+      3
+    ],
+    "negative_peak_force_n": [
+      0,
+      0
+    ],
+    "reset_zero": true,
+    "cross_environment_negative_force_n": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "scope": "4환경 base 양손 접촉 감지·격리와 실제 body pose 교차 검사. 전체 RJ45 과제의 병렬 성공이나 학습 성능은 미검증.",
+    "artifacts": {
+      "report.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-control-hooks/report.json",
+        "sha256": "f4242df7616f5d63446dae4126cd2b625d60752e8cc9b7cb3f3e8012de2b1d11"
+      },
+      "trace.jsonl": {
+        "filename": "artifacts/rj45-parallel-probe/after-control-hooks/trace.jsonl",
+        "sha256": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72"
+      },
+      "actual-body-pose-sat-report.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-control-hooks/actual-body-pose-sat-report.json",
+        "sha256": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3"
+      },
+      "evidence-spec.json": {
+        "filename": "artifacts/rj45-parallel-probe/after-control-hooks/evidence-spec.json",
+        "sha256": "57283513d10a924b7483f6c3db78c02b8f26cc5d78fa3563822bf46a66db851b"
+      }
+    }
+  }
 }

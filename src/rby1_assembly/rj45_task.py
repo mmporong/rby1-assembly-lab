@@ -182,17 +182,46 @@ def verify_checkpoint_lineage(
     _reject_nonfinite_numbers(lineage, "checkpoint_provenance")
     if type(lineage.get("schema_version")) is not int or lineage["schema_version"] != 1:
         raise ValueError("checkpoint provenance schema_version must be 1")
-    contract_keys = {
+    required_contract_keys = {
         "runtime_versions", "physics_dt_s", "control_decimation", "control_dt_s",
         "observation_noise", "baseline_controller_state_source", "task_config_path", "policy_config_path",
         "collision_monitor_mode", "num_envs",
     }
-    if set(runtime_contract) != contract_keys:
+    optional_contract_keys = {"rj45_training_contract"}
+    if not required_contract_keys.issubset(runtime_contract) or not set(runtime_contract).issubset(
+        required_contract_keys | optional_contract_keys
+    ):
         raise ValueError("runtime contract must specify versions, physics, observations and input paths")
     _reject_nonfinite_numbers(runtime_contract, "runtime_contract")
     for name, expected in runtime_contract.items():
+        if name in {"num_envs", "collision_monitor_mode"}:
+            continue
         if lineage.get(name) != expected:
             raise ValueError(f"checkpoint runtime contract mismatch for {name}")
+    lineage_num_envs = lineage.get("num_envs")
+    if type(lineage_num_envs) is not int or lineage_num_envs <= 0:
+        raise ValueError("checkpoint num_envs must be a positive integer")
+    collision_monitor_mode = lineage.get("collision_monitor_mode")
+    allowed_monitor_modes = {
+        "passive_nominal_one_environment",
+        "passive_parallel_native_ordering_verified",
+    }
+    if collision_monitor_mode not in allowed_monitor_modes:
+        raise ValueError("checkpoint collision monitor mode is not a verified RJ45 mode")
+    if lineage_num_envs == 1 and collision_monitor_mode != "passive_nominal_one_environment":
+        raise ValueError("single-environment checkpoint must use the nominal passive monitor")
+    if lineage_num_envs > 1 and collision_monitor_mode != "passive_parallel_native_ordering_verified":
+        raise ValueError("parallel checkpoint must use verified native contact ordering")
+    expected_training_contract = runtime_contract.get("rj45_training_contract")
+    if expected_training_contract is not None:
+        _validate_rj45_training_contract(expected_training_contract)
+        recorded_training_contract = _mapping(
+            lineage.get("rj45_training_contract"),
+            "checkpoint_provenance.rj45_training_contract",
+        )
+        _validate_rj45_training_contract(recorded_training_contract)
+        if recorded_training_contract != expected_training_contract:
+            raise ValueError("checkpoint RJ45 training contract does not match current inputs")
     expected_task_sha = _validate_sha256(task_config_sha256, "task_config_sha256")
     if lineage.get("task_config_sha256") != expected_task_sha:
         raise ValueError("checkpoint task configuration does not match the current task")
@@ -234,6 +263,86 @@ def verify_checkpoint_lineage(
         )
     if recorded_evidence != expected_evidence:
         raise ValueError("checkpoint RJ45 nominal evidence does not match the verified run")
+
+
+def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
+    expected_keys = {
+        "schema_version",
+        "policy_observation_schema_version",
+        "policy_observation_dimension",
+        "policy_action_dimension",
+        "action_mode",
+        "episode_scope",
+        "warmup_s",
+        "active_horizon_s",
+        "estimator",
+        "calibration_bias",
+        "calibration_bias_level",
+        "policy_pose_source",
+        "ground_truth_usage",
+        "held_grasp_reset_proof",
+        "training_config_sha256",
+        "parallel_contact_evidence",
+        "learned_recovery",
+        "retract_controller",
+    }
+    if set(contract) != expected_keys:
+        raise ValueError("RJ45 training contract fields are incomplete or unexpected")
+    _reject_nonfinite_numbers(contract, "rj45_training_contract")
+    if (
+        type(contract["schema_version"]) is not int
+        or contract["schema_version"] != 1
+        or type(contract["policy_observation_schema_version"]) is not int
+        or contract["policy_observation_schema_version"] != 1
+    ):
+        raise ValueError("RJ45 training contract schemas must be version 1")
+    if type(contract["policy_observation_dimension"]) is not int or contract["policy_observation_dimension"] != 79:
+        raise ValueError("RJ45 policy observation dimension must be 79")
+    action_dimensions = {"right_only_6d": 6, "both_arms_12d": 12}
+    action_mode = contract["action_mode"]
+    if (
+        action_mode not in action_dimensions
+        or type(contract["policy_action_dimension"]) is not int
+        or contract["policy_action_dimension"] != action_dimensions[action_mode]
+    ):
+        raise ValueError("RJ45 policy action mode and dimension disagree")
+    if contract["episode_scope"] != "held_grasp_alignment_insertion":
+        raise ValueError("RJ45 training episode scope is invalid")
+    _number(contract["warmup_s"], "rj45_training_contract.warmup_s", nonnegative=True)
+    _number(contract["active_horizon_s"], "rj45_training_contract.active_horizon_s", positive=True)
+    if contract["warmup_s"] >= contract["active_horizon_s"]:
+        raise ValueError("RJ45 training warmup must be shorter than the active horizon")
+    exact_values = {
+        "estimator": "frozen_kinematic_grasp_estimator",
+        "calibration_bias": "episode_fixed_one_shot_se3",
+        "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
+        "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+        "retract_controller": "baseline_only",
+    }
+    for name, expected in exact_values.items():
+        if contract[name] != expected:
+            raise ValueError(f"RJ45 training contract {name} is invalid")
+    if type(contract["calibration_bias_level"]) is not int or not 0 <= contract["calibration_bias_level"] < 3:
+        raise ValueError("RJ45 calibration bias level must index a configured level")
+    if contract["learned_recovery"] is not False:
+        raise ValueError("RJ45 training contract must not claim learned recovery")
+    _validate_sha256(contract["training_config_sha256"], "training_config_sha256")
+    held_proof = _mapping(contract["held_grasp_reset_proof"], "held_grasp_reset_proof")
+    if set(held_proof) != {
+        "artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256", "selection_control_step"
+    }:
+        raise ValueError("held-grasp reset proof fields are incomplete or unexpected")
+    for name in ("artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256"):
+        _validate_sha256(held_proof[name], f"held_grasp_reset_proof.{name}")
+    if type(held_proof["selection_control_step"]) is not int or held_proof["selection_control_step"] <= 0:
+        raise ValueError("held-grasp selection control step must be positive")
+    parallel = contract["parallel_contact_evidence"]
+    if parallel is not None:
+        parallel = _mapping(parallel, "parallel_contact_evidence")
+        if parallel.get("schema_version") != 1 or parallel.get("validated_probe_num_envs") != 4:
+            raise ValueError("parallel contact evidence metadata is invalid")
+        for name in ("report_sha256", "trace_sha256", "sat_report_sha256"):
+            _validate_sha256(parallel.get(name), f"parallel_contact_evidence.{name}")
 
 
 def verify_runtime_versions(versions: dict[str, str], runtime: dict[str, Any]) -> None:

@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "rj45-v1",
+  "episode_scope": "held_grasp_alignment_insertion",
+  "active_horizon_s": 24.0,
+  "warmup_s": 0.2,
+  "action_mode": "right_only_6d",
+  "observation_dim": 79,
+  "calibration_bias": {
+    "translation_levels_m": [
+      0.00015,
+      0.00035,
+      0.0006
+    ],
+    "rotation_max_levels_rad": [
+      0.004363323129985824,
+      0.008726646259971648,
+      0.013962634015954637
+    ],
+    "initial_level": 0
+  },
+  "reward": {
+    "depth_scale_m": 0.012,
+    "lateral_scale_m": 0.0005,
+    "angle_scale_rad": 0.017453292519943295,
+    "force_scale_n": 8.0,
+    "force_penalty": 0.01,
+    "action_delta_penalty": 0.0001,
+    "success_bonus": 10.0,
+    "failure_penalty": 3.0,
+    "normalized_error_cap": 20.0
+  },
+  "task_physics": {
+    "mass_randomization_enabled": false
+  }
+}

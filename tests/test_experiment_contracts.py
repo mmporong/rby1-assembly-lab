@@ -12,6 +12,7 @@ import unittest
 
 from rby1_assembly.experiment_contracts import (
     load_finite_json,
+    apply_runtime_timing,
     validate_ppo_config,
     verify_rj45_nominal_evidence,
     verify_physics_sample_stability,
@@ -227,6 +228,26 @@ def _synthetic_contract_fixture(project: Path) -> tuple[dict, Path, Path]:
     report_path = project / "evidence/nominal-report.json"
     _write_json(report_path, report)
     return task, report_path, trace_path
+
+
+class RuntimeTimingTests(unittest.TestCase):
+    def test_refinement_keeps_control_rate_fixed(self):
+        from types import SimpleNamespace
+        cfg = SimpleNamespace(sim=SimpleNamespace())
+        apply_runtime_timing(cfg, {"physics_dt_s": 1 / 240, "control_decimation": 8, "control_dt_s": 1 / 30})
+        self.assertEqual(cfg.sim.dt, 1 / 240)
+        self.assertEqual(cfg.decimation, 8)
+        self.assertEqual(cfg.sim.render_interval, 8)
+
+    def test_invalid_timing_is_rejected(self):
+        from types import SimpleNamespace
+        baseline = {"physics_dt_s": 1 / 120, "control_decimation": 4, "control_dt_s": 1 / 30}
+        for key, value in (("physics_dt_s", 0), ("physics_dt_s", float("nan")),
+                           ("control_decimation", True), ("control_decimation", 0),
+                           ("control_decimation", 4.5), ("control_dt_s", 0.02)):
+            runtime = dict(baseline, **{key: value})
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                apply_runtime_timing(SimpleNamespace(sim=SimpleNamespace()), runtime)
 
 
 class FiniteJsonTests(unittest.TestCase):
@@ -589,7 +610,7 @@ class TrainingPreflightTests(unittest.TestCase):
         self.assertIn("--rj45-nominal-evidence is required", completed.stderr)
         self.assertNotIn("launcher started", completed.stderr)
 
-    def test_parallel_rj45_stops_before_launcher(self) -> None:
+    def test_missing_rj45_physical_evidence_stops_before_launcher(self) -> None:
         root = Path(__file__).resolve().parents[1]
         with tempfile.TemporaryDirectory() as directory:
             fake_modules = Path(directory)
@@ -618,7 +639,7 @@ class TrainingPreflightTests(unittest.TestCase):
                 check=False,
             )
         self.assertEqual(completed.returncode, 2)
-        self.assertIn("parallel RJ45 collision validation pending", completed.stderr)
+        self.assertIn("--rj45-nominal-evidence", completed.stderr)
         self.assertNotIn("launcher started", completed.stderr)
 
 

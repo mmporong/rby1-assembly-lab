@@ -42,7 +42,9 @@ class NominalHandContactMonitorContractTests(unittest.TestCase):
         self.assertNotIn("def _pre_physics_step", source)
         self.assertNotIn("def _apply_action", source)
         self.assertNotIn("write_root_pose_to_sim", source)
-        self.assertIn("requires exactly one environment", source)
+        self.assertIn("passive_batched_runtime_ordering_asserted", source)
+        self.assertIn("replicate_physics=False", source)
+        self.assertIn("_validate_hand_contact_sensor_routing", source)
         self.assertIn("command_pose_force_or_failure_injection", source)
 
 

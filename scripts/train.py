@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Train the 12-D residual policy with the real RSL-RL PPO runner."""
+"""Train the RJ45 residual policy with the real RSL-RL PPO runner."""
 
 import argparse
 from datetime import datetime
@@ -31,6 +31,27 @@ def _preimport_option(name: str, default: str | None) -> str | None:
     return default
 
 
+def _project_path(value: str) -> Path:
+    path = Path(value)
+    return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+
+
+def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -> tuple[Path, ...]:
+    if path_value is None:
+        return ()
+    path = _project_path(path_value)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"JSON input must be an object: {path}")
+    dependencies = [path]
+    for key in path_keys:
+        value = payload.get(key)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"JSON input {path} must identify {key}")
+        dependencies.append(_project_path(value))
+    return tuple(dependencies)
+
+
 _bootstrap_task = _preimport_option("--task", "toy")
 _bootstrap_config_default = (
     "configs/ppo-rj45-v1.json" if _bootstrap_task == "rj45" else "configs/ppo.json"
@@ -50,18 +71,48 @@ if _bootstrap_task == "rj45" and _bootstrap_nominal_report is not None:
     if not nominal_trace_path.is_absolute():
         nominal_trace_path = PROJECT_ROOT / nominal_trace_path
     _bootstrap_nominal_paths = (nominal_report_path, nominal_trace_path)
+_bootstrap_training_config = _preimport_option(
+    "--rj45-training-config", "configs/rj45-training-v1.json"
+)
+_bootstrap_held_state = _preimport_option("--rj45-held-state", None)
+_bootstrap_held_paths: tuple[Path, ...] = ()
+if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
+    held_path = _project_path(_bootstrap_held_state)
+    held_payload = json.loads(held_path.read_text(encoding="utf-8"))
+    held_provenance = held_payload.get("provenance") if isinstance(held_payload, dict) else None
+    if not isinstance(held_provenance, dict):
+        raise ValueError("RJ45 held state must contain provenance")
+    _bootstrap_held_paths = (
+        held_path,
+        _project_path(held_provenance["nominal_report_path"]),
+        _project_path(held_provenance["nominal_trace_path"]),
+    )
+_bootstrap_parallel_spec = _preimport_option("--parallel-contact-evidence", None)
+_bootstrap_parallel_paths = (
+    _json_dependency_paths(
+        _bootstrap_parallel_spec,
+        ("report_path", "trace_path", "sat_report_path"),
+    )
+    if _bootstrap_task == "rj45" and _bootstrap_parallel_spec is not None
+    else ()
+)
 _bootstrap_input_snapshot = capture_run_inputs(
     PROJECT_ROOT,
     task_path=_bootstrap_task_path,
     build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
     config_paths=(
         Path(_preimport_option("--config", _bootstrap_config_default)),
+        *((Path(_bootstrap_training_config),) if _bootstrap_task == "rj45" else ()),
         *sorted((PROJECT_ROOT / "configs").glob("*.json")),
         *((PROJECT_ROOT / "configs/rj45-assets.json",) if _bootstrap_task == "rj45" else ()),
     ),
     source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
     source_files=(Path(__file__).resolve(),),
-    extra_paths=_bootstrap_nominal_paths,
+    extra_paths=(
+        *_bootstrap_nominal_paths,
+        *_bootstrap_held_paths,
+        *_bootstrap_parallel_paths,
+    ),
 )
 
 from rby1_assembly.experiment_contracts import (  # noqa: E402
@@ -74,6 +125,9 @@ from rby1_assembly.rj45_task import (  # noqa: E402
     load_rj45_task,
     verify_runtime_versions,
 )
+from rby1_assembly.held_grasp import load_verified_held_grasp_artifact  # noqa: E402
+from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence  # noqa: E402
+from rby1_assembly.rj45_training import load_training_config  # noqa: E402
 from isaaclab.app import AppLauncher  # noqa: E402
 
 
@@ -88,21 +142,39 @@ parser.add_argument(
     type=Path,
     help="completed single-environment nominal RJ45 run report required for RJ45 training",
 )
+parser.add_argument(
+    "--rj45-training-config",
+    type=Path,
+    default=Path("configs/rj45-training-v1.json"),
+    help="RJ45 estimator, action, bias, reward, and held-reset training contract",
+)
+parser.add_argument(
+    "--rj45-held-state",
+    type=Path,
+    help="verified held-grasp state generated from the current nominal run",
+)
+parser.add_argument(
+    "--parallel-contact-evidence",
+    type=Path,
+    help="JSON specification pinning report, trace, and SAT proof for parallel contact routing",
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
     args.config = Path("configs/ppo-rj45-v1.json")
 if args.num_envs <= 0:
     parser.error("--num-envs must be positive")
-if args.task == "rj45" and args.num_envs > 1:
-    parser.error("parallel RJ45 collision validation pending; use --num-envs 1")
 if args.task == "rj45" and args.rj45_nominal_evidence is None:
     parser.error("--rj45-nominal-evidence is required for --task rj45")
+if args.task == "rj45" and args.rj45_held_state is None:
+    parser.error("--rj45-held-state is required for --task rj45")
+if args.task == "rj45" and args.num_envs > 1 and args.parallel_contact_evidence is None:
+    parser.error("parallel RJ45 training requires --parallel-contact-evidence")
 try:
     task_path = PROJECT_ROOT / (
         "configs/tasks/rj45-v1.json" if args.task == "rj45" else "configs/task.json"
     )
-    nominal_trace_paths: tuple[Path, ...] = ()
+    extra_input_paths: list[Path] = []
     if args.task == "rj45":
         nominal_report = load_finite_json(args.rj45_nominal_evidence)
         nominal_trace = nominal_report.get("trace_path")
@@ -111,15 +183,40 @@ try:
         nominal_trace_path = Path(nominal_trace)
         if not nominal_trace_path.is_absolute():
             nominal_trace_path = PROJECT_ROOT / nominal_trace_path
-        nominal_trace_paths = (args.rj45_nominal_evidence, nominal_trace_path)
+        extra_input_paths.extend((args.rj45_nominal_evidence, nominal_trace_path))
+        held_payload = load_finite_json(args.rj45_held_state)
+        held_provenance = held_payload.get("provenance")
+        if not isinstance(held_provenance, dict):
+            raise ValueError("RJ45 held state must contain provenance")
+        extra_input_paths.extend(
+            (
+                args.rj45_held_state,
+                _project_path(held_provenance["nominal_report_path"]),
+                _project_path(held_provenance["nominal_trace_path"]),
+            )
+        )
+        if args.parallel_contact_evidence is not None:
+            parallel_spec_payload = load_finite_json(args.parallel_contact_evidence)
+            extra_input_paths.extend(
+                _json_dependency_paths(
+                    str(args.parallel_contact_evidence),
+                    ("report_path", "trace_path", "sat_report_path"),
+                )
+            )
+        else:
+            parallel_spec_payload = None
     input_snapshot = capture_run_inputs(
         PROJECT_ROOT,
         task_path=task_path,
         build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
-        config_paths=(args.config, *sorted((PROJECT_ROOT / "configs").glob("*.json"))),
+        config_paths=(
+            args.config,
+            *((args.rj45_training_config,) if args.task == "rj45" else ()),
+            *sorted((PROJECT_ROOT / "configs").glob("*.json")),
+        ),
         source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
         source_files=(Path(__file__).resolve(),),
-        extra_paths=nominal_trace_paths,
+        extra_paths=tuple(extra_input_paths),
     )
     _bootstrap_input_snapshot.assert_unchanged()
     _bootstrap_input_snapshot.assert_preserved_in(input_snapshot)
@@ -163,6 +260,22 @@ try:
         if args.task == "rj45"
         else None
     )
+    if args.task == "rj45":
+        training_config = load_training_config(args.rj45_training_config)
+        held_state, held_state_proof = load_verified_held_grasp_artifact(
+            PROJECT_ROOT, selected_task, args.rj45_held_state
+        )
+        parallel_contact_evidence = (
+            load_parallel_contact_evidence(
+                parallel_spec_payload, project_root=PROJECT_ROOT
+            )
+            if parallel_spec_payload is not None
+            else None
+        )
+        if args.num_envs > 1 and parallel_contact_evidence is None:
+            raise ValueError("parallel RJ45 training requires verified contact evidence")
+    else:
+        training_config = held_state = held_state_proof = parallel_contact_evidence = None
 except (OSError, ValueError, TypeError, KeyError, metadata.PackageNotFoundError) as error:
     parser.error(f"invalid training configuration: {error}")
 launcher = AppLauncher(args)
@@ -176,14 +289,26 @@ from rby1_assembly.isaac_env import Rby1AssemblyEnv, Rby1AssemblyEnvCfg  # noqa:
 
 def main() -> int:
     cfg = Rby1AssemblyEnvCfg()
+    from rby1_assembly.experiment_contracts import apply_runtime_timing
+    apply_runtime_timing(cfg, input_snapshot.json_for(PROJECT_ROOT / "configs/runtime.json"))
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
     cfg.seed = runner_cfg["seed"]
     env_type = Rby1AssemblyEnv
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task
+        from rby1_assembly.rj45_training_env import make_rj45_training_env_type
 
+        if parallel_spec_payload is not None:
+            cfg.rj45_parallel_contact_evidence = parallel_spec_payload
         env_type = configure_rj45_task(cfg, selected_task, PROJECT_ROOT)
+        env_type = make_rj45_training_env_type(
+            env_type,
+            training_config,
+            held_state=held_state,
+            calibration_bias_enabled=True,
+            bias_level=training_config["calibration_bias"]["initial_level"],
+        )
     _bootstrap_input_snapshot.assert_unchanged()
     input_snapshot.assert_unchanged()
     _bootstrap_input_snapshot.assert_preserved_in(input_snapshot)
@@ -226,7 +351,11 @@ def main() -> int:
             "seed": cfg.seed,
             "num_envs": cfg.scene.num_envs,
             "task_id": "rj45-v1" if args.task == "rj45" else "toy",
-            "collision_monitor_mode": "passive_nominal_one_environment" if args.task == "rj45" else "disabled",
+            "collision_monitor_mode": (
+                "passive_parallel_native_ordering_verified"
+                if args.task == "rj45" and args.num_envs > 1
+                else "passive_nominal_one_environment" if args.task == "rj45" else "disabled"
+            ),
             "task_config_path": str(task_path.relative_to(PROJECT_ROOT)),
             "policy_config_path": (
                 str(args.config.resolve().relative_to(PROJECT_ROOT))
@@ -242,10 +371,36 @@ def main() -> int:
                 "position_std_m": cfg.observation_position_noise_std_m,
                 "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
             },
-            "baseline_controller_state_source": "simulator_ground_truth",
+            "baseline_controller_state_source": (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                if args.task == "rj45"
+                else "simulator_ground_truth"
+            ),
             "checkpoint_scope": "checkpoints created in this run directory",
             "rj45_nominal_evidence": nominal_evidence,
         }
+        if args.task == "rj45":
+            action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
+            lineage["rj45_training_contract"] = {
+                "schema_version": 1,
+                "policy_observation_schema_version": 1,
+                "policy_observation_dimension": 79,
+                "policy_action_dimension": action_dimension,
+                "action_mode": training_config["action_mode"],
+                "episode_scope": training_config["episode_scope"],
+                "warmup_s": training_config["warmup_s"],
+                "active_horizon_s": training_config["active_horizon_s"],
+                "estimator": "frozen_kinematic_grasp_estimator",
+                "calibration_bias": "episode_fixed_one_shot_se3",
+                "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
+                "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
+                "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+                "held_grasp_reset_proof": held_state_proof,
+                "training_config_sha256": training_config["_config_sha256"],
+                "parallel_contact_evidence": parallel_contact_evidence,
+                "learned_recovery": False,
+                "retract_controller": "baseline_only",
+            }
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
         runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)

@@ -98,6 +98,34 @@ def valid_task() -> dict:
     }
 
 
+def valid_training_contract() -> dict:
+    return {
+        "schema_version": 1,
+        "policy_observation_schema_version": 1,
+        "policy_observation_dimension": 79,
+        "policy_action_dimension": 6,
+        "action_mode": "right_only_6d",
+        "episode_scope": "held_grasp_alignment_insertion",
+        "warmup_s": 0.2,
+        "active_horizon_s": 24.0,
+        "estimator": "frozen_kinematic_grasp_estimator",
+        "calibration_bias": "episode_fixed_one_shot_se3",
+        "calibration_bias_level": 0,
+        "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
+        "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+        "held_grasp_reset_proof": {
+            "artifact_sha256": "1" * 64,
+            "nominal_report_sha256": "2" * 64,
+            "nominal_trace_sha256": "3" * 64,
+            "selection_control_step": 900,
+        },
+        "training_config_sha256": "4" * 64,
+        "parallel_contact_evidence": None,
+        "learned_recovery": False,
+        "retract_controller": "baseline_only",
+    }
+
+
 class Rj45TaskConfigTests(unittest.TestCase):
     def load(self, task: dict) -> dict:
         with tempfile.TemporaryDirectory() as directory:
@@ -547,7 +575,6 @@ class Rj45ProvenanceTests(unittest.TestCase):
         for name, candidate in variants.items():
             with self.subTest(name=name), self.assertRaises(ValueError):
                 verify(candidate)
-
         for name, current in (
             ("missing_current_field", {"report_sha256": "b" * 64, "trace_records": 14}),
             ("invalid_current_sha", {**evidence, "trace_sha256": "BAD"}),
@@ -556,6 +583,92 @@ class Rj45ProvenanceTests(unittest.TestCase):
         ):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 verify(lineage, current)
+
+    def test_checkpoint_lineage_requires_exact_rj45_training_contract(self):
+        digest = {"src/rby1_assembly/rj45_training_env.py": "a" * 64}
+        evidence = {
+            "report_sha256": "b" * 64,
+            "trace_sha256": "c" * 64,
+            "trace_records": 14,
+        }
+        training_contract = valid_training_contract()
+        runtime = {
+            "runtime_versions": {"isaacsim": "5.1.0.0"},
+            "physics_dt_s": 1 / 120,
+            "control_decimation": 4,
+            "control_dt_s": 1 / 30,
+            "observation_noise": {"position_std_m": 0.0005},
+            "baseline_controller_state_source": (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+            ),
+            "task_config_path": "configs/tasks/rj45-v1.json",
+            "policy_config_path": "configs/ppo-rj45-v1.json",
+            "collision_monitor_mode": "passive_parallel_native_ordering_verified",
+            "num_envs": 64,
+            "rj45_training_contract": training_contract,
+        }
+        lineage = {
+            "schema_version": 1,
+            "task_id": "rj45-v1",
+            "task_config_sha256": "d" * 64,
+            "source_and_config_sha256": digest,
+            "rj45_nominal_evidence": evidence,
+            **runtime,
+        }
+
+        def verify(candidate, expected=runtime):
+            verify_checkpoint_lineage(
+                candidate,
+                task_id="rj45-v1",
+                task_config_sha256="d" * 64,
+                source_sha256=digest,
+                runtime_contract=expected,
+                rj45_nominal_evidence=evidence,
+            )
+
+        verify(lineage)
+        for name, mutate in (
+            ("missing", lambda item: item.pop("rj45_training_contract")),
+            (
+                "observation_dimension",
+                lambda item: item["rj45_training_contract"].__setitem__(
+                    "policy_observation_dimension", 76
+                ),
+            ),
+            (
+                "action_mode_dimension",
+                lambda item: item["rj45_training_contract"].__setitem__(
+                    "policy_action_dimension", 12
+                ),
+            ),
+            (
+                "training_config_sha",
+                lambda item: item["rj45_training_contract"].__setitem__(
+                    "training_config_sha256", "e" * 64
+                ),
+            ),
+            (
+                "held_proof",
+                lambda item: item["rj45_training_contract"]["held_grasp_reset_proof"].__setitem__(
+                    "selection_control_step", 901
+                ),
+            ),
+        ):
+            damaged = copy.deepcopy(lineage)
+            mutate(damaged)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                verify(damaged)
+
+        for num_envs, monitor in (
+            (0, "passive_nominal_one_environment"),
+            (1, "passive_parallel_native_ordering_verified"),
+            (64, "passive_nominal_one_environment"),
+        ):
+            damaged = copy.deepcopy(lineage)
+            damaged["num_envs"] = num_envs
+            damaged["collision_monitor_mode"] = monitor
+            with self.subTest(num_envs=num_envs, monitor=monitor), self.assertRaises(ValueError):
+                verify(damaged)
 
     def test_checkpoint_manifest_rejects_a_swapped_checkpoint(self):
         manifest = {

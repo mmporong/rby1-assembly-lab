@@ -266,8 +266,8 @@ def configure_rj45_task(cfg, task: dict[str, Any], project: Path) -> type:
     and frame-math tests run on CPU-only machines.
     """
 
-    if cfg.scene.num_envs != 1:
-        raise ValueError("parallel RJ45 collision validation pending; use exactly one environment")
+    if cfg.scene.num_envs != 1 and not getattr(cfg, "rj45_parallel_contact_evidence", None):
+        raise ValueError("parallel RJ45 requires validated hand-contact evidence")
     import torch
     from isaacsim.core.utils.stage import get_current_stage
     from isaaclab.utils.math import (
@@ -279,6 +279,7 @@ def configure_rj45_task(cfg, task: dict[str, Any], project: Path) -> type:
     )
     from pxr import PhysxSchema
 
+    from rby1_assembly.contact_manifolds import pack_filtered_contact_manifold
     from rby1_assembly.isaac_env import AssemblyPhase, GRASP_CENTER_IN_WRIST_M, Rby1AssemblyEnv
 
     project = Path(project).resolve()
@@ -299,6 +300,18 @@ def configure_rj45_task(cfg, task: dict[str, Any], project: Path) -> type:
     cfg.socket.init_state.rot = tuple(task["socket"]["initial_orientation_wxyz"])
     cfg.plug.init_state.pos = tuple(task["plug"]["initial_position_m"])
     cfg.plug.init_state.rot = tuple(task["plug"]["initial_orientation_wxyz"])
+    for sensor_name in (
+        "left_contact_l1",
+        "left_contact_l2",
+        "right_contact_r1",
+        "right_contact_r2",
+    ):
+        sensor_cfg = getattr(cfg, sensor_name)
+        setattr(
+            cfg,
+            sensor_name,
+            sensor_cfg.replace(max_contact_data_count_per_prim=128),
+        )
 
     contact = task["contact"]
     cfg.sim.physics_material.static_friction = contact["static_friction"]
@@ -957,10 +970,49 @@ def configure_rj45_task(cfg, task: dict[str, Any], project: Path) -> type:
             self.extras["residual_action_frame"] = "measured_socket_entry"
             return observations
 
+        def _grip_contact_manifold_snapshot(self) -> dict[str, torch.Tensor]:
+            manifolds = []
+            for sensor_name, sensor in (
+                ("left_contact_l1", self.left_contact_l1),
+                ("left_contact_l2", self.left_contact_l2),
+                ("right_contact_r1", self.right_contact_r1),
+                ("right_contact_r2", self.right_contact_r2),
+            ):
+                try:
+                    contact_data = sensor.contact_physx_view.get_contact_data(
+                        dt=self.cfg.sim.dt
+                    )
+                    manifold = pack_filtered_contact_manifold(
+                        *contact_data,
+                        num_envs=self.num_envs,
+                        capacity=128,
+                    )
+                except (TypeError, ValueError) as error:
+                    raise RuntimeError(
+                        f"invalid RJ45 grip contact manifold for {sensor_name}: {error}"
+                    ) from error
+                manifolds.append(manifold)
+            return {
+                field: torch.stack(
+                    [manifold[field] for manifold in manifolds], dim=1
+                )
+                for field in (
+                    "contact_count",
+                    "active",
+                    "force_n",
+                    "points_world_m",
+                    "normals_world",
+                    "separation_m",
+                )
+            }
+
         def _get_dones(self):
             terminated, truncated = super()._get_dones()
             snapshot = self.extras.get("terminal_snapshot")
             if isinstance(snapshot, dict):
+                snapshot["grip_contact_manifold"] = (
+                    self._grip_contact_manifold_snapshot()
+                )
                 snapshot["object_substep_poses_world_wxyz"] = torch.stack(self._physics_pose_samples, dim=1)
                 snapshot["object_substep_velocities_world"] = torch.stack(self._physics_velocity_samples, dim=1)
                 snapshot["object_substep_link_velocities_world"] = torch.stack(
@@ -993,6 +1045,10 @@ def configure_rj45_task(cfg, task: dict[str, Any], project: Path) -> type:
                 snapshot["object_pose_difference_angular_velocity_rad_s"] = angular_difference.clone()
                 self._previous_recorded_object_poses[:] = object_poses
                 self._pose_difference_valid[:] = True
+                snapshot["all_joint_names"] = tuple(self.robot.joint_names)
+                snapshot["all_joint_positions_si"] = self.robot.data.joint_pos.clone()
+                snapshot["all_joint_velocities_si"] = self.robot.data.joint_vel.clone()
+                snapshot["all_joint_reference_si"] = self._joint_targets.clone()
                 controlled = self._torso_joint_ids + self._arm_joint_ids
                 snapshot["raw_joint_reference_rad"] = self._joint_targets[:, controlled].clone()
                 snapshot["applied_joint_position_target_rad"] = self.robot.data.joint_pos_target[:, controlled].clone()

@@ -57,6 +57,11 @@ _bootstrap_input_snapshot = capture_run_inputs(
     ),
     source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
     source_files=(Path(__file__).resolve(),),
+    extra_paths=tuple(
+        Path(_preimport_option(option, ""))
+        for option in ("--parallel-contact-evidence", "--rj45-training-config")
+        if _preimport_has_option(option)
+    ),
 )
 
 from isaaclab.app import AppLauncher  # noqa: E402
@@ -65,6 +70,12 @@ from isaaclab.app import AppLauncher  # noqa: E402
 parser = argparse.ArgumentParser(description="RB-Y1 assembly PhysX smoke run")
 parser.add_argument("--num-envs", type=int, default=1)
 parser.add_argument("--task", choices=("toy", "rj45"), default="toy")
+parser.add_argument("--parallel-contact-evidence", type=Path)
+parser.add_argument("--rj45-training-config", type=Path)
+parser.add_argument("--rj45-bias-level", type=int, default=0)
+parser.add_argument("--rj45-calibration-bias", action="store_true")
+parser.add_argument("--rj45-held-state-output", type=Path)
+
 parser.add_argument(
     "--steps",
     type=int,
@@ -92,6 +103,10 @@ AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.num_envs <= 0 or (args.steps is not None and args.steps <= 0):
     parser.error("--num-envs must be positive and --steps, when set, must be positive")
+if args.task == "rj45" and args.num_envs > 1 and args.parallel_contact_evidence is None:
+    parser.error("parallel RJ45 requires --parallel-contact-evidence")
+if args.rj45_held_state_output is not None and (args.task != "rj45" or args.num_envs != 1 or args.trace is None or args.trace_every not in (None, 1)):
+    parser.error("held-state export requires one RJ45 environment and a trace at every control step")
 if args.video is not None and args.num_envs != 1:
     parser.error("--video requires --num-envs 1")
 if args.video is not None and not getattr(args, "enable_cameras", False):
@@ -512,6 +527,36 @@ def _trace_record(
                             "object_substep_poses_world_wxyz", "object_substep_velocities_world",
                             "object_substep_link_velocities_world"):
                     entry[key] = _tensor_list(snapshot[key][env_index])
+                for key in ("all_joint_positions_si", "all_joint_velocities_si", "all_joint_reference_si"):
+                    entry[key] = _tensor_list(snapshot[key][env_index])
+                entry["all_joint_names"] = list(snapshot["all_joint_names"])
+                entry["all_joint_units"] = [
+                    "m" if name.startswith("gripper_finger_") else "rad"
+                    for name in snapshot["all_joint_names"]
+                ]
+                manifold = snapshot["grip_contact_manifold"]
+                entry["grip_contact_manifold"] = []
+                finger_paths = (
+                    "left_gripper/ee_finger_l1", "left_gripper/ee_finger_l2",
+                    "right_gripper/ee_finger_r1", "right_gripper/ee_finger_r2",
+                )
+                for finger_index, finger_path in enumerate(finger_paths):
+                    count = int(manifold["contact_count"][env_index, finger_index].item())
+                    contacts = []
+                    for contact_index in range(count):
+                        contacts.append({
+                            "normal_force_n": float(manifold["force_n"][env_index, finger_index, contact_index].item()),
+                            "point_world_m": _tensor_list(manifold["points_world_m"][env_index, finger_index, contact_index]),
+                            "normal_world": _tensor_list(manifold["normals_world"][env_index, finger_index, contact_index]),
+                            "separation_m": float(manifold["separation_m"][env_index, finger_index, contact_index].item()),
+                        })
+                    env_path = env.scene.env_prim_paths[env_index]
+                    entry["grip_contact_manifold"].append({
+                        "source_body_path": f"{env_path}/Robot/{finger_path}",
+                        "target_body_path": f"{env_path}/{'Socket' if finger_index < 2 else 'Plug'}",
+                        "contact_count": count,
+                        "contacts": contacts,
+                    })
                 entry["object_data_cache_times_s"] = _tensor_list(snapshot["object_data_cache_times_s"])
                 stability = snapshot.get("rj45_evaluation_stability", {})
                 entry["mating_stability"] = {
@@ -592,6 +637,16 @@ def main() -> int:
     assets_path = PROJECT_ROOT / "configs/assets.json"
     runtime_path = PROJECT_ROOT / "configs/runtime.json"
     connector_assets_path = PROJECT_ROOT / "configs/rj45-assets.json"
+    optional_configs = tuple(path for path in (args.parallel_contact_evidence, args.rj45_training_config) if path is not None)
+    parallel_specification = None
+    parallel_paths = ()
+    if args.parallel_contact_evidence is not None:
+        parallel_specification = _bootstrap_input_snapshot.json_for(args.parallel_contact_evidence)
+        parallel_paths = tuple(
+            Path(parallel_specification[name]) if Path(parallel_specification[name]).is_absolute()
+            else PROJECT_ROOT / parallel_specification[name]
+            for name in ("report_path", "trace_path", "sat_report_path")
+        )
     input_snapshot = capture_run_inputs(
         PROJECT_ROOT,
         task_path=task_path,
@@ -601,9 +656,11 @@ def main() -> int:
             runtime_path,
             *((connector_assets_path,) if args.task == "rj45" else ()),
             *((args.command_fault_config,) if args.command_fault is not None else ()),
+            *optional_configs,
         ),
         source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
         source_files=(PROJECT_ROOT / "scripts/run_sim.py",),
+        extra_paths=parallel_paths,
     )
     _input_snapshot_for_failure_report = input_snapshot
     _bootstrap_input_snapshot.assert_unchanged()
@@ -618,8 +675,15 @@ def main() -> int:
         verify_runtime_versions(runtime_versions, runtime_config)
     run_seed = args.seed if args.seed is not None else int(task_config["data"]["train_seed"])
     cfg = Rby1AssemblyEnvCfg()
+    from rby1_assembly.experiment_contracts import apply_runtime_timing
+    apply_runtime_timing(cfg, input_snapshot.json_for(PROJECT_ROOT / "configs/runtime.json"))
     cfg.seed = run_seed
     cfg.scene.num_envs = args.num_envs
+    if parallel_specification is not None:
+        from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence
+        load_parallel_contact_evidence(parallel_specification, project_root=PROJECT_ROOT)
+        cfg.rj45_parallel_contact_evidence = parallel_specification
+
     cfg.sim.device = args.device
     cfg.render_background = args.background
     control_dt_s = float(cfg.sim.dt * cfg.decimation)
@@ -648,13 +712,24 @@ def main() -> int:
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task, load_rj45_task
 
-        env_type = configure_rj45_task(cfg, load_rj45_task(task_path), PROJECT_ROOT)
+        task_config = load_rj45_task(task_path)
+        env_type = configure_rj45_task(cfg, task_config, PROJECT_ROOT)
     if args.command_fault == "hand_collision":
         from rby1_assembly.hand_collision import make_hand_collision_env_type
 
         assert fault_config is not None
         env_type = make_hand_collision_env_type(Rby1AssemblyEnv, fault_config["hand_collision"])
     input_snapshot.assert_unchanged()
+    if args.rj45_training_config is not None:
+        if args.task != "rj45":
+            raise ValueError("RJ45 training observation wrapper requires the RJ45 task")
+        from rby1_assembly.rj45_training import load_training_config
+        from rby1_assembly.rj45_training_env import make_rj45_training_env_type
+        env_type = make_rj45_training_env_type(
+            env_type, load_training_config(args.rj45_training_config),
+            calibration_bias_enabled=args.rj45_calibration_bias,
+            bias_level=args.rj45_bias_level,
+        )
     env = env_type(cfg, render_mode="rgb_array" if args.video is not None else None)
     completed = False
     max_contact_force_proxy_n = 0.0
@@ -702,7 +777,7 @@ def main() -> int:
             args.video.parent.mkdir(parents=True, exist_ok=True)
             video_writer = imageio.get_writer(
                 args.video, fps=args.video_fps, codec="libx264", quality=8,
-                pixelformat="yuv420p", output_params=["-movflags", "+faststart"],
+                pixelformat="yuv420p", macro_block_size=1, output_params=["-movflags", "+faststart"],
             )
             # Initialize the RGB annotator, then converge RTX history without
             # advancing physics or recording its noisy startup frames.
@@ -723,7 +798,7 @@ def main() -> int:
 
         previous_phase = env._phase.clone()
         for control_step in range(1, effective_steps + 1):
-            actions = torch.zeros((env.num_envs, ACTION_DIM), device=env.device)
+            actions = torch.zeros((env.num_envs, int(env.cfg.action_space)), device=env.device)
             capture_context = (
                 video_capture.control_step(cfg.decimation // render_stride)
                 if video_capture is not None else nullcontext()
@@ -849,9 +924,19 @@ def main() -> int:
                 ) if key in entry
             } for entry in final_record["environments"]],
             "physics_backend": "PhysX via Isaac Sim",
-            "observation_source": "simulator_state_with_noise",
-            "baseline_controller_state_source": "simulator_ground_truth",
-            "phase_gate_state_source": "simulator_ground_truth",
+            "observation_source": (
+                "frozen_grasp_encoder_estimator_with_episode_calibration_bias"
+                if hasattr(env, "rj45_training_report") else "simulator_state_with_noise"
+            ),
+            "baseline_controller_state_source": (
+                "scripted_gt_setup_then_shared_frozen_grasp_encoder_estimator"
+                if hasattr(env, "rj45_training_report") else "simulator_ground_truth"
+            ),
+            "phase_gate_state_source": (
+                "scripted_gt_setup_then_shared_frozen_grasp_encoder_estimator"
+                if hasattr(env, "rj45_training_report") else "simulator_ground_truth"
+            ),
+            "rj45_training": env.rj45_training_report() if hasattr(env, "rj45_training_report") else None,
             "contact_force_source": "contact_force_proxy",
             "num_envs": env.num_envs,
             "steps_requested": effective_steps,
@@ -942,6 +1027,12 @@ def main() -> int:
         }
         atomic_write_json(args.report, report)
         input_snapshot.assert_unchanged()
+        if args.rj45_held_state_output is not None:
+            if args.task != "rj45" or env.num_envs != 1 or not completed:
+                raise ValueError("held-state export requires a completed one-environment RJ45 run")
+            from rby1_assembly.held_grasp import build_held_grasp_artifact
+            build_held_grasp_artifact(PROJECT_ROOT, task_config, args.report, args.rj45_held_state_output)
+            input_snapshot.assert_unchanged()
         print(json.dumps(report, indent=2, allow_nan=False), flush=True)
         return 2 if args.require_completion and not completed else 0
     finally:

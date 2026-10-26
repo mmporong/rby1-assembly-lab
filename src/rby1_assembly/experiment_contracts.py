@@ -107,6 +107,19 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def apply_runtime_timing(cfg: Any, runtime: dict) -> None:
+    """Apply one validated timing contract before physics construction."""
+    physics_dt = _finite_number(runtime.get("physics_dt_s"), "physics_dt_s", nonnegative=True)
+    control_dt = _finite_number(runtime.get("control_dt_s"), "control_dt_s", nonnegative=True)
+    decimation = runtime.get("control_decimation")
+    if (physics_dt <= 0 or type(decimation) is not int or decimation < 1
+            or not math.isclose(control_dt, physics_dt * decimation, rel_tol=1e-12, abs_tol=1e-12)):
+        raise ValueError("runtime timing must have positive dt and integral consistent decimation")
+    cfg.sim.dt = physics_dt
+    cfg.decimation = decimation
+    cfg.sim.render_interval = decimation
+
+
 def verify_physics_sample_stability(entry: dict, task: dict, decimation: int) -> bool:
     """Recompute every physics sample, including the final control endpoint."""
     import numpy as np

@@ -1,0 +1,1063 @@
+"""Isaac runtime wrapper for estimator-separated RJ45 residual learning."""
+
+from __future__ import annotations
+
+import math
+from typing import Any, Mapping
+
+
+_CALIBRATION_BIAS_STREAM_OFFSET = 45_123_017
+_CALIBRATION_BIAS_EPISODE_STRIDE = 1_000_003
+
+
+def _calibration_bias_case_seed(base_seed: int, env_id: int, episode_index: int) -> int:
+    if any(type(value) is not int or value < 0 for value in (base_seed, env_id, episode_index)):
+        raise ValueError("bias seed inputs must be non-negative integers")
+    return (
+        base_seed
+        + _CALIBRATION_BIAS_STREAM_OFFSET
+        + episode_index * _CALIBRATION_BIAS_EPISODE_STRIDE
+        + env_id
+    )
+
+
+def _warmup_sensor_status(
+    finger_force_n,
+    insertion_force_world_n,
+    insertion_load_n,
+    forbidden_load_n,
+    *,
+    grip_contact_force_n: float,
+    hard_contact_force_n: float,
+    forbidden_contact_force_n: float,
+):
+    """Return finite, limit, and live-grip masks for warmup sensors."""
+
+    import torch
+
+    if finger_force_n.ndim != 2 or finger_force_n.shape[1] != 4:
+        raise ValueError("finger_force_n must have shape (num_envs, 4)")
+    if insertion_force_world_n.shape != (finger_force_n.shape[0], 3):
+        raise ValueError("insertion_force_world_n must have shape (num_envs, 3)")
+    if insertion_load_n.shape != (finger_force_n.shape[0],) or forbidden_load_n.shape != (
+        finger_force_n.shape[0],
+    ):
+        raise ValueError("warmup scalar loads must have shape (num_envs,)")
+    finite = (
+        torch.isfinite(finger_force_n).all(dim=1)
+        & torch.isfinite(insertion_force_world_n).all(dim=1)
+        & torch.isfinite(insertion_load_n)
+        & torch.isfinite(forbidden_load_n)
+    )
+    within_limits = (
+        (finger_force_n.amax(dim=1) <= hard_contact_force_n)
+        & (insertion_load_n <= hard_contact_force_n)
+        & (forbidden_load_n <= forbidden_contact_force_n)
+    )
+    grip_live = (finger_force_n >= grip_contact_force_n).all(dim=1)
+    return finite, within_limits, grip_live
+
+
+def _warmup_motion_status(
+    joint_velocity_si,
+    joint_reference_error_si,
+    prismatic_joint_mask,
+    socket_com_velocity_world,
+    plug_com_velocity_world,
+    relative_linear_velocity,
+    relative_angular_velocity,
+    *,
+    limits,
+    max_relative_linear_speed_m_s: float,
+    max_relative_angular_speed_rad_s: float,
+):
+    """Return finite and settled masks using absolute and relative motion."""
+
+    import torch
+
+    if joint_velocity_si.ndim != 2:
+        raise ValueError("joint_velocity_si must have shape (num_envs, num_joints)")
+    if joint_reference_error_si.shape != joint_velocity_si.shape:
+        raise ValueError("joint reference error must match joint velocity shape")
+    if prismatic_joint_mask.shape != (joint_velocity_si.shape[1],):
+        raise ValueError("prismatic_joint_mask must select the joint dimension")
+    if prismatic_joint_mask.dtype != torch.bool:
+        raise ValueError("prismatic_joint_mask must be boolean")
+    num_envs = joint_velocity_si.shape[0]
+    if socket_com_velocity_world.shape != (num_envs, 6):
+        raise ValueError("socket COM velocity must have shape (num_envs, 6)")
+    if plug_com_velocity_world.shape != (num_envs, 6):
+        raise ValueError("plug COM velocity must have shape (num_envs, 6)")
+    if relative_linear_velocity.shape != (num_envs, 3):
+        raise ValueError("relative linear velocity must have shape (num_envs, 3)")
+    if relative_angular_velocity.shape != (num_envs, 3):
+        raise ValueError("relative angular velocity must have shape (num_envs, 3)")
+
+    finite = (
+        torch.isfinite(joint_velocity_si).all(dim=1)
+        & torch.isfinite(joint_reference_error_si).all(dim=1)
+        & torch.isfinite(socket_com_velocity_world).all(dim=1)
+        & torch.isfinite(plug_com_velocity_world).all(dim=1)
+        & torch.isfinite(relative_linear_velocity).all(dim=1)
+        & torch.isfinite(relative_angular_velocity).all(dim=1)
+    )
+    revolute_joint_mask = ~prismatic_joint_mask
+    settled = (
+        (
+            joint_velocity_si[:, revolute_joint_mask].abs()
+            <= limits["max_revolute_joint_speed_rad_s"]
+        ).all(dim=1)
+        & (
+            joint_velocity_si[:, prismatic_joint_mask].abs()
+            <= limits["max_prismatic_joint_speed_m_s"]
+        ).all(dim=1)
+        & (
+            joint_reference_error_si[:, revolute_joint_mask].abs()
+            <= limits["max_revolute_tracking_error_rad"]
+        ).all(dim=1)
+        & (
+            joint_reference_error_si[:, prismatic_joint_mask].abs()
+            <= limits["max_prismatic_tracking_error_m"]
+        ).all(dim=1)
+        & (
+            torch.linalg.vector_norm(socket_com_velocity_world[:, :3], dim=1)
+            <= limits["max_object_linear_speed_m_s"]
+        )
+        & (
+            torch.linalg.vector_norm(socket_com_velocity_world[:, 3:], dim=1)
+            <= limits["max_object_angular_speed_rad_s"]
+        )
+        & (
+            torch.linalg.vector_norm(plug_com_velocity_world[:, :3], dim=1)
+            <= limits["max_object_linear_speed_m_s"]
+        )
+        & (
+            torch.linalg.vector_norm(plug_com_velocity_world[:, 3:], dim=1)
+            <= limits["max_object_angular_speed_rad_s"]
+        )
+        & (
+            torch.linalg.vector_norm(relative_linear_velocity, dim=1)
+            <= max_relative_linear_speed_m_s
+        )
+        & (
+            torch.linalg.vector_norm(relative_angular_velocity, dim=1)
+            <= max_relative_angular_speed_rad_s
+        )
+    )
+    return finite, settled
+
+
+def _warmup_timeout_mask(pending, passed, warmup_steps, timeout_steps: int):
+    """Return pending rows that timed out without passing on this step."""
+
+    return pending & ~passed & (warmup_steps >= timeout_steps)
+
+
+def make_rj45_training_env_type(
+    base_cls: type,
+    training_config: Mapping[str, Any],
+    held_state: Mapping[str, Any] | None = None,
+    calibration_bias_enabled: bool = True,
+    bias_level: int = 0,
+) -> type:
+    """Wrap a configured RJ45 environment with the 79D residual-RL contract.
+
+    The wrapped controller uses a frozen hand/object estimator after one
+    calibration event. Simulator object state remains available only to the
+    independent evaluator and reward calculation.
+    """
+
+    import torch
+    from isaaclab.utils.math import (
+        combine_frame_transforms,
+        quat_apply,
+        quat_apply_inverse,
+        subtract_frame_transforms,
+    )
+
+    from rby1_assembly.isaac_env import AssemblyPhase, TerminationReason
+    from rby1_assembly.rj45_training import (
+        HELD_GRASP_STABILITY_LIMITS,
+        apply_relative_pose_bias,
+        build_policy_observation,
+        expand_residual_actions,
+        normalized_insertion_potential,
+        residual_reward,
+        validate_held_grasp_artifact,
+    )
+
+    config = dict(training_config)
+    required = {
+        "action_mode",
+        "observation_dim",
+        "active_horizon_s",
+        "warmup_s",
+        "calibration_bias",
+        "reward",
+    }
+    if not required.issubset(config):
+        raise ValueError(f"training configuration is missing {sorted(required - set(config))}")
+    if config["action_mode"] not in ("right_only_6d", "both_arms_12d"):
+        raise ValueError("unsupported RJ45 residual action mode")
+    action_dim = 6 if config["action_mode"] == "right_only_6d" else 12
+    if config["observation_dim"] != 79:
+        raise ValueError("RJ45 residual policy observation must be 79D")
+    levels = config["calibration_bias"]
+    if type(bias_level) is not int or not 0 <= bias_level < len(levels["translation_levels_m"]):
+        raise ValueError("bias_level must select a configured calibration level")
+    validated_held_state = (
+        None if held_state is None else validate_held_grasp_artifact(held_state)
+    )
+
+    class Rby1Rj45TrainingEnv(base_cls):
+        """Residual policy environment with a strict estimator/evaluator split."""
+
+        def __init__(self, cfg, render_mode: str | None = None, **kwargs):
+            self._training_config = config
+            self._training_held_state = validated_held_state
+            self._training_bias_enabled = bool(calibration_bias_enabled)
+            self._training_bias_level = bias_level
+            self._training_initialized = False
+            if type(cfg.seed) is not int or cfg.seed < 0:
+                raise ValueError("RJ45 residual training requires a non-negative integer cfg.seed")
+            self._training_bias_base_seed = int(cfg.seed)
+            cfg.action_space = action_dim
+            cfg.observation_space = 79
+            if validated_held_state is not None:
+                cfg.episode_length_s = (
+                    float(config["active_horizon_s"])
+                    + float(config["warmup_s"])
+                    + 1.0
+                )
+            super().__init__(cfg, render_mode, **kwargs)
+            self._initialize_training_state()
+            self._training_initialized = True
+            self._configure_training_reset(self.robot._ALL_INDICES)
+
+        def _initialize_training_state(self) -> None:
+            self._training_estimator_valid = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_policy_activated = torch.zeros_like(
+                self._training_estimator_valid
+            )
+            self._training_realign_pending = torch.zeros_like(
+                self._training_estimator_valid
+            )
+            self._training_warmup_complete = torch.full_like(
+                self._training_estimator_valid,
+                self._training_held_state is None,
+            )
+            self._training_warmup_steps = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_warmup_stable_steps = torch.zeros_like(
+                self._training_warmup_steps
+            )
+            self._training_warmup_grip_force_peak_n = torch.zeros(
+                self.num_envs, device=self.device
+            )
+            self._training_warmup_insertion_load_peak_n = torch.zeros(
+                self.num_envs, device=self.device
+            )
+            self._training_warmup_forbidden_load_peak_n = torch.zeros(
+                self.num_envs, device=self.device
+            )
+            self._training_frozen_object_to_ee_pos = torch.zeros(
+                (self.num_envs, 2, 3), device=self.device
+            )
+            self._training_frozen_object_to_ee_quat = torch.zeros(
+                (self.num_envs, 2, 4), device=self.device
+            )
+            self._training_frozen_object_to_ee_quat[:, :, 0] = 1.0
+            self._training_estimated_object_pos = torch.zeros(
+                (self.num_envs, 2, 3), device=self.device
+            )
+            self._training_estimated_object_quat = torch.zeros(
+                (self.num_envs, 2, 4), device=self.device
+            )
+            self._training_estimated_object_quat[:, :, 0] = 1.0
+            self._training_estimated_relative_pos = torch.zeros(
+                (self.num_envs, 3), device=self.device
+            )
+            self._training_estimated_relative_quat = torch.zeros(
+                (self.num_envs, 4), device=self.device
+            )
+            self._training_estimated_relative_quat[:, 0] = 1.0
+            self._training_translation_bias_entry = torch.zeros(
+                (self.num_envs, 3), device=self.device
+            )
+            self._training_rotation_bias_entry = torch.zeros(
+                (self.num_envs, 3), device=self.device
+            )
+            self._training_episode_index = torch.full(
+                (self.num_envs,), -1, dtype=torch.long, device=self.device
+            )
+            self._training_previous_action = torch.zeros(
+                (self.num_envs, 12), device=self.device
+            )
+            self._training_action_delta = torch.zeros_like(
+                self._training_previous_action
+            )
+            self._training_previous_potential = torch.zeros(
+                self.num_envs, device=self.device
+            )
+            self._training_terminal_reward_emitted = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_held_reference = torch.zeros(
+                (self.num_envs, self.robot.num_joints), device=self.device
+            )
+            self._training_prismatic_joint_mask = torch.zeros(
+                self.robot.num_joints, dtype=torch.bool, device=self.device
+            )
+            if self._training_held_state is not None:
+                units_by_name = dict(
+                    zip(
+                        self._training_held_state["joint_names"],
+                        self._training_held_state["joint_units"],
+                        strict=True,
+                    )
+                )
+                self._training_prismatic_joint_mask[:] = torch.tensor(
+                    [units_by_name[name] == "m" for name in self.robot.joint_names],
+                    dtype=torch.bool,
+                    device=self.device,
+                )
+
+        def _sample_episode_bias(self, env_ids) -> None:
+            self._training_translation_bias_entry[env_ids] = 0.0
+            self._training_rotation_bias_entry[env_ids] = 0.0
+            if not self._training_bias_enabled:
+                return
+            translation_max = float(
+                self._training_config["calibration_bias"]["translation_levels_m"][
+                    self._training_bias_level
+                ]
+            )
+            rotation_max = float(
+                self._training_config["calibration_bias"]["rotation_max_levels_rad"][
+                    self._training_bias_level
+                ]
+            )
+            for env_id in env_ids.detach().cpu().tolist():
+                episode_index = int(self._training_episode_index[env_id].item())
+                case_seed = _calibration_bias_case_seed(
+                    self._training_bias_base_seed, env_id, episode_index
+                )
+                generator = torch.Generator(device=self.device)
+                generator.manual_seed(case_seed)
+                translation = torch.randn(
+                    (1, 3), device=self.device, generator=generator
+                )
+                translation /= torch.linalg.vector_norm(
+                    translation, dim=1, keepdim=True
+                ).clamp_min(1.0e-9)
+                translation *= torch.rand(
+                    (1, 1), device=self.device, generator=generator
+                ) * translation_max
+                rotation = torch.randn(
+                    (1, 3), device=self.device, generator=generator
+                )
+                rotation /= torch.linalg.vector_norm(
+                    rotation, dim=1, keepdim=True
+                ).clamp_min(1.0e-9)
+                rotation *= torch.rand(
+                    (1, 1), device=self.device, generator=generator
+                ) * rotation_max
+                self._training_translation_bias_entry[env_id] = translation[0]
+                self._training_rotation_bias_entry[env_id] = rotation[0]
+
+        def _object_poses_from_relative_mating(
+            self,
+            socket_pos,
+            socket_quat,
+            relative_pos,
+            relative_quat,
+        ):
+            entry_pos, entry_quat = self._frame_tensors("socket_entry")
+            tip_pos, tip_quat = self._frame_tensors("plug_tip")
+            entry_world_pos, entry_world_quat = combine_frame_transforms(
+                socket_pos, socket_quat, entry_pos, entry_quat
+            )
+            tip_world_pos, tip_world_quat = combine_frame_transforms(
+                entry_world_pos,
+                entry_world_quat,
+                relative_pos,
+                relative_quat,
+            )
+            inverse_tip_quat = tip_quat.clone()
+            inverse_tip_quat[:, 1:] *= -1.0
+            inverse_tip_pos = -quat_apply(inverse_tip_quat, tip_pos)
+            return combine_frame_transforms(
+                tip_world_pos,
+                tip_world_quat,
+                inverse_tip_pos,
+                inverse_tip_quat,
+            )
+
+        def _freeze_training_estimator(self, mask) -> None:
+            if not torch.any(mask):
+                return
+            actual_relative_pos, actual_relative_quat = self._relative_object_pose()
+            biased_relative_pos, biased_relative_quat = apply_relative_pose_bias(
+                actual_relative_pos,
+                actual_relative_quat,
+                self._training_translation_bias_entry,
+                self._training_rotation_bias_entry,
+            )
+            biased_plug_pos, biased_plug_quat = self._object_poses_from_relative_mating(
+                self.socket.data.root_pos_w,
+                self.socket.data.root_quat_w,
+                biased_relative_pos,
+                biased_relative_quat,
+            )
+            left_ee_pos = self.robot.data.body_pos_w[:, self._left_ee_body_id]
+            left_ee_quat = self.robot.data.body_quat_w[:, self._left_ee_body_id]
+            right_ee_pos = self.robot.data.body_pos_w[:, self._right_ee_body_id]
+            right_ee_quat = self.robot.data.body_quat_w[:, self._right_ee_body_id]
+            left_pos, left_quat = subtract_frame_transforms(
+                self.socket.data.root_pos_w,
+                self.socket.data.root_quat_w,
+                left_ee_pos,
+                left_ee_quat,
+            )
+            right_pos, right_quat = subtract_frame_transforms(
+                biased_plug_pos,
+                biased_plug_quat,
+                right_ee_pos,
+                right_ee_quat,
+            )
+            self._training_frozen_object_to_ee_pos[mask] = torch.stack(
+                (left_pos[mask], right_pos[mask]), dim=1
+            )
+            self._training_frozen_object_to_ee_quat[mask] = torch.stack(
+                (left_quat[mask], right_quat[mask]), dim=1
+            )
+            self._training_estimator_valid[mask] = True
+            self._refresh_training_estimator()
+
+        def _refresh_training_estimator(self) -> None:
+            if not torch.any(self._training_estimator_valid):
+                return
+            ee_pos = torch.stack(
+                (
+                    self.robot.data.body_pos_w[:, self._left_ee_body_id],
+                    self.robot.data.body_pos_w[:, self._right_ee_body_id],
+                ),
+                dim=1,
+            )
+            ee_quat = torch.stack(
+                (
+                    self.robot.data.body_quat_w[:, self._left_ee_body_id],
+                    self.robot.data.body_quat_w[:, self._right_ee_body_id],
+                ),
+                dim=1,
+            )
+            inverse_quat = self._training_frozen_object_to_ee_quat.clone()
+            inverse_quat[:, :, 1:] *= -1.0
+            inverse_pos = -quat_apply(
+                inverse_quat.reshape(-1, 4),
+                self._training_frozen_object_to_ee_pos.reshape(-1, 3),
+            ).reshape(self.num_envs, 2, 3)
+            object_pos, object_quat = combine_frame_transforms(
+                ee_pos.reshape(-1, 3),
+                ee_quat.reshape(-1, 4),
+                inverse_pos.reshape(-1, 3),
+                inverse_quat.reshape(-1, 4),
+            )
+            object_pos = object_pos.reshape(self.num_envs, 2, 3)
+            object_quat = object_quat.reshape(self.num_envs, 2, 4)
+            valid = self._training_estimator_valid
+            self._training_estimated_object_pos[valid] = object_pos[valid]
+            self._training_estimated_object_quat[valid] = object_quat[valid]
+            entry_pos, entry_quat = self._frame_tensors("socket_entry")
+            tip_pos, tip_quat = self._frame_tensors("plug_tip")
+            entry_world = combine_frame_transforms(
+                object_pos[:, 0], object_quat[:, 0], entry_pos, entry_quat
+            )
+            tip_world = combine_frame_transforms(
+                object_pos[:, 1], object_quat[:, 1], tip_pos, tip_quat
+            )
+            relative_pos, relative_quat = subtract_frame_transforms(
+                entry_world[0], entry_world[1], tip_world[0], tip_world[1]
+            )
+            self._training_estimated_relative_pos[valid] = relative_pos[valid]
+            self._training_estimated_relative_quat[valid] = relative_quat[valid]
+
+        def _control_relative_object_pose(self):
+            if self._training_initialized and bool(self._training_estimator_valid.all()):
+                return (
+                    self._training_estimated_relative_pos,
+                    self._training_estimated_relative_quat,
+                )
+            if self._training_initialized and torch.any(self._training_estimator_valid):
+                actual_pos, actual_quat = super()._control_relative_object_pose()
+                valid = self._training_estimator_valid[:, None]
+                return (
+                    torch.where(valid, self._training_estimated_relative_pos, actual_pos),
+                    torch.where(valid, self._training_estimated_relative_quat, actual_quat),
+                )
+            return super()._control_relative_object_pose()
+
+        def _control_object_poses(self):
+            if self._training_initialized and bool(self._training_estimator_valid.all()):
+                return (
+                    self._training_estimated_object_pos[:, 0],
+                    self._training_estimated_object_quat[:, 0],
+                    self._training_estimated_object_pos[:, 1],
+                    self._training_estimated_object_quat[:, 1],
+                )
+            if self._training_initialized and torch.any(self._training_estimator_valid):
+                actual = super()._control_object_poses()
+                valid = self._training_estimator_valid[:, None]
+                return (
+                    torch.where(valid, self._training_estimated_object_pos[:, 0], actual[0]),
+                    torch.where(valid, self._training_estimated_object_quat[:, 0], actual[1]),
+                    torch.where(valid, self._training_estimated_object_pos[:, 1], actual[2]),
+                    torch.where(valid, self._training_estimated_object_quat[:, 1], actual[3]),
+                )
+            return super()._control_object_poses()
+
+        def _control_grasp_transforms(self, *args):
+            if self._training_initialized and bool(self._training_estimator_valid.all()):
+                return (
+                    self._training_frozen_object_to_ee_pos[:, 0],
+                    self._training_frozen_object_to_ee_quat[:, 0],
+                    self._training_frozen_object_to_ee_pos[:, 1],
+                    self._training_frozen_object_to_ee_quat[:, 1],
+                )
+            if self._training_initialized and torch.any(self._training_estimator_valid):
+                actual = super()._control_grasp_transforms(*args)
+                valid = self._training_estimator_valid[:, None]
+                return (
+                    torch.where(valid, self._training_frozen_object_to_ee_pos[:, 0], actual[0]),
+                    torch.where(valid, self._training_frozen_object_to_ee_quat[:, 0], actual[1]),
+                    torch.where(valid, self._training_frozen_object_to_ee_pos[:, 1], actual[2]),
+                    torch.where(valid, self._training_frozen_object_to_ee_quat[:, 1], actual[3]),
+                )
+            return super()._control_grasp_transforms(*args)
+
+        def _grasp_target_poses(self):
+            if not self._training_initialized:
+                return super()._grasp_target_poses()
+            socket_pos, socket_quat, plug_pos, plug_quat = self._control_object_poses()
+            left_pos, left_quat = self._frame_tensors("left_grasp")
+            right_pos, right_quat = self._frame_tensors("right_grasp")
+            left_world = combine_frame_transforms(
+                socket_pos, socket_quat, left_pos, left_quat
+            )
+            right_world = combine_frame_transforms(
+                plug_pos, plug_quat, right_pos, right_quat
+            )
+            return (*left_world, *right_world)
+
+        def _residual_actions_world(self, actions):
+            if not self._training_initialized or not torch.any(self._training_estimator_valid):
+                return super()._residual_actions_world(actions)
+            bounded = actions.reshape(self.num_envs, 4, 3)
+            entry_pos, entry_quat = self._frame_tensors("socket_entry")
+            del entry_pos
+            socket_pos, socket_quat, _, _ = self._control_object_poses()
+            entry_world_quat = combine_frame_transforms(
+                socket_pos,
+                socket_quat,
+                torch.zeros((self.num_envs, 3), device=self.device),
+                entry_quat,
+            )[1]
+            return torch.stack(
+                [quat_apply(entry_world_quat, bounded[:, index]) for index in range(4)],
+                dim=1,
+            ).reshape(self.num_envs, 12)
+
+        def _policy_active_mask(self):
+            return self._training_policy_activated & (
+                (self._phase == int(AssemblyPhase.ALIGN))
+                | (self._phase == int(AssemblyPhase.INSERT))
+            )
+
+        def _evaluation_eligibility_mask(self):
+            if not self._training_initialized:
+                return super()._evaluation_eligibility_mask()
+            return self._training_policy_activated.clone()
+
+        def _warmup_pending_mask(self):
+            if not self._training_initialized or self._training_held_state is None:
+                return torch.zeros(
+                    self.num_envs, dtype=torch.bool, device=self.device
+                )
+            return ~self._training_warmup_complete
+
+        def _pre_physics_step(self, actions) -> None:
+            pending = self._warmup_pending_mask()
+            self._refresh_training_estimator()
+            expanded = expand_residual_actions(
+                actions, self._training_config["action_mode"]
+            )
+            active = self._policy_active_mask()[:, None]
+            expanded = torch.where(active, expanded, torch.zeros_like(expanded))
+            self._training_action_delta[:] = expanded - self._training_previous_action
+            super()._pre_physics_step(expanded)
+            self._training_previous_action[:] = expanded
+            if torch.any(pending):
+                self._actions[pending] = 0.0
+                self._training_action_delta[pending] = 0.0
+                self._training_previous_action[pending] = 0.0
+                self._joint_targets[pending] = self._training_held_reference[pending]
+                self._insert_joint_targets[pending] = self._training_held_reference[
+                    pending
+                ][:, self._arm_joint_ids]
+                self._torso_hold_targets[pending] = self._training_held_reference[
+                    pending
+                ][:, self._torso_joint_ids]
+                if hasattr(self, "_gripper_command"):
+                    self._gripper_command[pending] = self._training_held_reference[
+                        pending
+                    ][:, self._gripper_joint_ids]
+                if hasattr(self, "_pregrasp_servo_targets"):
+                    self._pregrasp_servo_targets[pending] = torch.stack(
+                        (
+                            self._training_held_reference[pending][
+                                :, self._left_arm_joint_ids
+                            ],
+                            self._training_held_reference[pending][
+                                :, self._right_arm_joint_ids
+                            ],
+                        ),
+                        dim=1,
+                    )
+                self._grasp_loss_since_s[pending] = -1.0
+                self._retry_count[pending] = 0
+                self._insertion_advance_enabled[pending] = False
+
+        def _transition_where(self, mask, phase, now, reason=None):
+            if self._training_initialized:
+                mask = mask & ~self._warmup_pending_mask()
+                if not torch.any(mask):
+                    return
+            if (
+                self._training_initialized
+                and self._training_held_state is None
+                and phase == AssemblyPhase.INSERT
+            ):
+                first_activation = mask & ~self._training_policy_activated
+                if torch.any(first_activation):
+                    self._freeze_training_estimator(first_activation)
+                    self._training_policy_activated[first_activation] = True
+                    self._training_realign_pending[first_activation] = True
+                    super()._transition_where(
+                        first_activation, AssemblyPhase.ALIGN, now, reason
+                    )
+                    mask = mask & ~first_activation
+                allow_insert = mask & self._training_policy_activated
+                self._training_realign_pending[allow_insert] = False
+                if torch.any(allow_insert):
+                    super()._transition_where(allow_insert, phase, now, reason)
+                return
+            super()._transition_where(mask, phase, now, reason)
+
+        def _start_recovery(self, mask, now):
+            if self._training_initialized:
+                mask = mask & ~self._warmup_pending_mask()
+            if torch.any(mask):
+                super()._start_recovery(mask, now)
+
+        def _get_observations(self):
+            if not self._training_initialized:
+                return super()._get_observations()
+            if self._training_initialized:
+                self._refresh_training_estimator()
+            relative_pos, relative_quat = self._control_relative_object_pose()
+            socket_pos, socket_quat, _, _ = self._control_object_poses()
+            entry_pos, entry_quat = self._frame_tensors("socket_entry")
+            _, entry_world_quat = combine_frame_transforms(
+                socket_pos, socket_quat, entry_pos, entry_quat
+            )
+            entry_force = quat_apply_inverse(
+                entry_world_quat, self._last_insertion_contact_force_w
+            )
+            arm_pos = self.robot.data.joint_pos[:, self._arm_joint_ids]
+            insert_error = torch.where(
+                (self._phase == int(AssemblyPhase.INSERT))[:, None],
+                self._insert_joint_targets - arm_pos,
+                torch.zeros_like(arm_pos),
+            )
+            observation = build_policy_observation(
+                estimated_relative_position_entry=relative_pos,
+                estimated_relative_quaternion_entry_wxyz=relative_quat,
+                arm_joint_position_rad=arm_pos,
+                arm_joint_velocity_rad_s=self.robot.data.joint_vel[:, self._arm_joint_ids],
+                grip_force_n=self._last_contact_proxy_n,
+                entry_contact_force_n=entry_force,
+                grip_proven=self._grip_proven.float(),
+                phase_one_hot=torch.nn.functional.one_hot(
+                    self._phase, num_classes=len(AssemblyPhase)
+                ).float(),
+                previous_expanded_action=self._training_previous_action,
+                command_depth_m=self._insertion_command_depth_m[:, None],
+                insertion_advance=self._insertion_advance_enabled.float()[:, None],
+                insertion_joint_reference_error_rad=insert_error,
+                policy_active=self._policy_active_mask().float()[:, None],
+            )
+            self.extras["observation_source"] = (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+            )
+            self.extras["ground_truth_in_policy_observation"] = False
+            return {"policy": observation}
+
+        def _get_rewards(self):
+            if not self._training_initialized:
+                return super()._get_rewards()
+            activated = self._training_policy_activated
+            if not torch.any(activated):
+                return torch.zeros(self.num_envs, device=self.device)
+            gt_pos, gt_quat = self._relative_object_pose()
+            potential = normalized_insertion_potential(
+                gt_pos, gt_quat, self._training_config
+            )
+            potential = torch.where(
+                activated, potential, self._training_previous_potential
+            )
+            success = (
+                self._evaluation_success
+                & activated
+                & ~self._training_terminal_reward_emitted
+            )
+            failed_now = (
+                (self._phase == int(AssemblyPhase.ABORT))
+                | self._episode_time_limit_reached()
+            ) & ~self._evaluation_success & activated
+            failed = failed_now & ~self._training_terminal_reward_emitted
+            reward = residual_reward(
+                self._training_previous_potential,
+                potential,
+                self._last_insertion_contact_force_w,
+                self._training_action_delta,
+                self._policy_active_mask(),
+                success,
+                failed,
+                self._training_config,
+            )
+            self._training_previous_potential[:] = potential
+            self._training_terminal_reward_emitted |= success | failed
+            return reward
+
+        def _held_warmup_check(self, pending) -> None:
+            left_l1 = self._filtered_force_magnitude(self.left_contact_l1)
+            left_l2 = self._filtered_force_magnitude(self.left_contact_l2)
+            right_r1 = self._filtered_force_magnitude(self.right_contact_r1)
+            right_r2 = self._filtered_force_magnitude(self.right_contact_r2)
+            self._last_contact_proxy_n[:, 0] = torch.maximum(left_l1, left_l2)
+            self._last_contact_proxy_n[:, 1] = torch.maximum(right_r1, right_r2)
+            insertion_force_w = self._filtered_force_vector(self.insertion_contact)
+            self._last_insertion_contact_force_w[:] = insertion_force_w
+            self._last_insertion_contact_force_n[:] = torch.linalg.vector_norm(
+                insertion_force_w, dim=1
+            )
+            self._last_insertion_contact_load_n[:] = self._insertion_contact_load()
+            self._last_forbidden_contact_load_n[:] = self._forbidden_contact_load()
+            grip_force = self._last_contact_proxy_n.amax(dim=1)
+            sensor_finite, within_limits, grip_live = _warmup_sensor_status(
+                torch.stack((left_l1, left_l2, right_r1, right_r2), dim=1),
+                insertion_force_w,
+                self._last_insertion_contact_load_n,
+                self._last_forbidden_contact_load_n,
+                grip_contact_force_n=self.cfg.grip_contact_force_n,
+                hard_contact_force_n=self.cfg.hard_contact_force_n,
+                forbidden_contact_force_n=self.cfg.forbidden_contact_force_n,
+            )
+            nonfinite = pending & ~sensor_finite
+            if torch.any(nonfinite):
+                ids = torch.nonzero(nonfinite, as_tuple=False).squeeze(1).tolist()
+                raise RuntimeError(
+                    f"held-grasp warmup received non-finite contact data in environments {ids}"
+                )
+            self._training_warmup_grip_force_peak_n[pending] = torch.maximum(
+                self._training_warmup_grip_force_peak_n[pending], grip_force[pending]
+            )
+            self._training_warmup_insertion_load_peak_n[pending] = torch.maximum(
+                self._training_warmup_insertion_load_peak_n[pending],
+                self._last_insertion_contact_load_n[pending],
+            )
+            self._training_warmup_forbidden_load_peak_n[pending] = torch.maximum(
+                self._training_warmup_forbidden_load_peak_n[pending],
+                self._last_forbidden_contact_load_n[pending],
+            )
+            unsafe = pending & ~within_limits
+            if torch.any(unsafe):
+                ids = torch.nonzero(unsafe, as_tuple=False).squeeze(1).tolist()
+                raise RuntimeError(
+                    f"held-grasp warmup violated force or forbidden-contact limits in environments {ids}"
+                )
+            lift_left = self.socket.data.root_pos_w[:, 2] - (
+                self.scene.env_origins[:, 2] + self._object_start_z[:, 0]
+            )
+            lift_right = self.plug.data.root_pos_w[:, 2] - (
+                self.scene.env_origins[:, 2] + self._object_start_z[:, 1]
+            )
+            linear, angular = self._relative_mating_velocity()
+            motion_finite, motion_settled = _warmup_motion_status(
+                self.robot.data.joint_vel,
+                self.robot.data.joint_pos - self._training_held_reference,
+                self._training_prismatic_joint_mask,
+                self.socket.data.root_com_vel_w,
+                self.plug.data.root_com_vel_w,
+                linear,
+                angular,
+                limits=HELD_GRASP_STABILITY_LIMITS,
+                max_relative_linear_speed_m_s=(
+                    self.cfg.max_relative_linear_speed_m_s
+                ),
+                max_relative_angular_speed_rad_s=(
+                    self.cfg.max_relative_angular_speed_rad_s
+                ),
+            )
+            state_finite = (
+                torch.isfinite(self.robot.data.joint_pos).all(dim=1)
+                & torch.isfinite(self.socket.data.root_state_w).all(dim=1)
+                & torch.isfinite(self.plug.data.root_state_w).all(dim=1)
+            )
+            stable = pending & (
+                state_finite
+                & motion_finite
+                & motion_settled
+                & sensor_finite
+                & within_limits
+                & grip_live
+                & (lift_left >= self.cfg.grip_lift_proof_m)
+                & (lift_right >= self.cfg.grip_lift_proof_m)
+            )
+            self._training_warmup_steps[pending] += 1
+            self._training_warmup_stable_steps[pending] = torch.where(
+                stable[pending],
+                self._training_warmup_stable_steps[pending] + 1,
+                torch.zeros_like(self._training_warmup_stable_steps[pending]),
+            )
+            required = max(
+                1,
+                math.ceil(float(self._training_config["warmup_s"]) / self.step_dt),
+            )
+            passed = (
+                pending
+                & (self._training_warmup_stable_steps >= required)
+            )
+            if torch.any(passed):
+                self._evaluation_success[passed] = False
+                self._evaluation_dwell_s[passed] = 0.0
+                self._success_since_step[passed] = -1
+                self._forbidden_contact_seen[passed] = False
+                self._episode_grip_force_peak_n[passed] = 0.0
+                self._episode_insertion_contact_force_peak_n[passed] = 0.0
+                self._episode_insertion_contact_load_peak_n[passed] = 0.0
+                self._episode_force_peak_n[passed] = 0.0
+                self._episode_forbidden_contact_load_peak_n[passed] = 0.0
+                self._grip_proven[passed] = True
+                self._evaluation_grip_proven[passed] = True
+                self._freeze_training_estimator(passed)
+                self._training_policy_activated[passed] = True
+                self._training_warmup_complete[passed] = True
+                self._phase[passed] = int(AssemblyPhase.ALIGN)
+                self._phase_started_s[passed] = self._sim_time_s()
+                self.episode_length_buf[passed] = 0
+                self._termination_reason_code[passed] = int(TerminationReason.NONE)
+                for name in (
+                    "_episode_cross_hand_contact_load_peak_n",
+                    "_episode_external_forbidden_contact_load_peak_n",
+                ):
+                    if hasattr(self, name):
+                        getattr(self, name)[passed] = 0.0
+                gt_pos, gt_quat = self._relative_object_pose()
+                self._training_previous_potential[passed] = normalized_insertion_potential(
+                    gt_pos, gt_quat, self._training_config
+                )[passed]
+            timeout_steps = max(1, math.ceil(1.0 / self.step_dt))
+            timed_out = _warmup_timeout_mask(
+                pending,
+                passed,
+                self._training_warmup_steps,
+                timeout_steps,
+            )
+            if torch.any(timed_out):
+                ids = torch.nonzero(timed_out, as_tuple=False).squeeze(1).tolist()
+                raise RuntimeError(
+                    f"held-grasp warmup failed physical revalidation for environments {ids}"
+                )
+
+        def _get_dones(self):
+            if not self._training_initialized:
+                return super()._get_dones()
+            pending = self._warmup_pending_mask()
+            terminated, truncated = super()._get_dones()
+            if torch.any(pending):
+                terminated[pending] = False
+                truncated[pending] = False
+                self._held_warmup_check(pending)
+            training_episode = {
+                "episode_index": self._training_episode_index.clone(),
+                "calibration_bias_translation_entry_m": (
+                    self._training_translation_bias_entry.clone()
+                ),
+                "calibration_bias_rotation_vector_entry_rad": (
+                    self._training_rotation_bias_entry.clone()
+                ),
+            }
+            self.extras["rj45_training_episode"] = training_episode
+            terminal_snapshot = self.extras.get("terminal_snapshot")
+            if isinstance(terminal_snapshot, dict):
+                terminal_snapshot.update(training_episode)
+            return terminated, truncated
+
+        def _held_artifact_joint_state(self, env_ids):
+            artifact = self._training_held_state
+            names = artifact["joint_names"]
+            if set(names) != set(self.robot.joint_names):
+                raise RuntimeError("held-grasp joint names do not match the loaded robot")
+            order = [names.index(name) for name in self.robot.joint_names]
+            state = artifact["state"]
+            joint_pos = torch.tensor(
+                state["joint_positions_si"], device=self.device
+            )[order].repeat(len(env_ids), 1)
+            joint_vel = torch.tensor(
+                state["joint_velocities_si"], device=self.device
+            )[order].repeat(len(env_ids), 1)
+            joint_ref = torch.tensor(
+                state["joint_reference_si"], device=self.device
+            )[order].repeat(len(env_ids), 1)
+            return joint_pos, joint_vel, joint_ref
+
+        def _reset_physical_state(self, env_ids):
+            if self._training_held_state is None:
+                return super()._reset_physical_state(env_ids)
+            joint_pos, joint_vel, _ = self._held_artifact_joint_state(env_ids)
+            robot_root = self.robot.data.default_root_state[env_ids].clone()
+            robot_root[:, :3] += self.scene.env_origins[env_ids]
+            self.robot.write_root_pose_to_sim(robot_root[:, :7], env_ids)
+            self.robot.write_root_velocity_to_sim(robot_root[:, 7:], env_ids)
+            self.robot.write_joint_state_to_sim(joint_pos, joint_vel, None, env_ids)
+            state = self._training_held_state["state"]
+            object_poses = torch.tensor(
+                state["object_poses_world_wxyz"], device=self.device
+            ).repeat(len(env_ids), 1, 1)
+            object_poses[:, :, :3] += self.scene.env_origins[env_ids, None, :]
+            object_velocities = torch.tensor(
+                state["object_com_velocities_world"], device=self.device
+            ).repeat(len(env_ids), 1, 1)
+            for index, obj in enumerate((self.socket, self.plug)):
+                obj.write_root_pose_to_sim(object_poses[:, index], env_ids)
+                obj.write_root_velocity_to_sim(object_velocities[:, index], env_ids)
+            return joint_pos, joint_vel
+
+        def _reset_idx(self, env_ids=None):
+            super()._reset_idx(env_ids)
+            if not self._training_initialized:
+                return
+            if env_ids is None:
+                env_ids = self.robot._ALL_INDICES
+            if not isinstance(env_ids, torch.Tensor):
+                env_ids = torch.as_tensor(env_ids, dtype=torch.long, device=self.device)
+            self._configure_training_reset(env_ids)
+
+        def _configure_training_reset(self, env_ids):
+            self._training_estimator_valid[env_ids] = False
+            self._training_policy_activated[env_ids] = False
+            self._training_realign_pending[env_ids] = False
+            self._training_warmup_complete[env_ids] = self._training_held_state is None
+            self._training_warmup_steps[env_ids] = 0
+            self._training_warmup_stable_steps[env_ids] = 0
+            self._training_warmup_grip_force_peak_n[env_ids] = 0.0
+            self._training_warmup_insertion_load_peak_n[env_ids] = 0.0
+            self._training_warmup_forbidden_load_peak_n[env_ids] = 0.0
+            self._training_previous_action[env_ids] = 0.0
+            self._training_action_delta[env_ids] = 0.0
+            self._training_terminal_reward_emitted[env_ids] = False
+            self._training_episode_index[env_ids] += 1
+            self._sample_episode_bias(env_ids)
+            if self._training_held_state is None:
+                gt_pos, gt_quat = self._relative_object_pose()
+                self._training_previous_potential[env_ids] = normalized_insertion_potential(
+                    gt_pos, gt_quat, self._training_config
+                )[env_ids]
+                return
+
+            _, _, joint_ref = self._held_artifact_joint_state(env_ids)
+            self._training_held_reference[env_ids] = joint_ref
+            self._joint_targets[env_ids] = joint_ref
+            self._insert_joint_targets[env_ids] = joint_ref[:, self._arm_joint_ids]
+            self._torso_hold_targets[env_ids] = joint_ref[:, self._torso_joint_ids]
+            if hasattr(self, "_pregrasp_servo_targets"):
+                self._pregrasp_servo_targets[env_ids] = torch.stack(
+                    (
+                        joint_ref[:, self._left_arm_joint_ids],
+                        joint_ref[:, self._right_arm_joint_ids],
+                    ),
+                    dim=1,
+                )
+            if hasattr(self, "_gripper_command"):
+                self._gripper_command[env_ids] = joint_ref[:, self._gripper_joint_ids]
+            self._phase[env_ids] = int(AssemblyPhase.ALIGN)
+            self._phase_started_s[env_ids] = self._sim_time_s()
+            self._grip_proven[env_ids] = False
+            self._evaluation_grip_proven[env_ids] = False
+            self._object_start_z[env_ids, 0] = self.socket.data.default_root_state[
+                env_ids, 2
+            ]
+            self._object_start_z[env_ids, 1] = self.plug.data.default_root_state[
+                env_ids, 2
+            ]
+            gt_pos, gt_quat = self._relative_object_pose()
+            self._training_previous_potential[env_ids] = normalized_insertion_potential(
+                gt_pos, gt_quat, self._training_config
+            )[env_ids]
+
+        def rj45_training_report(self):
+            return {
+                "policy_observation_source": (
+                    "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                ),
+                "ground_truth_usage": (
+                    "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only"
+                ),
+                "action_mode": self._training_config["action_mode"],
+                "policy_action_dimension": action_dim,
+                "policy_observation_dimension": 79,
+                "held_grasp_reset": self._training_held_state is not None,
+                "learned_scope": "pre_portal_alignment_and_insertion",
+                "learned_recovery": False,
+                "camera_observation_claim": False,
+                "mass_randomization": False,
+                "held_warmup_peaks_n": {
+                    "grip": self._training_warmup_grip_force_peak_n.detach()
+                    .cpu()
+                    .tolist(),
+                    "insertion": self._training_warmup_insertion_load_peak_n.detach()
+                    .cpu()
+                    .tolist(),
+                    "forbidden": self._training_warmup_forbidden_load_peak_n.detach()
+                    .cpu()
+                    .tolist(),
+                },
+                "calibration_bias": {
+                    "enabled": self._training_bias_enabled,
+                    "level": self._training_bias_level,
+                    "base_seed": self._training_bias_base_seed,
+                    "stream_offset": _CALIBRATION_BIAS_STREAM_OFFSET,
+                    "episode_stride": _CALIBRATION_BIAS_EPISODE_STRIDE,
+                    "case_seed_formula": (
+                        "base_seed + stream_offset + episode_index * episode_stride + env_id"
+                    ),
+                    "sampling_event": "once_per_environment_reset_before_calibration",
+                    "episode_index": self._training_episode_index.detach().cpu().tolist(),
+                    "translation_entry_m": self._training_translation_bias_entry.detach()
+                    .cpu()
+                    .tolist(),
+                    "rotation_vector_entry_rad": self._training_rotation_bias_entry.detach()
+                    .cpu()
+                    .tolist(),
+                },
+            }
+
+    Rby1Rj45TrainingEnv.__name__ = "Rby1Rj45TrainingEnv"
+    return Rby1Rj45TrainingEnv
+
+
+__all__ = ["make_rj45_training_env_type"]

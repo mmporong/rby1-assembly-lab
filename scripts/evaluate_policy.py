@@ -23,7 +23,7 @@ from rby1_assembly.run_provenance import (  # noqa: E402
 )
 
 
-def _preimport_option(name: str, default: str) -> str:
+def _preimport_option(name: str, default: str | None) -> str | None:
     prefix = name + "="
     values = sys.argv[1:]
     for index, value in enumerate(values):
@@ -32,6 +32,27 @@ def _preimport_option(name: str, default: str) -> str:
         if value == name and index + 1 < len(values):
             return values[index + 1]
     return default
+
+
+def _project_path(value: str) -> Path:
+    path = Path(value)
+    return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+
+
+def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -> tuple[Path, ...]:
+    if path_value is None:
+        return ()
+    path = _project_path(path_value)
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError(f"JSON input must be an object: {path}")
+    dependencies = [path]
+    for key in path_keys:
+        value = payload.get(key)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"JSON input {path} must identify {key}")
+        dependencies.append(_project_path(value))
+    return tuple(dependencies)
 
 
 _bootstrap_task = _preimport_option("--task", "toy")
@@ -58,12 +79,37 @@ if _bootstrap_task == "rj45" and _bootstrap_nominal_report:
         bootstrap_nominal_report_path,
         bootstrap_trace_path,
     )
+_bootstrap_training_config = _preimport_option(
+    "--rj45-training-config", "configs/rj45-training-v1.json"
+)
+_bootstrap_held_state = _preimport_option("--rj45-held-state", None)
+_bootstrap_held_paths: tuple[Path, ...] = ()
+if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
+    held_path = _project_path(_bootstrap_held_state)
+    held_payload = json.loads(held_path.read_text(encoding="utf-8"))
+    held_provenance = held_payload.get("provenance") if isinstance(held_payload, dict) else None
+    if not isinstance(held_provenance, dict):
+        raise ValueError("RJ45 held state must contain provenance")
+    _bootstrap_held_paths = (
+        held_path,
+        _project_path(held_provenance["nominal_report_path"]),
+        _project_path(held_provenance["nominal_trace_path"]),
+    )
+_bootstrap_parallel_spec = _preimport_option("--parallel-contact-evidence", None)
+_bootstrap_parallel_paths = (
+    _json_dependency_paths(
+        _bootstrap_parallel_spec, ("report_path", "trace_path", "sat_report_path")
+    )
+    if _bootstrap_task == "rj45" and _bootstrap_parallel_spec is not None
+    else ()
+)
 _bootstrap_input_snapshot = capture_run_inputs(
     PROJECT_ROOT,
     task_path=_bootstrap_task_path,
     build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
     config_paths=(
         Path(_preimport_option("--config", _bootstrap_config_default)),
+        *((Path(_bootstrap_training_config),) if _bootstrap_task == "rj45" else ()),
         PROJECT_ROOT / "configs/assets.json",
         PROJECT_ROOT / "configs/runtime.json",
         *((PROJECT_ROOT / "configs/rj45-assets.json",) if _bootstrap_task == "rj45" else ()),
@@ -74,6 +120,8 @@ _bootstrap_input_snapshot = capture_run_inputs(
         PROJECT_ROOT / "scripts/train.py",
         PROJECT_ROOT / "scripts/run_sim.py",
         *_bootstrap_nominal_paths,
+        *_bootstrap_held_paths,
+        *_bootstrap_parallel_paths,
     ),
 )
 
@@ -81,8 +129,8 @@ from isaaclab.app import AppLauncher  # noqa: E402
 
 
 parser = argparse.ArgumentParser(description="Evaluate RB-Y1 assembly policy")
-parser.add_argument("checkpoint", type=Path)
-parser.add_argument("--num-envs", type=int, default=64)
+parser.add_argument("checkpoint", type=Path, nargs="?")
+parser.add_argument("--num-envs", type=int, default=None)
 parser.add_argument("--task", choices=("toy", "rj45"), default="toy")
 parser.add_argument("--episodes", type=int, default=200)
 parser.add_argument("--seed", type=int, default=None)
@@ -93,10 +141,24 @@ parser.add_argument(
     type=Path,
     help="Completed current-source RJ45 nominal run report used to authorize the checkpoint.",
 )
+parser.add_argument(
+    "--rj45-training-config",
+    type=Path,
+    default=Path("configs/rj45-training-v1.json"),
+)
+parser.add_argument("--rj45-held-state", type=Path)
+parser.add_argument("--parallel-contact-evidence", type=Path)
+parser.add_argument(
+    "--baseline-mode",
+    choices=("learned", "biased_zero", "oracle"),
+    default="learned",
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
     args.config = Path("configs/ppo-rj45-v1.json")
+if args.num_envs is None:
+    args.num_envs = 1 if args.task == "rj45" else 64
 if args.num_envs <= 0 or args.episodes <= 0:
     parser.error("--num-envs and --episodes must be positive")
 if args.task == "rj45" and args.num_envs != 1:
@@ -105,7 +167,13 @@ if args.task == "rj45" and args.rj45_nominal_evidence is None:
     parser.error("--task rj45 requires --rj45-nominal-evidence")
 if args.seed is not None and args.seed < 0:
     parser.error("--seed must be non-negative")
-if not args.checkpoint.is_file():
+if args.task == "toy" and args.checkpoint is None:
+    parser.error("toy evaluation requires a checkpoint")
+if args.task == "rj45" and args.baseline_mode == "learned" and args.checkpoint is None:
+    parser.error("learned RJ45 evaluation requires a checkpoint")
+if args.task == "rj45" and args.baseline_mode == "learned" and args.rj45_held_state is None:
+    parser.error("learned RJ45 evaluation requires --rj45-held-state")
+if args.checkpoint is not None and not args.checkpoint.is_file():
     parser.error(f"checkpoint does not exist: {args.checkpoint}")
 if not args.config.is_file():
     parser.error(f"config does not exist: {args.config}")
@@ -169,9 +237,19 @@ def main() -> int:
     assets_path = PROJECT_ROOT / "configs/assets.json"
     runtime_path = PROJECT_ROOT / "configs/runtime.json"
     connector_assets_path = PROJECT_ROOT / "configs/rj45-assets.json"
-    lineage_path = args.checkpoint.parent / "training_provenance.json"
-    manifest_path = args.checkpoint.parent / "checkpoint_manifest.json"
+    learned_mode = args.task == "toy" or args.baseline_mode == "learned"
+    lineage_path = (
+        args.checkpoint.parent / "training_provenance.json"
+        if args.task == "rj45" and learned_mode
+        else None
+    )
+    manifest_path = (
+        args.checkpoint.parent / "checkpoint_manifest.json"
+        if args.task == "rj45" and learned_mode
+        else None
+    )
     nominal_trace_path = None
+    extra_input_paths: list[Path] = []
     if args.task == "rj45":
         nominal_report = load_finite_json(args.rj45_nominal_evidence)
         raw_trace_path = nominal_report.get("trace_path")
@@ -180,12 +258,40 @@ def main() -> int:
         nominal_trace_path = Path(raw_trace_path)
         if not nominal_trace_path.is_absolute():
             nominal_trace_path = PROJECT_ROOT / nominal_trace_path
+        extra_input_paths.extend((args.rj45_nominal_evidence, nominal_trace_path))
+        if args.rj45_held_state is not None:
+            held_payload = load_finite_json(args.rj45_held_state)
+            held_provenance = held_payload.get("provenance")
+            if not isinstance(held_provenance, dict):
+                raise ValueError("RJ45 held state must contain provenance")
+            extra_input_paths.extend(
+                (
+                    args.rj45_held_state,
+                    _project_path(held_provenance["nominal_report_path"]),
+                    _project_path(held_provenance["nominal_trace_path"]),
+                )
+            )
+        if args.parallel_contact_evidence is not None:
+            parallel_spec_payload = load_finite_json(args.parallel_contact_evidence)
+            extra_input_paths.extend(
+                _json_dependency_paths(
+                    str(args.parallel_contact_evidence),
+                    ("report_path", "trace_path", "sat_report_path"),
+                )
+            )
+        else:
+            parallel_spec_payload = None
+    if learned_mode:
+        extra_input_paths.append(args.checkpoint)
+    if args.task == "rj45" and learned_mode:
+        extra_input_paths.extend((lineage_path, manifest_path))
     input_snapshot = capture_run_inputs(
         PROJECT_ROOT,
         task_path=task_path,
         build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
         config_paths=(
             args.config,
+            *((args.rj45_training_config,) if args.task == "rj45" else ()),
             assets_path,
             runtime_path,
             *((connector_assets_path,) if args.task == "rj45" else ()),
@@ -193,11 +299,9 @@ def main() -> int:
         source_roots=((PROJECT_ROOT / "src", True),),
         source_files=(PROJECT_ROOT / "scripts/evaluate_policy.py",),
         extra_paths=(
-            args.checkpoint,
             PROJECT_ROOT / "scripts/train.py",
             PROJECT_ROOT / "scripts/run_sim.py",
-            *((lineage_path, manifest_path, args.rj45_nominal_evidence, nominal_trace_path)
-              if args.task == "rj45" else ()),
+            *extra_input_paths,
         ),
     )
     _input_snapshot_for_failure_report = input_snapshot
@@ -219,11 +323,15 @@ def main() -> int:
     runner_cfg = input_snapshot.json_for(args.config)
     validate_ppo_config(runner_cfg)
     cfg = Rby1AssemblyEnvCfg()
+    from rby1_assembly.experiment_contracts import apply_runtime_timing
+    apply_runtime_timing(cfg, input_snapshot.json_for(PROJECT_ROOT / "configs/runtime.json"))
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
     env_type = Rby1AssemblyEnv
     selected_task = input_snapshot.json_for(task_path)
     verified_checkpoint_evidence = None
+    held_state_proof = None
+    parallel_contact_evidence = None
     cfg.seed = (
         args.seed
         if args.seed is not None
@@ -231,6 +339,13 @@ def main() -> int:
     )
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task, load_rj45_task
+        from rby1_assembly.rj45_training import load_training_config
+        from rby1_assembly.rj45_training_env import (
+            _calibration_bias_case_seed,
+            make_rj45_training_env_type,
+        )
+        from rby1_assembly.held_grasp import load_verified_held_grasp_artifact
+        from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence
         from rby1_assembly.rj45_task import (
             verify_checkpoint_lineage,
             verify_checkpoint_manifest,
@@ -239,19 +354,35 @@ def main() -> int:
         )
 
         task = load_rj45_task(task_path)
-        env_type = configure_rj45_task(cfg, task, PROJECT_ROOT)
-        if not lineage_path.is_file():
-            raise ValueError("RJ45 evaluation requires training_provenance.json beside the checkpoint")
-        lineage = input_snapshot.json_for(lineage_path)
-        if not manifest_path.is_file():
-            raise ValueError("RJ45 evaluation requires checkpoint_manifest.json beside the checkpoint")
-        manifest = input_snapshot.json_for(manifest_path)
-        verify_checkpoint_manifest(
-            manifest,
-            training_provenance_sha256=input_snapshot.hash_for(lineage_path),
-            checkpoint_name=args.checkpoint.name,
-            checkpoint_sha256=input_snapshot.hash_for(args.checkpoint),
-        )
+        training_config = load_training_config(args.rj45_training_config)
+        if args.rj45_held_state is not None:
+            _, held_state_proof = load_verified_held_grasp_artifact(
+                PROJECT_ROOT, task, args.rj45_held_state
+            )
+        if parallel_spec_payload is not None:
+            parallel_contact_evidence = load_parallel_contact_evidence(
+                parallel_spec_payload, project_root=PROJECT_ROOT
+            )
+        if learned_mode:
+            if not lineage_path.is_file():
+                raise ValueError("RJ45 evaluation requires training_provenance.json beside the checkpoint")
+            lineage = input_snapshot.json_for(lineage_path)
+            if not manifest_path.is_file():
+                raise ValueError("RJ45 evaluation requires checkpoint_manifest.json beside the checkpoint")
+            manifest = input_snapshot.json_for(manifest_path)
+            verify_checkpoint_manifest(
+                manifest,
+                training_provenance_sha256=input_snapshot.hash_for(lineage_path),
+                checkpoint_name=args.checkpoint.name,
+                checkpoint_sha256=input_snapshot.hash_for(args.checkpoint),
+            )
+            trained_num_envs = lineage.get("num_envs")
+            if type(trained_num_envs) is not int or trained_num_envs <= 0:
+                raise ValueError("checkpoint num_envs must be a positive integer")
+            if trained_num_envs > 1 and parallel_contact_evidence is None:
+                raise ValueError(
+                    "parallel-trained checkpoint evaluation requires --parallel-contact-evidence"
+                )
         build_report_path = (PROJECT_ROOT / task["assets"]["build_report"]).resolve()
         build_report = input_snapshot.json_for(build_report_path)
         generated_asset_sha256 = verify_generated_asset_hashes(
@@ -283,40 +414,84 @@ def main() -> int:
         current_nominal_evidence = verify_rj45_nominal_evidence(
             PROJECT_ROOT, task, args.rj45_nominal_evidence
         )
-        verify_checkpoint_lineage(
-            lineage,
-            task_id="rj45-v1",
-            task_config_sha256=task["_config_sha256"],
-            source_sha256=expected_lineage_sources,
-            runtime_contract={
-                "runtime_versions": current_versions,
-                "physics_dt_s": cfg.sim.dt, "control_decimation": cfg.decimation,
-                "control_dt_s": cfg.sim.dt * cfg.decimation,
-                "observation_noise": {
-                    "distribution": "independent_zero_mean_gaussian_position_and_rotation_vector",
-                    "position_std_m": cfg.observation_position_noise_std_m,
-                    "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
+        if learned_mode:
+            action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
+            training_contract = {
+                "schema_version": 1,
+                "policy_observation_schema_version": 1,
+                "policy_observation_dimension": 79,
+                "policy_action_dimension": action_dimension,
+                "action_mode": training_config["action_mode"],
+                "episode_scope": training_config["episode_scope"],
+                "warmup_s": training_config["warmup_s"],
+                "active_horizon_s": training_config["active_horizon_s"],
+                "estimator": "frozen_kinematic_grasp_estimator",
+                "calibration_bias": "episode_fixed_one_shot_se3",
+                "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
+                "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
+                "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+                "held_grasp_reset_proof": held_state_proof,
+                "training_config_sha256": training_config["_config_sha256"],
+                "parallel_contact_evidence": (
+                    parallel_contact_evidence if lineage["num_envs"] > 1 else None
+                ),
+                "learned_recovery": False,
+                "retract_controller": "baseline_only",
+            }
+            verify_checkpoint_lineage(
+                lineage,
+                task_id="rj45-v1",
+                task_config_sha256=task["_config_sha256"],
+                source_sha256=expected_lineage_sources,
+                runtime_contract={
+                    "runtime_versions": current_versions,
+                    "physics_dt_s": cfg.sim.dt, "control_decimation": cfg.decimation,
+                    "control_dt_s": cfg.sim.dt * cfg.decimation,
+                    "observation_noise": {
+                        "distribution": "independent_zero_mean_gaussian_position_and_rotation_vector",
+                        "position_std_m": cfg.observation_position_noise_std_m,
+                        "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
+                    },
+                    "baseline_controller_state_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+                    "task_config_path": str(task_path.relative_to(PROJECT_ROOT)),
+                    "policy_config_path": _lineage_path_key(args.config),
+                    "collision_monitor_mode": lineage["collision_monitor_mode"],
+                    "num_envs": lineage["num_envs"],
+                    "rj45_training_contract": training_contract,
                 },
-                "baseline_controller_state_source": "simulator_ground_truth",
-                "task_config_path": str(task_path.relative_to(PROJECT_ROOT)),
-                "policy_config_path": _lineage_path_key(args.config),
-                "collision_monitor_mode": "passive_nominal_one_environment", "num_envs": cfg.scene.num_envs,
-            },
-            rj45_nominal_evidence=current_nominal_evidence,
+                rj45_nominal_evidence=current_nominal_evidence,
+            )
+            verified_checkpoint_evidence = {
+                "training_provenance_sha256": input_snapshot.hash_for(lineage_path),
+                "checkpoint_manifest_sha256": input_snapshot.hash_for(manifest_path),
+                "runtime_contract_verified_at_start": True,
+                "rj45_nominal_evidence": current_nominal_evidence,
+                "held_grasp_reset_proof": held_state_proof,
+                "training_num_envs": lineage["num_envs"],
+            }
+        env_type = configure_rj45_task(cfg, task, PROJECT_ROOT)
+        env_type = make_rj45_training_env_type(
+            env_type,
+            training_config,
+            held_state=None,
+            calibration_bias_enabled=args.baseline_mode != "oracle",
+            bias_level=training_config["calibration_bias"]["initial_level"],
         )
-        verified_checkpoint_evidence = {
-            "training_provenance_sha256": input_snapshot.hash_for(lineage_path),
-            "checkpoint_manifest_sha256": input_snapshot.hash_for(manifest_path),
-            "runtime_contract_verified_at_start": True,
-            "rj45_nominal_evidence": current_nominal_evidence,
-        }
     input_snapshot.assert_unchanged()
     env = env_type(cfg)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=runner_cfg.get("clip_actions", 1.0))
     try:
-        runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=None, device=env.device)
-        runner.load(str(args.checkpoint))
-        policy = runner.get_inference_policy(device=env.device)
+        if learned_mode:
+            runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=None, device=env.device)
+            runner.load(str(args.checkpoint))
+            policy = runner.get_inference_policy(device=env.device)
+        else:
+            action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
+            policy = lambda observation: torch.zeros(  # noqa: E731
+                (observation.shape[0], action_dimension),
+                dtype=observation.dtype,
+                device=observation.device,
+            )
         observations = wrapped.get_observations()
         attempts = 0
         valid_successes = 0
@@ -328,6 +503,7 @@ def main() -> int:
         retry_counts = []
         recovery_attempts = 0
         recovered_successes = 0
+        episode_outcomes = []
         while attempts < args.episodes:
             with torch.inference_mode():
                 actions = policy(observations)
@@ -347,6 +523,17 @@ def main() -> int:
                 finite = finite and all(bool(torch.isfinite(snapshot[key][env_id]).all().item()) for key in
                     ("object_poses_world_wxyz", "revolute_joint_positions_rad", "actual_depth_m",
                      "actual_lateral_error_m", "actual_orientation_error_rad"))
+                bias_finite = True
+                if args.task == "rj45":
+                    bias_finite = all(
+                        bool(torch.isfinite(snapshot[key][env_id]).all().item())
+                        for key in (
+                            "calibration_bias_translation_entry_m",
+                            "calibration_bias_rotation_vector_entry_rad",
+                        )
+                    )
+                    finite = finite and bias_finite
+                    finite = finite and int(snapshot["episode_index"][env_id].item()) >= 0
                 valid = finite and bool(extras["evaluation"]["valid"][env_id].item())
                 succeeded = valid and bool(extras["success"][env_id].item())
                 valid_successes += int(succeeded)
@@ -364,6 +551,48 @@ def main() -> int:
                     invalid_reasons[reason] = invalid_reasons.get(reason, 0) + 1
                 if finite:
                     force_peaks.append(force_peak)
+                if args.task == "rj45":
+                    episode_index = int(snapshot["episode_index"][env_id].item())
+                    episode_outcomes.append(
+                        {
+                            "attempt_index": attempts - 1,
+                            "environment_index": env_id,
+                            "episode_index": episode_index,
+                            "paired_condition": {
+                                "task_config_sha256": task["_config_sha256"],
+                                "base_evaluation_seed": cfg.seed,
+                                "environment_index": env_id,
+                                "episode_index": episode_index,
+                                "calibration_bias_level": training_config[
+                                    "calibration_bias"
+                                ]["initial_level"],
+                                "calibration_latent_case_seed": (
+                                    _calibration_bias_case_seed(
+                                        cfg.seed, env_id, episode_index
+                                    )
+                                    if episode_index >= 0
+                                    else None
+                                ),
+                                "calibration_latent_case_seed_formula": (
+                                    "base_seed + stream_offset + episode_index * "
+                                    "episode_stride + env_id"
+                                ),
+                            },
+                            "calibration_bias_translation_entry_m": (
+                                snapshot["calibration_bias_translation_entry_m"][env_id]
+                                .detach().cpu().tolist() if bias_finite else None
+                            ),
+                            "calibration_bias_rotation_vector_entry_rad": (
+                                snapshot["calibration_bias_rotation_vector_entry_rad"][env_id]
+                                .detach().cpu().tolist() if bias_finite else None
+                            ),
+                            "valid": valid,
+                            "success": succeeded,
+                            "termination_reason": str(
+                                extras["terminal_evaluation"]["termination_reason"][env_id]
+                            ),
+                        }
+                    )
         valid_episodes = valid_successes + valid_failures
         build_report_path = input_snapshot.build_report_path
         input_snapshot.assert_unchanged()
@@ -389,13 +618,26 @@ def main() -> int:
             "mean_retry_count_valid": sum(retry_counts) / len(retry_counts) if retry_counts else None,
             "max_contact_force_proxy_n": max(force_peaks, default=0.0),
             "seed": cfg.seed,
-            "observation_source": "simulator_state_with_noise",
-            "baseline_controller_state_source": "simulator_ground_truth",
+            "evaluation_num_envs": cfg.scene.num_envs,
+            "observation_source": (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                if args.task == "rj45" and args.baseline_mode != "oracle"
+                else "joint_encoder_frozen_grasp_estimator_without_calibration_bias"
+                if args.task == "rj45"
+                else "simulator_state_with_noise"
+            ),
+            "baseline_controller_state_source": (
+                "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
+                if args.task == "rj45" and args.baseline_mode != "oracle"
+                else "joint_encoder_frozen_grasp_estimator_without_calibration_bias"
+                if args.task == "rj45"
+                else "simulator_ground_truth"
+            ),
             "completion_source": "simulator_ground_truth_evaluator",
             "sample_definition": "terminated_or_truncated_episode_attempt",
             "provenance": {
-                "checkpoint": str(args.checkpoint.resolve()),
-                "checkpoint_sha256": input_snapshot.hash_for(args.checkpoint),
+                "checkpoint": str(args.checkpoint.resolve()) if learned_mode else None,
+                "checkpoint_sha256": input_snapshot.hash_for(args.checkpoint) if learned_mode else None,
                 "verified_checkpoint_evidence": verified_checkpoint_evidence,
                 "policy_config": str(args.config.resolve()),
                 "policy_config_sha256": input_snapshot.hash_for(args.config),
@@ -424,8 +666,26 @@ def main() -> int:
                 "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
             },
         }
+        if args.task == "rj45":
+            report["baseline_mode"] = args.baseline_mode
+            report["rj45_training_config"] = {
+                "path": _lineage_path_key(args.rj45_training_config),
+                "sha256": training_config["_config_sha256"],
+                "action_mode": training_config["action_mode"],
+                "observation_dimension": training_config["observation_dim"],
+                "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
+            }
+            report["episode_outcomes"] = episode_outcomes
+            report["paired_condition_key"] = (
+                "task_config_sha256,base_evaluation_seed,environment_index,episode_index,"
+                "calibration_bias_level,calibration_latent_case_seed,"
+                "calibration_latent_case_seed_formula"
+            )
+            report["learned_recovery"] = False
         if hasattr(env, "rj45_task_report"):
             report["task_model"] = env.rj45_task_report()
+        if hasattr(env, "rj45_training_report"):
+            report["training_environment"] = env.rj45_training_report()
         atomic_write_json(args.report, report)
         input_snapshot.assert_unchanged()
         print(json.dumps(report, indent=2, allow_nan=False), flush=True)

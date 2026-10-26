@@ -714,7 +714,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self.robot.set_joint_position_target(targets)
 
     def _get_observations(self) -> dict[str, torch.Tensor]:
-        relative_pos, relative_quat = self._relative_object_pose()
+        relative_pos, relative_quat = self._control_relative_object_pose()
         noisy_pos = relative_pos + torch.randn_like(relative_pos) * self.cfg.observation_position_noise_std_m
         rotation_vector_noise = (
             torch.randn((self.num_envs, 3), device=self.device)
@@ -780,6 +780,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
         )
 
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
+        evaluation_eligible = self._evaluation_eligibility_mask()
+        if evaluation_eligible.shape != (self.num_envs,) or evaluation_eligible.dtype != torch.bool:
+            raise RuntimeError("evaluation eligibility must be a boolean mask per environment")
         left_l1_force = self._filtered_force_magnitude(self.left_contact_l1)
         left_l2_force = self._filtered_force_magnitude(self.left_contact_l2)
         right_r1_force = self._filtered_force_magnitude(self.right_contact_r1)
@@ -861,7 +864,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
             & (lift_right >= self.cfg.grip_lift_proof_m)
         )
         instantaneous_ok = geometry_ok & handling_ok & ~hard_overload & ~self._forbidden_contact_seen
-        self._advance_evaluation_dwell(instantaneous_ok & independent_eval_valid)
+        self._advance_evaluation_dwell(
+            instantaneous_ok & independent_eval_valid & evaluation_eligible
+        )
         aborted = self._phase == int(AssemblyPhase.ABORT)
         evaluator_failure = self._forbidden_contact_seen | hard_overload
         terminated = self._evaluation_success | aborted | evaluator_failure
@@ -1067,16 +1072,8 @@ class Rby1AssemblyEnv(DirectRLEnv):
             env_ids = self.robot._ALL_INDICES
         super()._reset_idx(env_ids)
 
-        robot_root = self.robot.data.default_root_state[env_ids].clone()
-        robot_root[:, :3] += self.scene.env_origins[env_ids]
-        joint_pos = self.robot.data.default_joint_pos[env_ids].clone()
-        joint_vel = self.robot.data.default_joint_vel[env_ids].clone()
-        self.robot.write_root_pose_to_sim(robot_root[:, :7], env_ids)
-        self.robot.write_root_velocity_to_sim(robot_root[:, 7:], env_ids)
-        self.robot.write_joint_state_to_sim(joint_pos, joint_vel, None, env_ids)
+        joint_pos, joint_vel = self._reset_physical_state(env_ids)
 
-        self._reset_rigid_object(self.socket, env_ids, y_noise=0.010)
-        self._reset_rigid_object(self.plug, env_ids, y_noise=0.010)
         self._joint_targets[env_ids] = joint_pos
         self._insert_joint_targets[env_ids] = joint_pos[:, self._arm_joint_ids]
         self._torso_hold_targets[env_ids] = joint_pos[:, self._torso_joint_ids]
@@ -1113,6 +1110,21 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._actions[env_ids] = 0.0
         self._object_start_z[env_ids, 0] = self.socket.data.default_root_state[env_ids, 2]
         self._object_start_z[env_ids, 1] = self.plug.data.default_root_state[env_ids, 2]
+
+    def _reset_physical_state(self, env_ids):
+        """Write one reset state and return the joint state used by controllers."""
+
+        robot_root = self.robot.data.default_root_state[env_ids].clone()
+        robot_root[:, :3] += self.scene.env_origins[env_ids]
+        joint_pos = self.robot.data.default_joint_pos[env_ids].clone()
+        joint_vel = self.robot.data.default_joint_vel[env_ids].clone()
+        self.robot.write_root_pose_to_sim(robot_root[:, :7], env_ids)
+        self.robot.write_root_velocity_to_sim(robot_root[:, 7:], env_ids)
+        self.robot.write_joint_state_to_sim(joint_pos, joint_vel, None, env_ids)
+
+        self._reset_rigid_object(self.socket, env_ids, y_noise=0.010)
+        self._reset_rigid_object(self.plug, env_ids, y_noise=0.010)
+        return joint_pos, joint_vel
 
     def _reset_rigid_object(self, obj: RigidObject, env_ids: Sequence[int] | torch.Tensor, y_noise: float) -> None:
         state = obj.data.default_root_state[env_ids].clone()
@@ -1218,7 +1230,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
             self._object_to_ee_quat[proof, 1] = right_offset_quat
         self._transition_where(proof, AssemblyPhase.ALIGN, now)
 
-        relative_pos, relative_quat = self._relative_object_pose()
+        relative_pos, relative_quat = self._control_relative_object_pose()
         lateral = torch.linalg.vector_norm(relative_pos[:, (0, 2)], dim=1)
         angle = quat_error_magnitude(relative_quat, self._identity_quat())
         aligned = (
@@ -1349,7 +1361,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         insert = self._phase == int(AssemblyPhase.INSERT)
         # The commanded depth includes tracking margin; the independent
         # evaluator still requires the original measured insertion depth.
-        relative_position, relative_orientation = self._relative_object_pose()
+        relative_position, relative_orientation = self._control_relative_object_pose()
         lateral_error = torch.linalg.vector_norm(relative_position[:, (0, 2)], dim=1)
         orientation_error = quat_error_magnitude(relative_orientation, self._identity_quat())
         pause_advance = (
@@ -1374,8 +1386,9 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._insertion_command_depth_m[insert] = next_depth[insert]
         # During insertion the measured support object defines the mating
         # frame, so support-arm tracking error is not added to the plug error.
+        control_object_poses = self._control_object_poses()
         measured_mating_goal, measured_mating_quat = self._plug_pose_goal(
-            self.socket.data.root_pos_w, self.socket.data.root_quat_w, next_depth
+            control_object_poses[0], control_object_poses[1], next_depth
         )
         plug_goal[insert] = measured_mating_goal[insert]
         plug_goal_quat[insert] = measured_mating_quat[insert]
@@ -1388,12 +1401,12 @@ class Rby1AssemblyEnv(DirectRLEnv):
         # Re-estimate the grasp transform from measured simulator poses so
         # millimetre-scale settling/slip is corrected at the object, rather
         # than treating the lift-proof transform as a rigid attachment.
-        left_grasp_pos, left_grasp_quat = subtract_frame_transforms(
-            self.socket.data.root_pos_w, self.socket.data.root_quat_w, left_pos, left_quat
-        )
-        right_grasp_pos, right_grasp_quat = subtract_frame_transforms(
-            self.plug.data.root_pos_w, self.plug.data.root_quat_w, right_pos, right_quat
-        )
+        (
+            left_grasp_pos,
+            left_grasp_quat,
+            right_grasp_pos,
+            right_grasp_quat,
+        ) = self._control_grasp_transforms(left_pos, left_quat, right_pos, right_quat)
         left_goal, left_goal_quat = combine_frame_transforms(
             socket_goal, socket_goal_quat, left_grasp_pos, left_grasp_quat,
         )
@@ -1442,6 +1455,41 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._last_actual_relative_pose[:, :3] = relative_pos
         self._last_actual_relative_pose[:, 3:] = relative_quat
         return relative_pos, relative_quat
+
+    def _control_relative_object_pose(self) -> tuple[torch.Tensor, torch.Tensor]:
+        """Pose used by the controller; evaluation continues to use simulator ground truth."""
+
+        return self._relative_object_pose()
+
+    def _control_object_poses(
+        self,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Object poses used by the controller, overridable by state estimators."""
+
+        return (
+            self.socket.data.root_pos_w,
+            self.socket.data.root_quat_w,
+            self.plug.data.root_pos_w,
+            self.plug.data.root_quat_w,
+        )
+
+    def _control_grasp_transforms(
+        self,
+        left_ee_pos: torch.Tensor,
+        left_ee_quat: torch.Tensor,
+        right_ee_pos: torch.Tensor,
+        right_ee_quat: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Return object-to-hand transforms used by the Cartesian controller."""
+
+        socket_pos, socket_quat, plug_pos, plug_quat = self._control_object_poses()
+        left_grasp_pos, left_grasp_quat = subtract_frame_transforms(
+            socket_pos, socket_quat, left_ee_pos, left_ee_quat
+        )
+        right_grasp_pos, right_grasp_quat = subtract_frame_transforms(
+            plug_pos, plug_quat, right_ee_pos, right_ee_quat
+        )
+        return left_grasp_pos, left_grasp_quat, right_grasp_pos, right_grasp_quat
 
     def _plug_center_goal(
         self, socket_center_w: torch.Tensor, depth_m: float | torch.Tensor
@@ -1644,6 +1692,11 @@ class Rby1AssemblyEnv(DirectRLEnv):
         quat[:, 0] = 1.0
         return quat
 
+    def _evaluation_eligibility_mask(self) -> torch.Tensor:
+        """Select environments whose ground-truth completion evaluator may advance."""
+
+        return torch.ones(self.num_envs, dtype=torch.bool, device=self.device)
+
     def _transition_where(
         self,
         mask: torch.Tensor,
@@ -1654,7 +1707,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         if torch.any(mask):
             self._insert_joint_targets[mask] = self.robot.data.joint_pos[mask][:, self._arm_joint_ids]
             if phase == AssemblyPhase.INSERT:
-                relative_position, _ = self._relative_object_pose()
+                relative_position, _ = self._control_relative_object_pose()
                 self._insertion_command_depth_m[mask] = relative_position[mask, 1]
                 self._insertion_advance_enabled[mask] = False
             self._phase[mask] = int(phase)
