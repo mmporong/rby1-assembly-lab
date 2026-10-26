@@ -1679,5 +1679,24 @@
     "terminal_lateral_error_m": 5.573688213189598e-06,
     "terminal_dwell_s": 0.4,
     "training_config_sha256": "c47d1d81313618c5744a1dd40bc5cdc142c694ec03e692c1d2cb21801eb270b4"
+  },
+  "residual_ppo_pilot": {
+    "training_completed": true,
+    "policy_improvement_verified": false,
+    "validation_status": "running",
+    "num_envs": 64,
+    "updates": 20,
+    "steps_per_env_per_update": 128,
+    "transitions": 163840,
+    "training_seed": 20261026,
+    "final_checkpoint_iteration": 19,
+    "checkpoint_sha256": "4d488172a824c2f19c22432951baefc4f87d946f94acaecef649c493458dbc6d",
+    "manifest_sha256": "d9b76f858519ed7c97ea3ae0a2ba8bf42b43565dd5650bff1afd1e0f226bf15c",
+    "training_provenance_sha256": "72b1b1921ed706c05857e6fd007e314a553dc08ca2ccfefa6f872fdb16c8292d",
+    "all_checkpoint_model_and_optimizer_tensors_finite": true,
+    "initial_and_final_model_weights_differ": true,
+    "input_immutability_verified": true,
+    "held_initial_state_count": 1,
+    "scope": "Residual alignment/insertion from one recorded held state with calibration bias. Training completion alone does not demonstrate policy improvement, learned pickup, camera perception, or hardware transfer."
   }
 }

@@ -84,6 +84,36 @@ def _environment_episode_is_within_quota(
     return accepted_counts[env_id] < quotas[env_id]
 
 
+def _rj45_terminal_attempt_metrics(snapshot, env_id: int) -> tuple[dict[str, object], bool]:
+    """Extract one environment's mandatory terminal metrics without inventing values."""
+
+    metric_sources = (
+        ("elapsed_s", "timestamp_s", float),
+        ("retry_count", "retry_count", int),
+        ("grip_contact_force_peak_n", "grip_contact_force_peak_n", float),
+        ("insertion_contact_force_peak_n", "insertion_contact_force_peak_n", float),
+        ("insertion_contact_load_peak_n", "insertion_contact_load_peak_n", float),
+        ("forbidden_contact_load_peak_n", "forbidden_contact_load_peak_n", float),
+        ("final_depth_m", "actual_depth_m", float),
+        ("final_lateral_error_m", "actual_lateral_error_m", float),
+        ("final_orientation_error_rad", "actual_orientation_error_rad", float),
+        ("final_dwell_s", "independent_eval_dwell_s", float),
+    )
+    metrics: dict[str, object] = {}
+    all_finite = True
+    for output_name, snapshot_key, output_type in metric_sources:
+        row_value = snapshot[snapshot_key][env_id]
+        if row_value.numel() != 1:
+            raise ValueError(f"terminal metric {snapshot_key} must be scalar per environment")
+        numeric_value = float(row_value.item())
+        if math.isfinite(numeric_value):
+            metrics[output_name] = output_type(numeric_value)
+        else:
+            metrics[output_name] = None
+            all_finite = False
+    return metrics, all_finite
+
+
 def _configure_verified_parallel_rj45_task(
     cfg,
     task,
@@ -601,7 +631,12 @@ def main() -> int:
                     ("object_poses_world_wxyz", "revolute_joint_positions_rad", "actual_depth_m",
                      "actual_lateral_error_m", "actual_orientation_error_rad"))
                 bias_finite = True
+                rj45_attempt_metrics = None
                 if args.task == "rj45":
+                    rj45_attempt_metrics, rj45_metrics_finite = (
+                        _rj45_terminal_attempt_metrics(snapshot, env_id)
+                    )
+                    finite = finite and rj45_metrics_finite
                     bias_finite = all(
                         bool(torch.isfinite(snapshot[key][env_id]).all().item())
                         for key in (
@@ -668,6 +703,7 @@ def main() -> int:
                             "termination_reason": str(
                                 extras["terminal_evaluation"]["termination_reason"][env_id]
                             ),
+                            **rj45_attempt_metrics,
                         }
                     )
         valid_episodes = valid_successes + valid_failures
