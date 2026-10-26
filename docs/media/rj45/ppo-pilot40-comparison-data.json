@@ -1,0 +1,1703 @@
+{
+  "schema_version": 1,
+  "analysis": {
+    "schema_version": 1,
+    "scope": "single-seed development pilot, one held grasp state, not final heldout or hardware validation",
+    "evaluation_start": "held",
+    "evaluation_horizon_s": 24.0,
+    "source_sha256": {
+      "scripts/evaluate_policy.py": "e450a4101d7e92670cb8f6d591ad24b196057ae132600db7a2d8aa60d51b9eb3",
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "9a218ca11429986a812b4a47e126063ecd6c5ea5aee98763022220aeb2be72a8",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "df9f49b484d2e2b3bdf422c217c564e219f5d9f359586f2d1a55b7c908655387",
+      "src/rby1_assembly/rj45_training.py": "1806fc32b9da27d8fb6d6f54f921f25344d1d7c1cf13f083581cacb19e039d35",
+      "src/rby1_assembly/rj45_training_env.py": "6d9d4653026833996e4ecadbc1da89cb24c3b5f98dacd85f1defdd8ad69d3dbb",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    },
+    "seed": 20261028,
+    "baseline": {
+      "mode": "biased_zero",
+      "attempts": 32,
+      "successes": 13,
+      "success_rate_all_attempts": 0.40625,
+      "invalid_episodes": 0,
+      "invalid_reasons": {},
+      "termination_counts": {
+        "episode_timeout": 19,
+        "independent_success": 13
+      },
+      "mean_elapsed_s": 19.772918045520782,
+      "max_insertion_load_n": 1.1278259754180908,
+      "max_forbidden_load_n": 0.0,
+      "held_initialization_passed_count": 32,
+      "policy_exposure_positive_count": 32
+    },
+    "learned": {
+      "mode": "learned",
+      "attempts": 32,
+      "successes": 12,
+      "success_rate_all_attempts": 0.375,
+      "invalid_episodes": 0,
+      "invalid_reasons": {},
+      "termination_counts": {
+        "episode_timeout": 20,
+        "independent_success": 12
+      },
+      "mean_elapsed_s": 19.814584761857986,
+      "max_insertion_load_n": 1.0398526191711426,
+      "max_forbidden_load_n": 0.0,
+      "held_initialization_passed_count": 32,
+      "policy_exposure_positive_count": 32
+    },
+    "paired_success_rate_difference": -0.03125,
+    "paired_bootstrap_95_percentile_interval": [
+      -0.09375,
+      0.0
+    ],
+    "bootstrap_resamples": 100000,
+    "bootstrap_seed": 20261029,
+    "learned_only_successes": 0,
+    "baseline_only_successes": 1,
+    "report_sha256": {
+      "artifacts/rj45-rl-pilot-v3/validation-biased-zero40.json": "3b4fa9c9f00b29d1276d42e9f8a30bdbe7a0fc049cab54f7a7f24421f3965b34",
+      "artifacts/rj45-rl-pilot-v3/validation-learned40.json": "66d3505c4ee2fba1e30fca717d8268572098d60a360ef722f0f2efc075cede56"
+    }
+  },
+  "analysis_script_sha256": "cb0e72023473299d9181701f540e09bdad3774431c3c8d02c4b7055755ad2427",
+  "training": {
+    "review": "APPROVE_training_completion_finiteness_and_lineage_only",
+    "updates": 20,
+    "transitions": 163840,
+    "model_tensors": 17,
+    "model_elements": 239245,
+    "optimizer_tensors": 51,
+    "optimizer_elements": 478507,
+    "optimizer_step_per_parameter": 400,
+    "source_and_config_pins_matched": 42,
+    "archive_code_and_config_files_matched": 50,
+    "model_and_optimizer_finite": true,
+    "input_immutability_verified": true,
+    "source_archive_scope": "source/config/scripts only; generated USD, build report and run-local runner config pinned separately",
+    "policy_performance_verified": false
+  },
+  "cases": [
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 0,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384048,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        6.126743392087519e-05,
+        -1.3214931641414296e-05,
+        6.008659056533361e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0009150984697043896,
+        -3.621883297455497e-05,
+        -0.00023223408788908273
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012310504913330078,
+        "final_lateral_error_m": 6.06271751166787e-05,
+        "final_orientation_error_rad": 0.0009565310901962221,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.00782767217606306,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012311220169067383,
+        "final_lateral_error_m": 5.71108321310021e-05,
+        "final_orientation_error_rad": 0.000784548872616142,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.00833706371486187,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 1,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384049,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        3.171816570102237e-05,
+        -3.3883981814142317e-05,
+        -9.89126565400511e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -9.770731412572786e-05,
+        -0.002351724309846759,
+        0.0010693304939195514
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012334346771240234,
+        "final_lateral_error_m": 0.00010470037523191422,
+        "final_orientation_error_rad": 0.0025823258329182863,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012334465980529785,
+        "final_lateral_error_m": 0.00010452634160174057,
+        "final_orientation_error_rad": 0.002577507169917226,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0009332295157946646,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 2,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384050,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -1.2598531611729413e-05,
+        3.242580351070501e-05,
+        6.763709097867832e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0004961069789715111,
+        -0.0004819422902073711,
+        -0.00046239743824116886
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012267231941223145,
+        "final_lateral_error_m": 6.818662950536236e-05,
+        "final_orientation_error_rad": 0.000826544186566025,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012269139289855957,
+        "final_lateral_error_m": 6.869008211651817e-05,
+        "final_orientation_error_rad": 0.0008299995097331703,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 3,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384051,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -7.364833436440676e-05,
+        2.865723445211188e-06,
+        -6.514203414553776e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -5.794897151645273e-05,
+        0.0010358780855312943,
+        -0.0005953955696895719
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01230907253921032,
+        "final_lateral_error_m": 8.014489139895886e-05,
+        "final_orientation_error_rad": 0.0047631640918552876,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.7055802345275879,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01231360249221325,
+        "final_lateral_error_m": 7.019831537036225e-05,
+        "final_orientation_error_rad": 0.0054921177215874195,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.6859772205352783,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 4,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384052,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        1.4369653399626259e-05,
+        6.409711204469204e-05,
+        -3.565664519555867e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0006019090069457889,
+        0.0011732601560652256,
+        -0.0010764272883534431
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012256622314453125,
+        "final_lateral_error_m": 2.5902081688400358e-05,
+        "final_orientation_error_rad": 0.0016821087338030338,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 378,
+        "elapsed_s": 12.600000381469727,
+        "final_depth_m": 0.012227535247802734,
+        "final_lateral_error_m": 3.192984513589181e-05,
+        "final_orientation_error_rad": 0.0016726048197597265,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 5,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384053,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        1.043722568283556e-05,
+        -4.4711068767355755e-06,
+        8.429431909462437e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.00037542724749073386,
+        0.0007216908852569759,
+        0.0008351581636816263
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012302279472351074,
+        "final_lateral_error_m": 8.580315625295043e-05,
+        "final_orientation_error_rad": 0.0011759549379348755,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01230168342590332,
+        "final_lateral_error_m": 8.578218694310635e-05,
+        "final_orientation_error_rad": 0.0011605836916714907,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 6,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384054,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -2.56558159890119e-05,
+        3.609429768403061e-05,
+        1.4861207091598772e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0026456385385245085,
+        0.00010480761557118967,
+        -0.003014862537384033
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012262225151062012,
+        "final_lateral_error_m": 3.082108378293924e-05,
+        "final_orientation_error_rad": 0.004135113675147295,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.020058561116456985,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012267827987670898,
+        "final_lateral_error_m": 4.239768531988375e-05,
+        "final_orientation_error_rad": 0.0034378180280327797,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.019807694479823112,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 7,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384055,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        7.755203114356846e-06,
+        -5.501617579284357e-06,
+        -0.0001042707372107543
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.00046371648204512894,
+        -0.0011170495999976993,
+        -0.0005654894630424678
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012305021286010742,
+        "final_lateral_error_m": 0.00010504219244467095,
+        "final_orientation_error_rad": 0.0013332745293155313,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012305021286010742,
+        "final_lateral_error_m": 0.00010616395593388006,
+        "final_orientation_error_rad": 0.0013381675817072392,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 8,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384056,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        5.9768648497993127e-05,
+        -9.909098480420653e-06,
+        -6.887510971864685e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.000818603381048888,
+        -0.00039636483415961266,
+        0.00047095533227548003
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012326238676905632,
+        "final_lateral_error_m": 0.00011279322643531486,
+        "final_orientation_error_rad": 0.004922675900161266,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.6161321401596069,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012323614209890366,
+        "final_lateral_error_m": 0.00011539719707798213,
+        "final_orientation_error_rad": 0.004541904199868441,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.5891780853271484,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 9,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384057,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -1.3063998267170973e-05,
+        -4.7105871203712013e-07,
+        -8.256472938228399e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.002751754131168127,
+        -0.0007687206380069256,
+        -0.001210752292536199
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012300491333007812,
+        "final_lateral_error_m": 0.00010136225319001824,
+        "final_orientation_error_rad": 0.0030985986813902855,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012299895286560059,
+        "final_lateral_error_m": 0.00010156098142033443,
+        "final_orientation_error_rad": 0.0030952810775488615,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 10,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384058,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -6.270410085562617e-05,
+        9.866488835541531e-05,
+        1.9474544387776405e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0029994880314916372,
+        0.0025042518973350525,
+        -0.0011143565643578768
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 503,
+        "elapsed_s": 16.76666831970215,
+        "final_depth_m": 0.012209412641823292,
+        "final_lateral_error_m": 3.7149271520320326e-05,
+        "final_orientation_error_rad": 0.006917335093021393,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.7049238085746765,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012212035246193409,
+        "final_lateral_error_m": 3.773692515096627e-05,
+        "final_orientation_error_rad": 0.006766738370060921,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.6745301485061646,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 11,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384059,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -6.726974970661104e-05,
+        9.766023140400648e-05,
+        -6.302409929048736e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        1.2304393749218434e-05,
+        -0.0001999485248234123,
+        -0.00013877902529202402
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 512,
+        "elapsed_s": 17.066667556762695,
+        "final_depth_m": 0.012214419431984425,
+        "final_lateral_error_m": 4.520048969425261e-05,
+        "final_orientation_error_rad": 0.0038381482008844614,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.5846080183982849,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 409,
+        "elapsed_s": 13.633334159851074,
+        "final_depth_m": 0.012211795896291733,
+        "final_lateral_error_m": 4.559728768072091e-05,
+        "final_orientation_error_rad": 0.0037281508557498455,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.5616841316223145,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 12,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384060,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        2.0675593987107277e-05,
+        -7.382207513728645e-06,
+        -9.539780876366422e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0017697146395221353,
+        -0.00013550581934396178,
+        0.0036058882251381874
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01231145579367876,
+        "final_lateral_error_m": 0.00012350536417216063,
+        "final_orientation_error_rad": 0.003508123569190502,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.02440088614821434,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012313604354858398,
+        "final_lateral_error_m": 0.00011127890320494771,
+        "final_orientation_error_rad": 0.0034979984629899263,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.02433127909898758,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 13,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384061,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -6.0891408793395385e-05,
+        7.435268344124779e-05,
+        -1.4639195796917193e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0007950100698508322,
+        0.0013253878569230437,
+        0.0003251170855946839
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012235400266945362,
+        "final_lateral_error_m": 5.627429345622659e-05,
+        "final_orientation_error_rad": 0.003717723535373807,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.4660837948322296,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012235757894814014,
+        "final_lateral_error_m": 5.5285647249547765e-05,
+        "final_orientation_error_rad": 0.0037379523273557425,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.46165111660957336,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 14,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384062,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        0.0001043406009557657,
+        -9.763068374013528e-05,
+        -1.1778962289099582e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0029588802717626095,
+        -0.0015249231364578009,
+        -0.001387601369060576
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012405753135681152,
+        "final_lateral_error_m": 6.232446321519092e-05,
+        "final_orientation_error_rad": 0.004127412103116512,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.03905249387025833,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012406706809997559,
+        "final_lateral_error_m": 6.18888225289993e-05,
+        "final_orientation_error_rad": 0.004106853622943163,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.11237064003944397,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 15,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384063,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        0.0001068601559381932,
+        2.7703048544935882e-05,
+        -2.2019750758772716e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0018415472004562616,
+        -0.0001918706257129088,
+        0.001460092724300921
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012279747053980827,
+        "final_lateral_error_m": 8.12834914540872e-05,
+        "final_orientation_error_rad": 0.0017880810191854835,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.23397530615329742,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01228022389113903,
+        "final_lateral_error_m": 7.897619798313826e-05,
+        "final_orientation_error_rad": 0.0018182205967605114,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.25883886218070984,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 0,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384051,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        5.862272882950492e-05,
+        4.7248035116354004e-05,
+        -0.00012342895206529647
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0011797747574746609,
+        0.0010465647792443633,
+        0.0012146382359787822
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012254714965820312,
+        "final_lateral_error_m": 0.00014958447718527168,
+        "final_orientation_error_rad": 0.0019292512442916632,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.02687910571694374,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012255668640136719,
+        "final_lateral_error_m": 0.00014540158736053854,
+        "final_orientation_error_rad": 0.002017156220972538,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.020018445327878,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 1,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384052,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -1.751921809045598e-05,
+        4.947771230945364e-06,
+        6.5788658503151964e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0025608493015170097,
+        -0.0018561918986961246,
+        0.0029036113992333412
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012321710586547852,
+        "final_lateral_error_m": 2.5335824830108322e-05,
+        "final_orientation_error_rad": 0.004291498567909002,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012325763702392578,
+        "final_lateral_error_m": 2.3688768123975024e-05,
+        "final_orientation_error_rad": 0.004283767193555832,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 2,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384053,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -0.00012164156942162663,
+        2.596471858851146e-05,
+        -7.36550737201469e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00011532565986271948,
+        0.0004829818499274552,
+        -0.0001160518077085726
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 538,
+        "elapsed_s": 17.933334350585938,
+        "final_depth_m": 0.012284988537430763,
+        "final_lateral_error_m": 4.965432162862271e-05,
+        "final_orientation_error_rad": 0.005783217493444681,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 1.1278259754180908,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 435,
+        "elapsed_s": 14.500000953674316,
+        "final_depth_m": 0.012297622859477997,
+        "final_lateral_error_m": 4.378426820039749e-05,
+        "final_orientation_error_rad": 0.005971667822450399,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 1.0398526191711426,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 3,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384054,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        1.6306066754623316e-06,
+        3.4449917620804626e-06,
+        -1.0846060831681825e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        5.5749529565218836e-05,
+        0.00013755710097029805,
+        1.5992047508461837e-07
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012333154678344727,
+        "final_lateral_error_m": 1.19507722047274e-05,
+        "final_orientation_error_rad": 0.00016770687943790108,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012319803237915039,
+        "final_lateral_error_m": 1.1237973922106903e-05,
+        "final_orientation_error_rad": 0.00018092390382662416,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 4,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384055,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        2.3464141122531146e-05,
+        3.230330776204937e-06,
+        1.4692943295813166e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -6.358377140713856e-05,
+        -0.0038357661105692387,
+        -0.0001649450568947941
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012332677841186523,
+        "final_lateral_error_m": 2.2934000298846513e-05,
+        "final_orientation_error_rad": 0.003836139338091016,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 379,
+        "elapsed_s": 12.633334159851074,
+        "final_depth_m": 0.012290716171264648,
+        "final_lateral_error_m": 3.127111995127052e-05,
+        "final_orientation_error_rad": 0.003834527451545,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 5,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384056,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -1.365237835670996e-06,
+        3.9397932027895877e-07,
+        1.7378637267029262e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0016999768558889627,
+        0.0022363460157066584,
+        0.0015584889333695173
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 369,
+        "elapsed_s": 12.300000190734863,
+        "final_depth_m": 0.012337923049926758,
+        "final_lateral_error_m": 1.459901704947697e-05,
+        "final_orientation_error_rad": 0.00321581051684916,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012321114540100098,
+        "final_lateral_error_m": 1.83879255928332e-05,
+        "final_orientation_error_rad": 0.00321352225728333,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 6,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384057,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -6.837570981588215e-05,
+        1.0850099897652399e-05,
+        -0.00010688746260711923
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00012040470028296113,
+        0.0004214865912217647,
+        0.00010756026313174516
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012292027473449707,
+        "final_lateral_error_m": 0.00012510149099398404,
+        "final_orientation_error_rad": 0.0008078566752374172,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.009500173851847649,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012297271750867367,
+        "final_lateral_error_m": 0.0001243534206878394,
+        "final_orientation_error_rad": 0.0014170447830110788,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.008257205598056316,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 7,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384058,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -6.637381738983095e-05,
+        -4.9758629756979644e-05,
+        2.7353220502845943e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0001840175682445988,
+        -0.0032039477955549955,
+        -0.0012532423716038465
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012355326674878597,
+        "final_lateral_error_m": 5.814429096062668e-05,
+        "final_orientation_error_rad": 0.004431955981999636,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.06144440174102783,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012357473373413086,
+        "final_lateral_error_m": 4.8536174290347844e-05,
+        "final_orientation_error_rad": 0.005334251094609499,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.06128428503870964,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 8,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384059,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        8.376330697501544e-06,
+        -6.75851697451435e-05,
+        -4.411428380990401e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        9.336606308352202e-05,
+        0.0004924506065435708,
+        0.00025529053527861834
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 382,
+        "elapsed_s": 12.733333587646484,
+        "final_depth_m": 0.012411832809448242,
+        "final_lateral_error_m": 4.6166740503394976e-05,
+        "final_orientation_error_rad": 0.0005643313634209335,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 372,
+        "elapsed_s": 12.40000057220459,
+        "final_depth_m": 0.012410640716552734,
+        "final_lateral_error_m": 4.416849333210848e-05,
+        "final_orientation_error_rad": 0.0005863685510121286,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 9,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384060,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        8.84168730408419e-06,
+        8.323258043674286e-06,
+        -1.8911231336460332e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.002101012272760272,
+        -2.27307464228943e-05,
+        0.00022351843654178083
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 387,
+        "elapsed_s": 12.90000057220459,
+        "final_depth_m": 0.012316226959228516,
+        "final_lateral_error_m": 9.909906111715827e-06,
+        "final_orientation_error_rad": 0.002115633338689804,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 374,
+        "elapsed_s": 12.466667175292969,
+        "final_depth_m": 0.01231694221496582,
+        "final_lateral_error_m": 1.4451584320340771e-05,
+        "final_orientation_error_rad": 0.002119941171258688,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 10,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384061,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -8.790155698079616e-05,
+        -7.714985258644447e-06,
+        3.4566750400699675e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00036001481930725276,
+        -0.0033213431015610695,
+        -0.000419852789491415
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012323017232120037,
+        "final_lateral_error_m": 6.931905227247626e-05,
+        "final_orientation_error_rad": 0.004551867488771677,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.8319334983825684,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012318724766373634,
+        "final_lateral_error_m": 7.65874283388257e-05,
+        "final_orientation_error_rad": 0.00398265291005373,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.7922441959381104,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 11,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384062,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        7.658038521185517e-05,
+        4.8575700930086896e-05,
+        5.5036569392541423e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0012871648650616407,
+        0.0008676978759467602,
+        -0.0006135766161605716
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012258769012987614,
+        "final_lateral_error_m": 6.211932486621663e-05,
+        "final_orientation_error_rad": 0.0036129383370280266,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.022224977612495422,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.01225733757019043,
+        "final_lateral_error_m": 6.293952174019068e-05,
+        "final_orientation_error_rad": 0.0035789175890386105,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.01957336999475956,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 12,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384063,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -3.834337258012965e-05,
+        2.1860481865587644e-05,
+        2.055739787465427e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.000899826642125845,
+        0.00039638607995584607,
+        0.000300999527098611
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 394,
+        "elapsed_s": 13.133334159851074,
+        "final_depth_m": 0.012269257567822933,
+        "final_lateral_error_m": 4.279165659681894e-05,
+        "final_orientation_error_rad": 0.0010219960240647197,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 397,
+        "elapsed_s": 13.233333587646484,
+        "final_depth_m": 0.012268065474927425,
+        "final_lateral_error_m": 4.381065082270652e-05,
+        "final_orientation_error_rad": 0.0010408821981400251,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 13,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384064,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        1.482658444729168e-05,
+        1.2129573406127747e-05,
+        1.587930637469981e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -5.028699160902761e-05,
+        -1.7947751985047944e-05,
+        4.3791093048639596e-05
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012308239936828613,
+        "final_lateral_error_m": 2.4064662284217775e-05,
+        "final_orientation_error_rad": 8.128348417812958e-05,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 379,
+        "elapsed_s": 12.633334159851074,
+        "final_depth_m": 0.012280464172363281,
+        "final_lateral_error_m": 2.626171408337541e-05,
+        "final_orientation_error_rad": 7.3918592534028e-05,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 14,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384065,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        -1.63345812325133e-05,
+        2.2071670173318125e-05,
+        2.826888021445484e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0009313225746154785,
+        0.0008653897675685585,
+        0.0006255617481656373
+      ],
+      "baseline": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 370,
+        "elapsed_s": 12.333333969116211,
+        "final_depth_m": 0.012297272682189941,
+        "final_lateral_error_m": 1.6079842680483125e-05,
+        "final_orientation_error_rad": 0.0014328582910820842,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": true,
+        "termination_reason": "independent_success",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 389,
+        "elapsed_s": 12.966667175292969,
+        "final_depth_m": 0.012270331382751465,
+        "final_lateral_error_m": 9.755868632055353e-06,
+        "final_orientation_error_rad": 0.0014102802379056811,
+        "final_dwell_s": 0.4,
+        "insertion_contact_load_peak_n": 0.0,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    },
+    {
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 15,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384066,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "calibration_bias_translation_entry_m": [
+        0.00010397688311059028,
+        -3.416238905629143e-05,
+        7.949176506372169e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0035245849285274744,
+        -0.0010483604855835438,
+        0.001995146507397294
+      ],
+      "baseline": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012341974303126335,
+        "final_lateral_error_m": 7.290350185940042e-05,
+        "final_orientation_error_rad": 0.003273662645369768,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.30147653818130493,
+        "forbidden_contact_load_peak_n": 0.0
+      },
+      "learned": {
+        "valid": true,
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "held_initialization_passed": true,
+        "valid_policy_input_step_count": 720,
+        "elapsed_s": 24.000001907348633,
+        "final_depth_m": 0.012343643233180046,
+        "final_lateral_error_m": 7.4050847615581e-05,
+        "final_orientation_error_rad": 0.003359137801453471,
+        "final_dwell_s": 0.0,
+        "insertion_contact_load_peak_n": 0.3362911343574524,
+        "forbidden_contact_load_peak_n": 0.0
+      }
+    }
+  ]
+}

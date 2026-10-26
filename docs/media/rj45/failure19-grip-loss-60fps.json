@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "scope": "Historical pre-fix natural pickup failure, camera-only rerender; not current trained-policy failure",
+  "terminal_reason": "grip_close_timeout",
+  "command_fault_experiment": null,
+  "source_archive_sha256": "fa590d50bf362605677126d3665df76531e6ffff19dc8a0dddbfe7338e3f9612",
+  "render_provenance": {
+    "source_archive_sha256": "fa590d50bf362605677126d3665df76531e6ffff19dc8a0dddbfe7338e3f9612",
+    "prior_render_entry_sha256": "4187432086bb998d252a22c65af98a9a5e7abcc47da41e47c166d034f6f017eb",
+    "render_entry_sha256": "bd8680d40638516fede9ba165cb33f22cb9deba32a80f4e75babfa2477af29d2",
+    "scope": "two viewer camera coordinates only; no physics/controller/task edits; historical natural grip failure rerender, not current policy evaluation"
+  },
+  "report_sha256": "03fb1eb69ef433cb8830bcf9886927e072c32b066346610fe5aabcab33c41b3c",
+  "trace_sha256": "64163fb6933dacd38a9bc49f6c959264e3f7ae8e676a17e025e19c0a6cb23a8d",
+  "trace_identical_to_previous_camera_rerender": true,
+  "source_frames": 1796,
+  "source_frame_rate": 60,
+  "source_coded_resolution_px": [
+    1920,
+    1088
+  ],
+  "delivery": {
+    "path": "docs/media/rj45/failure19-grip-loss-60fps.mp4",
+    "sha256": "4d05487eb5dabd6ca545fcb0fa49aae70f8f7381765c6ca976f239da5cad70b1",
+    "source_start_frame_inclusive": 1368,
+    "source_end_frame_exclusive": 1796,
+    "frame_count": 428,
+    "fps": 60,
+    "duration_s": 7.133333333333334,
+    "resolution_px": [
+      1920,
+      1080
+    ],
+    "modifications": "trim frame range, reset timestamps, spatial resize1088to1080, add explanatory captions; no interpolation or speed change"
+  },
+  "failure_measurements": "See failure19-evidence-data.json for source trace event timestamps and drop/rotation measurements"
+}
