@@ -19,5 +19,8 @@
   "numpy": "1.26.0",
   "setuptools": "80.9.0",
   "wheel": "0.45.1",
-  "h5py": "3.14.0"
+  "h5py": "3.14.0",
+  "physics_dt_s": 0.008333333333333333,
+  "control_decimation": 4,
+  "control_dt_s": 0.03333333333333333
 }

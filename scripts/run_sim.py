@@ -8,17 +8,63 @@
 import argparse
 from contextlib import nullcontext
 import hashlib
+from importlib import metadata
 import json
 import math
 from pathlib import Path
 import sys
 import traceback
 
-from isaaclab.app import AppLauncher
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from rby1_assembly.run_provenance import (  # noqa: E402
+    InputMutationError,
+    RunInputSnapshot,
+    capture_run_inputs,
+)
+
+
+def _preimport_option(name: str, default: str) -> str:
+    prefix = name + "="
+    for index, value in enumerate(sys.argv[1:]):
+        if value.startswith(prefix):
+            return value[len(prefix):]
+        if value == name and index + 2 <= len(sys.argv[1:]):
+            return sys.argv[1:][index + 1]
+    return default
+
+
+def _preimport_has_option(name: str) -> bool:
+    prefix = name + "="
+    return any(value == name or value.startswith(prefix) for value in sys.argv[1:])
+
+
+_bootstrap_task = _preimport_option("--task", "toy")
+_bootstrap_task_path = PROJECT_ROOT / (
+    "configs/tasks/rj45-v1.json" if _bootstrap_task == "rj45" else "configs/task.json"
+)
+_bootstrap_input_snapshot = capture_run_inputs(
+    PROJECT_ROOT,
+    task_path=_bootstrap_task_path,
+    build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
+    config_paths=(
+        PROJECT_ROOT / "configs/assets.json",
+        PROJECT_ROOT / "configs/runtime.json",
+        *((PROJECT_ROOT / "configs/rj45-assets.json",) if _bootstrap_task == "rj45" else ()),
+        *((Path(_preimport_option("--command-fault-config", "configs/failure-scenarios.json")),)
+          if _preimport_has_option("--command-fault") else ()),
+    ),
+    source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
+    source_files=(Path(__file__).resolve(),),
+)
+
+from isaaclab.app import AppLauncher  # noqa: E402
 
 
 parser = argparse.ArgumentParser(description="RB-Y1 assembly PhysX smoke run")
 parser.add_argument("--num-envs", type=int, default=1)
+parser.add_argument("--task", choices=("toy", "rj45"), default="toy")
 parser.add_argument(
     "--steps",
     type=int,
@@ -36,7 +82,7 @@ parser.add_argument("--video-fps", type=int, choices=(30, 60, 120), default=120,
                     help="Native rendered physics frames per simulation second; controller stays at 30 Hz.")
 parser.add_argument(
     "--camera-view",
-    choices=("overview", "assembly"),
+    choices=("overview", "assembly", "connector"),
     default="overview",
     help="Video camera preset.",
 )
@@ -54,17 +100,17 @@ if args.trace_every is not None and args.trace_every < 1:
     parser.error("--trace-every must be positive")
 if args.command_fault is not None and (args.num_envs != 1 or args.trace is None or args.trace_every not in (None, 1)):
     parser.error("--command-fault requires one environment and --trace at every control step")
-trace_every = args.trace_every or (1 if args.command_fault else 10)
+if args.task == "rj45" and args.command_fault is not None:
+    parser.error("legacy command-fault demonstrations require --task toy")
+trace_every = args.trace_every or (1 if args.command_fault or args.task == "rj45" else 10)
 launcher = AppLauncher(args)
 simulation_app = launcher.app
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 import torch  # noqa: E402
 import omni.kit.app  # noqa: E402
 
 from rby1_assembly.contracts import ACTION_DIM  # noqa: E402
+from rby1_assembly.experiment_contracts import atomic_write_json  # noqa: E402
 from rby1_assembly.video_capture import PhysicsFrameCapture  # noqa: E402
 from rby1_assembly.isaac_env import (  # noqa: E402
     AssemblyPhase,
@@ -75,10 +121,16 @@ from rby1_assembly.isaac_env import (  # noqa: E402
 
 
 _effective_steps_for_report: int | None = None
+_input_snapshot_for_failure_report: RunInputSnapshot | None = None
 
 
 def _tensor_list(value: torch.Tensor):
     return value.detach().cpu().tolist()
+
+
+def _tensor_json_value(value: torch.Tensor):
+    value = value.detach().cpu()
+    return value.item() if value.numel() == 1 else value.tolist()
 
 
 def _forbidden_contact_breakdown(
@@ -335,6 +387,9 @@ def _trace_record(
                 "grip_live": _tensor_list(grip_live[env_index]),
                 "independent_eval_dwell_s": float(evaluation_dwell_s[env_index].item()),
                 "independent_eval_success": bool(evaluation_success[env_index].item()),
+                "independent_eval_valid": (
+                    None if snapshot is None else bool(snapshot["independent_eval_valid"][env_index].item())
+                ),
                 "insert_joint_target_error_active": int(phase[env_index].item()) in (
                     int(AssemblyPhase.INSERT), int(AssemblyPhase.DONE)
                 ),
@@ -421,6 +476,11 @@ def _trace_record(
                 "live_state_note": live_state_note,
             }
         )
+        if snapshot is not None:
+            criteria = env.extras["terminal_evaluation"]["criteria"]
+            environments[-1]["independent_eval_criteria"] = {
+                name: bool(value[env_index].item()) for name, value in criteria.items()
+            }
         if hasattr(env, "hand_collision_state"):
             hand_state = env.hand_collision_state()
             for key in ("cross_hand_contact_load_n", "external_forbidden_contact_load_n", "hand_wrist_separation_m"):
@@ -439,6 +499,44 @@ def _trace_record(
                     snapshot["max_abs_revolute_joint_velocity_rad_s"][env_index].item()
                 )
             environments[-1]["self_collision_enabled"] = True
+        if hasattr(env.cfg, "rj45_task"):
+            from rby1_assembly.rj45_task import verify_recorded_mating_geometry
+
+            entry = environments[-1]
+            if snapshot is not None:
+                for key in ("raw_joint_reference_rad", "applied_joint_position_target_rad",
+                            "model_gravity_torque_nm", "finger_poses_world_wxyz",
+                            "object_com_velocities_world", "object_link_velocities_world", "object_physx_velocities_world",
+                            "object_pose_difference_linear_velocity_m_s", "object_pose_difference_angular_velocity_rad_s",
+                            "object_pose_difference_velocity_available",
+                            "object_substep_poses_world_wxyz", "object_substep_velocities_world",
+                            "object_substep_link_velocities_world"):
+                    entry[key] = _tensor_list(snapshot[key][env_index])
+                entry["object_data_cache_times_s"] = _tensor_list(snapshot["object_data_cache_times_s"])
+                stability = snapshot.get("rj45_evaluation_stability", {})
+                entry["mating_stability"] = {
+                    key: _tensor_json_value(value[env_index]) for key, value in stability.items()
+                }
+                for key in ("pregrasp_clearance_reached", "pregrasp_above_reached"):
+                    if key in snapshot:
+                        entry[key] = bool(snapshot[key][env_index].item())
+                for key in (
+                    "cross_hand_contact_load_n", "cross_hand_contact_load_peak_n",
+                    "external_forbidden_contact_load_n", "external_forbidden_contact_load_peak_n",
+                ):
+                    if key in snapshot:
+                        entry[key] = float(snapshot[key][env_index].item())
+                entry["self_collision_enabled"] = bool(snapshot.get("self_collision_enabled", False))
+            frames = env.cfg.rj45_task["frames"]
+            entry["independent_mating_geometry"] = verify_recorded_mating_geometry(
+                entry["object_poses_world_wxyz"]["socket"],
+                entry["object_poses_world_wxyz"]["plug"],
+                frames["socket_entry"],
+                frames["plug_tip"],
+                entry["actual_depth_m"],
+                entry["actual_lateral_error_m"],
+                entry["actual_orientation_error_rad"],
+            )
     return {
         "schema_version": 1,
         "control_step": control_step,
@@ -473,16 +571,51 @@ def _write_runtime_failure_report(error: Exception) -> None:
             "message": str(error),
         },
     }
-    args.report.parent.mkdir(parents=True, exist_ok=True)
-    temporary_report = args.report.with_suffix(args.report.suffix + ".tmp")
-    temporary_report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-    temporary_report.replace(args.report)
+    immutability_error = error if isinstance(error, InputMutationError) else None
+    if immutability_error is None and _input_snapshot_for_failure_report is not None:
+        try:
+            _input_snapshot_for_failure_report.assert_unchanged()
+        except InputMutationError as detected:
+            immutability_error = detected
+    report["input_immutability"] = (
+        {"verified_unchanged": True}
+        if _input_snapshot_for_failure_report is not None and immutability_error is None
+        else None if immutability_error is None
+        else immutability_error.report()
+    )
+    atomic_write_json(args.report, report)
 
 
 def main() -> int:
-    global _effective_steps_for_report
-    task_path = PROJECT_ROOT / "configs/task.json"
-    task_config = json.loads(task_path.read_text(encoding="utf-8"))
+    global _effective_steps_for_report, _input_snapshot_for_failure_report
+    task_path = PROJECT_ROOT / ("configs/tasks/rj45-v1.json" if args.task == "rj45" else "configs/task.json")
+    assets_path = PROJECT_ROOT / "configs/assets.json"
+    runtime_path = PROJECT_ROOT / "configs/runtime.json"
+    connector_assets_path = PROJECT_ROOT / "configs/rj45-assets.json"
+    input_snapshot = capture_run_inputs(
+        PROJECT_ROOT,
+        task_path=task_path,
+        build_report_fallback=PROJECT_ROOT / "assets/generated/build-report.json",
+        config_paths=(
+            assets_path,
+            runtime_path,
+            *((connector_assets_path,) if args.task == "rj45" else ()),
+            *((args.command_fault_config,) if args.command_fault is not None else ()),
+        ),
+        source_roots=((PROJECT_ROOT / "src/rby1_assembly", False),),
+        source_files=(PROJECT_ROOT / "scripts/run_sim.py",),
+    )
+    _input_snapshot_for_failure_report = input_snapshot
+    _bootstrap_input_snapshot.assert_unchanged()
+    _bootstrap_input_snapshot.assert_preserved_in(input_snapshot)
+    task_config = input_snapshot.json_for(task_path)
+    runtime_config = input_snapshot.json_for(runtime_path)
+    build_report_path = input_snapshot.build_report_path
+    runtime_versions = {name: metadata.version(name) for name in
+                        ("isaacsim", "isaaclab", "isaaclab-rl", "rsl-rl-lib", "torch", "numpy", "h5py")}
+    if args.task == "rj45":
+        from rby1_assembly.rj45_task import verify_runtime_versions
+        verify_runtime_versions(runtime_versions, runtime_config)
     run_seed = args.seed if args.seed is not None else int(task_config["data"]["train_seed"])
     cfg = Rby1AssemblyEnvCfg()
     cfg.seed = run_seed
@@ -502,19 +635,26 @@ def main() -> int:
             cfg.viewer.eye = (2.2, -2.0, 1.8)
             cfg.viewer.lookat = (0.35, 0.0, 0.9)
             cfg.viewer.resolution = (960, 720)
-        else:
+        elif args.camera_view == "assembly":
             cfg.viewer.eye = (0.95, -0.60, 1.25)
             cfg.viewer.lookat = (0.36, 0.0, 0.87)
             cfg.viewer.resolution = (1280, 960)
-    fault_config = (
-        json.loads(args.command_fault_config.read_text(encoding="utf-8")) if args.command_fault else None
-    )
+        else:
+            cfg.viewer.eye = (0.50, -0.16, 1.01)
+            cfg.viewer.lookat = (0.37, 0.01, 0.90)
+            cfg.viewer.resolution = (1920, 1080)
+    fault_config = input_snapshot.json_for(args.command_fault_config) if args.command_fault else None
     env_type = Rby1AssemblyEnv
+    if args.task == "rj45":
+        from rby1_assembly.rj45_env import configure_rj45_task, load_rj45_task
+
+        env_type = configure_rj45_task(cfg, load_rj45_task(task_path), PROJECT_ROOT)
     if args.command_fault == "hand_collision":
         from rby1_assembly.hand_collision import make_hand_collision_env_type
 
         assert fault_config is not None
         env_type = make_hand_collision_env_type(Rby1AssemblyEnv, fault_config["hand_collision"])
+    input_snapshot.assert_unchanged()
     env = env_type(cfg, render_mode="rgb_array" if args.video is not None else None)
     completed = False
     max_contact_force_proxy_n = 0.0
@@ -552,7 +692,9 @@ def main() -> int:
         if args.trace is not None:
             args.trace.parent.mkdir(parents=True, exist_ok=True)
             trace_file = args.trace.open("w", encoding="utf-8", buffering=1)
-            trace_file.write(json.dumps(_trace_record(env, 0, ["initial"])) + "\n")
+            trace_file.write(
+                json.dumps(_trace_record(env, 0, ["initial"]), allow_nan=False) + "\n"
+            )
             trace_record_count += 1
         if args.video is not None:
             import imageio.v2 as imageio
@@ -608,7 +750,7 @@ def main() -> int:
                     record["command_fault"] = command_fault.current_state()
                 elif hasattr(env, "hand_collision_state"):
                     record["command_fault"] = snapshot["hand_collision_command_state"]
-                trace_file.write(json.dumps(record) + "\n")
+                trace_file.write(json.dumps(record, allow_nan=False) + "\n")
                 trace_record_count += 1
             previous_phase = snapshot_phase.clone()
             if video_capture is not None:
@@ -656,30 +798,50 @@ def main() -> int:
                 )
             if bool(torch.all(terminated | truncated).item()):
                 break
-        assets_path = PROJECT_ROOT / "configs/assets.json"
-        runtime_path = PROJECT_ROOT / "configs/runtime.json"
-        build_report_path = PROJECT_ROOT / "assets/generated/build-report.json"
-        source_paths = sorted((PROJECT_ROOT / "src/rby1_assembly").glob("*.py")) + [
-            PROJECT_ROOT / "scripts/run_sim.py",
-        ]
         sha256 = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
+        if trace_file is not None:
+            trace_file.flush()
         if snapshot is None:
             raise RuntimeError("simulation produced no control-step snapshot")
         final_record = _trace_record(env, actual_steps, ["final_report"], snapshot)
+        if args.task == "rj45" and env.num_envs == 1 and completed:
+            terminal_evidence = final_record["environments"][0]
+            if not (terminal_evidence["terminal"] and terminal_evidence["phase_name"] == "done"
+                    and terminal_evidence["independent_eval_valid"] is True
+                    and terminal_evidence["independent_eval_success"] is True):
+                raise RuntimeError("RJ45 completed flag disagrees with independent terminal evidence")
         experiment_report = (
             command_fault.report() if command_fault is not None else
             env.hand_collision_report() if hasattr(env, "hand_collision_report") else None
         )
+        input_snapshot.assert_unchanged()
         report = {
             "completed": completed,
+            "task_id": task_config.get("task_id", "toy"),
+            "independent_evaluator": {
+                "source": extras["terminal_evaluation"]["evaluator_source"],
+                "version": extras["terminal_evaluation"]["evaluator_version"],
+            },
+            "task_model": env.rj45_task_report() if hasattr(env, "rj45_task_report") else None,
+            "hand_contact_monitor": (
+                env.hand_contact_monitor_report() if hasattr(env, "hand_contact_monitor_report") else None
+            ),
             "command_fault_experiment": None if experiment_report is None else {
                 **experiment_report, "config_path": str(args.command_fault_config),
-                "config_sha256": sha256(args.command_fault_config),
+                "config_sha256": input_snapshot.hash_for(args.command_fault_config),
             },
             "terminal_outcomes": [{
                 key: entry[key] for key in (
                     "env_index", "timestamp_s", "phase_name", "terminal", "termination_reason",
                     "grip_proven", "grip_live", "actual_depth_m", "actual_lateral_error_m",
+                    "actual_orientation_error_rad", "independent_eval_dwell_s",
+                    "independent_eval_success", "independent_eval_valid", "mating_stability", "independent_mating_geometry",
+                    "independent_eval_criteria",
+                    "object_poses_world_wxyz", "insertion_contact_load_peak_n",
+                    "grip_contact_force_peak_n", "forbidden_contact_load_peak_n",
+                    "object_link_velocities_world", "object_substep_poses_world_wxyz",
+                    "object_substep_velocities_world", "object_substep_link_velocities_world",
+                    "pregrasp_clearance_reached", "pregrasp_above_reached",
                     "cross_hand_contact_load_n", "cross_hand_contact_load_peak_n",
                     "external_forbidden_contact_load_n", "external_forbidden_contact_load_peak_n",
                     "hand_wrist_separation_m", "self_collision_enabled",
@@ -723,6 +885,7 @@ def main() -> int:
             "forbidden_contact_load_source": forbidden_contact_load_source,
             "visual_background_enabled": args.background,
             "trace_path": None if args.trace is None else str(args.trace),
+            "trace_sha256": None if args.trace is None else sha256(args.trace),
             "trace_record_count": trace_record_count,
             "trace_every_control_steps": trace_every,
             "video_path": None if args.video is None else str(args.video),
@@ -758,28 +921,28 @@ def main() -> int:
             "runtime_validated": actual_steps > 0,
             "provenance": {
                 "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+                "runtime_versions": runtime_versions,
                 "physics_dt_s": float(cfg.sim.dt),
                 "control_decimation": int(cfg.decimation),
                 "control_dt_s": control_dt_s,
                 "configured_task_timeout_s": configured_timeout_s,
                 "seed": run_seed,
-                "seed_source": "cli" if args.seed is not None else "configs/task.json:data.train_seed",
-                "task_config_sha256": sha256(task_path),
-                "assets_config_sha256": sha256(assets_path),
-                "runtime_config_sha256": sha256(runtime_path),
-                "build_report_sha256": sha256(build_report_path),
-                "source_sha256": {
-                    str(path.relative_to(PROJECT_ROOT)): sha256(path) for path in source_paths
-                },
-                "generated_asset_sha256": json.loads(
-                    build_report_path.read_text(encoding="utf-8")
-                )["files"],
+                "seed_source": "cli" if args.seed is not None else f"{task_path.relative_to(PROJECT_ROOT)}:data.train_seed",
+                "task_config_path": str(task_path.relative_to(PROJECT_ROOT)),
+                "input_immutability_verified": True,
+                "connector_assets_config_sha256": input_snapshot.hash_for(connector_assets_path) if args.task == "rj45" else None,
+                "task_config_sha256": input_snapshot.hash_for(task_path),
+                "assets_config_sha256": input_snapshot.hash_for(assets_path),
+                "runtime_config_sha256": input_snapshot.hash_for(runtime_path),
+                "build_report_sha256": input_snapshot.hash_for(build_report_path),
+                "source_sha256": input_snapshot.source_sha256,
+                "generated_asset_sha256": input_snapshot.generated_asset_sha256,
                 "torch_version": torch.__version__,
             },
         }
-        args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
-        print(json.dumps(report, indent=2), flush=True)
+        atomic_write_json(args.report, report)
+        input_snapshot.assert_unchanged()
+        print(json.dumps(report, indent=2, allow_nan=False), flush=True)
         return 2 if args.require_completion and not completed else 0
     finally:
         active_exception = sys.exc_info()[0] is not None

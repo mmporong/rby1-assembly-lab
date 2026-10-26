@@ -500,6 +500,8 @@ def reconcile_terminal_evaluation(
         "hard_force_limit",
         "grasp_lost",
         "pregrasp_timeout",
+        "grip_close_timeout",
+        "lift_proof_timeout",
         "retry_limit",
         "episode_timeout",
         "forbidden_contact",

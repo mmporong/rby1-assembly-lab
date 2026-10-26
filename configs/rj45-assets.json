@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "cache_root": "assets/cache/rj45",
+  "sources": {
+    "te_customer_view": {
+      "title": "TE Connectivity 5555153-1 customer-view STEP",
+      "page": "https://www.te.com/en/product-5555153-1.html",
+      "license": "Supplier customer-view terms; redistribution grant not verified. Fetch into ignored local cache."
+    },
+    "te_drawing_mirror": {
+      "title": "TE customer drawing C-558530 revision H, third-party-hosted copy",
+      "page": "https://www.kroton.com.pe/wp-content/uploads/2016/12/5-554720-3.pdf",
+      "license": "Dimension reference only. Drawing is not supplier STEP and no redistribution grant is asserted."
+    }
+  },
+  "assets": [
+    {
+      "id": "te_5555153_1_step_archive",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "te_customer_view",
+      "url": "https://www.te.com.cn/commerce/DocumentDelivery/DDEController?Action=srchrtrv&DocNm=CVM_5555153-1&DocType=Customer%20View%20Model&DocLang=English&DocFormat=3d_stp.zip&PartCntxt=5555153-1",
+      "path": "te-5555153-1.step.zip",
+      "size_bytes": 71678,
+      "sha256": "913b13ec50dc41661f550011d145b716b4a9caaac649806232285b1dd31c06a6",
+      "usd": false,
+      "used": true
+    },
+    {
+      "id": "te_c558530_drawing",
+      "kind": "download",
+      "physical_role": "configuration",
+      "source": "te_drawing_mirror",
+      "url": "https://www.kroton.com.pe/wp-content/uploads/2016/12/5-554720-3.pdf",
+      "path": "te-c558530-rev-h.pdf",
+      "size_bytes": 86374,
+      "sha256": "70fc038f6030d9c254b5be569c61475ddeceffc8ad6a235b58de6a12b421358e",
+      "usd": false,
+      "used": true,
+      "reason": "Derived plug envelope, not a supplier CAD model or a certified mating-pair claim."
+    }
+  ],
+  "step_member": "c-5555153-1-c-3d.stp",
+  "step_sha256": "2a04f61d6f382b35df75da64210a8cc1410551a62f3d367e97513ab46a53e756"
+}

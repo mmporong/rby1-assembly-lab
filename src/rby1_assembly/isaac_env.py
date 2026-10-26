@@ -90,6 +90,8 @@ class TerminationReason(IntEnum):
     RETRY_LIMIT = 5
     EPISODE_TIMEOUT = 6
     FORBIDDEN_CONTACT = 7
+    GRIP_CLOSE_TIMEOUT = 8
+    LIFT_PROOF_TIMEOUT = 9
 
 
 @configclass
@@ -293,6 +295,7 @@ class Rby1AssemblyEnvCfg(DirectRLEnvCfg):
 
     # Phase gates use measured simulated state and contact-force proxies.
     pregrasp_distance_m = 0.004
+    pregrasp_above_height_m = 0.050
     # A bent-elbow waypoint leaves the straight-arm singularity beside the
     # robot before either hand travels across the table edge.
     pregrasp_clearance_joint_pos_rad = (0.7, 0.0, 0.0, -2.1, 0.0, 1.4, 0.0)
@@ -528,6 +531,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         common_filters = (
             "{ENV_REGEX_NS}/Table/top",
             ground_collision_path,
+            *self._extra_forbidden_static_filters(),
         )
         robot_filters = (
             *common_filters,
@@ -595,12 +599,13 @@ class Rby1AssemblyEnv(DirectRLEnv):
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
         self._advance_phases()
         self._actions = self._bound_residual_actions(actions)
+        residual_actions = self._residual_actions_world(self._actions)
         left_twist, right_twist = self._desired_ee_twists()
         baseline_left_twist, baseline_right_twist = left_twist.clone(), right_twist.clone()
-        left_twist[:, :3] += self._actions[:, :3] * self.cfg.residual_translation_bound_m
-        left_twist[:, 3:] += self._actions[:, 3:6] * self.cfg.residual_rotation_bound_rad
-        right_twist[:, :3] += self._actions[:, 6:9] * self.cfg.residual_translation_bound_m
-        right_twist[:, 3:] += self._actions[:, 9:12] * self.cfg.residual_rotation_bound_rad
+        left_twist[:, :3] += residual_actions[:, :3] * self.cfg.residual_translation_bound_m
+        left_twist[:, 3:] += residual_actions[:, 3:6] * self.cfg.residual_rotation_bound_rad
+        right_twist[:, :3] += residual_actions[:, 6:9] * self.cfg.residual_translation_bound_m
+        right_twist[:, 3:] += residual_actions[:, 9:12] * self.cfg.residual_rotation_bound_rad
 
         jacobians = self.robot.root_physx_view.get_jacobians()
         left_jacobian = jacobians[:, self._left_ee_jacobian_id, :, self._left_arm_joint_ids]
@@ -612,7 +617,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
         lifting_beside_base = (
             (self._phase == int(AssemblyPhase.PREGRASP)) & ~self._pregrasp_lift_reached
         )
-        clearance_q = torch.tensor(self.cfg.pregrasp_clearance_joint_pos_rad, device=self.device)
+        clearance_q = self._pregrasp_clearance_joint_targets()
         for joint_ids, delta in ((self._left_arm_joint_ids, left_delta),
                                  (self._right_arm_joint_ids, right_delta)):
             clearance_delta = torch.clamp(
@@ -1167,7 +1172,8 @@ class Rby1AssemblyEnv(DirectRLEnv):
             (self._phase == int(AssemblyPhase.PREGRASP))
             & self._pregrasp_above_reached
             & (left_distance < self.cfg.pregrasp_distance_m)
-            & (right_distance < self.cfg.pregrasp_distance_m),
+            & (right_distance < self.cfg.pregrasp_distance_m)
+            & self._pregrasp_ready_mask(),
             AssemblyPhase.CLOSE,
             now,
         )
@@ -1272,9 +1278,15 @@ class Rby1AssemblyEnv(DirectRLEnv):
         pregrasp_failed = ((now - self._phase_started_s) >= preparation_timeout) & (
             self._phase <= int(AssemblyPhase.CHECK_LIFT)
         )
-        self._transition_where(
-            pregrasp_failed, AssemblyPhase.ABORT, now, TerminationReason.PREGRASP_TIMEOUT
-        )
+        for phase, reason in (
+            (AssemblyPhase.PREGRASP, TerminationReason.PREGRASP_TIMEOUT),
+            (AssemblyPhase.CLOSE, TerminationReason.GRIP_CLOSE_TIMEOUT),
+            (AssemblyPhase.CHECK_LIFT, TerminationReason.LIFT_PROOF_TIMEOUT),
+        ):
+            self._transition_where(
+                pregrasp_failed & (self._phase == int(phase)),
+                AssemblyPhase.ABORT, now, reason,
+            )
 
     def _start_recovery(self, mask: torch.Tensor, now: float) -> None:
         retryable = mask & (self._retry_count < self.cfg.max_retries)
@@ -1288,13 +1300,17 @@ class Rby1AssemblyEnv(DirectRLEnv):
         right_pos = self.robot.data.body_pos_w[:, self._right_ee_body_id]
         left_quat = self.robot.data.body_quat_w[:, self._left_ee_body_id]
         right_quat = self.robot.data.body_quat_w[:, self._right_ee_body_id]
-        target_quat = self._identity_quat()
         grasp_center_offset = torch.tensor(GRASP_CENTER_IN_WRIST_M, device=self.device).repeat(self.num_envs, 1)
-        left_grasp_target, right_grasp_target = self._grasp_target_positions()
-        left_target = left_grasp_target - quat_apply(target_quat, grasp_center_offset)
-        right_target = right_grasp_target - quat_apply(target_quat, grasp_center_offset)
-        left_target_quat = target_quat.clone()
-        right_target_quat = target_quat.clone()
+        (
+            left_grasp_target,
+            left_grasp_quat,
+            right_grasp_target,
+            right_grasp_quat,
+        ) = self._grasp_target_poses()
+        left_target = left_grasp_target - quat_apply(left_grasp_quat, grasp_center_offset)
+        right_target = right_grasp_target - quat_apply(right_grasp_quat, grasp_center_offset)
+        left_target_quat = left_grasp_quat.clone()
+        right_target_quat = right_grasp_quat.clone()
 
         pregrasp_lift = (
             (self._phase == int(AssemblyPhase.PREGRASP)) & ~self._pregrasp_lift_reached
@@ -1307,29 +1323,29 @@ class Rby1AssemblyEnv(DirectRLEnv):
             & self._pregrasp_lift_reached
             & ~self._pregrasp_above_reached
         )
-        left_target[pregrasp_above, 2] += 0.050
-        right_target[pregrasp_above, 2] += 0.050
+        left_target[pregrasp_above, 2] += self.cfg.pregrasp_above_height_m
+        right_target[pregrasp_above, 2] += self.cfg.pregrasp_above_height_m
         check_lift = self._phase == int(AssemblyPhase.CHECK_LIFT)
-        left_target[check_lift, 2] = (
-            self.scene.env_origins[check_lift, 2]
-            + self._object_start_z[check_lift, 0]
-            + 0.050
-            + self.cfg.left_grasp_center_above_object_m
-            - GRASP_CENTER_IN_WRIST_M[2]
+        left_check_lift, right_check_lift = self._check_lift_target_positions(
+            left_target,
+            right_target,
+            left_target_quat,
+            right_target_quat,
         )
-        right_target[check_lift, 2] = (
-            self.scene.env_origins[check_lift, 2]
-            + self._object_start_z[check_lift, 1]
-            + 0.050
-            + self.cfg.right_grasp_center_above_object_m
-            - GRASP_CENTER_IN_WRIST_M[2]
-        )
+        left_target[check_lift] = left_check_lift[check_lift]
+        right_target[check_lift] = right_check_lift[check_lift]
 
         manipulation = (self._phase >= int(AssemblyPhase.ALIGN)) & (
             self._phase <= int(AssemblyPhase.RETRACT)
         )
         socket_goal = self.scene.env_origins + torch.tensor(self.cfg.assembly_socket_goal_m, device=self.device)
-        plug_goal = self._plug_center_goal(socket_goal, -self.cfg.alignment_standoff_m)
+        socket_goal_quat = torch.tensor(
+            getattr(self.cfg, "assembly_socket_goal_quat_wxyz", (1.0, 0.0, 0.0, 0.0)),
+            device=self.device,
+        ).repeat(self.num_envs, 1)
+        plug_goal, plug_goal_quat = self._plug_pose_goal(
+            socket_goal, socket_goal_quat, -self.cfg.alignment_standoff_m
+        )
         insert = self._phase == int(AssemblyPhase.INSERT)
         # The commanded depth includes tracking margin; the independent
         # evaluator still requires the original measured insertion depth.
@@ -1358,18 +1374,17 @@ class Rby1AssemblyEnv(DirectRLEnv):
         self._insertion_command_depth_m[insert] = next_depth[insert]
         # During insertion the measured support object defines the mating
         # frame, so support-arm tracking error is not added to the plug error.
-        plug_offset_in_socket = torch.zeros((self.num_envs, 3), device=self.device)
-        plug_offset_in_socket[:, 1] = (
-            self.cfg.socket_entry_y_m + next_depth - self.cfg.plug_tip_y_m
-        )
-        measured_mating_goal = self.socket.data.root_pos_w + quat_apply(
-            self.socket.data.root_quat_w, plug_offset_in_socket
+        measured_mating_goal, measured_mating_quat = self._plug_pose_goal(
+            self.socket.data.root_pos_w, self.socket.data.root_quat_w, next_depth
         )
         plug_goal[insert] = measured_mating_goal[insert]
-        plug_goal_quat = target_quat.clone()
-        plug_goal_quat[insert] = self.socket.data.root_quat_w[insert]
+        plug_goal_quat[insert] = measured_mating_quat[insert]
         retract = self._phase == int(AssemblyPhase.RETRACT)
-        plug_goal[retract] = self._plug_center_goal(socket_goal[retract], -0.030)
+        retract_goal, retract_goal_quat = self._plug_pose_goal(
+            socket_goal, socket_goal_quat, -0.030
+        )
+        plug_goal[retract] = retract_goal[retract]
+        plug_goal_quat[retract] = retract_goal_quat[retract]
         # Re-estimate the grasp transform from measured simulator poses so
         # millimetre-scale settling/slip is corrected at the object, rather
         # than treating the lift-proof transform as a rigid attachment.
@@ -1380,7 +1395,7 @@ class Rby1AssemblyEnv(DirectRLEnv):
             self.plug.data.root_pos_w, self.plug.data.root_quat_w, right_pos, right_quat
         )
         left_goal, left_goal_quat = combine_frame_transforms(
-            socket_goal, target_quat, left_grasp_pos, left_grasp_quat,
+            socket_goal, socket_goal_quat, left_grasp_pos, left_grasp_quat,
         )
         right_goal, right_goal_quat = combine_frame_transforms(
             plug_goal, plug_goal_quat, right_grasp_pos, right_grasp_quat,
@@ -1431,20 +1446,38 @@ class Rby1AssemblyEnv(DirectRLEnv):
     def _plug_center_goal(
         self, socket_center_w: torch.Tensor, depth_m: float | torch.Tensor
     ) -> torch.Tensor:
-        goal = socket_center_w.clone()
-        goal[:, 1] += self.cfg.socket_entry_y_m + depth_m - self.cfg.plug_tip_y_m
+        socket_quat = self._identity_quat()[: socket_center_w.shape[0]]
+        goal, _ = self._plug_pose_goal(socket_center_w, socket_quat, depth_m)
         return goal
+
+    def _plug_pose_goal(
+        self,
+        socket_center_w: torch.Tensor,
+        socket_quat_w: torch.Tensor,
+        depth_m: float | torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        offset = torch.zeros_like(socket_center_w)
+        offset[:, 1] = self.cfg.socket_entry_y_m + depth_m - self.cfg.plug_tip_y_m
+        return socket_center_w + quat_apply(socket_quat_w, offset), socket_quat_w.clone()
 
     def _pregrasp_above_mask(
         self, left_grasp_center: torch.Tensor, right_grasp_center: torch.Tensor
     ) -> torch.Tensor:
         left_above, right_above = self._grasp_target_positions()
-        left_above[:, 2] += 0.050
-        right_above[:, 2] += 0.050
+        left_above[:, 2] += self.cfg.pregrasp_above_height_m
+        right_above[:, 2] += self.cfg.pregrasp_above_height_m
         return (
             (torch.linalg.vector_norm(left_grasp_center - left_above, dim=1) < 0.005)
             & (torch.linalg.vector_norm(right_grasp_center - right_above, dim=1) < 0.005)
         )
+
+    def _extra_forbidden_static_filters(self) -> tuple[str, ...]:
+        return ()
+
+    def _pregrasp_clearance_joint_targets(self) -> torch.Tensor:
+        return torch.tensor(
+            self.cfg.pregrasp_clearance_joint_pos_rad, device=self.device
+        ).repeat(self.num_envs, 1)
 
     def _pregrasp_lift_targets(
         self, left_ee: torch.Tensor, right_ee: torch.Tensor
@@ -1470,6 +1503,47 @@ class Rby1AssemblyEnv(DirectRLEnv):
         left_target[:, 2] += self.cfg.left_grasp_center_above_object_m
         right_target[:, 2] += self.cfg.right_grasp_center_above_object_m
         return left_target, right_target
+
+    def _grasp_target_poses(
+        self,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+        left_target, right_target = self._grasp_target_positions()
+        identity = self._identity_quat()
+        return left_target, identity, right_target, identity.clone()
+
+    def _check_lift_target_positions(
+        self,
+        left_target: torch.Tensor,
+        right_target: torch.Tensor,
+        left_target_quat: torch.Tensor,
+        right_target_quat: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        del left_target_quat, right_target_quat
+        left_lift = left_target.clone()
+        right_lift = right_target.clone()
+        left_lift[:, 2] = (
+            self.scene.env_origins[:, 2]
+            + self._object_start_z[:, 0]
+            + 0.050
+            + self.cfg.left_grasp_center_above_object_m
+            - GRASP_CENTER_IN_WRIST_M[2]
+        )
+        right_lift[:, 2] = (
+            self.scene.env_origins[:, 2]
+            + self._object_start_z[:, 1]
+            + 0.050
+            + self.cfg.right_grasp_center_above_object_m
+            - GRASP_CENTER_IN_WRIST_M[2]
+        )
+        return left_lift, right_lift
+
+    def _pregrasp_ready_mask(self) -> torch.Tensor:
+        return torch.ones(self.num_envs, dtype=torch.bool, device=self.device)
+
+    def _residual_actions_world(self, actions: torch.Tensor) -> torch.Tensor:
+        """Map task-frame residuals to world axes; the legacy task is already world-aligned."""
+
+        return actions
 
     def _advance_evaluation_dwell(self, instantaneous_ok: torch.Tensor) -> None:
         (

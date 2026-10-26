@@ -17,6 +17,8 @@ ALLOWED_DOWNLOAD_HOSTS = frozenset(
     {
         "raw.githubusercontent.com",
         "omniverse-content-production.s3-us-west-2.amazonaws.com",
+        "www.te.com.cn",
+        "www.kroton.com.pe",
     }
 )
 DEFAULT_TIMEOUT_S = 30.0

@@ -1,0 +1,504 @@
+{
+  "schema_version": 1,
+  "task_id": "rj45-v1",
+  "title": "RJ45 양팔 파지·삽입 검증 요약",
+  "status": {
+    "completed": false,
+    "reinforcement_learning_trained": false,
+    "summary": "기본 그리퍼의 마찰 접촉으로 두 부품을 파지하고 15 mm 이상 들어 올린 뒤 12.3 mm 삽입 구간에 도달했지만, PhysX 보고 상대속도가 성공 한계를 넘어서 0.4초 안정 판정을 통과하지 못했다. 아래 실행은 RJ45 완료 성공이나 강화학습 성능의 근거가 아니다."
+  },
+  "evaluation_contract": {
+    "depth_window_m": [
+      0.012,
+      0.013
+    ],
+    "max_lateral_error_m": 5e-05,
+    "max_orientation_error_rad": 0.008726646259971648,
+    "max_contact_force_n": 25.0,
+    "max_relative_linear_speed_m_s": 0.005,
+    "max_relative_angular_speed_rad_s": 0.05,
+    "required_continuous_dwell_s": 0.4
+  },
+  "evidence_policy": {
+    "report_and_trace_hash_algorithm": "sha256",
+    "source_archive_visibility": "private_reproducibility_artifact_not_published",
+    "source_manifest_digest_definition": "sha256 of provenance.source_sha256 serialized as UTF-8 JSON with sorted keys and separators ',' ':'",
+    "geometry_hold_definition": "longest consecutive control-record span satisfying depth, lateral, orientation, grasp_live_and_proven, force and forbidden_contact; relative-speed and dwell criteria are intentionally excluded from this diagnostic span",
+    "pose_difference_definition": "consecutive recorded pose difference divided by the stated sample interval; quaternion angle is 2*acos(clamp(abs(dot(normalize(q0),normalize(q1)))))",
+    "scope_note": "No supplier CAD, converted mesh, source archive or private binary data is copied into this public summary."
+  },
+  "runs": [
+    {
+      "run_id": 19,
+      "purpose": "고정 파지 목표 적용 뒤 평면 받침에서 발생한 자연 실패 확인",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-19.json",
+          "sha256": "4d2f24feb990322e21dd8af11c9b811a502beac172a7dc31a84030037b0f63e0"
+        },
+        "trace": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-19.jsonl",
+          "sha256": "64163fb6933dacd38a9bc49f6c959264e3f7ae8e676a17e025e19c0a6cb23a8d",
+          "records": 899
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45-physics/rj45-19-source.tar.gz",
+          "sha256": "fa590d50bf362605677126d3665df76531e6ffff19dc8a0dddbfe7338e3f9612",
+          "published": false
+        }
+      },
+      "provenance": {
+        "task_config_sha256": "b0893223e21275ac99556cbdcad916c93078cac5f1b52cfd94473b60cd21fedc",
+        "runtime_config_sha256": "3709cc1b82ceb27e8677441b5d906c37d68cec12f2426939bf466c0099aed271",
+        "connector_assets_config_sha256": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+        "build_report_sha256": "ca65c001d9cd71145199c6bed97c0170a578b9109faba82e3618878e291595f9",
+        "source_manifest_sha256": "719445acec4727023b0cdc52aa046be4d82222466620a1ee6ccefafd70b1a8ed",
+        "selected_recorded_source_sha256": {
+          "src/rby1_assembly/rj45_env.py": "3118180c9612df8a8f4133934f21838fdb8faea848756449b588ae3ee250793a",
+          "src/rby1_assembly/rj45_scene.py": "86fce753af1666739e4bb3774b7ed05afb0421390df3b3698baa3b15837da98b",
+          "src/rby1_assembly/rj45_task.py": "b97c5ada74625136f6fca8c000aa67ddfc6082200411558bc05555d2733ba91c",
+          "scripts/run_sim.py": "430f057adab2558dfdac49392bd43dd58643979f4641c28ec1ccf04b623dc3f4"
+        }
+      },
+      "execution": {
+        "completed": false,
+        "command_fault_experiment": null,
+        "actual_control_steps": 898,
+        "last_timestamp_s": 29.933334350585938,
+        "phase_timeline": [
+          {
+            "phase": "pregrasp",
+            "start_s": 0.0
+          },
+          {
+            "phase": "close",
+            "start_s": 21.933334350585938
+          },
+          {
+            "phase": "abort",
+            "start_s": 29.933334350585938
+          }
+        ],
+        "termination_reason": "grip_close_timeout"
+      },
+      "physical_result": {
+        "grip_proven": [
+          false,
+          false
+        ],
+        "max_grip_contact_force_n": 5.190120220184326,
+        "max_forbidden_contact_load_n": 0.0,
+        "plug_max_rotation_from_initial_deg": 129.83886764550854,
+        "plug_max_rotation_timestamp_s": 24.366668701171875,
+        "plug_max_vertical_center_drop_from_initial_mm": 36.92501783370972,
+        "plug_max_drop_timestamp_s": 24.500001907348633,
+        "interpretation": "보고서의 command_fault_experiment 필드는 null이다. close 구간에서 플러그가 평면 받침 위에서 회전하고 떨어져 오른손 파지를 증명하지 못했다.",
+        "independent_success": false
+      }
+    },
+    {
+      "run_id": 20,
+      "purpose": "위가 열린 픽업 로케이터를 적용한 명목 파지·리프트·삽입",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-20.json",
+          "sha256": "7c8bec70747878676b8092e3386c78c5ce4221e540acfc00d293213cde576e84"
+        },
+        "trace": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-20.jsonl",
+          "sha256": "079ae33b3522ea11ac5b21ea9bdffd837f384f9947c598480d46175cafdc7c25",
+          "records": 1909
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45-physics/rj45-20-source.tar.gz",
+          "sha256": "348f2b05e5a270095f82244de0dd04127f21a3cccc4b97ed2ca0f44e20ac17a1",
+          "published": false
+        }
+      },
+      "provenance": {
+        "task_config_sha256": "4a53e5c823a61ecdb09093d88817a11288d7f785bbccf58fdab0c8a80efdf952",
+        "runtime_config_sha256": "3709cc1b82ceb27e8677441b5d906c37d68cec12f2426939bf466c0099aed271",
+        "connector_assets_config_sha256": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+        "build_report_sha256": "5a4f216a27467b277bcc4226d3f8c6fbca42e5493145779ca8b4f50bf44a09bc",
+        "source_manifest_sha256": "f59d89e87e368f7faa9284779b9975da7e46227f5e076f47aa8248fc8ba6a41b",
+        "selected_recorded_source_sha256": {
+          "src/rby1_assembly/rj45_env.py": "98b9bb8f71a651e1cb5c7bff00022f3d40e435725eb230db2b9de436d41930b2",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_task.py": "c44ee4b0d04140298451766736ad2e0b2f8aaf6d81deace98e2fe02f75a2ca8a",
+          "scripts/run_sim.py": "430f057adab2558dfdac49392bd43dd58643979f4641c28ec1ccf04b623dc3f4"
+        }
+      },
+      "execution": {
+        "completed": false,
+        "command_fault_experiment": null,
+        "actual_control_steps": 1908,
+        "last_timestamp_s": 63.60000228881836,
+        "phase_timeline": [
+          {
+            "phase": "pregrasp",
+            "start_s": 0.0
+          },
+          {
+            "phase": "close",
+            "start_s": 21.933334350585938
+          },
+          {
+            "phase": "check_lift",
+            "start_s": 24.33333396911621
+          },
+          {
+            "phase": "align",
+            "start_s": 24.63333511352539
+          },
+          {
+            "phase": "insert",
+            "start_s": 33.30000305175781
+          },
+          {
+            "phase": "retract",
+            "start_s": 63.30000305175781,
+            "retry_count": 1
+          },
+          {
+            "phase": "abort",
+            "start_s": 63.60000228881836,
+            "retry_count": 1
+          }
+        ],
+        "termination_reason": "grasp_lost"
+      },
+      "physical_result": {
+        "both_grips_first_proven_s": 24.600000381469727,
+        "lift_at_first_both_grips_proven_mm": {
+          "socket_center_z": 15.540361404418945,
+          "plug_center_z": 15.199840068817139
+        },
+        "max_independent_insertion_depth_mm": 12.343806221400397,
+        "max_depth_timestamp_s": 45.80000305175781,
+        "geometry_hold_without_speed_or_dwell": {
+          "first_sample_s": 45.43333435058594,
+          "last_sample_s": 63.26667022705078,
+          "span_last_minus_first_s": 17.833335876464844,
+          "control_samples": 536
+        },
+        "reported_relative_speed_over_geometry_hold": {
+          "linear_m_s": {
+            "min": 0.6252198219299316,
+            "median": 0.6256794333457947,
+            "max": 0.625785231590271
+          },
+          "angular_rad_s": {
+            "min": 54.660430908203125,
+            "median": 54.6702938079834,
+            "max": 54.67819595336914
+          }
+        },
+        "max_grip_contact_force_n": 3.7571487426757812,
+        "max_forbidden_contact_load_n": 0.0,
+        "independent_success": false,
+        "interpretation": "깊이·횡오차·각도·파지·하중 조건은 연속으로 충족했지만 상대속도 조건은 충족하지 못했다. 30초 insert 제한 뒤 재시도 전환 과정에서 오른손 파지를 잃었다."
+      }
+    },
+    {
+      "run_id": 22,
+      "purpose": "120 Hz 서브스텝 자세와 PhysX 원시 속도의 동시 기록",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-22.json",
+          "sha256": "7c509a3754866cb23b7b300f149c647c3eed0775ae5040769cd2a8903e6352ce"
+        },
+        "trace": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-22.jsonl",
+          "sha256": "0dc74c4a26db90c9c95c5a57b9764fb722476d58b57d4f4763f924b1f7e1d856",
+          "records": 1501
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45-physics/rj45-22-source.tar.gz",
+          "sha256": "e9eaf9348105ed4c1cefb648ce45a58a1743a99ef5a8935f89aea17605ef0132",
+          "published": false
+        }
+      },
+      "provenance": {
+        "task_config_sha256": "4a53e5c823a61ecdb09093d88817a11288d7f785bbccf58fdab0c8a80efdf952",
+        "runtime_config_sha256": "3709cc1b82ceb27e8677441b5d906c37d68cec12f2426939bf466c0099aed271",
+        "connector_assets_config_sha256": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+        "build_report_sha256": "5a4f216a27467b277bcc4226d3f8c6fbca42e5493145779ca8b4f50bf44a09bc",
+        "source_manifest_sha256": "ad24898a5870df4bf83ecff22ccab65e06476335c3d0f8d5d0d3652c0969304b",
+        "selected_recorded_source_sha256": {
+          "src/rby1_assembly/rj45_env.py": "ca472c6a29952c3948aba2155c74dc0891a0067121e0c7bd035541665436dca9",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_task.py": "c44ee4b0d04140298451766736ad2e0b2f8aaf6d81deace98e2fe02f75a2ca8a",
+          "scripts/run_sim.py": "e17a6929f8528c4ae6f1dc10873756160d8fbef92f5b7c9b663a2dc82b997fe2"
+        }
+      },
+      "execution": {
+        "completed": false,
+        "command_fault_experiment": null,
+        "actual_control_steps": 1500,
+        "last_timestamp_s": 50.000003814697266,
+        "phase_timeline": [
+          {
+            "phase": "pregrasp",
+            "start_s": 0.0
+          },
+          {
+            "phase": "close",
+            "start_s": 21.933334350585938
+          },
+          {
+            "phase": "check_lift",
+            "start_s": 24.33333396911621
+          },
+          {
+            "phase": "align",
+            "start_s": 24.63333511352539
+          },
+          {
+            "phase": "insert",
+            "start_s": 33.30000305175781
+          }
+        ],
+        "termination_reason": "none",
+        "ended_by_requested_step_limit": true
+      },
+      "physical_result": {
+        "both_grips_first_proven_s": 24.600000381469727,
+        "lift_at_first_both_grips_proven_mm": {
+          "socket_center_z": 15.540361404418945,
+          "plug_center_z": 15.199840068817139
+        },
+        "max_independent_insertion_depth_mm": 12.343806221400397,
+        "max_depth_timestamp_s": 45.80000305175781,
+        "geometry_hold_without_speed_or_dwell": {
+          "first_sample_s": 45.43333435058594,
+          "last_sample_s": 50.000003814697266,
+          "span_last_minus_first_s": 4.566669464111328,
+          "control_samples": 138
+        },
+        "reported_relative_speed_over_geometry_hold": {
+          "linear_m_s_median": 0.6256250143051147,
+          "angular_rad_s_median": 54.67010498046875
+        },
+        "raw_120_hz_pose_vs_native_velocity": {
+          "window_first_control_sample_s": 45.43333435058594,
+          "window_last_control_sample_s": 50.000003814697266,
+          "control_records": 138,
+          "substep_pose_states": 552,
+          "consecutive_pose_intervals": 551,
+          "physics_sample_interval_s": 0.008333333333333333,
+          "socket": {
+            "pose_difference_linear_speed_m_s": {
+              "median": 1.5492192016092053e-05,
+              "max": 0.00014138249696077528
+            },
+            "native_linear_speed_m_s": {
+              "median": 0.04088613191230282,
+              "max": 0.040906609560468515
+            },
+            "pose_difference_angular_speed_rad_s": {
+              "median": 7.611678834125824e-05,
+              "max": 0.000488970291778008
+            },
+            "native_angular_speed_rad_s": {
+              "median": 0.272169419602115,
+              "max": 0.2724916062964831
+            }
+          },
+          "plug": {
+            "pose_difference_linear_speed_m_s": {
+              "median": 2.266360808052649e-05,
+              "max": 0.0016443198574658251
+            },
+            "native_linear_speed_m_s": {
+              "median": 0.35827314251801573,
+              "max": 0.35843890078529034
+            },
+            "pose_difference_angular_speed_rad_s": {
+              "median": 0.0005607691649819448,
+              "max": 0.0025649947342000967
+            },
+            "native_angular_speed_rad_s": {
+              "median": 54.914995130272494,
+              "max": 54.92655016238115
+            }
+          },
+          "interpretation": "120 Hz 자세 차분에도 작은 서브스텝 운동은 보이지만, 플러그의 자세 차분 각속도 중앙값 0.000561 rad/s는 원시 속도 중앙값 54.915 rad/s보다 약 97928배 작다. 30 Hz 기록의 alias만으로 원시 고속값을 설명할 수 없다."
+        },
+        "independent_success": false
+      }
+    },
+    {
+      "run_id": 23,
+      "purpose": "명시적 solver 반복 수 12/16 조건 진단",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-23.json",
+          "sha256": "8f725ebb3c78978ebfd5cc1f60b8445d30c9bc62f794bef4f8b2fb70bae6093c"
+        },
+        "trace": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-23.jsonl",
+          "sha256": "d949c31907663ad793044e754cca2638db65aefee32ac10718c8e4f3cb5a3d5d",
+          "records": 2101
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45-physics/rj45-23-source.tar.gz",
+          "sha256": "8cfc64b0c2134dce3661d99c14ecbce56174119f889073c04e770a34c99e2c07",
+          "published": false
+        }
+      },
+      "provenance": {
+        "task_config_sha256": "b3a6178200d310ae53c45c6c9f44375b83315a32a2b9001e264bb72e545de926",
+        "runtime_config_sha256": "3709cc1b82ceb27e8677441b5d906c37d68cec12f2426939bf466c0099aed271",
+        "connector_assets_config_sha256": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+        "build_report_sha256": "932b2023bc195d6366802a420731beee35a2b98b9bc6e717773738f58b9f62f6",
+        "source_manifest_sha256": "999844344e593b4db36ffb80e04f20dfd775e5cfad07b8676fceaf1cd8cd8cbf",
+        "selected_recorded_source_sha256": {
+          "src/rby1_assembly/rj45_env.py": "886faa5872ff98ab20d5114eb96989bdbf583a895611a7563538144d4aafcaef",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_task.py": "d30b2881bf972e0fd1754f0086847d811118c4485227f3966fae84250d9c595c",
+          "scripts/run_sim.py": "e17a6929f8528c4ae6f1dc10873756160d8fbef92f5b7c9b663a2dc82b997fe2"
+        }
+      },
+      "execution": {
+        "completed": false,
+        "command_fault_experiment": null,
+        "solver_position_iterations": 12,
+        "solver_velocity_iterations": 16,
+        "actual_control_steps": 2100,
+        "last_timestamp_s": 70.0,
+        "phase_timeline": [
+          {
+            "phase": "pregrasp",
+            "start_s": 0.0
+          }
+        ],
+        "termination_reason": "none",
+        "ended_by_requested_step_limit": true
+      },
+      "physical_result": {
+        "pregrasp_clearance_reached": true,
+        "pregrasp_above_reached": false,
+        "grip_proven": [
+          false,
+          false
+        ],
+        "max_grip_contact_force_n": 0.0,
+        "max_forbidden_contact_load_n": 0.0,
+        "independent_success": false,
+        "interpretation": "70초 진단 제한까지 pregrasp에 머물러 파지·리프트·삽입 단계에 진입하지 못했다. 이 실행만으로 solver 반복 수와 정체의 인과관계를 확정하지 않는다."
+      }
+    },
+    {
+      "run_id": 25,
+      "purpose": "명시적 solver 반복 수 24/4 조건과 재시도 경로 진단",
+      "artifacts": {
+        "report": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-25.json",
+          "sha256": "74bf56c672b8dd43a38959ddb2957380a57520b333fed151692f1d6b23e6fbf2"
+        },
+        "trace": {
+          "filename": "artifacts/rj45-physics/rj45-pickup-25.jsonl",
+          "sha256": "54da125828fc54d0b100a1d1a12ce1c9d2d46803abe2c8b36be350d1b158f426",
+          "records": 2102
+        },
+        "source_archive": {
+          "filename": "artifacts/rj45-physics/rj45-25-source.tar.gz",
+          "sha256": "d3095d15ecad0898f70da4f645afeb570218b3b6bf688edb5a18de28c00d8699",
+          "published": false
+        }
+      },
+      "provenance": {
+        "task_config_sha256": "c2576e9264a60ac6fe24b1f5df61d5ac78eab6b5a1b528d343e1d3517ffd549e",
+        "runtime_config_sha256": "3709cc1b82ceb27e8677441b5d906c37d68cec12f2426939bf466c0099aed271",
+        "connector_assets_config_sha256": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+        "build_report_sha256": "b1f6653a73f89f6a6f9fc600986fe73ef102c8f01b62f10e345c65c82a28e4de",
+        "source_manifest_sha256": "999844344e593b4db36ffb80e04f20dfd775e5cfad07b8676fceaf1cd8cd8cbf",
+        "selected_recorded_source_sha256": {
+          "src/rby1_assembly/rj45_env.py": "886faa5872ff98ab20d5114eb96989bdbf583a895611a7563538144d4aafcaef",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_task.py": "d30b2881bf972e0fd1754f0086847d811118c4485227f3966fae84250d9c595c",
+          "scripts/run_sim.py": "e17a6929f8528c4ae6f1dc10873756160d8fbef92f5b7c9b663a2dc82b997fe2"
+        }
+      },
+      "execution": {
+        "completed": false,
+        "command_fault_experiment": null,
+        "solver_position_iterations": 24,
+        "solver_velocity_iterations": 4,
+        "actual_control_steps": 2101,
+        "last_timestamp_s": 70.03334045410156,
+        "phase_timeline": [
+          {
+            "phase": "pregrasp",
+            "start_s": 0.0
+          },
+          {
+            "phase": "close",
+            "start_s": 21.900001525878906
+          },
+          {
+            "phase": "check_lift",
+            "start_s": 24.26666831970215
+          },
+          {
+            "phase": "align",
+            "start_s": 24.566667556762695
+          },
+          {
+            "phase": "insert",
+            "start_s": 32.30000305175781
+          },
+          {
+            "phase": "retract",
+            "start_s": 62.30000305175781,
+            "retry_count": 1
+          },
+          {
+            "phase": "align",
+            "start_s": 62.63333511352539,
+            "retry_count": 1
+          },
+          {
+            "phase": "insert",
+            "start_s": 63.20000457763672,
+            "retry_count": 1
+          }
+        ],
+        "termination_reason": "none",
+        "ended_by_requested_step_limit": true
+      },
+      "physical_result": {
+        "both_grips_first_proven_s": 24.533334732055664,
+        "lift_at_first_both_grips_proven_mm": {
+          "socket_center_z": 15.680074691772461,
+          "plug_center_z": 15.26862382888794
+        },
+        "max_independent_insertion_depth_mm": 12.343563870338702,
+        "max_depth_timestamp_s": 44.76667022705078,
+        "geometry_hold_without_speed_or_dwell": {
+          "first_sample_s": 44.43333435058594,
+          "last_sample_s": 62.26667022705078,
+          "span_last_minus_first_s": 17.833335876464844,
+          "control_samples": 536
+        },
+        "reported_relative_speed_over_geometry_hold": {
+          "linear_m_s": {
+            "min": 0.26905542612075806,
+            "median": 0.26955708861351013,
+            "max": 0.26967284083366394
+          },
+          "angular_rad_s": {
+            "min": 19.58686065673828,
+            "median": 19.595251083374023,
+            "max": 19.601367950439453
+          }
+        },
+        "retry_insert_depth_at_last_sample_mm": 5.294310598416216,
+        "max_grip_contact_force_n": 3.919344663619995,
+        "max_forbidden_contact_load_n": 0.0,
+        "independent_success": false,
+        "interpretation": "첫 삽입 시도에서 기하 조건을 오래 유지했지만 대표 원시 상대각속도는 약 19.6 rad/s로 한계를 넘었다. insert 제한 뒤 한 번 후퇴·재정렬해 두 번째 삽입을 시작했으나 진단 제한 안에 성공하지 못했다."
+      }
+    }
+  ]
+}
