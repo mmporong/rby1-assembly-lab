@@ -5,7 +5,7 @@
   "status": {
     "completed": true,
     "reinforcement_learning_trained": true,
-    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 같은 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 이전 표준 79D PPO v3는 학습을 마쳤지만 32개 짝지은 조건에서 기준 13회, 학습 정책 12회 성공해 개선을 확인하지 못했다. 새 INSERT-only tip-target 79D PPO는 현재 학습 중이며 결과와 개선 근거는 아직 없다. 85D 진단 학습은 시작하지 않았다. 실물 성능은 미검증이다.",
+    "summary": "단일 seed의 120 Hz·240 Hz 명목 실행이 같은 원시 상대속도 한계와 0.4초 안정 조건을 통과했다. 이전 표준 79D PPO v3는 32개 짝지은 조건에서 기준 13회, 학습 정책 12회 성공했다. 새 INSERT-only tip-target 79D PPO는 학습과 평가를 마쳤지만 기준 12회, 학습 정책 0회 성공해 이번 개발 실험에서 악화됐다. 85D privileged 진단 본 학습은 실행 중이며 결과는 아직 검증하지 않았다. 실물 성능은 미검증이다.",
     "reinforcement_learning_improvement_verified": false
   },
   "evaluation_contract": {
@@ -2057,14 +2057,106 @@
     "standard_observation_dimension": 79,
     "diagnostic_observation_dimension": 85,
     "diagnostic_observation_privileged": true,
+    "diagnostic_85d_gpu_training_status": "running",
     "diagnostic_85d_gpu_training_completed": false,
-    "new_standard_79d_training_status": "running",
-    "new_standard_79d_training_completed": false,
+    "diagnostic_85d_performance_verified": false,
+    "diagnostic_85d_run_directory": "artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08",
+    "diagnostic_85d_smoke": {
+      "completed": true,
+      "num_envs": 1,
+      "iterations": 1,
+      "transitions": 128,
+      "scope": "runtime dimension and finite checkpoint only; not policy performance",
+      "experiment_plan": {
+        "filename": "artifacts/rj45-bias-observability-ablation/experiment-plan.json",
+        "sha256": "b2a7f70ebcbac445c66dbad44b895d05ba449a4d9a4d5747bd8b7fe7b015e39c"
+      },
+      "runner_config": {
+        "filename": "artifacts/rj45-bias-observability-ablation/smoke-logs/rj45-v1/2026-10-26_16-20-08/runner_config.json",
+        "sha256": "2fdc848e66109ebe4b20bc7624e003ff4759a696e22c5402655c4abb082110b5"
+      },
+      "checkpoint_manifest": {
+        "filename": "artifacts/rj45-bias-observability-ablation/smoke-logs/rj45-v1/2026-10-26_16-20-08/checkpoint_manifest.json",
+        "sha256": "9928d456741ac1d6c0533f4827f305dccea3ace7b6b54de611ccd1735626b036"
+      },
+      "training_provenance": {
+        "filename": "artifacts/rj45-bias-observability-ablation/smoke-logs/rj45-v1/2026-10-26_16-20-08/training_provenance.json",
+        "sha256": "aa7a8164d04ccc1c5fa34f859a5b0e662464c63e237aa7833bb87c30d8c32412"
+      },
+      "checkpoint": {
+        "filename": "artifacts/rj45-bias-observability-ablation/smoke-logs/rj45-v1/2026-10-26_16-20-08/model_0.pt",
+        "sha256": "3f4b830ecf373ddc784fad1bfb125241d3eb9159a577e6031f3c77d5d3328e0a"
+      }
+    },
+    "diagnostic_85d_interpretation_limit": "The six appended values are simulator-sampled privileged calibration-bias latents, not real sensors or inferred bias. Standard79 may still contain bias-correlated cues in joint positions after scripted ALIGN, so an 85D result cannot by itself prove that bias is unobservable from standard79.",
+    "new_standard_79d_training_status": "completed",
+    "new_standard_79d_training_completed": true,
     "new_standard_79d_policy_improvement_verified": false,
+    "new_standard_79d_pilot_worse_than_baseline": true,
     "new_standard_79d_log_root": "artifacts/rj45-target-offset-pilot/logs",
     "predeclared_experiment": {
       "filename": "artifacts/rj45-target-offset-pilot/experiment-plan.json",
       "sha256": "85fe680a4e930c6ba9802cd532c2a515c7e1bf9176017b51dcec4cd1f99be8c2"
+    },
+    "new_standard_79d_result": {
+      "status": "completed_and_paired_development_evaluation_worse_than_baseline",
+      "scope": "standard79 target-offset single-seed development pilot from one held grasp state; not final heldout, real sensing, production policy, or hardware validation",
+      "run_directory": "artifacts/rj45-target-offset-pilot/logs/rj45-v1/2026-10-26_15-55-36",
+      "training_updates": 20,
+      "training_transitions": 163840,
+      "evaluation_seed": 20261028,
+      "attempts_per_mode": 32,
+      "baseline_successes": 12,
+      "learned_successes": 0,
+      "baseline_invalid_episodes": 0,
+      "learned_invalid_episodes": 0,
+      "learned_termination_counts": {
+        "episode_timeout": 32
+      },
+      "baseline_max_forbidden_load_n": 0.0,
+      "learned_max_forbidden_load_n": 0.0,
+      "paired_success_rate_difference": -0.375,
+      "paired_bootstrap_95_percentile_interval": [
+        -0.53125,
+        -0.21875
+      ],
+      "bootstrap_resamples": 100000,
+      "bootstrap_seed": 20261029,
+      "independent_review": "APPROVE",
+      "artifacts": {
+        "paired_comparison": {
+          "filename": "artifacts/rj45-target-offset-pilot/paired-comparison42.json",
+          "sha256": "03f19081137f877dcca85c88575b13016103e6b2a1539875e2ecb1bb85766300"
+        },
+        "baseline_report": {
+          "filename": "artifacts/rj45-target-offset-pilot/validation-biased-zero42.json",
+          "sha256": "fc34f435d4bbea38a544da2367b0a1a952f14879b31eb871e78ca82788f1556e"
+        },
+        "learned_report": {
+          "filename": "artifacts/rj45-target-offset-pilot/validation-learned42.json",
+          "sha256": "0eda15027888982fa555fb7787e173840cc0f5395f078bdb653789a3cd82d2a2"
+        },
+        "paired_analyzer": {
+          "filename": "artifacts/rj45-target-offset-pilot/compare_paired.py",
+          "sha256": "70a0971420eda3bf2838c3070a5353fdab7af005ed6f078113066a6952fa9dfd"
+        },
+        "checkpoint_manifest": {
+          "filename": "artifacts/rj45-target-offset-pilot/logs/rj45-v1/2026-10-26_15-55-36/checkpoint_manifest.json",
+          "sha256": "b56401ec2229c3f18b0b9a5732dce73b963659cff414fb288913f9547798f4fa"
+        },
+        "training_provenance": {
+          "filename": "artifacts/rj45-target-offset-pilot/logs/rj45-v1/2026-10-26_15-55-36/training_provenance.json",
+          "sha256": "7af540a572b1d7e0ba86d0dc9cbf56d0e07223a4b6b2b519a53eb22823f5109c"
+        },
+        "training_review_summary": {
+          "filename": "artifacts/rj45-target-offset-pilot/training-review-summary.json",
+          "sha256": "ff78c13a2b8c6ea44d09fdb510860c0b8856578f6ada366bb2610e35b642cc58"
+        },
+        "final_checkpoint": {
+          "filename": "artifacts/rj45-target-offset-pilot/logs/rj45-v1/2026-10-26_15-55-36/model_19.pt",
+          "sha256": "25fad470164002e001e775018cb5892771cb06d50719056602eb43621aec11b6"
+        }
+      }
     },
     "configs": {
       "standard79_post_integral": {
