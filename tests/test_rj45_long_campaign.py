@@ -7,11 +7,13 @@ import json
 import os
 from pathlib import Path
 import signal
+import subprocess
 import sys
 import tempfile
 import time
 import types
 import unittest
+import venv
 from unittest import mock
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts/run_rj45_long_campaign.py"
@@ -146,10 +148,10 @@ def _raw_summary(_root, _ref, label, _attempts, _analyzer):
     return {"attempts": 32, "successes_all_attempts": 1 if label == "Z1" else 0, "invalid_episodes": 0, "maximum_forbidden_contact_load_peak_n": 0.0}
 
 
-def _contract(f):
+def _contract(f, *, python=None):
     deadline = f["guard_deadline"]
     with mock.patch.object(MODULE, "_revalidate_pilot_report", side_effect=_raw_summary), mock.patch.object(MODULE, "_revalidate_pilot_bundle", return_value=None):
-        return MODULE.load_contract(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], deadline_utc=deadline.strftime("%Y-%m-%dT%H:%M:%SZ"), python=Path(sys.executable), now=lambda: f["guard_started"], disk_free=lambda _p: 10**12)
+        return MODULE.load_contract(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], deadline_utc=deadline.strftime("%Y-%m-%dT%H:%M:%SZ"), python=python or Path(sys.executable), now=lambda: f["guard_started"], disk_free=lambda _p: 10**12)
 
 
 def _arg(command, name): return command[list(command).index(name) + 1]
@@ -193,6 +195,19 @@ class FakeRunner:
 
 
 class Tests(unittest.TestCase):
+    def test_campaign_python_preserves_virtual_environment(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            f = _fixture(root / "repo")
+            environment = root / "venv"
+            venv.create(environment, symlinks=True, with_pip=False)
+            executable = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
+            contract = _contract(f, python=executable)
+            prefix = subprocess.check_output(
+                [str(contract.python), "-c", "import sys; print(sys.prefix)"], text=True
+            ).strip()
+            self.assertEqual(Path(prefix), environment)
+
     def test_two_stage_contract_and_commands(self):
         with tempfile.TemporaryDirectory() as d:
             f = _fixture(Path(d)); c = _contract(f)
@@ -328,7 +343,20 @@ class Tests(unittest.TestCase):
     def test_subprocess_periodic_monitor_stopped_hang_and_descendant_cleanup(self):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d); calls = []
-            result = MODULE.run_subprocess([sys.executable, "-c", "import time; time.sleep(.08)"], root, root / "quiet.log", datetime.now(timezone.utc)+timedelta(seconds=2), lambda: calls.append(1), .01, .03)
+            marker = root / "monitor-called-twice"
+            def monitor():
+                calls.append(1)
+                if len(calls) == 2:
+                    marker.write_text("ready\n", encoding="utf-8")
+            code = (
+                "import pathlib,time; "
+                f"marker=pathlib.Path({str(marker)!r}); "
+                "deadline=time.monotonic()+3.0; "
+                "\nwhile not marker.exists():\n"
+                "    if time.monotonic() >= deadline: raise SystemExit(3)\n"
+                "    time.sleep(0.005)\n"
+            )
+            result = MODULE.run_subprocess([sys.executable, "-c", code], root, root / "quiet.log", datetime.now(timezone.utc)+timedelta(seconds=5), monitor, .01, .03)
             self.assertEqual(result.return_code, 0); self.assertGreaterEqual(len(calls), 2)
             def disk_failure():
                 raise MODULE.CampaignError("disk below minimum")

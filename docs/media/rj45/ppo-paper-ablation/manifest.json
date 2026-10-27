@@ -1,0 +1,23 @@
+{
+  "audit_sha256": "9a05c1d23c352b1506b9e02f2df136591b48363f54248016be3bfe9d1fe7beed",
+  "complete": true,
+  "files": {
+    "data": {
+      "bytes": 55016,
+      "filename": "ppo-paper-ablation-data.json",
+      "sha256": "07f00c716ffdae372a711424a7e292b19ba7997204f992e8705ebf8454346804"
+    },
+    "png": {
+      "bytes": 260566,
+      "filename": "ppo-paper-ablation.png",
+      "sha256": "ad8e216f9a4a7c4bed2586fa16d606dbb7a07310fa4bf5583138fb780eef0957"
+    },
+    "svg": {
+      "bytes": 267531,
+      "filename": "ppo-paper-ablation.svg",
+      "sha256": "5c6d26101f4cbc54b1b2e5e0711eeb5b65a6fe1d156a1577c2fdcc2eea541166"
+    }
+  },
+  "schema_version": 1,
+  "visualization": "rj45_paired_pilot_ablation"
+}

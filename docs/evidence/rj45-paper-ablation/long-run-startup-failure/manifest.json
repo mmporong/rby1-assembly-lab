@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "scope": "first long campaign stopped before any training update or development evaluation; process failure is not a policy outcome",
+  "files": {
+    "campaign-status.json": "fbef214ebc71dae9a7cb97e880fa5c992441c1617e7e6bdf53b589d9c229cbc9",
+    "events.jsonl": "a6efd7742616223dfa78a1203e79253d7385536e3d9f85c8360a5a067b755dcd",
+    "train-seed-20261101.log": "cfee0ee12f47ae5efd85133271bd945d86d0f9fb512bbf75fcb64906bcff7a7b"
+  }
+}

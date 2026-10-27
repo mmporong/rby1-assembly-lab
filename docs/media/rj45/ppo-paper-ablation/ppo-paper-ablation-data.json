@@ -1,0 +1,1482 @@
+{
+  "conditions": [
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "potential_type": "legacy_pose_reward",
+        "reward_profile_id": "baseline_target_offset_v1",
+        "semantics": "non-learned biased-zero baseline task configuration",
+        "training_config_path": "configs/rj45-training-target-offset-v1.json",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 20,
+      "id": "baseline",
+      "invalid": 0,
+      "label": "기준 제어",
+      "method_note": "학습 정책을 사용하지 않는 기준 제어",
+      "success_delta_vs_baseline": 0,
+      "success_rate": 0.375,
+      "success_rate_delta_vs_baseline": 0.0,
+      "successes": 12
+    },
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+        "potential_type": "legacy_pose_reward",
+        "reward_profile_id": "a0_target_offset_v1",
+        "semantics": "base PPO task configuration",
+        "training_config_path": "configs/rj45-training-target-offset-v1.json",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 32,
+      "id": "A0",
+      "invalid": 0,
+      "label": "A0 · 기본 PPO",
+      "method_note": "기본 PPO 보상과 기본 탐색 설정",
+      "success_delta_vs_baseline": -12,
+      "success_rate": 0.0,
+      "success_rate_delta_vs_baseline": -0.375,
+      "successes": 0
+    },
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+        "potential_type": "normalized_pose",
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "semantics": "discounted potential with INSERT transition and finite-horizon termination handling",
+        "training_config_path": "configs/rj45-training-target-offset-a1-discounted-pose-v2.json",
+        "training_config_sha256": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 32,
+      "id": "A1",
+      "invalid": 0,
+      "label": "A1 · 할인 보상·종료 처리",
+      "method_note": "할인 보상과 실제 INSERT 전이·종료 처리를 함께 반영",
+      "success_delta_vs_baseline": -12,
+      "success_rate": 0.0,
+      "success_rate_delta_vs_baseline": -0.375,
+      "successes": 0
+    },
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+        "potential_type": "cad_keypoints",
+        "reward_profile_id": "a2_keypoint_shape_v2",
+        "semantics": "A1 potential replaced by CAD keypoint geometry",
+        "training_config_path": "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json",
+        "training_config_sha256": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 29,
+      "id": "A2",
+      "invalid": 0,
+      "label": "A2 · A1 potential 교체",
+      "method_note": "A1의 기존 potential을 형상 대응점 기반으로 교체",
+      "success_delta_vs_baseline": -9,
+      "success_rate": 0.09375,
+      "success_rate_delta_vs_baseline": -0.28125,
+      "successes": 3
+    },
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "initial_action_noise_std": 0.1,
+        "policy_config_sha256": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+        "potential_type": "legacy_pose_reward",
+        "reward_profile_id": "e1_target_offset_v1",
+        "semantics": "A0 task configuration with low-exploration PPO profile",
+        "training_config_path": "configs/rj45-training-target-offset-v1.json",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 25,
+      "id": "E1",
+      "invalid": 0,
+      "label": "E1 · 낮은 탐색 폭",
+      "method_note": "A0 설정에서 초기 탐색 폭을 낮춤",
+      "success_delta_vs_baseline": -5,
+      "success_rate": 0.21875,
+      "success_rate_delta_vs_baseline": -0.15625,
+      "successes": 7
+    },
+    {
+      "attempts": 32,
+      "contract_evidence": {
+        "actor_mean_initialization": "deterministic mean output zero",
+        "initial_action_noise_std": 0.1,
+        "policy_config_sha256": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+        "potential_type": "legacy_pose_reward",
+        "reward_profile_id": "z1_target_offset_v1",
+        "semantics": "E1 task and PPO configuration with zero-initialized actor mean layer",
+        "stochastic_policy_noise_modified": false,
+        "training_config_path": "configs/rj45-training-target-offset-v1.json",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "verification_basis": "audit metadata matched to pinned config hash"
+      },
+      "failures": 22,
+      "id": "Z1",
+      "invalid": 0,
+      "label": "Z1 · actor 평균 0 초기화",
+      "method_note": "결정론적 평균만 0으로 시작하고 탐색 잡음 0.1은 유지",
+      "success_delta_vs_baseline": -2,
+      "success_rate": 0.3125,
+      "success_rate_delta_vs_baseline": -0.0625,
+      "successes": 10
+    }
+  ],
+  "evaluation": {
+    "checkpoint_completed_updates_verified_by_supplied_inspection": true,
+    "checkpoint_inspection_file_evidence": {
+      "A0": {
+        "bytes_rehashed_by_plotter": true,
+        "checkpoint_payload_reloaded_by_plotter": false,
+        "path": "artifacts/rj45-paper-ablation/pilot-inspections/A0.json",
+        "sha256": "3cb45794f4d091799352710fad12827570f6359a37e3b5dde3bbbd0931a9bd6e"
+      },
+      "A1": {
+        "bytes_rehashed_by_plotter": true,
+        "checkpoint_payload_reloaded_by_plotter": false,
+        "path": "artifacts/rj45-paper-ablation/pilot-inspections/A1.json",
+        "sha256": "a95e662175c6812e90a92e7093419703a542084299d51e5d681a08a1d61c247b"
+      },
+      "A2": {
+        "bytes_rehashed_by_plotter": true,
+        "checkpoint_payload_reloaded_by_plotter": false,
+        "path": "artifacts/rj45-paper-ablation/pilot-inspections/A2.json",
+        "sha256": "d661866af389079d26207e53139c7c5f71c593ba2c187ca25d3d3744eaebee6d"
+      },
+      "E1": {
+        "bytes_rehashed_by_plotter": true,
+        "checkpoint_payload_reloaded_by_plotter": false,
+        "path": "artifacts/rj45-paper-ablation/pilot-inspections/E1.json",
+        "sha256": "23f521822518a4553d52437a917c24b978686f0490d453f5d223005a2605e828"
+      },
+      "Z1": {
+        "bytes_rehashed_by_plotter": true,
+        "checkpoint_payload_reloaded_by_plotter": false,
+        "path": "artifacts/rj45-paper-ablation/pilot-inspections/Z1.json",
+        "sha256": "53e45f2cc5d9e223074ed67fd79b9af437128d98db24de96568d8a3327b36031"
+      }
+    },
+    "checkpoint_inspection_files_rehashed_by_plotter": true,
+    "checkpoint_payload_reloaded_by_plotter": false,
+    "common_training_seed": 20261026,
+    "complete_five_group_pilot": true,
+    "condition_count": 6,
+    "evaluation_seed": 20261028,
+    "evaluation_start": "held",
+    "expected_learned_condition_count": 5,
+    "held_state_claim": "보고서상 동일 파지 상태 1개",
+    "held_state_proof_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+    "held_state_referenced_bytes_rehashed_by_plotter": false,
+    "learned_condition_count": 5,
+    "paired_attempts": 32,
+    "recorded_training_updates_each": 20,
+    "task_id": "rj45-v1",
+    "training_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+    "training_update_claim": "별도 inspector 파일 SHA 재대조·보고서상 완료 20회",
+    "training_update_evidence": "supplied_inspection_report_consistent_payload_not_rechecked"
+  },
+  "limitations": [
+    "개발 평가 결과이다.",
+    "각 학습 조건은 공통 seed 20261026의 별도 inspector 파일 SHA 재대조·보고서상 완료 20회 예비 학습 결과이다.",
+    "보고서상 동일 파지 상태 1개이며, 파지 증거 파일 재해시는 그림 생성 범위 밖이다.",
+    "다른 파지·재료·실물 환경으로의 일반화를 입증하지 않는다."
+  ],
+  "paired_cases": [
+    {
+      "case_number": 1,
+      "environment_index": 0,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384048,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":0,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.05413313267540334,
+      "translation_bias_norm_um": 62.96377419749963
+    },
+    {
+      "case_number": 2,
+      "environment_index": 1,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384049,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":1,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.14812506744901427,
+      "translation_bias_norm_um": 109.26060535631657
+    },
+    {
+      "case_number": 3,
+      "environment_index": 2,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384050,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":2,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.047669327471015134,
+      "translation_bias_norm_um": 76.05873919639085
+    },
+    {
+      "case_number": 4,
+      "environment_index": 3,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384051,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":3,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.06853728176297758,
+      "translation_bias_norm_um": 98.36551295110648
+    },
+    {
+      "case_number": 5,
+      "environment_index": 4,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384052,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":4,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.09752962840997906,
+      "translation_bias_norm_um": 74.74170895756367
+    },
+    {
+      "case_number": 6,
+      "environment_index": 5,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384053,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":5,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.06679991338684528,
+      "translation_bias_norm_um": 85.05562126211288
+    },
+    {
+      "case_number": 7,
+      "environment_index": 6,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384054,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":6,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.22989665777147006,
+      "translation_bias_norm_um": 46.71054158950463
+    },
+    {
+      "case_number": 8,
+      "environment_index": 7,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384055,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":7,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.0764981509303385,
+      "translation_bias_norm_um": 104.70337917091216
+    },
+    {
+      "case_number": 9,
+      "environment_index": 8,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384056,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":8,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.05868317264731295,
+      "translation_bias_norm_um": 91.72928820571417
+    },
+    {
+      "case_number": 10,
+      "environment_index": 9,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384057,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":9,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.17779244438725741,
+      "translation_bias_norm_um": 83.59320836649722
+    },
+    {
+      "case_number": 11,
+      "environment_index": 10,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384058,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":10,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.23280704794967338,
+      "translation_bias_norm_um": 118.51507219510344
+    },
+    {
+      "case_number": 12,
+      "environment_index": 11,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384059,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":11,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.013963068285996827,
+      "translation_bias_norm_um": 118.75378054777018
+    },
+    {
+      "case_number": 13,
+      "environment_index": 12,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384060,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":12,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.23027402330044133,
+      "translation_bias_norm_um": 97.89136372226156
+    },
+    {
+      "case_number": 14,
+      "environment_index": 13,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384061,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":13,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.09049097236515186,
+      "translation_bias_norm_um": 97.21312284531997
+    },
+    {
+      "case_number": 15,
+      "environment_index": 14,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384062,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":14,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.20662895435407652,
+      "translation_bias_norm_um": 143.37871309223235
+    },
+    {
+      "case_number": 16,
+      "environment_index": 15,
+      "episode_index": 1,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384063,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":15,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.13510122709766095,
+      "translation_bias_norm_um": 112.56740758006517
+    },
+    {
+      "case_number": 17,
+      "environment_index": 0,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384051,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":0,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.11405332409383219,
+      "translation_bias_norm_um": 144.58114457186713
+    },
+    {
+      "case_number": 18,
+      "environment_index": 1,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384052,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":1,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.2460008600124284,
+      "translation_bias_norm_um": 19.35677965290648
+    },
+    {
+      "case_number": 19,
+      "environment_index": 2,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384053,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":2,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.029217448773653818,
+      "translation_bias_norm_um": 124.59971397071585
+    },
+    {
+      "case_number": 20,
+      "environment_index": 3,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384054,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":3,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.00850412820193276,
+      "translation_bias_norm_um": 11.496255126579578
+    },
+    {
+      "case_number": 21,
+      "environment_index": 4,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384055,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":4,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.22000647826252778,
+      "translation_bias_norm_um": 27.872630629987814
+    },
+    {
+      "case_number": 22,
+      "environment_index": 5,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384056,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":5,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.184061767085279,
+      "translation_bias_norm_um": 2.244830591680557
+    },
+    {
+      "case_number": 23,
+      "environment_index": 6,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384057,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":6,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.025860489824962363,
+      "translation_bias_norm_um": 127.3494877225781
+    },
+    {
+      "case_number": 24,
+      "environment_index": 7,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384058,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":7,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.19739839098095333,
+      "translation_bias_norm_um": 87.34760181062853
+    },
+    {
+      "case_number": 25,
+      "environment_index": 8,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384059,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":8,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.03222845982901585,
+      "translation_bias_norm_um": 81.14177790444653
+    },
+    {
+      "case_number": 26,
+      "environment_index": 9,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384060,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":9,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.12106544994249308,
+      "translation_bias_norm_um": 12.289361478588033
+    },
+    {
+      "case_number": 27,
+      "environment_index": 10,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384061,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":10,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.19291929722077314,
+      "translation_bias_norm_um": 94.76848078582628
+    },
+    {
+      "case_number": 28,
+      "environment_index": 11,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384062,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":11,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.09563709599987326,
+      "translation_bias_norm_um": 106.08099778256896
+    },
+    {
+      "case_number": 29,
+      "environment_index": 12,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384063,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":12,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.05891752130063011,
+      "translation_bias_norm_um": 48.689850026377826
+    },
+    {
+      "case_number": 30,
+      "environment_index": 13,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384064,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":13,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.003956547663249859,
+      "translation_bias_norm_um": 24.88185138467182
+    },
+    {
+      "case_number": 31,
+      "environment_index": 14,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384065,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":14,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "Z1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "baseline": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.08118204786186078,
+      "translation_bias_norm_um": 27.60377626642972
+    },
+    {
+      "case_number": 32,
+      "environment_index": 15,
+      "episode_index": 2,
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384066,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":15,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "results": {
+        "A0": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "A2": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "E1": {
+          "success": true,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "Z1": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "baseline": {
+          "success": false,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        }
+      },
+      "rotation_bias_norm_deg": 0.23970165937468355,
+      "translation_bias_norm_um": 135.26714959801845
+    }
+  ],
+  "schema_version": 1,
+  "source": {
+    "audit_path": "/home/lim/rby1-assembly-lab/artifacts/rj45-paper-ablation/paired-audit-v2-inspected.json",
+    "audit_schema_version": 2,
+    "audit_sha256": "9a05c1d23c352b1506b9e02f2df136591b48363f54248016be3bfe9d1fe7beed",
+    "audit_verification_status": "report_proof_hashes_consistent_inputs_not_rehashed"
+  },
+  "visualization": "rj45_paired_pilot_ablation"
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "status": "failed",
+  "profile_label": "Z1",
+  "deadline_utc": "2026-10-27T12:47:55Z",
+  "completed_reports": 0,
+  "error": {
+    "type": "CampaignError",
+    "message": "stage train-seed-20261101 failed with return code 1 (None); partial output preserved"
+  },
+  "final_holdout_opened": false
+}

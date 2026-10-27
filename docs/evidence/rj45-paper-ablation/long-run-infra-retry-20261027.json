@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-27T03:57:17Z",
+  "purpose": "One infrastructure-only restart after a failed launch before training; original scientific plan and candidate selection remain unchanged.",
+  "original_long_run_plan_sha256": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c",
+  "candidate_selection_sha256": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868",
+  "original_campaign": "artifacts/rj45-long-campaign-20261027",
+  "failure_evidence": {
+    "path": "docs/evidence/rj45-paper-ablation/long-run-startup-failure/manifest.json",
+    "sha256": "28d5b406b1bdeaf9b2c00b62d93d2700f951c4333285fff40a1de4db0894d60c"
+  },
+  "failure_cause": "Runner resolved the virtual environment Python symlink to the base interpreter; numpy import failed before simulator or PPO training started.",
+  "original_runner_sha256": "6046237a332488ac81d802d6a0fff0c0ace2efa9729d20f4838a894bd3737e5c",
+  "corrected_runner_sha256": "677a3bcbaae94099b6594e813f305f45cc6fc4a5169395ba71ca47b9d5e8043f",
+  "change": "Use an absolute executable path without resolving the virtual environment symlink; preserve all scientific settings.",
+  "training_updates_completed_before_restart": 0,
+  "development_evaluations_before_restart": 0,
+  "same_original_guard_record_sha256": "7adc531650bdaf391a073d1776e2f78785ce19bd8442791d553a520c09f1bc02",
+  "same_original_guard_started_utc": "2026-10-27T03:52:55Z",
+  "same_original_guard_deadline_utc": "2026-10-27T12:47:55Z",
+  "same_original_timer_target": "rby1-rj45-stop-20261027-b.timer",
+  "no_guard_extension": true,
+  "restart_count_max": 1,
+  "restart_conditions": [
+    "The original instance was verified STOPPED after evidence retrieval.",
+    "Freeze this protocol and corrected runner before restart.",
+    "Recheck exact instance identity, active original deadline timer, frozen inputs, the corrected Python path, its virtual environment prefix and required imports on Brev.",
+    "Recreate the launch manifest with the original guard and corrected runner, and write the restart to a new output path."
+  ],
+  "unchanged_scientific_contract": "Same Z1 candidate, seeds, training updates, checkpoints, development cases, promotion rule and sealed final seed as the original plan.",
+  "failure_policy": "Any subsequent infrastructure or policy-stage failure stops the new campaign; preserve outputs and stop the instance. No re-selection or retry based on measured outcomes."
+}

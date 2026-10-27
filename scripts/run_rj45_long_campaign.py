@@ -964,7 +964,7 @@ def load_contract(
         monitor_interval_s=monitor_interval_s,
         hang_no_progress_timeout_s=hang_timeout_s,
         deadline_utc=deadline,
-        python=python.resolve(),
+        python=Path(os.path.abspath(python)),
         output_dir=output_dir,
     )
 
