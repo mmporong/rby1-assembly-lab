@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-27T02:33:43Z",
+  "scope": "Follow-up to the five-profile 20-update pilot; one fixed physical held grasp and no hardware or vision policy claim.",
+  "parent_pilot_plan_sha256": "d6520ccd7ad0e2c287c58b9b691924d5446f66d749e5daeee92735445ba0cb42",
+  "selection_preregistered_before_any_pilot_32_case_policy_evaluation_result": true,
+  "known_at_registration": {
+    "pilot_baseline_successes": 12,
+    "pilot_baseline_attempts": 32,
+    "pilot_baseline_invalid": 0,
+    "pilot_a0_training_process_completed": true,
+    "pilot_a0_evaluation_started": true,
+    "completed_32_case_policy_evaluations": 0,
+    "smoke_policy_results": {"A1": "0/1", "A2": "0/4", "Z1": "0/1"},
+    "smoke_policy_scope": "One-update pipeline checks; not the 20-update 32-case pilot comparisons.",
+    "historical_policy_results": "Prior 79D and 85D residual experiments each succeeded 0/32 against a reported 12/32 baseline; the historical baseline report did not itself prove the evaluation held artifact."
+  },
+  "pilot_candidate_selection": {
+    "eligible_groups": ["A0", "A1", "A2", "E1", "Z1"],
+    "requirement": "Complete paired-audit and actual checkpoint bundle verification; 32 attempts, zero invalid, and zero forbidden contact load in the candidate report. If no group qualifies, stop and diagnose instead of running long training.",
+    "primary_rank": "Largest strict-v1 success count on the predeclared 32 pilot development cases.",
+    "tie_break_order": ["Z1", "E1", "A2", "A1", "A0"],
+    "tie_break_reason": "Prefer zero initial residual, then smaller exploration; remaining ties prefer shape and discounted reward experiments over the existing reward.",
+    "not_a_selection_metric": "Do not rank different reward profiles by their reward sums, whose scales differ."
+  },
+  "training": {
+    "mode": "from scratch; current training entrypoint does not support resume",
+    "training_seeds": [20261101, 20261102, 20261103],
+    "num_envs": 64,
+    "steps_per_env_per_update": 128,
+    "updates_per_seed": 200,
+    "transitions_per_seed": 1638400,
+    "total_transitions": 4915200,
+    "checkpoint_save_interval_iterations": 19,
+    "assessed_checkpoints": [
+      {"filename": "model_19.pt", "iteration_index": 19, "completed_updates": 20},
+      {"filename": "model_95.pt", "iteration_index": 95, "completed_updates": 96},
+      {"filename": "model_199.pt", "iteration_index": 199, "completed_updates": 200}
+    ],
+    "checkpoint_verification": "Before analysis, inspect each checkpoint with weights_only torch loading, confirm internal iteration index, filename, manifest checkpoint hash, runner config and provenance. Planned max_iterations alone is not evidence of completed updates.",
+    "initialization": "Use the selected pilot group's reward, PPO exploration and actor-initialization settings; change only seed, number of updates and checkpoint save interval."
+  },
+  "development_evaluation": {
+    "seed": 20261028,
+    "num_envs": 16,
+    "attempts_per_policy": 32,
+    "paired_baseline": "The pilot baseline, with the same evaluation-input and held-grasp proofs, is the common reference.",
+    "assessed_models": "Three checkpoints for each of three independent training seeds; nine models in total.",
+    "checkpoint_selection": "Choose one common checkpoint age across the three training seeds by largest total strict success count; ties choose the earlier checkpoint. Do not select a different age per training seed.",
+    "promotion_rule": "At the selected common checkpoint age, at least two of three training seeds must exceed the paired baseline success count, the three-seed average must exceed it by at least 3 successes out of 32, and each model must have zero invalid and zero forbidden contact load. Otherwise do not open the final seed and report no demonstrated development improvement.",
+    "interpretation": "The three models share 32 calibration cases and one physical held grasp; do not claim 96 independent physical episodes or generalization across grasps."
+  },
+  "final_evaluation": {
+    "seed": 20261027,
+    "status": "sealed_until_candidate_and_common_checkpoint_and_final_protocol_are_frozen",
+    "rule": "If the development promotion rule passes, freeze a separate final protocol containing the chosen profile, common checkpoint age, all checkpoint hashes, training seeds and aggregation. Then evaluate one baseline and all three selected policies on the same 32 held-out calibration cases once.",
+    "limitation": "This seed holds out calibration cases, not a distinct physical grasp or a real-world setup."
+  },
+  "budget": {
+    "estimated_usd_per_gpu_hour": 1.74,
+    "bounded_guard_max_hours_from_follow_up_start": 9,
+    "exclude": ["storage", "tax", "price changes", "other project usage"],
+    "policy": "Verify the selected exact instance identity; stop after artifact retrieval or failure, and do not automatically extend training beyond this preregistered run."
+  },
+  "integrity": {
+    "pilot_inputs": "Keep the original pilot plan and its frozen 57 inputs unmodified for the duration of the pilot.",
+    "follow_up_inputs": "After the checkpoint verification changes are reviewed and before launching follow-up GPU jobs, pin the final source, scripts, selected settings, three seed configs, task/assets and this plan by SHA-256 in a separate input manifest."
+  }
+}
