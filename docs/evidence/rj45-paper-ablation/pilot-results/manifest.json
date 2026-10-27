@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "scope": "Single training seed, single reported physical held state, paired 32-case development pilot. Original checkpoints, nominal trace, held artifact and generated assets are not included in this directory.",
+  "files_sha256": {
+    "A0.json": "2652372c1bd43481f2d24e5aebeb681519801023fe454512083808ad1c2cef64",
+    "A1.json": "b547404d7b02cf6870fa9e463fc6f6e70f426e25bcfe955897919ac46c26cd0f",
+    "A2.json": "dfa91e166c94e4b43fa2c5af8c6762ed82efd0a1c5dce3ff28cc1667fa02d2b1",
+    "E1.json": "d339edc51e3139d6053757ad35b4c4fc7c5496f7ae50ad2fc3d9ad2ad8968db1",
+    "Z1.json": "b887f85ca4b90698361430c59655ce3b99d21bd0c8f20c66b8f245d5e2322860",
+    "baseline.json": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61",
+    "checkpoint-inspections/A0.json": "3cb45794f4d091799352710fad12827570f6359a37e3b5dde3bbbd0931a9bd6e",
+    "checkpoint-inspections/A1.json": "a95e662175c6812e90a92e7093419703a542084299d51e5d681a08a1d61c247b",
+    "checkpoint-inspections/A2.json": "d661866af389079d26207e53139c7c5f71c593ba2c187ca25d3d3744eaebee6d",
+    "checkpoint-inspections/E1.json": "23f521822518a4553d52437a917c24b978686f0490d453f5d223005a2605e828",
+    "checkpoint-inspections/Z1.json": "53e45f2cc5d9e223074ed67fd79b9af437128d98db24de96568d8a3327b36031",
+    "long-candidate.json": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868",
+    "paired-audit-v2-inspected.json": "9a05c1d23c352b1506b9e02f2df136591b48363f54248016be3bfe9d1fe7beed",
+    "paired-audit.json": "ba19af686fcc5b997709d7a761339281b9f0295c787c82ca2a14a58188a9b091"
+  }
+}

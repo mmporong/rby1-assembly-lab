@@ -1,0 +1,3441 @@
+{
+  "requested_attempts": 32,
+  "task_id": "rj45-v1",
+  "attempts": 32,
+  "valid_episodes": 32,
+  "valid_successes": 0,
+  "valid_failures": 32,
+  "invalid_episodes": 0,
+  "invalid_reasons": {},
+  "success_rate_valid_episodes": 0.0,
+  "recovery_attempts_valid": 0,
+  "recovered_successes_valid": 0,
+  "recovery_rate_valid": null,
+  "recovery_definition": "success among valid episodes with at least one commanded retry",
+  "episode_elapsed_times_s_valid": [
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633,
+    24.000001907348633
+  ],
+  "mean_episode_elapsed_s_valid": 24.000001907348633,
+  "episode_retry_counts_valid": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "mean_retry_count_valid": 0.0,
+  "max_contact_force_proxy_n": 4.269654273986816,
+  "seed": 20261028,
+  "evaluation_num_envs": 16,
+  "observation_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+  "baseline_controller_state_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+  "completion_source": "simulator_ground_truth_evaluator",
+  "sample_definition": "terminated_or_truncated_episode_attempt",
+  "provenance": {
+    "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/model_19.pt",
+    "checkpoint_sha256": "6a1a81ea3aeea00f348c9468348f2f7094c1b441ea94bd80a39133c779a1ce0c",
+    "verified_checkpoint_evidence": {
+      "training_provenance_sha256": "d653f69547e53f3b0f1d290ddcb1e42eeed3ade035bf9828d2ba945528780a72",
+      "checkpoint_manifest_sha256": "99a2f095ad0b1826200d4291e784fb378b76b8dc5587683e4d8a7b80695dd991",
+      "runtime_contract_verified_at_start": true,
+      "rj45_nominal_evidence": {
+        "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+        "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+        "trace_records": 1358
+      },
+      "held_grasp_reset_proof": {
+        "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+        "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+        "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+        "selection_control_step": 979,
+        "stability_limits": {
+          "max_object_linear_speed_m_s": 0.005,
+          "max_object_angular_speed_rad_s": 0.05,
+          "max_revolute_joint_speed_rad_s": 0.05,
+          "max_prismatic_joint_speed_m_s": 0.005,
+          "max_revolute_tracking_error_rad": 0.05,
+          "max_prismatic_tracking_error_m": 0.005
+        }
+      },
+      "training_num_envs": 64,
+      "policy_initialization": {
+        "mode": "rsl_rl_default",
+        "zero_actor_output_layer": false,
+        "actor_module_path": "runner.alg.policy.actor",
+        "final_layer_index": 4,
+        "final_layer_class": "torch.nn.Linear",
+        "input_dimension": 79,
+        "output_dimension": 6,
+        "pre_weight_sha256": "af5bd8f27c8c8cf9b2bfccd2e97e246d53e6f3d21c4957a0e8aa321f9bb81aee",
+        "pre_bias_sha256": "7ae74ad9ef55ea2c8161ece379fef40c25217fdbeefdc3dc21daf35bac4874c4",
+        "post_weight_sha256": "af5bd8f27c8c8cf9b2bfccd2e97e246d53e6f3d21c4957a0e8aa321f9bb81aee",
+        "post_bias_sha256": "7ae74ad9ef55ea2c8161ece379fef40c25217fdbeefdc3dc21daf35bac4874c4",
+        "weight_all_zero_after_initialization": false,
+        "bias_all_zero_after_initialization": false,
+        "deterministic_actor_test_input_count": 3,
+        "deterministic_actor_output_all_zero": false,
+        "deterministic_actor_output_max_abs": 0.23462757468223572,
+        "stochastic_policy_noise_modified": false,
+        "method_reference": null
+      }
+    },
+    "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+    "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+    "task_config_path": "configs/tasks/rj45-v1.json",
+    "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+    "assets_config_sha256": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+    "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "build_report_sha256": "6093e6bdfde796b4e556cb5b97a5c688d5a28ff66285a961452fe851de75c8be",
+    "source_sha256": {
+      "scripts/evaluate_policy.py": "c9dca6af77a5db11d70e17687ed58162976f3c4d4d26ae2bbc55e874ab748e43",
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+      "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+      "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    },
+    "generated_asset_sha256": {
+      "plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+      "robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+      "scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+      "socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+      "table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d"
+    },
+    "input_immutability_verified": true,
+    "runtime_versions": {
+      "isaac_sim": "5.1.0.0",
+      "isaac_lab": "0.47.2",
+      "rsl_rl": "3.0.1",
+      "torch": "2.7.0+cu128",
+      "physics_backend": "PhysX through Isaac Sim"
+    },
+    "physics_dt_s": 0.004166666666666667,
+    "control_decimation": 8,
+    "control_dt_s": 0.03333333333333333,
+    "observation_noise": {
+      "position_std_m": 0.0015,
+      "rotation_std_rad": 0.017453293
+    },
+    "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
+    "rj45_nominal_evidence": {
+      "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+      "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+      "trace_records": 1358
+    },
+    "held_grasp_reset_proof": {
+      "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+      "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+      "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+      "selection_control_step": 979,
+      "stability_limits": {
+        "max_object_linear_speed_m_s": 0.005,
+        "max_object_angular_speed_rad_s": 0.05,
+        "max_revolute_joint_speed_rad_s": 0.05,
+        "max_prismatic_joint_speed_m_s": 0.005,
+        "max_revolute_tracking_error_rad": 0.05,
+        "max_prismatic_tracking_error_m": 0.005
+      }
+    },
+    "evaluation_inputs_reverified_at_end": true
+  },
+  "rj45_evaluation_schema_version": 2,
+  "baseline_mode": "learned",
+  "evaluation_start": "held",
+  "evaluation_horizon_s": 24.0,
+  "per_environment_episode_quota": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "per_environment_accepted_attempt_count": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+  ],
+  "parallel_contact_evidence": {
+    "schema_version": 1,
+    "validated_probe_num_envs": 4,
+    "runtime_num_envs_requires_native_ordering_check": true,
+    "scope": "4env routing proof; target num_envs runtime asserted; full task validation pending",
+    "report_sha256": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+    "trace_sha256": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+    "sat_report_sha256": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+    "trace_row_count": 292,
+    "current_source_sha256": {
+      "checks/probe_parallel_hand_contacts.py": "3f44004bb692ff515676439aaaa5b07e76f90fc2329c31f55816a6dd23c3e4b9",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7"
+    }
+  },
+  "rj45_training_config": {
+    "path": "configs/rj45-training-target-offset-a1-discounted-pose-v2.json",
+    "sha256": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+    "action_mode": "right_only_6d",
+    "observation_dimension": 79,
+    "calibration_bias_level": 0,
+    "action_application_mode": "absolute_tip_pose_target_insert_only",
+    "policy_active_phases": [
+      "insert"
+    ]
+  },
+  "episode_outcomes": [
+    {
+      "attempt_index": 0,
+      "environment_index": 1,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 1,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384049,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384049,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":1,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        3.171816570102237e-05,
+        -3.3883981814142317e-05,
+        -9.89126565400511e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -9.770731412572786e-05,
+        -0.002351724309846759,
+        0.0010693304939195514
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.9556869268417358,
+        "force_cost": -2.2230728063732386e-05,
+        "action_cost": -2.7108201265946263e-06,
+        "terminal": -3.0,
+        "total": -2.044339179992676
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.189525604248047,
+      "insertion_contact_force_peak_n": 0.059896040707826614,
+      "insertion_contact_load_peak_n": 0.05989605933427811,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012553692795336246,
+      "final_lateral_error_m": 0.0002410668384982273,
+      "final_orientation_error_rad": 0.007252546958625317,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 1,
+      "environment_index": 2,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 2,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384050,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384050,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":2,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -1.2598531611729413e-05,
+        3.242580351070501e-05,
+        6.763709097867832e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0004961069789715111,
+        -0.0004819422902073711,
+        -0.00046239743824116886
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.02747282385826111,
+        "force_cost": 0.0,
+        "action_cost": -2.6555178465059726e-06,
+        "terminal": -3.0,
+        "total": -3.0274770259857178
+      },
+      "policy_active_step_count": 715,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 715,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.789921760559082,
+      "insertion_contact_force_peak_n": 0.0,
+      "insertion_contact_load_peak_n": 0.0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012478351593017578,
+      "final_lateral_error_m": 7.494699821108952e-05,
+      "final_orientation_error_rad": 0.007122325710952282,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 2,
+      "environment_index": 6,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 6,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384054,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384054,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":6,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -2.56558159890119e-05,
+        3.609429768403061e-05,
+        1.4861207091598772e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0026456385385245085,
+        0.00010480761557118967,
+        -0.003014862537384033
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.5748621225357056,
+        "force_cost": -5.258061150925641e-07,
+        "action_cost": -2.8426354674593313e-06,
+        "terminal": -3.0,
+        "total": -2.425142526626587
+      },
+      "policy_active_step_count": 708,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 708,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.269654273986816,
+      "insertion_contact_force_peak_n": 0.01183683704584837,
+      "insertion_contact_load_peak_n": 0.01183683704584837,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012473464012145996,
+      "final_lateral_error_m": 0.000118295218271669,
+      "final_orientation_error_rad": 0.007260420825332403,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 3,
+      "environment_index": 7,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 7,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384055,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384055,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":7,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        7.755203114356846e-06,
+        -5.501617579284357e-06,
+        -0.0001042707372107543
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.00046371648204512894,
+        -0.0011170495999976993,
+        -0.0005654894630424678
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.6311047077178955,
+        "force_cost": -0.005934213288128376,
+        "action_cost": -3.982753241871251e-06,
+        "terminal": -3.0,
+        "total": -1.3748341798782349
+      },
+      "policy_active_step_count": 715,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 715,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.9167237281799316,
+      "insertion_contact_force_peak_n": 0.39007166028022766,
+      "insertion_contact_load_peak_n": 0.39007166028022766,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012547015212476254,
+      "final_lateral_error_m": 0.0002729223051574081,
+      "final_orientation_error_rad": 0.010397762060165405,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 4,
+      "environment_index": 8,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 8,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384056,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384056,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":8,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        5.9768648497993127e-05,
+        -9.909098480420653e-06,
+        -6.887510971864685e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.000818603381048888,
+        -0.00039636483415961266,
+        0.00047095533227548003
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.9369574785232544,
+        "force_cost": -0.038134921342134476,
+        "action_cost": -5.611474534816807e-06,
+        "terminal": -3.0,
+        "total": -1.1011823415756226
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.14502477645874,
+      "insertion_contact_force_peak_n": 0.8560564517974854,
+      "insertion_contact_load_peak_n": 0.8560564517974854,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012578988447785378,
+      "final_lateral_error_m": 0.00028648271108977497,
+      "final_orientation_error_rad": 0.011256208643317223,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 5,
+      "environment_index": 9,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 9,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384057,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384057,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":9,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -1.3063998267170973e-05,
+        -4.7105871203712013e-07,
+        -8.256472938228399e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.002751754131168127,
+        -0.0007687206380069256,
+        -0.001210752292536199
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.3111703395843506,
+        "force_cost": 0.0,
+        "action_cost": -2.611581976452726e-06,
+        "terminal": -3.0,
+        "total": -1.6888325214385986
+      },
+      "policy_active_step_count": 707,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 707,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.78489351272583,
+      "insertion_contact_force_peak_n": 0.0,
+      "insertion_contact_load_peak_n": 0.0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012512207962572575,
+      "final_lateral_error_m": 0.00023603819136042148,
+      "final_orientation_error_rad": 0.007359530311077833,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 6,
+      "environment_index": 0,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 0,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384048,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384048,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":0,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        6.126743392087519e-05,
+        -1.3214931641414296e-05,
+        6.008659056533361e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0009150984697043896,
+        -3.621883297455497e-05,
+        -0.00023223408788908273
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.10212442278862,
+        "force_cost": -2.1722964447690174e-05,
+        "action_cost": -2.6328950752940727e-06,
+        "terminal": -3.0,
+        "total": -3.10214900970459
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.145869731903076,
+      "insertion_contact_force_peak_n": 0.07971867173910141,
+      "insertion_contact_load_peak_n": 0.0797186940908432,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012533426284790039,
+      "final_lateral_error_m": 0.00014566043682862073,
+      "final_orientation_error_rad": 0.004649340640753508,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 7,
+      "environment_index": 3,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 3,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384051,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384051,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":3,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -7.364833436440676e-05,
+        2.865723445211188e-06,
+        -6.514203414553776e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -5.794897151645273e-05,
+        0.0010358780855312943,
+        -0.0005953955696895719
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.1122826337814331,
+        "force_cost": -0.005639130249619484,
+        "action_cost": -3.4168090223829495e-06,
+        "terminal": -3.0,
+        "total": -3.117924928665161
+      },
+      "policy_active_step_count": 714,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 714,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.872978687286377,
+      "insertion_contact_force_peak_n": 0.47221261262893677,
+      "insertion_contact_load_peak_n": 0.536335825920105,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012505529448390007,
+      "final_lateral_error_m": 0.00019419562886469066,
+      "final_orientation_error_rad": 0.0022506522946059704,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 8,
+      "environment_index": 4,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 4,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384052,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384052,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":4,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        1.4369653399626259e-05,
+        6.409711204469204e-05,
+        -3.565664519555867e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0006019090069457889,
+        0.0011732601560652256,
+        -0.0010764272883534431
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.006623208522796631,
+        "force_cost": 0.0,
+        "action_cost": -2.9376681141002337e-06,
+        "terminal": -3.0,
+        "total": -3.0066277980804443
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.784935474395752,
+      "insertion_contact_force_peak_n": 0.0,
+      "insertion_contact_load_peak_n": 0.0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012442827224731445,
+      "final_lateral_error_m": 0.00016898680769372731,
+      "final_orientation_error_rad": 0.005525293294340372,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 9,
+      "environment_index": 5,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 5,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384053,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384053,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":5,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        1.043722568283556e-05,
+        -4.4711068767355755e-06,
+        8.429431909462437e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.00037542724749073386,
+        0.0007216908852569759,
+        0.0008351581636816263
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.2452976107597351,
+        "force_cost": -1.61944956289517e-06,
+        "action_cost": -3.290943595857243e-06,
+        "terminal": -3.0,
+        "total": -3.2453038692474365
+      },
+      "policy_active_step_count": 714,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 714,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.1960601806640625,
+      "insertion_contact_force_peak_n": 0.016883568838238716,
+      "insertion_contact_load_peak_n": 0.016883570700883865,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012520313262939453,
+      "final_lateral_error_m": 5.742530265706591e-05,
+      "final_orientation_error_rad": 0.0052406685426831245,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 10,
+      "environment_index": 10,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 10,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384058,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384058,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":10,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -6.270410085562617e-05,
+        9.866488835541531e-05,
+        1.9474544387776405e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0029994880314916372,
+        0.0025042518973350525,
+        -0.0011143565643578768
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.056585729122161865,
+        "force_cost": -0.004269667901098728,
+        "action_cost": -3.007602799698361e-06,
+        "terminal": -3.0,
+        "total": -2.947688102722168
+      },
+      "policy_active_step_count": 707,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 707,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.8724372386932373,
+      "insertion_contact_force_peak_n": 0.4536905884742737,
+      "insertion_contact_load_peak_n": 0.5241308808326721,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012413738295435905,
+      "final_lateral_error_m": 0.00014225761697161943,
+      "final_orientation_error_rad": 0.0033655434381216764,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 11,
+      "environment_index": 11,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 11,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384059,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384059,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":11,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -6.726974970661104e-05,
+        9.766023140400648e-05,
+        -6.302409929048736e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        1.2304393749218434e-05,
+        -0.0001999485248234123,
+        -0.00013877902529202402
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.19597846269607544,
+        "force_cost": -0.003272467525675893,
+        "action_cost": -2.9768111744488124e-06,
+        "terminal": -3.0,
+        "total": -3.1992523670196533
+      },
+      "policy_active_step_count": 715,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 715,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.8468518257141113,
+      "insertion_contact_force_peak_n": 0.25176599621772766,
+      "insertion_contact_load_peak_n": 0.25176602602005005,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012413261458277702,
+      "final_lateral_error_m": 0.0001479972415836528,
+      "final_orientation_error_rad": 0.0035606499295681715,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 12,
+      "environment_index": 12,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 12,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384060,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384060,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":12,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        2.0675593987107277e-05,
+        -7.382207513728645e-06,
+        -9.539780876366422e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0017697146395221353,
+        -0.00013550581934396178,
+        0.0036058882251381874
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.1631901264190674,
+        "force_cost": -0.0016047332901507616,
+        "action_cost": -2.7808614504465368e-06,
+        "terminal": -3.0,
+        "total": -1.83841872215271
+      },
+      "policy_active_step_count": 718,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 718,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.193992614746094,
+      "insertion_contact_force_peak_n": 0.21313729882240295,
+      "insertion_contact_load_peak_n": 0.21313729882240295,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012533669359982014,
+      "final_lateral_error_m": 0.0002688596141524613,
+      "final_orientation_error_rad": 0.007571017369627953,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 13,
+      "environment_index": 13,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 13,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384061,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384061,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":13,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -6.0891408793395385e-05,
+        7.435268344124779e-05,
+        -1.4639195796917193e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0007950100698508322,
+        0.0013253878569230437,
+        0.0003251170855946839
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.28061509132385254,
+        "force_cost": -0.001355833956040442,
+        "action_cost": -3.7577324292215053e-06,
+        "terminal": -3.0,
+        "total": -3.2819724082946777
+      },
+      "policy_active_step_count": 711,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 711,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.8268887996673584,
+      "insertion_contact_force_peak_n": 0.4835479259490967,
+      "insertion_contact_load_peak_n": 0.5649874806404114,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012440204620361328,
+      "final_lateral_error_m": 0.00015889969654381275,
+      "final_orientation_error_rad": 0.002831077203154564,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 14,
+      "environment_index": 14,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 14,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384062,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384062,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":14,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        0.0001043406009557657,
+        -9.763068374013528e-05,
+        -1.1778962289099582e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0029588802717626095,
+        -0.0015249231364578009,
+        -0.001387601369060576
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.2836039662361145,
+        "force_cost": -0.0018013939261436462,
+        "action_cost": -2.5784518129512435e-06,
+        "terminal": -3.0,
+        "total": -2.718200206756592
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.957467794418335,
+      "insertion_contact_force_peak_n": 0.24401944875717163,
+      "insertion_contact_load_peak_n": 0.2440195083618164,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012625456787645817,
+      "final_lateral_error_m": 0.0001652098580962047,
+      "final_orientation_error_rad": 0.006949457339942455,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 15,
+      "environment_index": 15,
+      "episode_index": 1,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 15,
+        "episode_index": 1,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 66384063,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":66384063,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":15,\"episode_index\":1,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        0.0001068601559381932,
+        2.7703048544935882e-05,
+        -2.2019750758772716e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0018415472004562616,
+        -0.0001918706257129088,
+        0.001460092724300921
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.5831304788589478,
+        "force_cost": -0.016339970752596855,
+        "action_cost": -2.1533487597480416e-06,
+        "terminal": -3.0,
+        "total": -2.4332125186920166
+      },
+      "policy_active_step_count": 718,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 718,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.035879611968994,
+      "insertion_contact_force_peak_n": 0.6360201835632324,
+      "insertion_contact_load_peak_n": 0.6360202431678772,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012517213821411133,
+      "final_lateral_error_m": 0.00021771067986264825,
+      "final_orientation_error_rad": 0.006463723257184029,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 16,
+      "environment_index": 1,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 1,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384052,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384052,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":1,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -1.751921809045598e-05,
+        4.947771230945364e-06,
+        6.5788658503151964e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0025608493015170097,
+        -0.0018561918986961246,
+        0.0029036113992333412
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.5430304408073425,
+        "force_cost": -3.402724587431294e-06,
+        "action_cost": -2.5648489554441767e-06,
+        "terminal": -3.0,
+        "total": -2.4569764137268066
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.130383491516113,
+      "insertion_contact_force_peak_n": 0.022805362939834595,
+      "insertion_contact_load_peak_n": 0.022805368527770042,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.01251065731048584,
+      "final_lateral_error_m": 0.00012887248885817826,
+      "final_orientation_error_rad": 0.009721200913190842,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 17,
+      "environment_index": 2,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 2,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384053,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384053,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":2,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -0.00012164156942162663,
+        2.596471858851146e-05,
+        -7.36550737201469e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00011532565986271948,
+        0.0004829818499274552,
+        -0.0001160518077085726
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.3130289912223816,
+        "force_cost": -0.022204287350177765,
+        "action_cost": -3.7945148960716324e-06,
+        "terminal": -3.0,
+        "total": -3.335237741470337
+      },
+      "policy_active_step_count": 713,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 713,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.042235851287842,
+      "insertion_contact_force_peak_n": 1.0910305976867676,
+      "insertion_contact_load_peak_n": 1.4346078634262085,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012479417026042938,
+      "final_lateral_error_m": 0.00012578726455103606,
+      "final_orientation_error_rad": 0.0024386816658079624,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 18,
+      "environment_index": 6,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 6,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384057,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384057,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":6,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -6.837570981588215e-05,
+        1.0850099897652399e-05,
+        -0.00010688746260711923
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00012040470028296113,
+        0.0004214865912217647,
+        0.00010756026313174516
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.6135084629058838,
+        "force_cost": -1.0021813977800775e-05,
+        "action_cost": -3.1797010251466418e-06,
+        "terminal": -3.0,
+        "total": -1.386505365371704
+      },
+      "policy_active_step_count": 710,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 710,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.127644062042236,
+      "insertion_contact_force_peak_n": 0.03913779929280281,
+      "insertion_contact_load_peak_n": 0.03913779929280281,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012507439590990543,
+      "final_lateral_error_m": 0.0002526152820792049,
+      "final_orientation_error_rad": 0.00935603491961956,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 19,
+      "environment_index": 7,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 7,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384058,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384058,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":7,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -6.637381738983095e-05,
+        -4.9758629756979644e-05,
+        2.7353220502845943e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0001840175682445988,
+        -0.0032039477955549955,
+        -0.0012532423716038465
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.2877252101898193,
+        "force_cost": -0.00020525504078250378,
+        "action_cost": -3.962301889259834e-06,
+        "terminal": -3.0,
+        "total": -1.7124849557876587
+      },
+      "policy_active_step_count": 715,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 715,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.7852208614349365,
+      "insertion_contact_force_peak_n": 0.11514374613761902,
+      "insertion_contact_load_peak_n": 0.12014729529619217,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012567520141601562,
+      "final_lateral_error_m": 0.00011698974412865937,
+      "final_orientation_error_rad": 0.011435381136834621,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 20,
+      "environment_index": 8,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 8,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384059,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384059,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":8,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        8.376330697501544e-06,
+        -6.75851697451435e-05,
+        -4.411428380990401e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        9.336606308352202e-05,
+        0.0004924506065435708,
+        0.00025529053527861834
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.1573647260665894,
+        "force_cost": -0.009760931134223938,
+        "action_cost": -3.464605015324196e-06,
+        "terminal": -3.0,
+        "total": -1.852399468421936
+      },
+      "policy_active_step_count": 711,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 711,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.9573569297790527,
+      "insertion_contact_force_peak_n": 0.4731290638446808,
+      "insertion_contact_load_peak_n": 0.4731290638446808,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012615922838449478,
+      "final_lateral_error_m": 0.0002323490334674716,
+      "final_orientation_error_rad": 0.010091656818985939,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 21,
+      "environment_index": 9,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 9,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384060,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384060,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":9,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        8.84168730408419e-06,
+        8.323258043674286e-06,
+        -1.8911231336460332e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.002101012272760272,
+        -2.27307464228943e-05,
+        0.00022351843654178083
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 1.1316697597503662,
+        "force_cost": -0.010347560979425907,
+        "action_cost": -2.801732080115471e-06,
+        "terminal": -3.0,
+        "total": -1.8786813020706177
+      },
+      "policy_active_step_count": 708,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 708,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.9632976055145264,
+      "insertion_contact_force_peak_n": 0.4819604754447937,
+      "insertion_contact_load_peak_n": 0.4819605052471161,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012537126429378986,
+      "final_lateral_error_m": 0.0001977862266357988,
+      "final_orientation_error_rad": 0.010016842745244503,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 22,
+      "environment_index": 0,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 0,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384051,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384051,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":0,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        5.862272882950492e-05,
+        4.7248035116354004e-05,
+        -0.00012342895206529647
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0011797747574746609,
+        0.0010465647792443633,
+        0.0012146382359787822
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.7972629070281982,
+        "force_cost": -0.0007651137420907617,
+        "action_cost": -3.0091455300862435e-06,
+        "terminal": -3.0,
+        "total": -2.2035059928894043
+      },
+      "policy_active_step_count": 716,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 716,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.134929180145264,
+      "insertion_contact_force_peak_n": 0.15303893387317657,
+      "insertion_contact_load_peak_n": 0.15303894877433777,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012478831224143505,
+      "final_lateral_error_m": 0.0002885870053432882,
+      "final_orientation_error_rad": 0.004699045792222023,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 23,
+      "environment_index": 3,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 3,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384054,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384054,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":3,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        1.6306066754623316e-06,
+        3.4449917620804626e-06,
+        -1.0846060831681825e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        5.5749529565218836e-05,
+        0.00013755710097029805,
+        1.5992047508461837e-07
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.11421224474906921,
+        "force_cost": -4.4653909014868987e-08,
+        "action_cost": -2.5918111532519106e-06,
+        "terminal": -3.0,
+        "total": -2.8857924938201904
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.0840373039245605,
+      "insertion_contact_force_peak_n": 0.008022445254027843,
+      "insertion_contact_load_peak_n": 0.008022448047995567,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012503623962402344,
+      "final_lateral_error_m": 0.00014892425679136068,
+      "final_orientation_error_rad": 0.006873156875371933,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 24,
+      "environment_index": 4,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 4,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384055,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384055,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":4,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        2.3464141122531146e-05,
+        3.230330776204937e-06,
+        1.4692943295813166e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -6.358377140713856e-05,
+        -0.0038357661105692387,
+        -0.0001649450568947941
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.555426836013794,
+        "force_cost": -3.5957050386059564e-06,
+        "action_cost": -3.124459908576682e-06,
+        "terminal": -3.0,
+        "total": -2.4445807933807373
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.203806400299072,
+      "insertion_contact_force_peak_n": 0.020273415371775627,
+      "insertion_contact_load_peak_n": 0.020273413509130478,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012509584426879883,
+      "final_lateral_error_m": 0.0001328053476754576,
+      "final_orientation_error_rad": 0.009676172398030758,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 25,
+      "environment_index": 5,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 5,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384056,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384056,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":5,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -1.365237835670996e-06,
+        3.9397932027895877e-07,
+        1.7378637267029262e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.0016999768558889627,
+        0.0022363460157066584,
+        0.0015584889333695173
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.07004505395889282,
+        "force_cost": -1.3029385854679276e-06,
+        "action_cost": -1.8717195189310587e-06,
+        "terminal": -3.0,
+        "total": -3.0700507164001465
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.220979690551758,
+      "insertion_contact_force_peak_n": 0.014285468496382236,
+      "insertion_contact_load_peak_n": 0.014285469427704811,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012512086890637875,
+      "final_lateral_error_m": 0.00012259866343811154,
+      "final_orientation_error_rad": 0.0060669188387691975,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 26,
+      "environment_index": 10,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 10,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384061,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384061,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":10,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -8.790155698079616e-05,
+        -7.714985258644447e-06,
+        3.4566750400699675e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.00036001481930725276,
+        -0.0033213431015610695,
+        -0.000419852789491415
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.052314579486846924,
+        "force_cost": -0.012441625818610191,
+        "action_cost": -2.888629978770041e-06,
+        "terminal": -3.0,
+        "total": -2.960130214691162
+      },
+      "policy_active_step_count": 716,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 716,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.9461140632629395,
+      "insertion_contact_force_peak_n": 0.5105130076408386,
+      "insertion_contact_load_peak_n": 0.6849582195281982,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012509223073720932,
+      "final_lateral_error_m": 9.302236139774323e-05,
+      "final_orientation_error_rad": 0.005755081307142973,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 27,
+      "environment_index": 11,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 11,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384062,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384062,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":11,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        7.658038521185517e-05,
+        4.8575700930086896e-05,
+        5.5036569392541423e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0012871648650616407,
+        0.0008676978759467602,
+        -0.0006135766161605716
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.4017915725708008,
+        "force_cost": -6.975160067668185e-05,
+        "action_cost": -2.857596200556145e-06,
+        "terminal": -3.0,
+        "total": -3.4018657207489014
+      },
+      "policy_active_step_count": 718,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 718,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.181066036224365,
+      "insertion_contact_force_peak_n": 0.06558059900999069,
+      "insertion_contact_load_peak_n": 0.06558060646057129,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012472153641283512,
+      "final_lateral_error_m": 0.00010484955419087783,
+      "final_orientation_error_rad": 0.0036217852029949427,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 28,
+      "environment_index": 12,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 12,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384063,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384063,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":12,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -3.834337258012965e-05,
+        2.1860481865587644e-05,
+        2.055739787465427e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -0.000899826642125845,
+        0.00039638607995584607,
+        0.000300999527098611
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.35148489475250244,
+        "force_cost": -0.00033538820571266115,
+        "action_cost": -3.373268327777623e-06,
+        "terminal": -3.0,
+        "total": -3.351823329925537
+      },
+      "policy_active_step_count": 716,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 716,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.7856087684631348,
+      "insertion_contact_force_peak_n": 0.1426209956407547,
+      "insertion_contact_load_peak_n": 0.14262104034423828,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012494325637817383,
+      "final_lateral_error_m": 0.00012724872794933617,
+      "final_orientation_error_rad": 0.004064572975039482,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 29,
+      "environment_index": 13,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 13,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384064,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384064,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":13,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        1.482658444729168e-05,
+        1.2129573406127747e-05,
+        1.587930637469981e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        -5.028699160902761e-05,
+        -1.7947751985047944e-05,
+        4.3791093048639596e-05
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": -0.07129478454589844,
+        "force_cost": -8.60151715187385e-07,
+        "action_cost": -2.500650907677482e-06,
+        "terminal": -3.0,
+        "total": -3.071300983428955
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.144333362579346,
+      "insertion_contact_force_peak_n": 0.01199119072407484,
+      "insertion_contact_load_peak_n": 0.01199119072407484,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012503623962402344,
+      "final_lateral_error_m": 0.00012424527085386217,
+      "final_orientation_error_rad": 0.005505888257175684,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 30,
+      "environment_index": 14,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 14,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384065,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384065,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":14,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        -1.63345812325133e-05,
+        2.2071670173318125e-05,
+        2.826888021445484e-06
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0009313225746154785,
+        0.0008653897675685585,
+        0.0006255617481656373
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.12425509095191956,
+        "force_cost": 0.0,
+        "action_cost": -2.6457526018930366e-06,
+        "terminal": -3.0,
+        "total": -2.8757483959198
+      },
+      "policy_active_step_count": 719,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 719,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 3.7870607376098633,
+      "insertion_contact_force_peak_n": 0.0,
+      "insertion_contact_load_peak_n": 0.0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012487649917602539,
+      "final_lateral_error_m": 0.00013991822197567672,
+      "final_orientation_error_rad": 0.006727210711687803,
+      "final_dwell_s": 0.0
+    },
+    {
+      "attempt_index": 31,
+      "environment_index": 15,
+      "episode_index": 2,
+      "paired_condition": {
+        "evaluation_start": "held",
+        "task_config_sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+        "base_evaluation_seed": 20261028,
+        "environment_index": 15,
+        "episode_index": 2,
+        "calibration_bias_level": 0,
+        "calibration_latent_case_seed": 67384066,
+        "calibration_latent_case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id"
+      },
+      "paired_condition_id": "{\"base_evaluation_seed\":20261028,\"calibration_bias_level\":0,\"calibration_latent_case_seed\":67384066,\"calibration_latent_case_seed_formula\":\"base_seed + stream_offset + episode_index * episode_stride + env_id\",\"environment_index\":15,\"episode_index\":2,\"evaluation_start\":\"held\",\"task_config_sha256\":\"7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772\"}",
+      "calibration_bias_translation_entry_m": [
+        0.00010397688311059028,
+        -3.416238905629143e-05,
+        7.949176506372169e-05
+      ],
+      "calibration_bias_rotation_vector_entry_rad": [
+        0.0035245849285274744,
+        -0.0010483604855835438,
+        0.001995146507397294
+      ],
+      "valid": true,
+      "success": false,
+      "termination_reason": "episode_timeout",
+      "reward_profile": {
+        "reward_profile_id": "a1_discounted_pose_v2",
+        "reward_potential_type": "normalized_pose",
+        "reward_shaping_mode": "discounted_potential",
+        "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+        "reward_discount_factor": 0.995
+      },
+      "reward_component_episode_sums": {
+        "potential_progress": 0.5096293687820435,
+        "force_cost": -0.018635330721735954,
+        "action_cost": -3.2061275305750314e-06,
+        "terminal": -3.0,
+        "total": -2.509009838104248
+      },
+      "policy_active_step_count": 707,
+      "action_saturation_step_count": 0,
+      "action_clip_boundary_step_count": 0,
+      "action_norm_projection_step_count": 0,
+      "action_saturation_definition": "active step where the wrapper-clipped action reached a per-axis [-1,1] boundary or any 3D action vector needed unit-norm projection; pre-wrapper raw clipping magnitude is unavailable",
+      "action_saturation_rate_active_steps": 0.0,
+      "reward_true_terminated": false,
+      "reward_truncated": true,
+      "reward_terminated_and_truncated": false,
+      "invalid_reason": null,
+      "training_policy_activated": true,
+      "training_estimator_valid": true,
+      "policy_input_valid": true,
+      "held_initialization_passed": true,
+      "controller_grip_proven": [
+        true,
+        true
+      ],
+      "evaluation_grip_proven": [
+        true,
+        true
+      ],
+      "valid_policy_input_step_count": 707,
+      "elapsed_s": 24.000001907348633,
+      "retry_count": 0,
+      "grip_contact_force_peak_n": 4.0487141609191895,
+      "insertion_contact_force_peak_n": 0.6628268361091614,
+      "insertion_contact_load_peak_n": 0.6628268361091614,
+      "forbidden_contact_load_peak_n": 0.0,
+      "final_depth_m": 0.012582539580762386,
+      "final_lateral_error_m": 0.00011819691280834377,
+      "final_orientation_error_rad": 0.007992370054125786,
+      "final_dwell_s": 0.0
+    }
+  ],
+  "paired_condition_key": "evaluation_start,task_config_sha256,base_evaluation_seed,environment_index,episode_index,calibration_bias_level,calibration_latent_case_seed,calibration_latent_case_seed_formula",
+  "learned_recovery": false,
+  "task_model": {
+    "scope": "RB-Y1 bimanual mechanical insertion of an RJ45 plug into a handheld LAN-adapter housing; no latch locking, cable dynamics or Ethernet-link claim",
+    "parameter_provenance": "vendor CAD/drawing dimensions plus explicitly labelled simulation-design assumptions; no hardware calibration",
+    "mating_frame": "measured_socket_entry_full_pose",
+    "residual_action_frame": "measured_socket_entry",
+    "observation_dimension": 79,
+    "torso_work_joint_positions_rad": [
+      0.0,
+      0.9,
+      -1.8,
+      0.9,
+      0.0,
+      0.0
+    ],
+    "cross_hand_collision_monitor": "enabled_single_environment_wrapper",
+    "external_forces_every_iteration": true,
+    "evaluation_stability_limits": {
+      "max_depth_m": 0.013,
+      "max_relative_linear_speed_m_s": 0.005,
+      "max_relative_angular_speed_rad_s": 0.05,
+      "required_continuous_dwell_s": 0.4,
+      "relative_linear_velocity_definition": "tip velocity minus entry velocity minus socket angular velocity cross tip-to-entry displacement",
+      "relative_angular_velocity_definition": "plug root angular velocity minus socket root angular velocity"
+    },
+    "pose_or_force_injection": false,
+    "fixed_base": true,
+    "gravity_tensor_shape": [
+      16,
+      62
+    ],
+    "num_joints": 62
+  },
+  "training_environment": {
+    "policy_observation_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+    "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+    "ground_truth_in_policy_observation": false,
+    "object_pose_ground_truth_in_policy_observation": false,
+    "privileged_simulation_latent_in_policy_observation": false,
+    "action_mode": "right_only_6d",
+    "reward_profile": {
+      "reward_profile_id": "a1_discounted_pose_v2",
+      "reward_potential_type": "normalized_pose",
+      "reward_shaping_mode": "discounted_potential",
+      "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+      "reward_discount_factor": 0.995
+    },
+    "action_application_mode": "absolute_tip_pose_target_insert_only",
+    "action_application_description": "tip target pose offset INSERT-only",
+    "policy_active_phases": [
+      "insert"
+    ],
+    "action_application_telemetry": {
+      "field": "applied_tip_target_offset_entry_6d",
+      "frame": "socket_entry",
+      "component_order": [
+        "tx",
+        "ty",
+        "tz",
+        "rx",
+        "ry",
+        "rz"
+      ],
+      "units": [
+        "m",
+        "m",
+        "m",
+        "rad",
+        "rad",
+        "rad"
+      ],
+      "inactive_rows": "all_zeros"
+    },
+    "policy_action_dimension": 6,
+    "policy_observation_dimension": 79,
+    "diagnostic_observation_mode": "standard",
+    "privileged_diagnostic_observation": null,
+    "policy_observation_contract": {
+      "inactive_rows": "all_zeros",
+      "validity_extra": "policy_observation_valid",
+      "policy_active_field_index": 78,
+      "policy_active_field_value_when_valid": 1.0,
+      "persistent_calibration_bias_field_indices": null
+    },
+    "held_grasp_reset": true,
+    "held_controller_initialization": "reconstruct_completed_setup_path_for_new_alignment_episode",
+    "held_reset_staging": {
+      "enabled": true,
+      "scope": "episode_initialization_before_policy_activation_only",
+      "method": "one_noncontact_control_step_then_exact_recorded_state_restore",
+      "state_write_gate": "policy_inactive_only",
+      "control_steps": 1,
+      "object_positions_local_m": [
+        [
+          0.8,
+          0.8,
+          2.5
+        ],
+        [
+          1.0,
+          0.8,
+          2.5
+        ]
+      ],
+      "provenance": {
+        "source": "simulation_design_assumption",
+        "defined_at": "2026-10-26",
+        "valid_for": "Fixed-base RB-Y1 M v1.2 held-state initialization in the current table scene; requires contact-free verification before recorded-state restoration",
+        "unit": "m"
+      },
+      "contact_free_validation": {
+        "requirement": "finite_and_exactly_zero_before_restore",
+        "passed": [
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "finger_force_n": [
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "raw_contact_count": [
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          [
+            0,
+            0,
+            0,
+            0,
+            0
+          ]
+        ],
+        "raw_contact_count_order": [
+          "left_l1",
+          "left_l2",
+          "right_r1",
+          "right_r2",
+          "insertion"
+        ],
+        "insertion_force_world_n": [
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            0.0
+          ]
+        ],
+        "insertion_load_n": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "forbidden_load_n": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    "learned_scope": "pre_portal_alignment_and_insertion",
+    "learned_recovery": false,
+    "camera_observation_claim": false,
+    "mass_randomization": false,
+    "held_warmup_peaks_n": {
+      "grip": [
+        0.0,
+        3.7795441150665283,
+        3.7870779037475586,
+        0.0,
+        0.0,
+        0.0,
+        3.7834081649780273,
+        3.7833242416381836,
+        3.7836456298828125,
+        3.7838294506073,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "insertion": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "forbidden": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "calibration_bias": {
+      "enabled": true,
+      "level": 0,
+      "base_seed": 20261028,
+      "stream_offset": 45123017,
+      "episode_stride": 1000003,
+      "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+      "sampling_event": "once_per_environment_reset_before_calibration",
+      "episode_index": [
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3,
+        3
+      ],
+      "translation_entry_m": [
+        [
+          -7.395610737148672e-05,
+          2.507266435713973e-05,
+          -3.206272958777845e-05
+        ],
+        [
+          3.6320652725407854e-05,
+          2.254329592688009e-05,
+          2.9716809876845218e-05
+        ],
+        [
+          2.2437607185565867e-05,
+          1.7567708709975705e-05,
+          3.2160056434804574e-05
+        ],
+        [
+          4.073043237440288e-05,
+          9.868928464129567e-05,
+          9.395998495165259e-05
+        ],
+        [
+          4.1525010601617396e-05,
+          -5.0797691073967144e-05,
+          -1.9174609406036325e-05
+        ],
+        [
+          8.660577805130742e-06,
+          6.862463578727329e-06,
+          4.740826170746004e-06
+        ],
+        [
+          -6.337866216199473e-05,
+          3.0292414521682076e-05,
+          -4.76372406410519e-06
+        ],
+        [
+          -3.144484935546643e-06,
+          3.476365918686497e-06,
+          -1.6249733789663878e-06
+        ],
+        [
+          -5.740828055422753e-05,
+          7.721139809291344e-06,
+          0.00012356232036836445
+        ],
+        [
+          1.3774404578725807e-05,
+          1.007291029964108e-05,
+          2.79491905530449e-06
+        ],
+        [
+          1.5782497939653695e-05,
+          3.5341006878297776e-05,
+          -7.669101614737883e-05
+        ],
+        [
+          6.84453480062075e-05,
+          4.346556670498103e-05,
+          8.853720601109671e-07
+        ],
+        [
+          -7.82219194661593e-06,
+          2.1330446543288417e-05,
+          9.180274673781241e-07
+        ],
+        [
+          2.5235876819351688e-05,
+          -1.1802108019765e-06,
+          -5.1056362281087786e-05
+        ],
+        [
+          3.6156532587483525e-05,
+          -9.985667929868214e-06,
+          2.897874037444126e-05
+        ],
+        [
+          8.683263877173886e-05,
+          3.21107727359049e-05,
+          6.824579031672329e-05
+        ]
+      ],
+      "rotation_vector_entry_rad": [
+        [
+          0.0022385953925549984,
+          0.0022532776929438114,
+          -1.9217428416595794e-05
+        ],
+        [
+          3.505495624267496e-05,
+          0.0006329933530651033,
+          -0.0005058248061686754
+        ],
+        [
+          0.0032337140291929245,
+          -0.0004927131230942905,
+          0.0014913763152435422
+        ],
+        [
+          -0.003238792298361659,
+          0.0006489919614978135,
+          -0.00010683354776119813
+        ],
+        [
+          8.185722981579602e-05,
+          0.0001814372808439657,
+          4.899499981547706e-05
+        ],
+        [
+          0.002247756812721491,
+          1.6080681461971835e-06,
+          -0.003524022875353694
+        ],
+        [
+          -0.0004410158144310117,
+          0.0005642192554660141,
+          -0.0003021186566911638
+        ],
+        [
+          9.371949090564158e-06,
+          -6.066364903745125e-07,
+          7.377020210697083e-06
+        ],
+        [
+          0.002492321189492941,
+          0.002646965440362692,
+          -0.0015452224761247635
+        ],
+        [
+          -0.0023028901778161526,
+          -0.0005117609980516136,
+          -0.0021490762010216713
+        ],
+        [
+          -0.0001839426113292575,
+          0.0008730141562409699,
+          0.0004894424928352237
+        ],
+        [
+          0.0012910598888993263,
+          0.0015921522863209248,
+          -0.0006650383002124727
+        ],
+        [
+          -0.0019340607104822993,
+          9.982506890082732e-05,
+          0.0004964640829712152
+        ],
+        [
+          0.0011048507876694202,
+          -0.001424123183824122,
+          0.001840813783928752
+        ],
+        [
+          -0.0012820112751796842,
+          -0.0011271993862465024,
+          0.0004599429958034307
+        ],
+        [
+          -0.0008470079046674073,
+          0.0014523229328915477,
+          0.0004391307884361595
+        ]
+      ]
+    }
+  }
+}

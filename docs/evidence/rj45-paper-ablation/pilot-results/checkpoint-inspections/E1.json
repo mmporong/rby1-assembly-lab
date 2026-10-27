@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "status": "checkpoint_payload_and_lineage_verified",
+  "checkpoint": {
+    "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/model_19.pt",
+    "sha256": "f14c282c17c0e14291ec66318923af57fec1f883cae9aace267846ae72b7a972",
+    "filename_iteration": 19,
+    "payload_iteration": 19,
+    "completed_updates": 20
+  },
+  "planned_training_updates": 20,
+  "checkpoint_manifest": {
+    "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/checkpoint_manifest.json",
+    "sha256": "475e841f2d93fe13fcbda2369292ded374e19fdff9eba7bbeba62bd53018b147",
+    "training_completed": true
+  },
+  "training_provenance": {
+    "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/training_provenance.json",
+    "sha256": "263b41fbf69bee265febc52866a73fd19ab22624d86315fde81a83f5b5ec9a6c",
+    "seed": 20261026
+  },
+  "runner_config": {
+    "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/runner_config.json",
+    "sha256": "796f630bddc1a8d4f3310f5143e1101e6b38efeb81a6c16d0cc4af674c43487e",
+    "seed": 20261026
+  },
+  "loader": {
+    "map_location": "cpu",
+    "weights_only": true
+  },
+  "completion_derivation": {
+    "formula": "completed_updates = checkpoint payload iter + 1",
+    "training_mode_basis": "assumed_fresh_no_resume_requires_review_of_pinned_training_script",
+    "checkpoint_scope": "checkpoints created in this run directory",
+    "rsl_rl_version": "3.0.1",
+    "training_script": {
+      "path": "scripts/train.py",
+      "sha256": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2"
+    }
+  }
+}
