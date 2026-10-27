@@ -54,7 +54,7 @@
     "seed": 20261027,
     "status": "sealed_until_candidate_and_common_checkpoint_and_final_protocol_are_frozen",
     "rule": "If the development promotion rule passes, freeze a separate final protocol containing the chosen profile, common checkpoint age, all checkpoint hashes, training seeds and aggregation. Then evaluate one baseline and all three selected policies on the same 32 held-out calibration cases once. Do not reselect a profile, checkpoint age or training seed, or retrain after viewing final results.",
-    "infrastructure_failure": "Preserve the failed output and stop on a process crash, missing or corrupt report, failed input proof, or infrastructure-level held initialization failure. A retry requires a separately recorded incident and frozen retry protocol with the same checkpoint, seed and case IDs; never retry because an otherwise valid policy outcome was unsuccessful. Policy-caused failures count in the original denominator.",
+    "infrastructure_failure": "Preserve the failed output and stop on a process crash, missing or corrupt report, failed input proof, or infrastructure-level held initialization failure. At most one retry is allowed, only after recording an outcome-independent infrastructure cause and freezing a retry protocol. Re-run the entire paired baseline-and-three-policy block with the same checkpoints, seed and case IDs, and preserve every original output. Never retry because a valid policy outcome was unsuccessful. Policy-caused failures count in the original denominator.",
     "limitation": "This seed holds out calibration cases, not a distinct physical grasp or a real-world setup."
   },
   "budget": {
