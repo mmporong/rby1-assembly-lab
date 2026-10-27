@@ -129,11 +129,15 @@ from rby1_assembly.held_grasp import load_verified_held_grasp_artifact  # noqa: 
 from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence  # noqa: E402
 from rby1_assembly.rj45_training import (  # noqa: E402
     action_application_contract_metadata,
+    configure_actor_output_initialization,
     load_training_config,
     policy_ground_truth_usage,
     policy_observation_dimension,
     policy_observation_schema_version,
     privileged_diagnostic_observation_metadata,
+    reward_profile_metadata,
+    validate_reward_profile_runner,
+    validate_reward_horizon_contract,
 )
 from isaaclab.app import AppLauncher  # noqa: E402
 
@@ -165,6 +169,14 @@ parser.add_argument(
     type=Path,
     help="JSON specification pinning report, trace, and SAT proof for parallel contact routing",
 )
+parser.add_argument(
+    "--zero-init-actor-output",
+    action="store_true",
+    help=(
+        "RJ45 experiment option: zero only the final deterministic actor mean "
+        "Linear layer; Gaussian policy noise remains configured by PPO"
+    ),
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
@@ -177,6 +189,8 @@ if args.task == "rj45" and args.rj45_held_state is None:
     parser.error("--rj45-held-state is required for --task rj45")
 if args.task == "rj45" and args.num_envs > 1 and args.parallel_contact_evidence is None:
     parser.error("parallel RJ45 training requires --parallel-contact-evidence")
+if args.zero_init_actor_output and args.task != "rj45":
+    parser.error("--zero-init-actor-output is only supported for --task rj45")
 try:
     task_path = PROJECT_ROOT / (
         "configs/tasks/rj45-v1.json" if args.task == "rj45" else "configs/task.json"
@@ -269,6 +283,7 @@ try:
     )
     if args.task == "rj45":
         training_config = load_training_config(args.rj45_training_config)
+        validate_reward_profile_runner(training_config, runner_cfg)
         held_state, held_state_proof = load_verified_held_grasp_artifact(
             PROJECT_ROOT, selected_task, args.rj45_held_state
         )
@@ -301,6 +316,10 @@ def main() -> int:
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
     cfg.seed = runner_cfg["seed"]
+    if args.task == "rj45":
+        validate_reward_horizon_contract(
+            training_config, is_finite_horizon=cfg.is_finite_horizon
+        )
     env_type = Rby1AssemblyEnv
     if args.task == "rj45":
         from rby1_assembly.rj45_env import configure_rj45_task
@@ -417,9 +436,24 @@ def main() -> int:
             lineage["rj45_training_contract"].update(
                 action_application_contract_metadata(training_config)
             )
+            if training_config["schema_version"] == 2:
+                lineage["rj45_training_contract"].update(
+                    reward_profile_metadata(training_config)
+                )
+        if args.task == "rj45":
+            if args.zero_init_actor_output and action_dimension != 6:
+                raise ValueError(
+                    "zero-initialized RJ45 residual actor requires 6D actions"
+                )
+        runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)
+        if args.task == "rj45":
+            lineage["policy_initialization"] = configure_actor_output_initialization(
+                runner,
+                expected_output_dim=action_dimension,
+                zero_initialize=args.zero_init_actor_output,
+            )
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
-        runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)
         runner.add_git_repo_to_log(__file__)
         runner.learn(
             num_learning_iterations=runner_cfg["max_iterations"],

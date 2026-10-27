@@ -261,4 +261,81 @@ OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/evaluate_policy.py \
 
 조건별 비교에는 같은 시작 방식·시드·환경·episode index·보정 오차 case를 사용한다. 시작 방식은 `paired_condition`과 canonical ID에 포함된다. 각 episode의 물리 종료 이유인 `termination_reason`과 평가 계약 위반인 `invalid_reason`은 별도로 기록한다. held 초기화 실패나 유효 정책 입력이 한 번도 없었던 표본은 invalid로 남기며, 정책이 활성화된 뒤 생긴 파지 손실은 정책 실패로 집계한다. 전체 성공률은 invalid를 포함한 요청 표본 수를 분모로 해석하고, 유효 표본만의 성공률은 보조 지표로 본다. 이 명령은 사용 예시이며 성능 개선이 검증됐다는 뜻은 아니다.
 
-진단용 `configs/rj45-training-bias-observability.json`과 `configs/rj45-training-target-offset-bias-observability.json`은 `persistent_calibration_bias` 모드로, 시뮬레이터의 episode별 보정 오차 6D를 정규화해 입력에 추가한다. `base_observation_dim`은 모든 설정에서 79이며 실제 정책 폭은 표준 79D, 진단 85D다. 진단 체크포인트는 관측 schema v2와 privileged 정보 사용 계약을 요구하고, 표준 schema v1과 혼용하지 않는다. 진단 설정의 `oracle` 평가는 시작 전에 거부한다. 1환경·1 iteration·128 transition smoke와 64환경·20-update 본 학습을 `artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08`에서 완료했다. 같은 32개 조건의 기준 제어는 12회, 85D 정책은 0회 성공했고 정책의 32회는 모두 24초 제한으로 끝났다. 무효 episode와 최대 금지 접촉 하중은 양쪽 모두 0이며, 정책의 최대 삽입 접촉 하중은 2.968129873 N이다. 성공률 차이는 -37.5%p, 100,000회 paired bootstrap 95% 구간은 -53.125~-21.875%p다(seed `20261029`). 79D와 85D 평가의 기준 제어 32건은 `attempt_index`를 제외한 모든 outcome 필드가 같았다. 이번 단일 held·단일 seed·20-update 진단에서는 privileged 6D를 더해도 결과가 나아지지 않았다. 이 6D는 실물 센서나 추정값이 아니며, 이번 결과로 학습 원리가 불가능하다고 볼 수 없다. 표준 79D도 scripted ALIGN 뒤 관절 자세에 보정 오차와 상관된 단서가 남을 수 있어 85D 결과만으로 표준 관측의 정보 부족을 증명할 수 없다. 원시 평가와 baseline 교차 대조, 학습 provenance의 해시는 [RJ45 검증 근거](evidence/rj45-validation.json)에 있다. 다음 주 실험의 주 목표는 mechanical v2와 현재 50 µm 엄격 기준 중 사용자 결정 뒤 확정하며, 그전에는 성공 기준을 바꾸지 않는다.
+진단용 `configs/rj45-training-bias-observability.json`과 `configs/rj45-training-target-offset-bias-observability.json`은 `persistent_calibration_bias` 모드로, 시뮬레이터의 episode별 보정 오차 6D를 정규화해 입력에 추가한다. `base_observation_dim`은 모든 설정에서 79이며 실제 정책 폭은 표준 79D, 진단 85D다. 진단 체크포인트는 관측 schema v2와 privileged 정보 사용 계약을 요구하고, 표준 schema v1과 혼용하지 않는다. 진단 설정의 `oracle` 평가는 시작 전에 거부한다. 1환경·1 iteration·128 transition smoke와 64환경·20-update 본 학습을 `artifacts/rj45-bias-observability-ablation/logs/rj45-v1/2026-10-26_16-22-08`에서 완료했다. 같은 32개 조건의 기준 제어는 12회, 85D 정책은 0회 성공했고 정책의 32회는 모두 24초 제한으로 끝났다. 무효 episode와 최대 금지 접촉 하중은 양쪽 모두 0이며, 정책의 최대 삽입 접촉 하중은 2.968129873 N이다. 성공률 차이는 -37.5%p, 100,000회 paired bootstrap 95% 구간은 -53.125~-21.875%p다(seed `20261029`). 79D와 85D 평가의 기준 제어 32건은 `attempt_index`를 제외한 모든 outcome 필드가 같았다. 이번 단일 held·단일 seed·20-update 진단에서는 privileged 6D를 더해도 결과가 나아지지 않았다. 이 6D는 실물 센서나 추정값이 아니며, 이번 결과로 학습 원리가 불가능하다고 볼 수 없다. 표준 79D도 scripted ALIGN 뒤 관절 자세에 보정 오차와 상관된 단서가 남을 수 있어 85D 결과만으로 표준 관측의 정보 부족을 증명할 수 없다. 원시 평가와 baseline 교차 대조, 학습 provenance의 해시는 [RJ45 검증 근거](evidence/rj45-validation.json)에 있다. 새 보상 비교도 기존 50 µm 엄격 기준을 유지한다. 이전 기준 제어 결과 JSON에는 평가용 파지 proof가 없으므로 공통 파지 상태가 보고서 자체로 증명되지는 않는다.
+
+
+## 논문 기반 보상·초기화 비교
+
+[A0/A1/A2/E1/Z1의 출처·수식·비교 범위](rj45-rl-research.md)를 먼저 확인한다. 동일한 소스에서 명목 실행과 held artifact를 다시 생성한 뒤 검사한다. 병렬 reset 검사는 N4 접촉 라우팅 증거를 **사전 조건**으로 쓰며, N64 reset 보존은 별도 물리 실행으로 측정한다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/check_rj45_reset.py \
+  --headless --device cuda:0 --num-envs 64 --reset-cycles 4 \
+  --nominal artifacts/rj45/nominal.json --held artifacts/rj45/held.json \
+  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json \
+  --report artifacts/rj45/reset-64.json
+```
+
+A1 학습 예시는 다음과 같다. A2는 `--rj45-training-config`를 `configs/rj45-training-target-offset-a2-keypoint-shape-v2.json`으로 바꾸며, 두 실험은 유한 지평선 timeout에서 potential을 0으로 처리한다. E1은 기존 A0 training config와 `configs/ppo-rj45-low-exploration-v1.json`을 사용한다. Z1은 E1에 `--zero-init-actor-output`만 더한다. 이 옵션은 actor 평균 출력층만 0으로 초기화하며 학습 중 탐색 잡음은 유지한다.
+
+```bash
+OMNI_KIT_ACCEPT_EULA=YES .venv-isaac/bin/python scripts/train.py \
+  --headless --device cuda:0 --task rj45 --num-envs 64 --max-iterations 20 \
+  --config configs/ppo-rj45-v1.json \
+  --rj45-training-config configs/rj45-training-target-offset-a1-discounted-pose-v2.json \
+  --rj45-nominal-evidence artifacts/rj45/nominal.json \
+  --rj45-held-state artifacts/rj45/held.json \
+  --parallel-contact-evidence artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json \
+  --log-root artifacts/rj45-research/a1
+```
+
+각 policy는 지정한 마지막 checkpoint로 별도 평가한다. 새 schema v2 보고서에는 기준 제어와 정책 각각의 명목·파지 proof, 종료 시 입력 재검증, 보상 항목 합계와 행동 경계 지표가 포함된다. `python3 scripts/analyze_rj45_paired.py --help`는 보고서, checkpoint·manifest·training provenance·runner config를 지정하는 인자를 보여준다. 분석기는 보고값의 공통 조건과 명시적으로 제공한 checkpoint bundle 바이트를 검사한다. source·asset 파일 바이트와 사전등록 계획은 별도로 대조해야 한다. 이전 보고서는 `--allow-legacy-unproven-held`를 명시해야 분석할 수 있으며, 그 보고서에 없는 파지 proof는 복원되지 않는다.
+
+사전등록된 다섯 조건을 동일한 순서로 재현하려면 [실행 스크립트](evidence/rj45-paper-ablation/run_remote_experiment.sh)와 [GPU smoke 검사기](evidence/rj45-paper-ablation/validate_gpu_smoke.py)를 사용한다. 실행 전 생성 에셋과 N4 접촉 증거를 준비해야 한다. 스크립트는 기존 실행 상태 파일이 있으면 덮어쓰지 않는다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+(cd docs/evidence/rj45-paper-ablation && sha256sum -c plan.sha256)
+mkdir -p artifacts/rj45-paper-ablation
+cp docs/evidence/rj45-paper-ablation/run_remote_experiment.sh artifacts/rj45-paper-ablation/
+cp docs/evidence/rj45-paper-ablation/validate_gpu_smoke.py artifacts/rj45-paper-ablation/
+python3 docs/evidence/rj45-paper-ablation/verify_frozen_inputs.py && \
+  bash artifacts/rj45-paper-ablation/run_remote_experiment.sh
+```
+
+입력 검증기는 계획 파일과 고정 입력의 해시, 소스·설정 파일 목록이 모두 일치해야 실행을 허용한다. 검증기 자체는 기존 사전등록 입력에는 포함되지 않은 보조 도구다.
+
+다섯 학습·평가가 모두 끝나면 같은 사례의 결과와 실제 checkpoint bundle을 감사한다. 각 실행군의 `model_19.pt`가 정확히 하나인지 검사하고 같은 폴더의 manifest·provenance·runner config를 함께 지정한다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+RJ45_RESULT_DIR=artifacts/rj45-paper-ablation
+RJ45_AUDIT_ARGS=()
+RJ45_AUDIT_READY=1
+for RJ45_GROUP in A0 A1 A2 E1 Z1; do
+  mapfile -t RJ45_MODELS < <(find "$RJ45_RESULT_DIR/runs/$RJ45_GROUP" -type f -name model_19.pt -print)
+  if [ "${#RJ45_MODELS[@]}" -ne 1 ]; then
+    printf '%s: expected one final checkpoint, found %s\n' "$RJ45_GROUP" "${#RJ45_MODELS[@]}" >&2
+    RJ45_AUDIT_READY=0
+    break
+  fi
+  RJ45_RUN_DIR="$(dirname "${RJ45_MODELS[0]}")"
+  RJ45_AUDIT_ARGS+=(--condition "$RJ45_GROUP=$RJ45_RESULT_DIR/$RJ45_GROUP.json")
+  RJ45_AUDIT_ARGS+=(--checkpoint-artifact "$RJ45_GROUP=${RJ45_MODELS[0]}")
+  RJ45_AUDIT_ARGS+=(--checkpoint-manifest "$RJ45_GROUP=$RJ45_RUN_DIR/checkpoint_manifest.json")
+  RJ45_AUDIT_ARGS+=(--training-provenance "$RJ45_GROUP=$RJ45_RUN_DIR/training_provenance.json")
+  RJ45_AUDIT_ARGS+=(--runner-config "$RJ45_GROUP=$RJ45_RUN_DIR/runner_config.json")
+done
+if [ "$RJ45_AUDIT_READY" -eq 1 ] && [ "${#RJ45_AUDIT_ARGS[@]}" -eq 50 ]; then
+  python3 scripts/analyze_rj45_paired.py \
+    --baseline "$RJ45_RESULT_DIR/baseline.json" "${RJ45_AUDIT_ARGS[@]}" \
+    --bootstrap-resamples 100000 --bootstrap-seed 20261029 \
+    --output "$RJ45_RESULT_DIR/paired-audit.json"
+else
+  printf 'checkpoint 준비 실패: 결과 감사를 실행하지 않았습니다\n' >&2
+  false
+fi
+```
+
+감사 결과의 신뢰구간은 한 평가 seed와 한 파지 상태의 조건부 사례 비교다. bundle 검증 여부와 별개로 source·asset 실제 바이트와 사전등록 계획은 검증하지 않는다고 표시한다.

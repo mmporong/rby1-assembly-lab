@@ -1,0 +1,69 @@
+# RJ45 양팔 삽입: 논문을 근거로 한 잔차 강화학습 검증
+
+## 문제와 현재 범위
+
+RB-Y1은 왼손으로 휴대형 LAN 어댑터를 지지하고 오른손으로 RJ45 플러그를 삽입한다. 양손 파지·접근·정렬은 기준 제어기가 수행한다. 강화학습 정책은 INSERT 구간에서 오른손 플러그 팁의 위치와 자세에 6차원 보정만 더한다. 기준 제어는 고정하며, 정책이 양팔 과제 전체나 잼 후 복구를 학습한 것은 아니다.
+
+기존 개발 실험에서는 하나의 파지 상태와 보정 오차를 바꾼 32개 조건에서 기준 제어가 12회, 79차원 PPO 정책이 0회 성공했다. 학습은 seed 하나, 64개 환경, 20회 갱신이었다. 정책 입력에 시뮬레이터 보정 오차를 추가한 85차원 진단도 0회였다. 기존 기준 제어 보고서는 평가에 사용한 파지 상태의 해시를 별도로 남기지 않아, **그 보고서만으로는** 두 평가가 같은 파지 artifact를 썼는지 증명할 수 없다. 해당 결과는 개발 기록으로 보존한다.
+
+성공 기준은 기존 strict v1을 유지한다. 삽입 깊이 12–13 mm, 중심축 횡오차 50 µm 이하, 각도 오차 0.5° 이하에 파지·하중·상대속도 및 0.4초 연속 유지 조건을 함께 적용한다. 50 µm는 이 프로젝트의 평가 기준이며 RJ45 제조사 규격이 아니다. 성공 영상을 전기 연결, 래치 잠금, 케이블 변형 또는 실제 로봇 성공으로 해석하지 않는다.
+
+## 관련 논문과 적용 범위
+
+| 근거 | 논문의 접근 | 이 프로젝트에서 검증하는 적용 | 차이와 제한 |
+| --- | --- | --- | --- |
+| [IndustReal, RSS 2023](https://www.roboticsproceedings.org/rss19/p039.pdf), [공식 코드](https://github.com/isaac-sim/IsaacGymEnvs/blob/aeed298638a1f7b5421b38f5f3cc2d1079b6d9c3/isaacgymenvs/tasks/industreal/industreal_algo_utils.py#L239-L276) | 부품 형상에 관한 SDF 보상과 물리·커리큘럼 개선을 사용한다. | 플러그 팁 좌표계의 형상 대응점 8개를 목표 자세와 비교하는 보상을 추가한다. | 대응점 보상은 논문의 SDF 구현이나 포트 내부 간극 해석이 아니다. 로봇·부품·물리 설정이 달라 논문의 성공률을 적용하지 않는다. |
+| [Residual Policy Learning, Silver 외](https://arxiv.org/pdf/1812.06298) | 기준 정책에 더하는 잔차 신경망의 마지막 층을 0으로 초기화해 시작 시 기준 정책을 보존한다. | PPO actor의 마지막 Linear 층만 0으로 초기화하는 옵션을 따로 비교한다. | 초기 **결정론적 평균**이 0이다. PPO 학습 중 Gaussian 탐색은 유지되며, 학습 후 성능 보장은 없다. 논문은 현재 프로젝트와 다른 알고리즘·과제를 사용한다. |
+| [Ng·Harada·Russell, 1999](https://people.eecs.berkeley.edu/~russell/papers/icml99-shaping.pdf) | 할인율을 포함한 potential 기반 보상 변환을 분석한다. | 같은 자세 potential에 `γΦ(s_next) − Φ(s)`와 종료 처리 보완을 적용해 기존 보상과 비교한다. | 현재 정책은 INSERT만 활성화되고 남은 시간을 관측하지 않는다. 이 구현이 전체 과제의 정책 불변성을 보장한다고 주장하지 않는다. |
+| [AutoMate, RSS 2024](https://roboticsproceedings.org/rss20/p064.pdf) | 분해 경로를 활용한 조립 시연, 모방 보상과 RL을 결합한다. | 다음 단계에서 이 로봇의 성공 궤적을 검증해 시연으로 기록하는 방향을 제안한다. | 공개 데이터의 다른 로봇·부품 궤적은 RB-Y1의 행동 데이터가 아니다. 이번 PPO는 해당 시연을 사용하지 않는다. |
+| [Isaac Lab Mimic 공식 문서](https://docs.nvidia.com/isaaclab/features/synthetic-data-generation-and-imitation-learning-with-isaac-lab-mimic) | 물체 기준 좌표와 작업 공간 행동을 이용해 시연을 증강한다. | 양팔 시연의 검증·증강을 위한 후속 후보로 검토한다. | 현재 태스크에 Mimic 데이터 생성·모방학습 파이프라인이 연결된 것은 아니다. |
+
+플러그 대응점은 현재 시뮬레이션에 사용한 도면 기반 강체 외곽의 앞·뒤 네 모서리다. 설정에 단위, 목표 팁 위치, 좌표계, 작업 설정 및 플러그 asset의 SHA-256을 기록하고 실제 파일과 대조한다. 머리 또는 손목 카메라 영상을 입력받는 정책은 아니며 접촉 신호도 시뮬레이션 관측이다.
+
+## 보상 수식
+
+팁 위치를 소켓 입구 좌표계의 `(x, d, z)`, 방향 오차를 `θ`라 하면 A0/A1의 자세 potential은 `clip(d / 0.012, -2, 1.1) - min(√(x²+z²) / 0.0005, 20) - min(θ / (π/180), 20)`이다. 길이는 m, 각도는 rad다. A0은 인접 상태의 potential 차이를 쓰고, A1은 할인율 0.995와 실제 INSERT 전이·종료 처리를 적용한다.
+
+A2는 플러그 팁 기준 대응점 `pᵢ` 8개에 대해 현재 점 `R pᵢ + t`와 목표 점 `pᵢ + t_goal`의 차이를 구한다. 각 축을 `[0.0005, 0.012, 0.0005] m`로 나눈 벡터의 크기를 20에서 제한하고, 이 값의 평균을 1에서 뺀다. 따라서 A2는 축마다 다른 크기 기준을 적용한 대응점 자세 potential이며, 실제 공동 표면의 SDF나 간섭 깊이가 아니다.
+
+## 비교 조건
+
+공통 조건은 79차원 관측, 오른손 6차원 INSERT 잔차, 같은 기준 제어와 물리 조건이다. 학습은 64개 환경 × 128 step × 20회 갱신, seed `20261026`으로 진행한다. 각 정책의 마지막 checkpoint를 미리 지정하고, 평가에서는 seed `20261028`의 32개 조건을 동일한 paired condition ID와 실제 보정 오차 벡터로 연결한다. 모든 요청 사례를 성공률 분모에 포함한다.
+
+| 실험군 | 변경 내용 | 비교할 대상 |
+| --- | --- | --- |
+| A0 | 기존 자세 potential, 기존 종료 처리, 초기 탐색 표준편차 0.6 | 기준 제어 |
+| A1 | 할인된 potential과 실제 삽입 action 전이·종료 처리를 함께 반영 | A0: 복합 변경의 효과 |
+| A2 | A1의 종료 처리·할인율은 유지하고 potential만 형상 대응점으로 변경 | A1: 형상 표현의 효과 |
+| E1 | A0 보상은 유지하고 초기 탐색 표준편차를 0.6에서 0.1로 변경 | A0: 탐색 크기 변경 |
+| Z1 | E1의 학습 조건에 actor 마지막 층 0 초기화 추가 | E1: 초기화 변경 |
+
+`A1 − A0`에는 할인율과 행동 전이·종료 처리 차이가 함께 들어 있으므로 할인율 하나의 인과 효과가 아니다. 실제 코드의 timeout은 24초 유한 지평선과 기존 실패 패널티 `-3`을 유지한다. 현재 Isaac Lab/RSL-RL 설정에서 timeout은 bootstrap되지 않으므로 A1/A2는 true termination 또는 시간 제한에서 다음 potential을 0으로 처리한다.
+
+시뮬레이션 접촉력 페널티, 행동 변화 페널티와 성공·실패 보너스는 비교군별로 새로 튜닝하지 않는다. 각 평가 에피소드에는 보상 항목별 합, 행동이 wrapper의 clip 경계에 도달한 횟수, 3축 벡터 norm 제한 횟수, 종료·시간 제한과 하중을 기록한다. clip 전 원래 행동값은 이 기록에서 확인할 수 없다.
+
+## 데이터와 결과 해석
+
+현재 PPO는 파일 기반 offline 데이터셋이 아니라 병렬 시뮬레이터에서 online rollout을 생성한다. 하나의 검증된 파지 상태를 복원한 후 보정 오차를 무작위로 바꾸므로, 조건 수가 늘어도 서로 다른 파지 형상·물체 배치·마찰에 대한 일반화가 입증되지는 않는다. 적재 질량과 마찰의 무작위화는 현재 꺼져 있다.
+
+새 평가 보고서 v2는 기준 제어와 학습 정책 모두 명목 실행과 파지 artifact의 proof를 남기고 종료 시 다시 검사한다. 분석기는 평가 조건 ID와 보정 오차, source·asset·runtime·접촉 증거의 보고값, 성공 집계를 서로 대조한다. checkpoint·manifest·training provenance·runner config 파일을 옵션으로 모두 제공하면 해당 bundle의 실제 바이트 해시도 확인한다. source·asset 파일의 실제 바이트와 사전등록 실험 계획의 일치는 별도 frozen-input 검사 범위다. 구버전 보고서는 명시적인 legacy 모드에서만 읽으며, 보고서 자체에 없는 파지 증거를 추정하지 않는다.
+
+개발 평가의 짝지은 bootstrap 구간은 **해당 평가 seed와 파지 상태에 조건부**다. 단일 학습 seed의 32개 사례만으로 정책의 재현성이나 다른 파지 상태에 대한 일반화, 실물 전이를 주장하지 않는다. 미사용 최종 평가 seed `20261027`은 개발 비교에 사용하지 않는다. 후속 단계에서는 독립적인 물리 파지 상태를 확보하고 train/dev/held-out을 상태와 seed 기준으로 분리한 후 여러 학습 seed를 평가한다.
+
+## 실행 방법
+
+개발 비교를 시작하기 전에 고정한 [실험 계획과 입력 해시](evidence/rj45-paper-ablation/experiment-plan.json), [계획 SHA-256](evidence/rj45-paper-ablation/plan.sha256), [실행 스크립트](evidence/rj45-paper-ablation/run_remote_experiment.sh), [GPU 사전 검사기](evidence/rj45-paper-ablation/validate_gpu_smoke.py)를 함께 보관한다. 입력 해시는 당시 작업 트리 기준이며 `base_commit`은 변경 전 기준 commit이다. 외부 에셋·대용량 원본 trace·체크포인트는 별도 확보해야 한다. 전체 명령과 결과 감사 방법은 [Brev 실행 문서](brev-run.md#논문-기반-보상초기화-비교)에 있다.
+
+동결 계획에 적힌 Ng 논문의 Stanford 링크는 현재 접근할 수 없어, 이 문서에서는 같은 논문의 Berkeley 원문 링크를 사용한다. 사전등록 계획과 해시는 당시 상태로 보존한다.
+
+기존 단일 파지 상태의 명목 실행·물리 reset·PPO 학습 및 평가 명령은 [Brev 실행 문서](brev-run.md)에 있다. 새 profile은 다음 설정을 사용한다.
+
+- 기존 보상: [`configs/rj45-training-target-offset-v1.json`](../configs/rj45-training-target-offset-v1.json)
+- A1: [`configs/rj45-training-target-offset-a1-discounted-pose-v2.json`](../configs/rj45-training-target-offset-a1-discounted-pose-v2.json)
+- A2: [`configs/rj45-training-target-offset-a2-keypoint-shape-v2.json`](../configs/rj45-training-target-offset-a2-keypoint-shape-v2.json)
+- 표준 탐색 크기: [`configs/ppo-rj45-v1.json`](../configs/ppo-rj45-v1.json)
+- 낮은 탐색 크기: [`configs/ppo-rj45-low-exploration-v1.json`](../configs/ppo-rj45-low-exploration-v1.json)
+- Z1 초기화: `scripts/train.py --zero-init-actor-output`; 학습 provenance에 actor 초기화와 논문 출처가 남는다.
+- 결과 감사: `scripts/analyze_rj45_paired.py --help`
+
+소스가 바뀌면 이전 명목 실행과 파지 artifact의 해시는 현재 소스와 일치하지 않는다. 새 명목 실행, 파지 복원, 병렬 접촉 증거 검증을 마친 뒤 학습·평가를 시작한다. 로봇과 부품이 포함된 PhysX 시뮬레이션 결과이며 실물 센서 보정이나 심투리얼 성공의 증거는 아니다.

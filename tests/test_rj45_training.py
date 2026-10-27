@@ -16,6 +16,9 @@ from rby1_assembly.rj45_training import (
     policy_observation_schema_version,
     policy_observation_source,
     privileged_diagnostic_observation_metadata,
+    reward_profile_metadata,
+    validate_reward_horizon_contract,
+    validate_reward_profile_runner,
     validate_held_grasp_artifact,
 )
 
@@ -25,6 +28,8 @@ CONFIG_PATH = ROOT / "configs/rj45-training-v1.json"
 DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-bias-observability.json"
 TARGET_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-v1.json"
 TARGET_DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-bias-observability.json"
+A1_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a1-discounted-pose-v2.json"
+A2_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
 HASH = "a" * 64
 
 
@@ -171,6 +176,77 @@ class TrainingConfigurationTests(unittest.TestCase):
                     "policy_active_phases": ["insert"],
                 },
             )
+
+    def test_versioned_reward_profiles_and_runner_gamma_are_strict(self):
+        a1 = load_training_config(A1_CONFIG_PATH)
+        a2 = load_training_config(A2_CONFIG_PATH)
+        self.assertEqual(
+            reward_profile_metadata(a1),
+            {
+                "reward_profile_id": "a1_discounted_pose_v2",
+                "reward_potential_type": "normalized_pose",
+                "reward_shaping_mode": "discounted_potential",
+                "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+                "reward_discount_factor": 0.995,
+            },
+        )
+        self.assertEqual(reward_profile_metadata(a2)["reward_potential_type"], "cad_keypoints")
+        validate_reward_profile_runner(a1, {"algorithm": {"gamma": 0.995}})
+        validate_reward_horizon_contract(a1, is_finite_horizon=True)
+        with self.assertRaisesRegex(ValueError, "is_finite_horizon=True"):
+            validate_reward_horizon_contract(a1, is_finite_horizon=False)
+        with self.assertRaisesRegex(ValueError, "exactly match"):
+            validate_reward_profile_runner(a1, {"algorithm": {"gamma": 0.99}})
+        legacy = load_training_config(TARGET_CONFIG_PATH)
+        validate_reward_profile_runner(legacy, {"algorithm": {"gamma": 0.1}})
+        validate_reward_horizon_contract(legacy, is_finite_horizon=False)
+
+    def test_a2_keypoints_are_pinned_to_current_drawing_geometry(self):
+        a2 = load_training_config(A2_CONFIG_PATH)
+        geometry = a2["reward_profile"]["keypoint_geometry"]
+        points = geometry["plug_keypoints_tip_frame_m"]
+        task = json.loads((ROOT / "configs/tasks/rj45-v1.json").read_text())
+        profile = task["geometry"]["plug_profile"]
+        self.assertEqual(len(points), 8)
+        self.assertEqual(
+            sorted({abs(point[0]) for point in points}),
+            [profile["max_width_m"] / 2.0],
+        )
+        self.assertEqual(
+            sorted({point[1] for point in points}),
+            [-profile["nose_length_m"], 0.0],
+        )
+        self.assertEqual(
+            sorted({abs(point[2]) for point in points}),
+            [profile["terminated_nose_height_m"] / 2.0],
+        )
+        source = geometry["geometry_source"]
+        self.assertEqual(
+            source["task_config_sha256"],
+            hashlib.sha256((ROOT / source["task_config_path"]).read_bytes()).hexdigest(),
+        )
+        self.assertEqual(
+            source["plug_asset_sha256"],
+            hashlib.sha256((ROOT / source["plug_asset_path"]).read_bytes()).hexdigest(),
+        )
+        damaged = json.loads(A2_CONFIG_PATH.read_text())
+        damaged["reward_profile"]["keypoint_geometry"]["geometry_source"][
+            "plug_asset_sha256"
+        ] = "0" * 64
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            path = Path(temporary) / "a2.json"
+            path.write_text(json.dumps(damaged))
+            with self.assertRaisesRegex(ValueError, "source hash mismatch"):
+                load_training_config(path)
+
+    def test_low_exploration_ppo_config_changes_only_initial_noise(self):
+        standard = json.loads((ROOT / "configs/ppo-rj45-v1.json").read_text())
+        low = json.loads((ROOT / "configs/ppo-rj45-low-exploration-v1.json").read_text())
+        standard_noise = standard["policy"].pop("init_noise_std")
+        low_noise = low["policy"].pop("init_noise_std")
+        self.assertEqual(standard, low)
+        self.assertEqual(standard_noise, 0.6)
+        self.assertEqual(low_noise, 0.1)
 
     def test_staging_rejects_ambiguous_units_unverified_duration_and_overlapping_objects(self):
         original = json.loads(CONFIG_PATH.read_text())

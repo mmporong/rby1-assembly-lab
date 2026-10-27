@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-27T01:39:00.172542+00:00",
+  "status": "predeclared_before_training",
+  "scope": "development ablation: fixed single physical held state, scripted bimanual controller and right-arm INSERT-only residual PPO; no hardware, vision policy or cross-grasp generalization claim",
+  "research_basis": {
+    "shape_reference": "https://www.roboticsproceedings.org/rss19/p039.pdf",
+    "discounted_potential_reference": "https://ai.stanford.edu/~ang/papers/shaping-icml99.pdf",
+    "demonstration_reference": "https://roboticsproceedings.org/rss20/p064.pdf",
+    "qualification": "A2 uses corresponding keypoints on a drawing-derived rigid plug envelope; it is not an SDF and does not reproduce IndustReal",
+    "zero_initialization_reference": "https://arxiv.org/pdf/1812.06298"
+  },
+  "training": {
+    "environments": 64,
+    "updates": 20,
+    "rollout_steps_per_env": 128,
+    "transitions": 163840,
+    "seed": 20261026,
+    "checkpoint": "final_only_model_19.pt",
+    "start": "one current-source physically validated held-grasp artifact"
+  },
+  "groups": [
+    {
+      "id": "A0",
+      "training_config": "configs/rj45-training-target-offset-v1.json",
+      "ppo_config": "configs/ppo-rj45-v1.json",
+      "difference": "legacy potential and exploration standard deviation 0.6",
+      "training_flags": []
+    },
+    {
+      "id": "A1",
+      "training_config": "configs/rj45-training-target-offset-a1-discounted-pose-v2.json",
+      "ppo_config": "configs/ppo-rj45-v1.json",
+      "difference": "discounted potential plus preserved pre-step INSERT active mask at terminal and zero next potential for both true termination and finite-horizon timeout; existing timeout penalty retained; contributions cannot be separated",
+      "training_flags": []
+    },
+    {
+      "id": "A2",
+      "training_config": "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json",
+      "ppo_config": "configs/ppo-rj45-v1.json",
+      "difference": "A1 with keypoint potential replacing pose potential",
+      "training_flags": []
+    },
+    {
+      "id": "E1",
+      "training_config": "configs/rj45-training-target-offset-v1.json",
+      "ppo_config": "configs/ppo-rj45-low-exploration-v1.json",
+      "difference": "A0 reward with initial exploration standard deviation 0.1 instead of 0.6",
+      "training_flags": []
+    },
+    {
+      "id": "Z1",
+      "training_config": "configs/rj45-training-target-offset-v1.json",
+      "ppo_config": "configs/ppo-rj45-low-exploration-v1.json",
+      "initialization": "zero actor final layer via explicit training flag",
+      "difference": "E1 plus zero initialization of actor final layer; stochastic exploration noise remains 0.1",
+      "training_flags": [
+        "--zero-init-actor-output"
+      ]
+    }
+  ],
+  "development_evaluation": {
+    "baseline": "biased_zero",
+    "episodes": 32,
+    "num_envs": 16,
+    "seed": 20261028,
+    "matching_condition_ids_and_bias_required": true,
+    "all_requested_attempts_in_denominator": true,
+    "primary": "strict-v1 success (12–13 mm depth, <=50 µm lateral, <=0.5° angle, force, velocity and 0.4s dwell)",
+    "bootstrap_seed": 20261029,
+    "bootstrap_resamples": 100000
+  },
+  "strict_v1_criterion_changed": false,
+  "selection": "Exploratory dev comparisons only. A1 combines discount, terminal transition gating, and finite-horizon timeout potential; A2 changes the potential relative to A1. Z1 changes only actor initialization relative to E1. Fix any selected profile and a separate multi-seed/held-state plan before final holdout evaluation; no reproducible-improvement claim from this one training seed.",
+  "heldout": {
+    "seed": 20261027,
+    "opened": false
+  },
+  "budget": {
+    "currency": "USD",
+    "estimated_hourly_rate": 1.74,
+    "account_wide_balance_checked": false,
+    "excludes": [
+      "storage",
+      "tax",
+      "price changes",
+      "other projects"
+    ],
+    "bounded_stop_guard_required": true
+  },
+  "frozen_inputs": {
+    "base_commit": "26c4baf6a5c58f3982c6cd8e3b57a05ff691ca53",
+    "sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+      "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+      "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+      "scripts/run_sim.py": "0e27f8531cce421bd24ef0eb7e1ea9d4f0869895acea7396d5b03f51072966a8",
+      "scripts/train.py": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2",
+      "scripts/evaluate_policy.py": "c9dca6af77a5db11d70e17687ed58162976f3c4d4d26ae2bbc55e874ab748e43",
+      "scripts/check_rj45_reset.py": "efd313d8a2f416a81ddc43c0a6fe77ee38d9000572b9c27bb146e2e5f04ba650",
+      "scripts/analyze_rj45_paired.py": "cdd087abb1298178cdf57b21a98c98c098da28d4730dd77b22429e72b37699a7",
+      "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+      "configs/compute-budget.json": "c05a7732523cad431899cad47c2907508362dcb87325f909f50e4922b93ba4d8",
+      "configs/failure-scenarios.json": "e0df6acd75ddd956126f3de6d19cc5588c7f34ed640b5f379e6c276643e4e58f",
+      "configs/ppo-rj45-low-exploration-v1.json": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+      "configs/ppo-rj45-v1.json": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+      "configs/ppo.json": "98a1e68a36d30e20b66daf76eafdcaf6ad5cd7ff0a6ff03118944ff78807bd91",
+      "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+      "configs/rj45-training-bias-observability.json": "27d13188724a7e2f4dbac90bff19e89010154fc0a5c620e497a12d39d03657a8",
+      "configs/rj45-training-target-offset-a1-discounted-pose-v2.json": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+      "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+      "configs/rj45-training-target-offset-bias-observability.json": "f95d6c61ad52477d1a37d63940a7dcd5ca365c49c539a7c7697dac5e6406044c",
+      "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+      "configs/rj45-training-v1.json": "28b0c3ad204f4593342623afa0e8607c8dc7da63627f97ba771071601010de23",
+      "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+      "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+      "configs/tasks/rj45-v1.json": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+      "assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+      "assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+      "assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+      "assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+      "assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+      "assets/generated/tasks/rj45-v1/build-report.json": "6093e6bdfde796b4e556cb5b97a5c688d5a28ff66285a961452fe851de75c8be",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+      "artifacts/rj45-paper-ablation/run_remote_experiment.sh": "e3e3b759c0369ed3dce28c817872cee640364062b1ddea83f038bd488474b9e6",
+      "artifacts/rj45-paper-ablation/validate_gpu_smoke.py": "9f79b7ce83c0c638fb630bde4936d76f335b8682a5f29b9ca16cbdc0a72c1827"
+    },
+    "guard_timer": "rby1-rj45-stop-20261027-a.timer",
+    "source_frozen_before_gpu_runs": true
+  }
+}

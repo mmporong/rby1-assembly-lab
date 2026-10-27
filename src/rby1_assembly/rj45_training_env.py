@@ -6,6 +6,8 @@ import json
 import math
 from typing import Any, Mapping
 
+from rby1_assembly.rj45_training import ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY
+
 
 _CALIBRATION_BIAS_STREAM_OFFSET = 45_123_017
 _CALIBRATION_BIAS_EPISODE_STRIDE = 1_000_003
@@ -15,6 +17,60 @@ def _reset_applied_tip_offset_telemetry(env_ids, applied_tip_offset_entry_6d) ->
     """Clear selected episode rows without disturbing parallel environments."""
 
     applied_tip_offset_entry_6d[env_ids] = 0.0
+
+
+def _reset_reward_telemetry(
+    env_ids,
+    component_sums,
+    policy_active_step_count,
+    action_saturation_step_count,
+) -> None:
+    """Clear reward telemetry only for reset rows in a vector environment."""
+
+    for value in component_sums.values():
+        value[env_ids] = 0.0
+    policy_active_step_count[env_ids] = 0
+    action_saturation_step_count[env_ids] = 0
+
+
+def _reward_policy_active_mask(config, current_active, transition_active):
+    """Keep A0 gating unchanged and use the executed transition for A1/A2."""
+
+    return transition_active if config.get("schema_version") == 2 else current_active
+
+
+def _executed_policy_transition_mask(
+    config,
+    current_active,
+    warmup_pending,
+    last_policy_observation_valid,
+    valid_policy_input_step_count,
+):
+    """Identify rows whose submitted action came from an eligible policy observation."""
+
+    active = current_active & ~warmup_pending
+    if config["action_application_mode"] != ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY:
+        return active
+    if config.get("schema_version") == 2:
+        return active & last_policy_observation_valid
+    return active & (valid_policy_input_step_count > 0)
+
+
+def _action_saturation_masks(expanded_actions, active_mask):
+    """Separate wrapper clip-boundary hits from 3D vector-norm projection."""
+
+    import torch
+
+    if expanded_actions.ndim != 2 or expanded_actions.shape[1] != 12:
+        raise ValueError("expanded_actions must have shape (num_envs, 12)")
+    if active_mask.shape != (expanded_actions.shape[0],) or active_mask.dtype != torch.bool:
+        raise ValueError("active_mask must be boolean per environment")
+    clip_boundary_reached = (torch.abs(expanded_actions) >= 1.0).any(dim=1) & active_mask
+    clipped = torch.clamp(expanded_actions, -1.0, 1.0).reshape(-1, 4, 3)
+    norm_projected = (
+        (torch.linalg.vector_norm(clipped, dim=2) > 1.0).any(dim=1) & active_mask
+    )
+    return clip_boundary_reached, norm_projected
 
 
 def _calibration_bias_case_seed(base_seed: int, env_id: int, episode_index: int) -> int:
@@ -610,7 +666,6 @@ def make_rj45_training_env_type(
     from rby1_assembly.contact_loads import sum_contact_normal_loads
     from rby1_assembly.isaac_env import AssemblyPhase, TerminationReason
     from rby1_assembly.rj45_training import (
-        ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
         HELD_GRASP_STABILITY_LIMITS,
         PERSISTENT_BIAS_DIAGNOSTIC_DESCRIPTION,
         POST_INTEGRAL_STEP_ACTION_APPLICATION,
@@ -620,12 +675,15 @@ def make_rj45_training_env_type(
         append_persistent_calibration_bias_diagnostic,
         build_policy_observation,
         expand_residual_actions,
-        normalized_insertion_potential,
+        insertion_potential,
         policy_observation_dimension,
         policy_ground_truth_usage,
         policy_observation_ground_truth_flags,
         policy_observation_source,
         residual_reward,
+        residual_reward_components,
+        reward_profile_metadata,
+        validate_reward_horizon_contract,
         validate_held_grasp_artifact,
     )
 
@@ -673,6 +731,9 @@ def make_rj45_training_env_type(
         """Residual policy environment with a strict estimator/evaluator split."""
 
         def __init__(self, cfg, render_mode: str | None = None, **kwargs):
+            validate_reward_horizon_contract(
+                config, is_finite_horizon=cfg.is_finite_horizon
+            )
             self._training_config = config
             self._training_held_state = validated_held_state
             self._training_bias_enabled = bool(calibration_bias_enabled)
@@ -808,6 +869,37 @@ def make_rj45_training_env_type(
             )
             self._training_terminal_reward_emitted = torch.zeros(
                 self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_reward_transition_active = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_reward_component_sums = {
+                name: torch.zeros(self.num_envs, device=self.device)
+                for name in (
+                    "potential_progress",
+                    "force_cost",
+                    "action_cost",
+                    "terminal",
+                    "total",
+                )
+            }
+            self._training_policy_active_step_count = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_action_saturation_step_count = torch.zeros_like(
+                self._training_policy_active_step_count
+            )
+            self._training_action_clip_boundary_step_count = torch.zeros_like(
+                self._training_policy_active_step_count
+            )
+            self._training_action_norm_projection_step_count = torch.zeros_like(
+                self._training_policy_active_step_count
+            )
+            self._training_action_clip_boundary_step = torch.zeros_like(
+                self._training_reward_transition_active
+            )
+            self._training_action_norm_projection_step = torch.zeros_like(
+                self._training_reward_transition_active
             )
             self._training_held_reference = torch.zeros(
                 (self.num_envs, self.robot.num_joints), device=self.device
@@ -1177,6 +1269,19 @@ def make_rj45_training_env_type(
                 actions, self._training_config["action_mode"]
             )
             active = self._policy_active_mask()[:, None]
+            reward_transition_active = _executed_policy_transition_mask(
+                self._training_config,
+                active[:, 0],
+                pending,
+                self._training_last_policy_observation_valid,
+                self._training_valid_policy_input_step_count,
+            )
+            self._training_reward_transition_active[:] = reward_transition_active
+            clip_boundary, norm_projection = _action_saturation_masks(
+                expanded, reward_transition_active
+            )
+            self._training_action_clip_boundary_step[:] = clip_boundary
+            self._training_action_norm_projection_step[:] = norm_projection
             expanded = torch.where(active, expanded, torch.zeros_like(expanded))
             self._training_action_delta[:] = expanded - self._training_previous_action
             super()._pre_physics_step(expanded)
@@ -1531,10 +1636,8 @@ def make_rj45_training_env_type(
                 activated = activated & (
                     self._training_valid_policy_input_step_count > 0
                 )
-            if not torch.any(activated):
-                return torch.zeros(self.num_envs, device=self.device)
             gt_pos, gt_quat = self._relative_object_pose()
-            potential = normalized_insertion_potential(
+            potential = insertion_potential(
                 gt_pos, gt_quat, self._training_config
             )
             potential = torch.where(
@@ -1550,19 +1653,105 @@ def make_rj45_training_env_type(
                 | self._episode_time_limit_reached()
             ) & ~self._evaluation_success & activated
             failed = failed_now & ~self._training_terminal_reward_emitted
-            reward = residual_reward(
+            true_terminated = self.reset_terminated & activated
+            truncated = self.reset_time_outs & activated
+            reward_active = _reward_policy_active_mask(
+                self._training_config,
+                self._policy_active_mask(),
+                self._training_reward_transition_active,
+            )
+            components = residual_reward_components(
                 self._training_previous_potential,
                 potential,
                 self._last_insertion_contact_force_w,
                 self._training_action_delta,
-                self._policy_active_mask(),
+                reward_active,
                 success,
                 failed,
+                true_terminated,
+                truncated,
                 self._training_config,
             )
+            if self._training_config.get("schema_version") == 1:
+                components["total"] = residual_reward(
+                    self._training_previous_potential,
+                    potential,
+                    self._last_insertion_contact_force_w,
+                    self._training_action_delta,
+                    self._policy_active_mask(),
+                    success,
+                    failed,
+                    self._training_config,
+                )
+            active_now = reward_active
+            for name in self._training_reward_component_sums:
+                self._training_reward_component_sums[name] += components[name]
+            self._training_policy_active_step_count += active_now.to(torch.long)
+            self._training_action_clip_boundary_step_count += (
+                self._training_action_clip_boundary_step & active_now
+            ).to(torch.long)
+            self._training_action_norm_projection_step_count += (
+                self._training_action_norm_projection_step & active_now
+            ).to(torch.long)
+            self._training_action_saturation_step_count += (
+                active_now
+                & (
+                    self._training_action_clip_boundary_step
+                    | self._training_action_norm_projection_step
+                )
+            ).to(torch.long)
+            self.extras["rj45_reward_profile"] = reward_profile_metadata(
+                self._training_config
+            )
+            self.extras["rj45_reward_components"] = {
+                name: value.clone()
+                for name, value in components.items()
+                if name not in {"true_terminated", "truncated"}
+            }
+            self.extras["rj45_episode_end"] = {
+                "true_terminated": true_terminated.clone(),
+                "truncated": truncated.clone(),
+                "simultaneous": (true_terminated & truncated).clone(),
+            }
+            terminal_snapshot = self.extras.get("terminal_snapshot")
+            if isinstance(terminal_snapshot, dict):
+                terminal_snapshot["reward_profile"] = reward_profile_metadata(
+                    self._training_config
+                )
+                terminal_snapshot["reward_components"] = {
+                    name: value.clone()
+                    for name, value in components.items()
+                    if name not in {"true_terminated", "truncated"}
+                }
+                terminal_snapshot["reward_component_episode_sums"] = {
+                    name: value.clone()
+                    for name, value in self._training_reward_component_sums.items()
+                }
+                terminal_snapshot["policy_active_step_count"] = (
+                    self._training_policy_active_step_count.clone()
+                )
+                terminal_snapshot["action_saturation_step_count"] = (
+                    self._training_action_saturation_step_count.clone()
+                )
+                terminal_snapshot["action_clip_boundary_step_count"] = (
+                    self._training_action_clip_boundary_step_count.clone()
+                )
+                terminal_snapshot["action_norm_projection_step_count"] = (
+                    self._training_action_norm_projection_step_count.clone()
+                )
+                terminal_snapshot["action_saturation_definition"] = (
+                    "active step where the wrapper-clipped action reached a per-axis "
+                    "[-1,1] boundary or any 3D action vector needed unit-norm projection; "
+                    "pre-wrapper raw clipping magnitude is unavailable"
+                )
+                terminal_snapshot["reward_true_terminated"] = true_terminated.clone()
+                terminal_snapshot["reward_truncated"] = truncated.clone()
+                terminal_snapshot["reward_terminated_and_truncated"] = (
+                    true_terminated & truncated
+                ).clone()
             self._training_previous_potential[:] = potential
             self._training_terminal_reward_emitted |= success | failed
-            return reward
+            return components["total"]
 
         def _held_warmup_check(self, pending) -> None:
             pending = pending & self._training_held_reset_stage_restored
@@ -1694,7 +1883,7 @@ def make_rj45_training_env_type(
                     if hasattr(self, name):
                         getattr(self, name)[passed] = 0.0
                 gt_pos, gt_quat = self._relative_object_pose()
-                self._training_previous_potential[passed] = normalized_insertion_potential(
+                self._training_previous_potential[passed] = insertion_potential(
                     gt_pos, gt_quat, self._training_config
                 )[passed]
             timeout_steps = max(1, math.ceil(1.0 / self.step_dt))
@@ -1957,11 +2146,22 @@ def make_rj45_training_env_type(
             )
             self._training_action_delta[env_ids] = 0.0
             self._training_terminal_reward_emitted[env_ids] = False
+            self._training_reward_transition_active[env_ids] = False
+            self._training_action_clip_boundary_step[env_ids] = False
+            self._training_action_norm_projection_step[env_ids] = False
+            _reset_reward_telemetry(
+                env_ids,
+                self._training_reward_component_sums,
+                self._training_policy_active_step_count,
+                self._training_action_saturation_step_count,
+            )
+            self._training_action_clip_boundary_step_count[env_ids] = 0
+            self._training_action_norm_projection_step_count[env_ids] = 0
             self._training_episode_index[env_ids] += 1
             self._sample_episode_bias(env_ids)
             if self._training_held_state is None:
                 gt_pos, gt_quat = self._relative_object_pose()
-                self._training_previous_potential[env_ids] = normalized_insertion_potential(
+                self._training_previous_potential[env_ids] = insertion_potential(
                     gt_pos, gt_quat, self._training_config
                 )[env_ids]
                 return
@@ -1993,7 +2193,7 @@ def make_rj45_training_env_type(
                 env_ids, 2
             ]
             gt_pos, gt_quat = self._relative_object_pose()
-            self._training_previous_potential[env_ids] = normalized_insertion_potential(
+            self._training_previous_potential[env_ids] = insertion_potential(
                 gt_pos, gt_quat, self._training_config
             )[env_ids]
 
@@ -2027,6 +2227,7 @@ def make_rj45_training_env_type(
                 ),
                 **policy_observation_ground_truth_flags(self._training_config),
                 "action_mode": self._training_config["action_mode"],
+                "reward_profile": reward_profile_metadata(self._training_config),
                 "action_application_mode": self._training_config[
                     "action_application_mode"
                 ],

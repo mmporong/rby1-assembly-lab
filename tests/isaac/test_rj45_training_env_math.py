@@ -10,7 +10,9 @@ import torch
 from rby1_assembly.rj45_training_env import (
     HeldGraspWarmupTimeoutError,
     HeldResetContactFlushError,
+    _action_saturation_masks,
     _calibration_bias_case_seed,
+    _executed_policy_transition_mask,
     _held_reset_contact_flush_diagnostics,
     _held_reset_contact_free_status,
     _held_reset_stage_transition,
@@ -18,6 +20,8 @@ from rby1_assembly.rj45_training_env import (
     _mask_inactive_policy_observation,
     _reset_policy_input_telemetry,
     _reset_applied_tip_offset_telemetry,
+    _reset_reward_telemetry,
+    _reward_policy_active_mask,
     _store_policy_input_telemetry,
     _warmup_motion_status,
     _warmup_sensor_status,
@@ -27,6 +31,7 @@ from rby1_assembly.rj45_training import (
     ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
     POST_INTEGRAL_STEP_ACTION_APPLICATION,
     apply_tip_target_pose_offset,
+    validate_reward_horizon_contract,
 )
 
 
@@ -110,6 +115,14 @@ STABILITY_LIMITS = {
 
 
 class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
+    def test_held_warmup_potential_uses_the_imported_profile_selector(self):
+        source = TRAINING_ENV_PATH.read_text(encoding="utf-8")
+        self.assertNotIn("normalized_insertion_potential(", source)
+        self.assertIn(
+            "self._training_previous_potential[passed] = insertion_potential(",
+            source,
+        )
+
     def test_default_mating_target_offset_hook_is_no_op(self):
         hook = _compiled_base_environment_method(
             "_apply_policy_mating_target_pose_offsets"
@@ -209,6 +222,38 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         self.assertEqual(active_method(environment).tolist(), [True, True, False])
         self.assertEqual(eligible_method(environment).tolist(), [True, True, False])
 
+    def test_first_valid_insert_action_and_partial_reset_use_cached_policy_input(self):
+        config = {
+            "schema_version": 2,
+            "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+        }
+        active = torch.tensor([True, True, True])
+        pending = torch.tensor([False, False, False])
+        last_observation_valid = torch.tensor([True, False, True])
+        counts_before_done = torch.tensor([0, 8, 3])
+        transition = _executed_policy_transition_mask(
+            config,
+            active,
+            pending,
+            last_observation_valid,
+            counts_before_done,
+        )
+        self.assertEqual(transition.tolist(), [True, False, True])
+        self.assertEqual(
+            _reward_policy_active_mask(config, active, transition).tolist(),
+            [True, False, True],
+        )
+
+        last_observation_valid[2] = False
+        transition_after_partial_reset = _executed_policy_transition_mask(
+            config,
+            active,
+            pending,
+            last_observation_valid,
+            counts_before_done,
+        )
+        self.assertEqual(transition_after_partial_reset.tolist(), [True, False, False])
+
     def test_applied_tip_offset_partial_reset_preserves_other_rows(self):
         telemetry = torch.arange(18, dtype=torch.float32).reshape(3, 6)
         first = telemetry[0].clone()
@@ -217,6 +262,45 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         torch.testing.assert_close(telemetry[0], first)
         torch.testing.assert_close(telemetry[1], torch.zeros(6))
         torch.testing.assert_close(telemetry[2], last)
+
+    def test_reward_telemetry_partial_reset_preserves_other_rows(self):
+        components = {
+            "potential_progress": torch.tensor([1.0, 2.0, 3.0]),
+            "total": torch.tensor([4.0, 5.0, 6.0]),
+        }
+        active = torch.tensor([7, 8, 9])
+        saturated = torch.tensor([1, 2, 3])
+        _reset_reward_telemetry(torch.tensor([1]), components, active, saturated)
+        torch.testing.assert_close(components["potential_progress"], torch.tensor([1.0, 0.0, 3.0]))
+        torch.testing.assert_close(components["total"], torch.tensor([4.0, 0.0, 6.0]))
+        torch.testing.assert_close(active, torch.tensor([7, 0, 9]))
+        torch.testing.assert_close(saturated, torch.tensor([1, 0, 3]))
+
+    def test_v2_reward_uses_executed_transition_after_phase_changes(self):
+        current = torch.tensor([False, False, True])
+        executed = torch.tensor([True, False, False])
+        torch.testing.assert_close(
+            _reward_policy_active_mask({"schema_version": 1}, current, executed),
+            current,
+        )
+        torch.testing.assert_close(
+            _reward_policy_active_mask({"schema_version": 2}, current, executed),
+            executed,
+        )
+
+    def test_action_saturation_distinguishes_clip_boundary_and_norm_projection(self):
+        actions = torch.tensor(
+            [
+                [1.0, 0.0, 0.0] + [0.0] * 9,
+                [0.8, 0.8, 0.0] + [0.0] * 9,
+                [0.8, 0.8, 0.0] + [0.0] * 9,
+            ]
+        )
+        clip_boundary, norm_projection = _action_saturation_masks(
+            actions, torch.tensor([True, True, False])
+        )
+        torch.testing.assert_close(clip_boundary, torch.tensor([True, False, False]))
+        torch.testing.assert_close(norm_projection, torch.tensor([False, True, False]))
     def test_held_controller_phase_keeps_torso_work_reference_and_other_rows(self):
         from rby1_assembly.rj45_env import advance_joint_reference
 
@@ -842,7 +926,12 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             prefix.append(statement)
         executable = ast.fix_missing_locations(ast.Module(body=prefix, type_ignores=[]))
         for observation_dim in (79, 85):
-            cfg = SimpleNamespace(seed=7, action_space=None, observation_space=None)
+            cfg = SimpleNamespace(
+                seed=7,
+                action_space=None,
+                observation_space=None,
+                is_finite_horizon=True,
+            )
             namespace = {
                 "self": SimpleNamespace(),
                 "cfg": cfg,
@@ -855,6 +944,7 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 "bias_level": 0,
                 "action_dim": 6,
                 "observation_dim": observation_dim,
+                "validate_reward_horizon_contract": validate_reward_horizon_contract,
             }
             exec(compile(executable, TRAINING_ENV_PATH, "exec"), namespace)
 

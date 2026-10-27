@@ -100,6 +100,54 @@ def _environment_episode_is_within_quota(
     return accepted_counts[env_id] < quotas[env_id]
 
 
+def _rj45_evaluation_inputs_reverified(
+    evaluation_start: str,
+    *,
+    nominal_reverified: bool,
+    held_reverified: bool,
+) -> bool:
+    """Require every proof used by the selected RJ45 start contract."""
+
+    if evaluation_start not in {"table", "held"}:
+        raise ValueError("RJ45 evaluation_start must be table or held")
+    if type(nominal_reverified) is not bool or type(held_reverified) is not bool:
+        raise ValueError("RJ45 proof verification flags must be booleans")
+    return nominal_reverified and (
+        evaluation_start == "table" or held_reverified
+    )
+
+
+def _attach_rj45_evaluation_provenance(
+    report: dict[str, object],
+    *,
+    evaluation_start: str,
+    nominal_evidence: dict[str, object],
+    held_grasp_reset_proof: dict[str, object] | None,
+    inputs_reverified_at_end: bool,
+) -> None:
+    """Mark a report as RJ45 schema v2 only after its required proof gate passed."""
+
+    if inputs_reverified_at_end is not True:
+        raise ValueError("RJ45 evaluation inputs must be reverified before report marking")
+    if not isinstance(nominal_evidence, dict) or not nominal_evidence:
+        raise ValueError("RJ45 nominal evidence must be nonempty")
+    if evaluation_start == "held":
+        if not isinstance(held_grasp_reset_proof, dict) or not held_grasp_reset_proof:
+            raise ValueError("held RJ45 evaluation requires a held-grasp proof")
+        recorded_held_proof = held_grasp_reset_proof
+    elif evaluation_start == "table":
+        recorded_held_proof = None
+    else:
+        raise ValueError("RJ45 evaluation_start must be table or held")
+    provenance = report.get("provenance")
+    if not isinstance(provenance, dict):
+        raise ValueError("evaluation report provenance must be an object")
+    report["rj45_evaluation_schema_version"] = 2
+    provenance["rj45_nominal_evidence"] = nominal_evidence
+    provenance["held_grasp_reset_proof"] = recorded_held_proof
+    provenance["evaluation_inputs_reverified_at_end"] = True
+
+
 def _rj45_terminal_attempt_metrics(snapshot, env_id: int) -> tuple[dict[str, object], bool]:
     """Extract one environment's mandatory terminal metrics without inventing values."""
 
@@ -546,6 +594,9 @@ def main() -> int:
             policy_observation_schema_version,
             policy_observation_source,
             privileged_diagnostic_observation_metadata,
+            reward_profile_metadata,
+            validate_reward_profile_runner,
+            validate_reward_horizon_contract,
         )
         from rby1_assembly.rj45_training_env import (
             _calibration_bias_case_seed,
@@ -562,6 +613,10 @@ def main() -> int:
 
         task = load_rj45_task(task_path)
         training_config = load_training_config(args.rj45_training_config)
+        validate_reward_profile_runner(training_config, runner_cfg)
+        validate_reward_horizon_contract(
+            training_config, is_finite_horizon=cfg.is_finite_horizon
+        )
         _validate_rj45_diagnostic_baseline_mode(
             training_config, args.baseline_mode
         )
@@ -657,6 +712,8 @@ def main() -> int:
             training_contract.update(
                 action_application_contract_metadata(training_config)
             )
+            if training_config["schema_version"] == 2:
+                training_contract.update(reward_profile_metadata(training_config))
             verify_checkpoint_lineage(
                 lineage,
                 task_id="rj45-v1",
@@ -690,6 +747,7 @@ def main() -> int:
                 "rj45_nominal_evidence": current_nominal_evidence,
                 "held_grasp_reset_proof": held_state_proof,
                 "training_num_envs": lineage["num_envs"],
+                "policy_initialization": lineage.get("policy_initialization"),
             }
         env_type = _configure_verified_parallel_rj45_task(
             cfg,
@@ -842,6 +900,28 @@ def main() -> int:
                     force_peaks.append(force_peak)
                 if args.task == "rj45":
                     episode_index = int(snapshot["episode_index"][env_id].item())
+                    reward_component_episode_sums = {
+                        name: float(values[env_id].item())
+                        for name, values in snapshot[
+                            "reward_component_episode_sums"
+                        ].items()
+                    }
+                    reward_diagnostics_finite = all(
+                        math.isfinite(value)
+                        for value in reward_component_episode_sums.values()
+                    )
+                    policy_active_step_count = int(
+                        snapshot["policy_active_step_count"][env_id].item()
+                    )
+                    action_saturation_step_count = int(
+                        snapshot["action_saturation_step_count"][env_id].item()
+                    )
+                    action_clip_boundary_step_count = int(
+                        snapshot["action_clip_boundary_step_count"][env_id].item()
+                    )
+                    action_norm_projection_step_count = int(
+                        snapshot["action_norm_projection_step_count"][env_id].item()
+                    )
                     paired_condition = {
                         "evaluation_start": args.evaluation_start,
                         "task_config_sha256": task["_config_sha256"],
@@ -881,6 +961,37 @@ def main() -> int:
                         "valid": valid,
                         "success": succeeded,
                         "termination_reason": physical_termination_reason,
+                        "reward_profile": snapshot["reward_profile"],
+                        "reward_component_episode_sums": (
+                            reward_component_episode_sums
+                            if reward_diagnostics_finite
+                            else None
+                        ),
+                        "policy_active_step_count": policy_active_step_count,
+                        "action_saturation_step_count": action_saturation_step_count,
+                        "action_clip_boundary_step_count": (
+                            action_clip_boundary_step_count
+                        ),
+                        "action_norm_projection_step_count": (
+                            action_norm_projection_step_count
+                        ),
+                        "action_saturation_definition": snapshot[
+                            "action_saturation_definition"
+                        ],
+                        "action_saturation_rate_active_steps": (
+                            action_saturation_step_count / policy_active_step_count
+                            if policy_active_step_count
+                            else None
+                        ),
+                        "reward_true_terminated": bool(
+                            snapshot["reward_true_terminated"][env_id].item()
+                        ),
+                        "reward_truncated": bool(
+                            snapshot["reward_truncated"][env_id].item()
+                        ),
+                        "reward_terminated_and_truncated": bool(
+                            snapshot["reward_terminated_and_truncated"][env_id].item()
+                        ),
                         "invalid_reason": invalid_reason,
                         **terminal_evidence,
                         **rj45_attempt_metrics,
@@ -907,6 +1018,22 @@ def main() -> int:
         valid_episodes = valid_successes + valid_failures
         build_report_path = input_snapshot.build_report_path
         input_snapshot.assert_unchanged()
+        nominal_evidence_reverified = False
+        held_evidence_reverified = False
+        if args.task == "rj45":
+            final_nominal_evidence = verify_rj45_nominal_evidence(
+                PROJECT_ROOT, task, args.rj45_nominal_evidence
+            )
+            if final_nominal_evidence != current_nominal_evidence:
+                raise RuntimeError("RJ45 nominal evidence changed during evaluation")
+            nominal_evidence_reverified = True
+            if args.evaluation_start == "held":
+                _, final_held_state_proof = load_verified_held_grasp_artifact(
+                    PROJECT_ROOT, task, args.rj45_held_state
+                )
+                if final_held_state_proof != held_state_proof:
+                    raise RuntimeError("RJ45 held-grasp proof changed during evaluation")
+                held_evidence_reverified = True
         report = {
             "requested_attempts": args.episodes,
             "task_id": "rj45-v1" if args.task == "rj45" else "toy",
@@ -981,6 +1108,20 @@ def main() -> int:
             },
         }
         if args.task == "rj45":
+            evaluation_inputs_reverified = _rj45_evaluation_inputs_reverified(
+                args.evaluation_start,
+                nominal_reverified=nominal_evidence_reverified,
+                held_reverified=held_evidence_reverified,
+            )
+            if not evaluation_inputs_reverified:
+                raise RuntimeError("RJ45 evaluation inputs were not reverified at end")
+            _attach_rj45_evaluation_provenance(
+                report,
+                evaluation_start=args.evaluation_start,
+                nominal_evidence=current_nominal_evidence,
+                held_grasp_reset_proof=held_state_proof,
+                inputs_reverified_at_end=evaluation_inputs_reverified,
+            )
             report["baseline_mode"] = args.baseline_mode
             report["evaluation_start"] = args.evaluation_start
             report["evaluation_horizon_s"] = evaluation_horizon_s

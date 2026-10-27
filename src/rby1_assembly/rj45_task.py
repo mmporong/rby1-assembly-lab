@@ -202,6 +202,9 @@ def verify_checkpoint_lineage(
     _reject_nonfinite_numbers(lineage, "checkpoint_provenance")
     if type(lineage.get("schema_version")) is not int or lineage["schema_version"] != 1:
         raise ValueError("checkpoint provenance schema_version must be 1")
+    policy_initialization = lineage.get("policy_initialization")
+    if policy_initialization is not None:
+        _validate_policy_initialization_metadata(policy_initialization)
     required_contract_keys = {
         "runtime_versions", "physics_dt_s", "control_decimation", "control_dt_s",
         "observation_noise", "baseline_controller_state_source", "task_config_path", "policy_config_path",
@@ -242,6 +245,14 @@ def verify_checkpoint_lineage(
         _validate_rj45_training_contract(recorded_training_contract)
         if recorded_training_contract != expected_training_contract:
             raise ValueError("checkpoint RJ45 training contract does not match current inputs")
+        if (
+            policy_initialization is not None
+            and policy_initialization["output_dimension"]
+            != recorded_training_contract["policy_action_dimension"]
+        ):
+            raise ValueError(
+                "policy initialization output dimension must match the RJ45 training contract"
+            )
     expected_task_sha = _validate_sha256(task_config_sha256, "task_config_sha256")
     if lineage.get("task_config_sha256") != expected_task_sha:
         raise ValueError("checkpoint task configuration does not match the current task")
@@ -285,6 +296,96 @@ def verify_checkpoint_lineage(
         raise ValueError("checkpoint RJ45 nominal evidence does not match the verified run")
 
 
+def _validate_policy_initialization_metadata(value: Any) -> None:
+    metadata = _mapping(value, "checkpoint_provenance.policy_initialization")
+    expected_keys = {
+        "mode",
+        "zero_actor_output_layer",
+        "actor_module_path",
+        "final_layer_index",
+        "final_layer_class",
+        "input_dimension",
+        "output_dimension",
+        "pre_weight_sha256",
+        "pre_bias_sha256",
+        "post_weight_sha256",
+        "post_bias_sha256",
+        "weight_all_zero_after_initialization",
+        "bias_all_zero_after_initialization",
+        "deterministic_actor_test_input_count",
+        "deterministic_actor_output_all_zero",
+        "deterministic_actor_output_max_abs",
+        "stochastic_policy_noise_modified",
+        "method_reference",
+    }
+    if set(metadata) != expected_keys:
+        raise ValueError("policy initialization metadata fields are incomplete or unexpected")
+    _reject_nonfinite_numbers(metadata, "checkpoint_provenance.policy_initialization")
+    zero = metadata["zero_actor_output_layer"]
+    if type(zero) is not bool:
+        raise ValueError("zero_actor_output_layer must be boolean")
+    expected_mode = "residual_actor_final_linear_zero" if zero else "rsl_rl_default"
+    if metadata["mode"] != expected_mode:
+        raise ValueError("policy initialization mode disagrees with zero-init flag")
+    if (
+        metadata["actor_module_path"] != "runner.alg.policy.actor"
+        or metadata["final_layer_class"] != "torch.nn.Linear"
+        or type(metadata["final_layer_index"]) is not int
+        or metadata["final_layer_index"] < 0
+        or type(metadata["input_dimension"]) is not int
+        or metadata["input_dimension"] <= 0
+        or type(metadata["output_dimension"]) is not int
+        or metadata["output_dimension"] not in (6, 12)
+    ):
+        raise ValueError("policy initialization actor structure is invalid")
+    for name in (
+        "pre_weight_sha256",
+        "pre_bias_sha256",
+        "post_weight_sha256",
+        "post_bias_sha256",
+    ):
+        _validate_sha256(metadata[name], f"policy_initialization.{name}")
+    for name in (
+        "weight_all_zero_after_initialization",
+        "bias_all_zero_after_initialization",
+        "deterministic_actor_output_all_zero",
+        "stochastic_policy_noise_modified",
+    ):
+        if type(metadata[name]) is not bool:
+            raise ValueError(f"policy_initialization.{name} must be boolean")
+    if metadata["stochastic_policy_noise_modified"] is not False:
+        raise ValueError("actor output initialization must not claim policy-noise mutation")
+    if metadata["deterministic_actor_test_input_count"] != 3:
+        raise ValueError("policy initialization must record three deterministic test inputs")
+    _number(
+        metadata["deterministic_actor_output_max_abs"],
+        "policy_initialization.deterministic_actor_output_max_abs",
+        nonnegative=True,
+    )
+    reference = metadata["method_reference"]
+    if zero:
+        if metadata["output_dimension"] != 6:
+            raise ValueError("zero-init actor output dimension must be 6")
+        if not all(
+            metadata[name]
+            for name in (
+                "weight_all_zero_after_initialization",
+                "bias_all_zero_after_initialization",
+                "deterministic_actor_output_all_zero",
+            )
+        ):
+            raise ValueError("zero-init metadata must prove zero weights, bias, and actor output")
+        if reference != {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only",
+        }:
+            raise ValueError("zero-init method reference is invalid")
+    elif reference is not None:
+        raise ValueError("default actor initialization must not claim the zero-init method")
+
+
 def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
     standard_keys = {
         "schema_version",
@@ -314,6 +415,13 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         "action_application_mode",
         "policy_active_phases",
     }
+    reward_v2_keys = {
+        "reward_profile_id",
+        "reward_potential_type",
+        "reward_shaping_mode",
+        "reward_horizon_semantics",
+        "reward_discount_factor",
+    }
     observation_schema = contract.get("policy_observation_schema_version")
     observation_dimension = contract.get("policy_observation_dimension")
     expected_keys = (
@@ -328,6 +436,8 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         expected_keys = expected_keys | target_offset_keys
     elif action_application_mode is not None:
         raise ValueError("RJ45 action application mode is invalid")
+    if "reward_profile_id" in contract:
+        expected_keys = expected_keys | reward_v2_keys
     if set(contract) != expected_keys:
         raise ValueError("RJ45 training contract fields are incomplete or unexpected")
     _reject_nonfinite_numbers(contract, "rj45_training_contract")
@@ -380,6 +490,25 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
         raise ValueError("RJ45 calibration bias level must index a configured level")
     if contract["learned_recovery"] is not False:
         raise ValueError("RJ45 training contract must not claim learned recovery")
+    if "reward_profile_id" in contract:
+        allowed_profiles = {
+            "a1_discounted_pose_v2": "normalized_pose",
+            "a2_keypoint_shape_v2": "cad_keypoints",
+        }
+        profile_id = contract["reward_profile_id"]
+        if allowed_profiles.get(profile_id) != contract["reward_potential_type"]:
+            raise ValueError("RJ45 reward profile and potential type disagree")
+        if contract["reward_shaping_mode"] != "discounted_potential":
+            raise ValueError("RJ45 reward profile must use discounted potential shaping")
+        if contract["reward_horizon_semantics"] != "finite_horizon_timeout_absorbing":
+            raise ValueError("RJ45 reward profile must use finite-horizon absorbing timeouts")
+        discount = _number(
+            contract["reward_discount_factor"],
+            "rj45_training_contract.reward_discount_factor",
+            positive=True,
+        )
+        if discount > 1.0:
+            raise ValueError("RJ45 reward discount factor must be at most one")
     _validate_sha256(contract["training_config_sha256"], "training_config_sha256")
     held_proof = _mapping(contract["held_grasp_reset_proof"], "held_grasp_reset_proof")
     if set(held_proof) != {

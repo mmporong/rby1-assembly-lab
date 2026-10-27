@@ -13,6 +13,7 @@ from rby1_assembly.rj45_training import (
     PERSISTENT_BIAS_DIAGNOSTIC_GROUND_TRUTH_USAGE,
 )
 from rby1_assembly.rj45_task import (
+    _validate_policy_initialization_metadata,
     _validate_rj45_training_contract,
     load_rj45_task,
     plug_root_goal_pose,
@@ -24,6 +25,38 @@ from rby1_assembly.rj45_task import (
     verify_checkpoint_manifest,
     verify_generated_asset_hashes,
 )
+
+
+def valid_policy_initialization(*, output_dimension=6, zero=False):
+    return {
+        "mode": "residual_actor_final_linear_zero" if zero else "rsl_rl_default",
+        "zero_actor_output_layer": zero,
+        "actor_module_path": "runner.alg.policy.actor",
+        "final_layer_index": 4,
+        "final_layer_class": "torch.nn.Linear",
+        "input_dimension": 79,
+        "output_dimension": output_dimension,
+        "pre_weight_sha256": "1" * 64,
+        "pre_bias_sha256": "2" * 64,
+        "post_weight_sha256": "3" * 64,
+        "post_bias_sha256": "4" * 64,
+        "weight_all_zero_after_initialization": zero,
+        "bias_all_zero_after_initialization": zero,
+        "deterministic_actor_test_input_count": 3,
+        "deterministic_actor_output_all_zero": zero,
+        "deterministic_actor_output_max_abs": 0.0 if zero else 0.25,
+        "stochastic_policy_noise_modified": False,
+        "method_reference": (
+            {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only",
+            }
+            if zero
+            else None
+        ),
+    }
 
 
 def valid_task() -> dict:
@@ -178,6 +211,46 @@ class Rj45TaskConfigTests(unittest.TestCase):
         self.assertEqual(task, original)
         self.assertEqual(loaded["frames"]["socket_entry"]["quaternion_wxyz"], [1.0, 0.0, 0.0, 0.0])
         self.assertEqual(loaded["assets"]["plug"], "assets/generated/tasks/rj45-v1/plug.usda")
+
+    def test_reward_v2_training_contract_is_explicit_and_fail_closed(self):
+        contract = valid_training_contract()
+        contract.update(
+            {
+                "reward_profile_id": "a2_keypoint_shape_v2",
+                "reward_potential_type": "cad_keypoints",
+                "reward_shaping_mode": "discounted_potential",
+                "reward_horizon_semantics": "finite_horizon_timeout_absorbing",
+                "reward_discount_factor": 0.995,
+            }
+        )
+        _validate_rj45_training_contract(contract)
+        for field, value in (
+            ("reward_potential_type", "signed_distance_field"),
+            ("reward_shaping_mode", "undiscounted_difference"),
+            ("reward_horizon_semantics", "bootstrap_timeout"),
+            ("reward_discount_factor", 1.1),
+        ):
+            damaged = copy.deepcopy(contract)
+            damaged[field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                _validate_rj45_training_contract(damaged)
+
+    def test_zero_actor_initialization_lineage_is_strict(self):
+        metadata = valid_policy_initialization(zero=True)
+        _validate_policy_initialization_metadata(metadata)
+        _validate_policy_initialization_metadata(
+            valid_policy_initialization(output_dimension=12)
+        )
+        for field, value in (
+            ("output_dimension", 12),
+            ("deterministic_actor_output_all_zero", False),
+            ("stochastic_policy_noise_modified", True),
+            ("post_weight_sha256", "bad"),
+        ):
+            damaged = copy.deepcopy(metadata)
+            damaged[field] = value
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                _validate_policy_initialization_metadata(damaged)
 
     def test_invalid_units_nonfinite_and_nonunit_frames_are_rejected(self):
         variants = []
@@ -579,7 +652,6 @@ class Rj45ProvenanceTests(unittest.TestCase):
             "rj45_nominal_evidence": evidence,
             **runtime,
         }
-
         def verify(candidate, current=evidence):
             verify_checkpoint_lineage(
                 candidate,
@@ -847,6 +919,7 @@ class Rj45ProvenanceTests(unittest.TestCase):
             "rj45_nominal_evidence": evidence,
             **runtime,
         }
+        lineage["policy_initialization"] = valid_policy_initialization()
 
         def verify(candidate, expected=runtime):
             verify_checkpoint_lineage(
@@ -859,6 +932,23 @@ class Rj45ProvenanceTests(unittest.TestCase):
             )
 
         verify(lineage)
+        both_runtime = copy.deepcopy(runtime)
+        both_runtime["rj45_training_contract"]["action_mode"] = "both_arms_12d"
+        both_runtime["rj45_training_contract"]["policy_action_dimension"] = 12
+        both_lineage = copy.deepcopy(lineage)
+        both_lineage["rj45_training_contract"] = copy.deepcopy(
+            both_runtime["rj45_training_contract"]
+        )
+        both_lineage["policy_initialization"] = valid_policy_initialization(
+            output_dimension=12
+        )
+        verify(both_lineage, both_runtime)
+        mismatched_initialization = copy.deepcopy(both_lineage)
+        mismatched_initialization["policy_initialization"] = (
+            valid_policy_initialization(output_dimension=6)
+        )
+        with self.assertRaisesRegex(ValueError, "must match"):
+            verify(mismatched_initialization, both_runtime)
         for name, mutate in (
             ("missing", lambda item: item.pop("rj45_training_contract")),
             (

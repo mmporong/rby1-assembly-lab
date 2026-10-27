@@ -43,19 +43,23 @@ class _TorchShim:
 
 
 class _PhysxView:
-    def __init__(self, offset: float, *, articulated: bool = False) -> None:
+    def __init__(
+        self, offset: float, *, articulated: bool = False, num_envs: int = 4
+    ) -> None:
         self.transforms = _Tensor(
-            np.arange(28, dtype=np.float64).reshape(4, 7) + offset
+            np.arange(num_envs * 7, dtype=np.float64).reshape(num_envs, 7) + offset
         )
         self.velocities = _Tensor(
-            np.arange(24, dtype=np.float64).reshape(4, 6) + offset
+            np.arange(num_envs * 6, dtype=np.float64).reshape(num_envs, 6) + offset
         )
         if articulated:
             self.dof_positions = _Tensor(
-                np.arange(20, dtype=np.float64).reshape(4, 5) + offset
+                np.arange(num_envs * 5, dtype=np.float64).reshape(num_envs, 5) + offset
             )
             self.dof_velocities = _Tensor(
-                np.arange(20, dtype=np.float64).reshape(4, 5) + offset + 100.0
+                np.arange(num_envs * 5, dtype=np.float64).reshape(num_envs, 5)
+                + offset
+                + 100.0
             )
 
     def get_dof_positions(self):
@@ -95,13 +99,33 @@ def _load_native_physx_helpers():
     return namespace
 
 
-def _fake_environment():
+def _load_parallel_requirement_helper():
+    tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name == "_requires_parallel_contact_evidence"
+    )
+    namespace = {}
+    exec(
+        compile(ast.Module(body=[function], type_ignores=[]), CHECKER_PATH, "exec"),
+        namespace,
+    )
+    return namespace["_requires_parallel_contact_evidence"]
+
+
+def _fake_environment(num_envs: int = 4):
     return types.SimpleNamespace(
         robot=types.SimpleNamespace(
-            root_physx_view=_PhysxView(0.0, articulated=True)
+            root_physx_view=_PhysxView(0.0, articulated=True, num_envs=num_envs)
         ),
-        socket=types.SimpleNamespace(root_physx_view=_PhysxView(1000.0)),
-        plug=types.SimpleNamespace(root_physx_view=_PhysxView(2000.0)),
+        socket=types.SimpleNamespace(
+            root_physx_view=_PhysxView(1000.0, num_envs=num_envs)
+        ),
+        plug=types.SimpleNamespace(
+            root_physx_view=_PhysxView(2000.0, num_envs=num_envs)
+        ),
     )
 
 
@@ -239,6 +263,86 @@ class NativePhysxIsolationTests(unittest.TestCase):
         env.socket.root_physx_view.transforms.value[0, 0] = -1.0
         env.plug.root_physx_view.velocities.value[0, 0] = -1.0
         self.assert_untouched(before, env, untouched)
+
+    def test_n64_single_target_reset_preserves_63_native_physx_rows(self) -> None:
+        env = _fake_environment(num_envs=64)
+        untouched = np.arange(1, 64)
+        before = self.snapshot(env, untouched)
+        env.robot.root_physx_view.dof_positions.value[0, 0] = -1.0
+        env.socket.root_physx_view.transforms.value[0, 0] = -1.0
+        env.plug.root_physx_view.velocities.value[0, 0] = -1.0
+        self.assertEqual(len(untouched), 63)
+        self.assert_untouched(before, env, untouched)
+
+
+class ParallelCliContractTests(unittest.TestCase):
+    def test_num_env_choices_include_n64_and_parallel_gate_applies_above_one(self) -> None:
+        tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
+        num_env_call = next(
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Attribute)
+            and node.func.attr == "add_argument"
+            and node.args
+            and isinstance(node.args[0], ast.Constant)
+            and node.args[0].value == "--num-envs"
+        )
+        choices = next(
+            keyword.value
+            for keyword in num_env_call.keywords
+            if keyword.arg == "choices"
+        )
+        self.assertEqual(ast.literal_eval(choices), (1, 4, 64))
+
+        required = _load_parallel_requirement_helper()
+        self.assertFalse(required(1))
+        self.assertTrue(required(4))
+        self.assertTrue(required(64))
+        for invalid in (0, 2, 65, True):
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                required(invalid)
+
+        source = CHECKER_PATH.read_text(encoding="utf-8")
+        self.assertEqual(
+            source.count("_requires_parallel_contact_evidence(args.num_envs)"), 2
+        )
+        self.assertNotIn("args.num_envs == 4", source)
+
+    def test_report_separates_n4_contact_proof_from_n64_reset_measurement(self) -> None:
+        source = CHECKER_PATH.read_text(encoding="utf-8")
+        self.assertIn("preexisting N4 contact-routing evidence", source)
+        self.assertIn('"measurement_num_envs": args.num_envs', source)
+        self.assertIn('"untouched_environments_per_cycle": args.num_envs - 1', source)
+
+    def test_report_limits_state_claims_and_exposes_per_cycle_warmup_counts(self) -> None:
+        source = CHECKER_PATH.read_text(encoding="utf-8")
+        self.assertIn('"warmup_control_steps_per_physical_cycle"', source)
+        for field in (
+            "episode_index",
+            "episode_length",
+            "phase_started",
+            "joint_targets",
+            "command_depth",
+            "previous_action",
+        ):
+            self.assertIn(f'"{field}"', source)
+        for excluded_group in (
+            "calibration_bias",
+            "held_reset_and_warmup",
+            "reward_components_and_action_saturation",
+            "policy_observation_cache",
+        ):
+            self.assertIn(f'"{excluded_group}"', source)
+        self.assertIn("does not assert preservation of unlisted training telemetry", source)
+        for native_group in (
+            "robot_joint_position",
+            "robot_joint_velocity",
+            "robot_root_state",
+            "socket_root_state",
+            "plug_root_state",
+        ):
+            self.assertIn(f'"{native_group}"', source)
 
 
 class ReportPathPreimportTests(unittest.TestCase):

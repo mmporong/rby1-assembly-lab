@@ -1,4 +1,6 @@
 import math
+from pathlib import Path
+from types import SimpleNamespace
 import unittest
 
 import torch
@@ -8,10 +10,17 @@ from rby1_assembly.rj45_training import (
     apply_tip_target_pose_offset,
     append_persistent_calibration_bias_diagnostic,
     build_policy_observation,
+    configure_actor_output_initialization,
     expand_residual_actions,
+    keypoint_insertion_potential,
+    load_training_config,
     normalized_insertion_potential,
     residual_reward,
+    residual_reward_components,
 )
+
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def config():
@@ -31,6 +40,63 @@ def config():
 
 
 class Rj45TrainingMathTests(unittest.TestCase):
+    def test_zero_actor_output_initialization_is_explicit_and_mean_only(self):
+        torch.manual_seed(20261027)
+        actor = torch.nn.Sequential(
+            torch.nn.Linear(4, 8),
+            torch.nn.ELU(),
+            torch.nn.Linear(8, 6),
+        )
+        runner = SimpleNamespace(
+            alg=SimpleNamespace(policy=SimpleNamespace(actor=actor))
+        )
+        hidden_weight = actor[0].weight.detach().clone()
+        original_weight = actor[-1].weight.detach().clone()
+        default_metadata = configure_actor_output_initialization(
+            runner, expected_output_dim=6, zero_initialize=False
+        )
+        torch.testing.assert_close(actor[-1].weight, original_weight)
+        self.assertEqual(default_metadata["mode"], "rsl_rl_default")
+        self.assertFalse(default_metadata["zero_actor_output_layer"])
+
+        zero_metadata = configure_actor_output_initialization(
+            runner, expected_output_dim=6, zero_initialize=True
+        )
+        torch.testing.assert_close(actor[0].weight, hidden_weight)
+        self.assertEqual(zero_metadata["mode"], "residual_actor_final_linear_zero")
+        self.assertTrue(zero_metadata["weight_all_zero_after_initialization"])
+        self.assertTrue(zero_metadata["bias_all_zero_after_initialization"])
+        self.assertTrue(zero_metadata["deterministic_actor_output_all_zero"])
+        self.assertFalse(zero_metadata["stochastic_policy_noise_modified"])
+        samples = torch.tensor(
+            [[0.0, 0.0, 0.0, 0.0], [1.0, -1.0, 2.0, -2.0]]
+        )
+        torch.testing.assert_close(actor(samples), torch.zeros((2, 6)))
+        self.assertNotEqual(
+            zero_metadata["pre_weight_sha256"],
+            zero_metadata["post_weight_sha256"],
+        )
+
+    def test_zero_actor_output_initialization_rejects_wrong_actor_contract(self):
+        wrong_output = SimpleNamespace(
+            alg=SimpleNamespace(
+                policy=SimpleNamespace(
+                    actor=torch.nn.Sequential(torch.nn.Linear(4, 12))
+                )
+            )
+        )
+        with self.assertRaisesRegex(ValueError, "6 outputs"):
+            configure_actor_output_initialization(
+                wrong_output, expected_output_dim=6, zero_initialize=True
+            )
+        nonsequential = SimpleNamespace(
+            alg=SimpleNamespace(policy=SimpleNamespace(actor=torch.nn.Linear(4, 6)))
+        )
+        with self.assertRaisesRegex(ValueError, "Sequential"):
+            configure_actor_output_initialization(
+                nonsequential, expected_output_dim=6, zero_initialize=True
+            )
+
     def test_tip_target_offset_uses_entry_frame_and_preserves_tip_pivot(self):
         half = math.sqrt(0.5)
         body_position = torch.tensor([[0.4, -0.2, 0.8]], dtype=torch.float64)
@@ -173,6 +239,91 @@ class Rj45TrainingMathTests(unittest.TestCase):
         self.assertAlmostEqual(float(reward[0]), 1.0 - 0.01 - 0.0006, places=12)
         self.assertAlmostEqual(float(reward[1]), 10.0, places=12)
         self.assertAlmostEqual(float(reward[2]), -3.0, places=12)
+
+    def test_a0_reward_is_bitwise_equal_to_pre_v2_arithmetic(self):
+        for device in (["cpu", "cuda"] if torch.cuda.is_available() else ["cpu"]):
+            generator = torch.Generator(device=device).manual_seed(20261027)
+            previous = torch.randn(257, generator=generator, device=device)
+            following = torch.randn(257, generator=generator, device=device)
+            force = torch.randn((257, 3), generator=generator, device=device)
+            delta = torch.randn((257, 6), generator=generator, device=device)
+            active = torch.rand(257, generator=generator, device=device) > 0.4
+            success = torch.rand(257, generator=generator, device=device) > 0.9
+            failed = (torch.rand(257, generator=generator, device=device) > 0.9) & ~success
+            reward_config = config()["reward"]
+            force_cost = reward_config["force_penalty"] * (
+                torch.linalg.vector_norm(force, dim=-1).abs()
+                / reward_config["force_scale_n"]
+            ).square()
+            action_cost = reward_config["action_delta_penalty"] * delta.square().sum(dim=-1)
+            shaped = following - previous - force_cost - action_cost
+            reference = torch.where(active, shaped, torch.zeros_like(shaped))
+            reference = (
+                reference
+                + success.to(reference.dtype) * reward_config["success_bonus"]
+                - failed.to(reference.dtype) * reward_config["failure_penalty"]
+            )
+            actual = residual_reward(
+                previous, following, force, delta, active, success, failed, config()
+            )
+            self.assertTrue(torch.equal(actual, reference), device)
+
+    def test_discounted_reward_distinguishes_true_terminal_and_truncation(self):
+        a1 = load_training_config(
+            ROOT / "configs/rj45-training-target-offset-a1-discounted-pose-v2.json"
+        )
+        previous = torch.tensor([2.0, 2.0, 2.0, 2.0], dtype=torch.float64)
+        following = torch.tensor([3.0, 3.0, 3.0, 3.0], dtype=torch.float64)
+        active = torch.ones(4, dtype=torch.bool)
+        false = torch.zeros(4, dtype=torch.bool)
+        true_terminated = torch.tensor([False, True, False, True])
+        truncated = torch.tensor([False, False, True, True])
+        failed = torch.tensor([False, True, True, True])
+        components = residual_reward_components(
+            previous,
+            following,
+            torch.zeros(4, dtype=torch.float64),
+            torch.zeros((4, 6), dtype=torch.float64),
+            active,
+            false,
+            failed,
+            true_terminated,
+            truncated,
+            a1,
+        )
+        self.assertAlmostEqual(float(components["potential_progress"][0]), 0.985, places=12)
+        self.assertAlmostEqual(float(components["potential_progress"][1]), -2.0, places=12)
+        self.assertAlmostEqual(float(components["potential_progress"][2]), -2.0, places=12)
+        self.assertAlmostEqual(float(components["potential_progress"][3]), -2.0, places=12)
+        self.assertAlmostEqual(float(components["terminal"][2]), -3.0, places=12)
+
+    def test_keypoint_potential_is_quaternion_sign_invariant_and_batch_isolated(self):
+        a2 = load_training_config(
+            ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
+        )
+        position = torch.tensor(
+            [[0.0, 0.012, 0.0], [0.0005, 0.012, 0.0]], dtype=torch.float64
+        )
+        q = torch.tensor(
+            [[1.0, 0.0, 0.0, 0.0], [-1.0, 0.0, 0.0, 0.0]], dtype=torch.float64
+        )
+        potential = keypoint_insertion_potential(position, q, a2)
+        self.assertAlmostEqual(float(potential[0]), 1.0, places=12)
+        self.assertLess(float(potential[1]), float(potential[0]))
+        isolated = keypoint_insertion_potential(position[:1], -q[:1], a2)
+        torch.testing.assert_close(isolated, potential[:1], atol=1e-12, rtol=0)
+
+    def test_keypoint_rotation_changes_corner_alignment_in_metres(self):
+        a2 = load_training_config(
+            ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
+        )
+        position = torch.tensor([[0.0, 0.012, 0.0]] * 2, dtype=torch.float64)
+        quaternion = torch.tensor(
+            [[1.0, 0.0, 0.0, 0.0], [math.sqrt(0.5), 0.0, math.sqrt(0.5), 0.0]],
+            dtype=torch.float64,
+        )
+        potential = keypoint_insertion_potential(position, quaternion, a2)
+        self.assertGreater(float(potential[0]), float(potential[1]))
 
     def test_observation_is_79d_and_uses_declared_normalization(self):
         batch = 2

@@ -73,6 +73,12 @@ def _validate_report_path(path: Path, protected_paths) -> None:
         raise ValueError(f"--report must identify a regular file: {path}")
 
 
+def _requires_parallel_contact_evidence(num_envs: int) -> bool:
+    if type(num_envs) is not int or num_envs not in (1, 4, 64):
+        raise ValueError("num_envs must be one of 1, 4, or 64")
+    return num_envs > 1
+
+
 task_path = PROJECT_ROOT / "configs/tasks/rj45-v1.json"
 runtime_path = PROJECT_ROOT / "configs/runtime.json"
 training_config_path = PROJECT_ROOT / "configs/rj45-training-v1.json"
@@ -169,7 +175,7 @@ from isaaclab.app import AppLauncher  # noqa: E402
 
 
 parser = argparse.ArgumentParser(description="Check RJ45 held-reset runtime isolation")
-parser.add_argument("--num-envs", type=int, choices=(1, 4), required=True)
+parser.add_argument("--num-envs", type=int, choices=(1, 4, 64), required=True)
 parser.add_argument("--reset-cycles", type=int, default=1000)
 parser.add_argument(
     "--mode",
@@ -184,8 +190,11 @@ AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.reset_cycles <= 0:
     parser.error("--reset-cycles must be positive")
-if args.num_envs == 4 and args.parallel_contact_evidence is None:
-    parser.error("four-environment checking requires --parallel-contact-evidence")
+if (
+    _requires_parallel_contact_evidence(args.num_envs)
+    and args.parallel_contact_evidence is None
+):
+    parser.error("parallel checking requires --parallel-contact-evidence")
 if _project_path(args.nominal) != nominal_path or _project_path(args.held) != held_path:
     parser.error("input paths changed between bootstrap and parsed arguments")
 if _resolved_path(args.report) != report_path:
@@ -250,8 +259,8 @@ try:
         if parallel_spec is None
         else load_parallel_contact_evidence(parallel_spec, project_root=PROJECT_ROOT)
     )
-    if args.num_envs == 4 and parallel_proof is None:
-        raise RuntimeError("four-environment checking lacks verified contact evidence")
+    if _requires_parallel_contact_evidence(args.num_envs) and parallel_proof is None:
+        raise RuntimeError("parallel checking lacks verified N4 contact-routing evidence")
     physics_dt = float(runtime["physics_dt_s"])
     control_dt = float(runtime["control_dt_s"])
     if not math.isclose(physics_dt, 1.0 / 240.0, rel_tol=0.0, abs_tol=1.0e-12):
@@ -392,6 +401,8 @@ def _exercise_resets(env, actions) -> dict:
         target = cycle % args.num_envs
         target_ids = all_ids[target : target + 1]
         untouched = all_ids[all_ids != target]
+        if len(target_ids) != 1 or len(untouched) != args.num_envs - 1:
+            raise RuntimeError("reset cycle must target one environment and preserve all others")
         before_target_episode = int(env._training_episode_index[target].item())
         before = {
             "episode_index": env._training_episode_index[untouched].clone(),
@@ -468,15 +479,37 @@ def _exercise_resets(env, actions) -> dict:
     return {
         "mode": args.mode,
         "cycles": args.reset_cycles,
+        "measurement_num_envs": args.num_envs,
+        "reset_environments_per_cycle": 1,
+        "untouched_environments_per_cycle": args.num_envs - 1,
         "per_environment_reset_count": reset_counts.detach().cpu().tolist(),
         "final_warmup_steps": final_warmup_steps,
         "physical_warmup_cycles_completed": len(warmup_steps_per_cycle),
+        "warmup_control_steps_per_physical_cycle": warmup_steps_per_cycle,
         "warmup_control_steps_total": sum(warmup_steps_per_cycle),
         "warmup_control_steps_min": min(warmup_steps_per_cycle, default=None),
         "warmup_control_steps_max": max(warmup_steps_per_cycle, default=None),
         "untouched_state_preserved_at_every_reset": True,
+        "selected_controller_state_fields_checked": [
+            "episode_index",
+            "episode_length",
+            "phase_started",
+            "joint_targets",
+            "command_depth",
+            "previous_action",
+        ],
+        "selected_controller_state_scope": (
+            "compatibility result covers only selected_controller_state_fields_checked; "
+            "it does not assert preservation of unlisted training telemetry"
+        ),
+        "unexamined_untouched_training_telemetry_groups": [
+            "calibration_bias",
+            "held_reset_and_warmup",
+            "reward_components_and_action_saturation",
+            "policy_observation_cache",
+        ],
         "untouched_native_physx_state_preserved_at_every_partial_reset": (
-            args.num_envs == 4
+            args.num_envs > 1
         ),
         "native_physx_state_fields": (
             [
@@ -486,14 +519,14 @@ def _exercise_resets(env, actions) -> dict:
                 "socket_root_state",
                 "plug_root_state",
             ]
-            if args.num_envs == 4
+            if args.num_envs > 1
             else []
         ),
         "untouched_episode_time_advanced_each_physical_cycle": (
-            args.num_envs == 4 and args.mode == "physical-warmup-cycles"
+            args.num_envs > 1 and args.mode == "physical-warmup-cycles"
         ),
         "no_untouched_automatic_reset_seen": (
-            args.num_envs == 4 and args.mode == "physical-warmup-cycles"
+            args.num_envs > 1 and args.mode == "physical-warmup-cycles"
         ),
         "maximum_warmup_loads_n": {
             "grip": maximum_grip_force_n,
@@ -570,11 +603,25 @@ def main() -> int:
                 "state_write_scope": "environment_held_reset_path_only",
                 "ground_truth_usage": runtime_report["ground_truth_usage"],
                 "success_and_safety_gates_relaxed": False,
+                "parallel_contact_evidence_role": (
+                    "N4 contact-routing prerequisite; not reset-isolation measurement"
+                    if args.num_envs > 1
+                    else None
+                ),
+                "reset_isolation_measurement": (
+                    f"N{args.num_envs} one-environment reset with "
+                    f"{args.num_envs - 1} untouched environments checked per cycle"
+                ),
             },
             "proof": {
                 "nominal": nominal_proof,
                 "held": held_proof,
                 "parallel_contact": parallel_proof,
+                "parallel_contact_scope": (
+                    "preexisting N4 contact-routing evidence"
+                    if parallel_proof is not None
+                    else None
+                ),
             },
             "provenance": {
                 "checker_sha256": _sha256(Path(__file__)),

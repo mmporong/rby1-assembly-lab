@@ -52,6 +52,7 @@ _TOP_LEVEL_KEYS = {
     "task_physics",
     "held_reset_staging",
 }
+_V2_TOP_LEVEL_KEYS = _TOP_LEVEL_KEYS | {"reward_profile"}
 _BIAS_KEYS = {"translation_levels_m", "rotation_max_levels_rad", "initial_level"}
 _REWARD_KEYS = {
     "depth_scale_m",
@@ -63,6 +64,29 @@ _REWARD_KEYS = {
     "success_bonus",
     "failure_penalty",
     "normalized_error_cap",
+}
+_REWARD_PROFILE_KEYS = {
+    "profile_id",
+    "potential_type",
+    "shaping_mode",
+    "horizon_semantics",
+    "discount_factor",
+    "keypoint_geometry",
+}
+_KEYPOINT_GEOMETRY_KEYS = {
+    "frame",
+    "length_unit",
+    "plug_keypoints_tip_frame_m",
+    "target_tip_position_entry_m",
+    "axis_scales_m",
+    "geometry_source",
+}
+_KEYPOINT_SOURCE_KEYS = {
+    "task_config_path",
+    "task_config_sha256",
+    "plug_asset_path",
+    "plug_asset_sha256",
+    "dimension_source",
 }
 _PHYSICS_KEYS = {"mass_randomization_enabled"}
 _OBSERVATION_DIM = 79
@@ -150,9 +174,13 @@ def load_training_config(path: Path) -> dict[str, Any]:
         raise ValueError(f"invalid finite training configuration {path}: {error}") from error
 
     config = _mapping(config, "training configuration")
-    _exact_keys(config, _TOP_LEVEL_KEYS, "training configuration")
-    if config["schema_version"] != 1:
-        raise ValueError("schema_version must be 1")
+    schema_version = config.get("schema_version")
+    if schema_version == 1:
+        _exact_keys(config, _TOP_LEVEL_KEYS, "training configuration")
+    elif schema_version == 2:
+        _exact_keys(config, _V2_TOP_LEVEL_KEYS, "training configuration")
+    else:
+        raise ValueError("schema_version must be 1 or 2")
     if config["task_id"] != "rj45-v1":
         raise ValueError("task_id must be rj45-v1")
     if config["episode_scope"] != "held_grasp_alignment_insertion":
@@ -213,6 +241,92 @@ def load_training_config(path: Path) -> dict[str, Any]:
     for name in ("force_penalty", "action_delta_penalty"):
         reward[name] = _finite_number(reward[name], f"reward.{name}", nonnegative=True)
 
+    if schema_version == 2:
+        profile = _mapping(config["reward_profile"], "reward_profile")
+        _exact_keys(profile, _REWARD_PROFILE_KEYS, "reward_profile")
+        profile_id = profile["profile_id"]
+        if profile_id not in {"a1_discounted_pose_v2", "a2_keypoint_shape_v2"}:
+            raise ValueError("reward_profile.profile_id is unsupported")
+        expected_potential = (
+            "normalized_pose" if profile_id == "a1_discounted_pose_v2" else "cad_keypoints"
+        )
+        if profile["potential_type"] != expected_potential:
+            raise ValueError("reward_profile potential_type disagrees with profile_id")
+        if profile["shaping_mode"] != "discounted_potential":
+            raise ValueError("schema 2 reward profiles require discounted_potential shaping")
+        if profile["horizon_semantics"] != "finite_horizon_timeout_absorbing":
+            raise ValueError("schema 2 reward profiles require finite-horizon absorbing timeouts")
+        profile["discount_factor"] = _finite_number(
+            profile["discount_factor"], "reward_profile.discount_factor", positive=True
+        )
+        if profile["discount_factor"] > 1.0:
+            raise ValueError("reward_profile.discount_factor must be at most 1")
+        geometry = profile["keypoint_geometry"]
+        if expected_potential == "normalized_pose":
+            if geometry is not None:
+                raise ValueError("A1 normalized-pose profile must not define keypoint geometry")
+        else:
+            geometry = _mapping(geometry, "reward_profile.keypoint_geometry")
+            _exact_keys(geometry, _KEYPOINT_GEOMETRY_KEYS, "reward_profile.keypoint_geometry")
+            if geometry["frame"] != "plug_tip_to_socket_entry" or geometry["length_unit"] != "m":
+                raise ValueError("keypoint geometry must use plug_tip_to_socket_entry in metres")
+            points = geometry["plug_keypoints_tip_frame_m"]
+            if not isinstance(points, list) or not 8 <= len(points) <= 16:
+                raise ValueError("keypoint geometry requires 8 to 16 plug points")
+            geometry["plug_keypoints_tip_frame_m"] = [
+                [_finite_number(v, f"keypoint[{i}][{j}]") for j, v in enumerate(point)]
+                for i, point in enumerate(points)
+                if isinstance(point, list) and len(point) == 3
+            ]
+            if len(geometry["plug_keypoints_tip_frame_m"]) != len(points):
+                raise ValueError("each plug keypoint must have three coordinates")
+            for name in ("target_tip_position_entry_m", "axis_scales_m"):
+                value = geometry[name]
+                if not isinstance(value, list) or len(value) != 3:
+                    raise ValueError(f"keypoint_geometry.{name} must have three coordinates")
+                geometry[name] = [
+                    _finite_number(v, f"keypoint_geometry.{name}[{i}]", positive=name == "axis_scales_m")
+                    for i, v in enumerate(value)
+                ]
+            source = _mapping(geometry["geometry_source"], "keypoint_geometry.geometry_source")
+            _exact_keys(source, _KEYPOINT_SOURCE_KEYS, "keypoint_geometry.geometry_source")
+            for name in ("task_config_sha256", "plug_asset_sha256"):
+                value = source[name]
+                if not isinstance(value, str) or len(value) != _SHA256_LENGTH:
+                    raise ValueError(f"keypoint_geometry.geometry_source.{name} must be SHA-256")
+                try:
+                    int(value, 16)
+                except ValueError as error:
+                    raise ValueError(f"keypoint_geometry.geometry_source.{name} must be SHA-256") from error
+            for name in ("task_config_path", "plug_asset_path", "dimension_source"):
+                if not isinstance(source[name], str) or not source[name].strip():
+                    raise ValueError(f"keypoint_geometry.geometry_source.{name} must be nonempty")
+            project_root = next(
+                (
+                    parent
+                    for parent in path.resolve().parents
+                    if (parent / "src/rby1_assembly").is_dir()
+                    and (parent / "configs/tasks/rj45-v1.json").is_file()
+                ),
+                None,
+            )
+            if project_root is None:
+                raise ValueError("schema 2 keypoint config must be located inside the project")
+            for path_key, digest_key in (
+                ("task_config_path", "task_config_sha256"),
+                ("plug_asset_path", "plug_asset_sha256"),
+            ):
+                source_path = Path(source[path_key])
+                if source_path.is_absolute() or ".." in source_path.parts:
+                    raise ValueError(f"keypoint_geometry.geometry_source.{path_key} must be project-relative")
+                resolved_source = project_root / source_path
+                try:
+                    actual_digest = hashlib.sha256(resolved_source.read_bytes()).hexdigest()
+                except OSError as error:
+                    raise ValueError(f"keypoint geometry source is unreadable: {source_path}") from error
+                if actual_digest != source[digest_key]:
+                    raise ValueError(f"keypoint geometry source hash mismatch: {source_path}")
+
     physics = _mapping(config["task_physics"], "task_physics")
     _exact_keys(physics, _PHYSICS_KEYS, "task_physics")
     if physics["mass_randomization_enabled"] is not False:
@@ -252,6 +366,163 @@ def load_training_config(path: Path) -> dict[str, Any]:
 
     config["_config_sha256"] = hashlib.sha256(raw).hexdigest()
     return config
+
+
+def reward_profile_metadata(config: Mapping[str, Any]) -> dict[str, Any]:
+    """Return a stable reward identity for lineage and evaluation reports."""
+
+    if config.get("schema_version") != 2:
+        return {
+            "reward_profile_id": "a0_legacy_pose_v1",
+            "reward_potential_type": "normalized_pose",
+            "reward_shaping_mode": "undiscounted_difference",
+            "reward_horizon_semantics": "legacy_finite_horizon",
+            "reward_discount_factor": None,
+        }
+    profile = _mapping(config.get("reward_profile"), "reward_profile")
+    return {
+        "reward_profile_id": profile["profile_id"],
+        "reward_potential_type": profile["potential_type"],
+        "reward_shaping_mode": profile["shaping_mode"],
+        "reward_horizon_semantics": profile["horizon_semantics"],
+        "reward_discount_factor": float(profile["discount_factor"]),
+    }
+
+
+def validate_reward_profile_runner(config: Mapping[str, Any], runner_config: Mapping[str, Any]) -> None:
+    """Fail closed when discounted reward shaping and PPO use different gamma values."""
+
+    metadata = reward_profile_metadata(config)
+    if metadata["reward_discount_factor"] is None:
+        return
+    algorithm = _mapping(runner_config.get("algorithm"), "runner_config.algorithm")
+    gamma = _finite_number(algorithm.get("gamma"), "runner_config.algorithm.gamma", positive=True)
+    if gamma > 1.0 or not math.isclose(
+        gamma, metadata["reward_discount_factor"], rel_tol=0.0, abs_tol=1.0e-12
+    ):
+        raise ValueError("reward discount_factor must exactly match PPO algorithm.gamma")
+
+
+def validate_reward_horizon_contract(
+    config: Mapping[str, Any], *, is_finite_horizon: bool
+) -> None:
+    """Require the Isaac finite-horizon contract assumed by A1/A2 shaping."""
+
+    if type(is_finite_horizon) is not bool:
+        raise ValueError("is_finite_horizon must be boolean")
+    if config.get("schema_version") == 2 and is_finite_horizon is not True:
+        raise ValueError("schema 2 reward profiles require is_finite_horizon=True")
+
+
+def configure_actor_output_initialization(
+    runner: Any,
+    *,
+    expected_output_dim: int,
+    zero_initialize: bool,
+) -> dict[str, Any]:
+    """Inspect or zero only the deterministic actor mean network's final Linear layer."""
+
+    if type(expected_output_dim) is not int or expected_output_dim <= 0:
+        raise ValueError("expected_output_dim must be a positive integer")
+    if type(zero_initialize) is not bool:
+        raise ValueError("zero_initialize must be boolean")
+    torch = _torch()
+    try:
+        actor = runner.alg.policy.actor
+    except AttributeError as error:
+        raise ValueError("runner must expose runner.alg.policy.actor") from error
+    if not isinstance(actor, torch.nn.Sequential):
+        raise ValueError("RSL-RL actor must be torch.nn.Sequential")
+    layers = list(actor.children())
+    if not layers or not isinstance(layers[-1], torch.nn.Linear):
+        raise ValueError("RSL-RL actor must end in torch.nn.Linear")
+    output_layer = layers[-1]
+    if output_layer.out_features != expected_output_dim or output_layer.bias is None:
+        raise ValueError(
+            f"actor output layer must have {expected_output_dim} outputs and a bias"
+        )
+    input_layers = [layer for layer in layers if isinstance(layer, torch.nn.Linear)]
+    if not input_layers:
+        raise ValueError("RSL-RL actor must contain a Linear input layer")
+
+    def tensor_sha256(value: Any) -> str:
+        raw = value.detach().contiguous().view(torch.uint8).cpu().numpy().tobytes()
+        return hashlib.sha256(raw).hexdigest()
+
+    pre_weight_sha256 = tensor_sha256(output_layer.weight)
+    pre_bias_sha256 = tensor_sha256(output_layer.bias)
+    if zero_initialize:
+        with torch.no_grad():
+            output_layer.weight.zero_()
+            output_layer.bias.zero_()
+
+    actor_was_training = actor.training
+    actor.eval()
+    input_dim = input_layers[0].in_features
+    sample = torch.stack(
+        (
+            torch.zeros(input_dim, device=output_layer.weight.device, dtype=output_layer.weight.dtype),
+            torch.ones(input_dim, device=output_layer.weight.device, dtype=output_layer.weight.dtype),
+            torch.linspace(
+                -1.0,
+                1.0,
+                input_dim,
+                device=output_layer.weight.device,
+                dtype=output_layer.weight.dtype,
+            ),
+        )
+    )
+    with torch.no_grad():
+        deterministic_output = actor(sample)
+    actor.train(actor_was_training)
+    if deterministic_output.shape != (3, expected_output_dim):
+        raise ValueError("actor deterministic output shape disagrees with action dimension")
+    if not bool(torch.isfinite(deterministic_output).all()):
+        raise ValueError("actor deterministic output must be finite")
+    deterministic_output_all_zero = bool(
+        torch.count_nonzero(deterministic_output).item() == 0
+    )
+    weight_all_zero = bool(torch.count_nonzero(output_layer.weight).item() == 0)
+    bias_all_zero = bool(torch.count_nonzero(output_layer.bias).item() == 0)
+    if zero_initialize and not (
+        deterministic_output_all_zero and weight_all_zero and bias_all_zero
+    ):
+        raise RuntimeError("zero-initialized actor output verification failed")
+    return {
+        "mode": (
+            "residual_actor_final_linear_zero"
+            if zero_initialize
+            else "rsl_rl_default"
+        ),
+        "zero_actor_output_layer": zero_initialize,
+        "actor_module_path": "runner.alg.policy.actor",
+        "final_layer_index": len(layers) - 1,
+        "final_layer_class": "torch.nn.Linear",
+        "input_dimension": input_dim,
+        "output_dimension": expected_output_dim,
+        "pre_weight_sha256": pre_weight_sha256,
+        "pre_bias_sha256": pre_bias_sha256,
+        "post_weight_sha256": tensor_sha256(output_layer.weight),
+        "post_bias_sha256": tensor_sha256(output_layer.bias),
+        "weight_all_zero_after_initialization": weight_all_zero,
+        "bias_all_zero_after_initialization": bias_all_zero,
+        "deterministic_actor_test_input_count": 3,
+        "deterministic_actor_output_all_zero": deterministic_output_all_zero,
+        "deterministic_actor_output_max_abs": float(
+            torch.abs(deterministic_output).max().item()
+        ),
+        "stochastic_policy_noise_modified": False,
+        "method_reference": (
+            {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only",
+            }
+            if zero_initialize
+            else None
+        ),
+    }
 
 
 def policy_observation_dimension(config: Mapping[str, Any]) -> int:
@@ -539,6 +810,135 @@ def normalized_insertion_potential(position_entry: Any, quaternion_entry_wxyz: A
     return depth - torch.clamp(lateral, max=cap) - torch.clamp(angle, max=cap)
 
 
+def keypoint_insertion_potential(position_entry: Any, quaternion_entry_wxyz: Any, config: Mapping[str, Any]):
+    """Score CAD-derived plug points against their aligned target pose.
+
+    This is a corresponding-keypoint pose potential inspired by geometry-aware
+    assembly rewards. It is not a signed-distance field or a cavity-clearance
+    calculation.
+    """
+
+    position = _last_dim(position_entry, 3, "position_entry")
+    quaternion = _last_dim(quaternion_entry_wxyz, 4, "quaternion_entry_wxyz")
+    if position.shape[:-1] != quaternion.shape[:-1]:
+        raise ValueError("relative pose batch shapes must match")
+    torch = _torch()
+    norm = torch.linalg.vector_norm(quaternion, dim=-1)
+    if bool((torch.abs(norm - 1.0) > 1.0e-4).any()):
+        raise ValueError("quaternion_entry_wxyz must be unit length")
+    profile = _mapping(config.get("reward_profile"), "reward_profile")
+    if profile.get("potential_type") != "cad_keypoints":
+        raise ValueError("keypoint potential requires cad_keypoints reward profile")
+    geometry = _mapping(profile.get("keypoint_geometry"), "reward_profile.keypoint_geometry")
+    points = torch.as_tensor(
+        geometry["plug_keypoints_tip_frame_m"], dtype=position.dtype, device=position.device
+    )
+    target = torch.as_tensor(
+        geometry["target_tip_position_entry_m"], dtype=position.dtype, device=position.device
+    )
+    scales = torch.as_tensor(
+        geometry["axis_scales_m"], dtype=position.dtype, device=position.device
+    )
+    batch_shape = position.shape[:-1]
+    expanded_points = points.reshape((1,) * len(batch_shape) + points.shape).expand(
+        batch_shape + points.shape
+    )
+    rotated = _quaternion_rotate_wxyz(
+        quaternion.unsqueeze(-2).expand(batch_shape + points.shape[:-1] + (4,)),
+        expanded_points,
+    )
+    actual = position.unsqueeze(-2) + rotated
+    desired = target + points
+    normalized_error = torch.linalg.vector_norm((actual - desired) / scales, dim=-1)
+    cap = float(_mapping(config.get("reward"), "reward")["normalized_error_cap"])
+    return 1.0 - torch.clamp(normalized_error, max=cap).mean(dim=-1)
+
+
+def insertion_potential(position_entry: Any, quaternion_entry_wxyz: Any, config: Mapping[str, Any]):
+    """Select the versioned potential while preserving schema-1 A0 behavior."""
+
+    if config.get("schema_version") == 2 and config["reward_profile"]["potential_type"] == "cad_keypoints":
+        return keypoint_insertion_potential(position_entry, quaternion_entry_wxyz, config)
+    return normalized_insertion_potential(position_entry, quaternion_entry_wxyz, config)
+
+
+def residual_reward_components(
+    previous_potential: Any,
+    next_potential: Any,
+    contact_force_n: Any,
+    action_delta: Any,
+    policy_active: Any,
+    success: Any,
+    failed: Any,
+    true_terminated: Any,
+    truncated: Any,
+    config: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Return separately attributable reward terms for one environment step."""
+
+    torch = _torch()
+    previous = _tensor(previous_potential, "previous_potential")
+    following = _tensor(next_potential, "next_potential")
+    force = _tensor(contact_force_n, "contact_force_n")
+    delta = _tensor(action_delta, "action_delta")
+    if previous.shape != following.shape:
+        raise ValueError("potential shapes must match")
+    if force.ndim == previous.ndim + 1:
+        force = torch.linalg.vector_norm(force, dim=-1)
+    if delta.ndim != previous.ndim + 1 or delta.shape[:-1] != previous.shape:
+        raise ValueError("action_delta must add one action dimension to the potential shape")
+    if force.shape != previous.shape:
+        raise ValueError("contact_force_n must match the potential shape or add one vector dimension")
+    masks = {
+        "policy_active": policy_active,
+        "success": success,
+        "failed": failed,
+        "true_terminated": true_terminated,
+        "truncated": truncated,
+    }
+    for name, value in masks.items():
+        if not isinstance(value, torch.Tensor) or value.shape != previous.shape or value.dtype != torch.bool:
+            raise ValueError(f"{name} must be a boolean tensor matching the potential shape")
+    if bool((success & failed).any()):
+        raise ValueError("success and failed must be mutually exclusive")
+    if bool((success & ~true_terminated).any()):
+        raise ValueError("success must be a true termination")
+    reward = _mapping(config.get("reward"), "reward")
+    metadata = reward_profile_metadata(config)
+    if metadata["reward_shaping_mode"] == "discounted_potential":
+        absorbing = true_terminated | truncated
+        terminal_following = torch.where(absorbing, torch.zeros_like(following), following)
+        progress = float(metadata["reward_discount_factor"]) * terminal_following - previous
+    else:
+        progress = following - previous
+    force_cost = float(reward["force_penalty"]) * (
+        torch.abs(force) / float(reward["force_scale_n"])
+    ).square()
+    action_cost = float(reward["action_delta_penalty"]) * delta.square().sum(dim=-1)
+    active = policy_active.to(previous.dtype)
+    terminal = (
+        success.to(previous.dtype) * float(reward["success_bonus"])
+        - failed.to(previous.dtype) * float(reward["failure_penalty"])
+    )
+    components = {
+        "potential_progress": active * progress,
+        "force_cost": -active * force_cost,
+        "action_cost": -active * action_cost,
+        "terminal": terminal,
+        "true_terminated": true_terminated,
+        "truncated": truncated,
+    }
+    components["total"] = (
+        components["potential_progress"]
+        + components["force_cost"]
+        + components["action_cost"]
+        + terminal
+    )
+    if not bool(torch.isfinite(components["total"]).all()):
+        raise ValueError("reward components must be finite")
+    return components
+
+
 def residual_reward(
     previous_potential: Any,
     next_potential: Any,
@@ -549,7 +949,7 @@ def residual_reward(
     failed: Any,
     config: Mapping[str, Any],
 ):
-    """Potential shaping while active, plus one-shot terminal outcome terms."""
+    """Legacy A0 arithmetic kept unchanged for prior checkpoints and baselines."""
 
     torch = _torch()
     previous = _tensor(previous_potential, "previous_potential")

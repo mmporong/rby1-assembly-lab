@@ -49,6 +49,73 @@ def _terminal_snapshot():
 
 
 class Rj45EvaluationMetricTests(unittest.TestCase):
+    def test_reverification_contract_distinguishes_table_held_and_toy_scope(self):
+        complete = _compiled_function("_rj45_evaluation_inputs_reverified")
+
+        self.assertTrue(
+            complete("table", nominal_reverified=True, held_reverified=False)
+        )
+        self.assertTrue(
+            complete("held", nominal_reverified=True, held_reverified=True)
+        )
+        self.assertFalse(
+            complete("held", nominal_reverified=True, held_reverified=False)
+        )
+        self.assertFalse(
+            complete("table", nominal_reverified=False, held_reverified=True)
+        )
+        with self.assertRaises(ValueError):
+            complete("toy", nominal_reverified=True, held_reverified=True)
+        with self.assertRaises(ValueError):
+            complete("table", nominal_reverified=1, held_reverified=False)
+
+    def test_schema_v2_is_attached_only_with_required_verified_proofs(self):
+        attach = _compiled_function("_attach_rj45_evaluation_provenance")
+        nominal = {"report_sha256": "a" * 64}
+        held = {"artifact_sha256": "b" * 64}
+
+        table_report = {"provenance": {}}
+        attach(
+            table_report,
+            evaluation_start="table",
+            nominal_evidence=nominal,
+            held_grasp_reset_proof=held,
+            inputs_reverified_at_end=True,
+        )
+        self.assertEqual(table_report["rj45_evaluation_schema_version"], 2)
+        self.assertEqual(table_report["provenance"]["rj45_nominal_evidence"], nominal)
+        self.assertIsNone(table_report["provenance"]["held_grasp_reset_proof"])
+        self.assertIs(
+            table_report["provenance"]["evaluation_inputs_reverified_at_end"],
+            True,
+        )
+
+        held_report = {"provenance": {}}
+        attach(
+            held_report,
+            evaluation_start="held",
+            nominal_evidence=nominal,
+            held_grasp_reset_proof=held,
+            inputs_reverified_at_end=True,
+        )
+        self.assertEqual(held_report["provenance"]["held_grasp_reset_proof"], held)
+        with self.assertRaises(ValueError):
+            attach(
+                {"provenance": {}},
+                evaluation_start="held",
+                nominal_evidence=nominal,
+                held_grasp_reset_proof=None,
+                inputs_reverified_at_end=True,
+            )
+        with self.assertRaises(ValueError):
+            attach(
+                {"provenance": {}},
+                evaluation_start="table",
+                nominal_evidence=nominal,
+                held_grasp_reset_proof=None,
+                inputs_reverified_at_end=False,
+            )
+
     def test_extracts_only_selected_environment_actual_finite_values(self):
         extract = _compiled_terminal_attempt_metrics()
 
