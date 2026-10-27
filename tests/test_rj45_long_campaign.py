@@ -38,6 +38,7 @@ def _ref(root: Path, path: Path) -> dict:
 
 def _fixture(root: Path) -> dict:
     guard_started = datetime.now(timezone.utc).replace(microsecond=0)
+    guard_deadline = guard_started + timedelta(hours=8)
     scripts = ("train.py", "evaluate_policy.py", "inspect_rj45_checkpoint.py", "analyze_rj45_paired.py", "run_rj45_long_campaign.py")
     for relative in [*(f"scripts/{name}" for name in scripts), "src/rby1_assembly/__init__.py", "src/rby1_assembly/task.py"]:
         path = root / relative
@@ -103,17 +104,42 @@ def _fixture(root: Path) -> dict:
         "candidate_evidence": {g: {"raw_report": _ref(root, reports[g]), "checkpoint_bundle": bundles[g]} for g in GROUPS},
         "inputs": {"stored_paired_audit": _ref(root, audit), "long_run_plan": _ref(root, plan), "parent_pilot_plan": _ref(root, parent), "frozen_analyzer": _ref(root, root / "scripts/analyze_rj45_paired.py"), "raw_evidence_sha256": raw_map, "immutable_inputs_sha256": {str(path.relative_to(root)): _sha(path) for path in immutable_paths}},
     })
-    manifest_paths = [plan, parent, candidate, audit, ppo, training, *reports.values(), *evidence.values(), *seed_configs.values(), *(root / "scripts").glob("*.py"), *(root / "src/rby1_assembly").glob("*.py")]
+    identity = {"id": "inst-123", "name": "rj45-long", "organization": "org-abc"}
+    timer_target = "rby1-rj45-stop.timer"
+    guard_record = root / "evidence/guard-record.json"
+    _write_json(guard_record, {
+        "schema_version": 1,
+        "candidate_selection_sha256": _sha(candidate),
+        "long_run_plan_sha256": _sha(plan),
+        "guard_started_utc": guard_started.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "guard_deadline_utc": guard_deadline.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "brev_instance": identity,
+        "timer_target": timer_target,
+        "observation_scope": "operator_recorded_not_provider_authenticated",
+    })
+    anchor = root / "artifacts/rj45-long-campaign-guards" / f"{_sha(candidate)}-{_sha(plan)}.anchor.json"
+    _write_json(anchor, {
+        "schema_version": 1,
+        "candidate_selection_sha256": _sha(candidate),
+        "long_run_plan_sha256": _sha(plan),
+        "guard_record": _ref(root, guard_record),
+        "guard_started_utc": guard_started.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "guard_deadline_utc": guard_deadline.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "brev_instance": identity,
+        "timer_target": timer_target,
+        "scope": "local_no_clobber_reissuance_anchor_not_provider_authenticated",
+    })
+    manifest_paths = [plan, parent, candidate, audit, guard_record, ppo, training, *reports.values(), *evidence.values(), *seed_configs.values(), *(root / "scripts").glob("*.py"), *(root / "src/rby1_assembly").glob("*.py")]
     for bundle in bundles.values():
         manifest_paths.extend(root / ref["path"] for ref in bundle.values())
     manifest = root / "evidence/inputs.json"
     _write_json(manifest, {"schema_version": 1, "inputs": {str(p.relative_to(root)): _sha(p) for p in manifest_paths}})
     launch = root / "evidence/launch.json"
-    _write_json(launch, {"schema_version": 1, "status": "ready_for_long_campaign", "long_run_plan_sha256": _sha(plan), "guard_started_utc": guard_started.strftime("%Y-%m-%dT%H:%M:%SZ"), "brev_instance": {"id": "inst-123", "name": "rj45-long", "organization": "org-abc"}, "candidate_selection": _ref(root, candidate), "input_manifest": _ref(root, manifest), "selected_profile": {"training_config": _ref(root, training), "ppo_config": _ref(root, ppo), "zero_init_actor_output": True},
+    _write_json(launch, {"schema_version": 1, "status": "ready_for_long_campaign", "long_run_plan_sha256": _sha(plan), "guard_started_utc": guard_started.strftime("%Y-%m-%dT%H:%M:%SZ"), "guard_deadline_utc": guard_deadline.strftime("%Y-%m-%dT%H:%M:%SZ"), "guard_record": _ref(root, guard_record), "timer_target": timer_target, "guard_verification_boundary": "record_and_anchor_are_local_integrity_evidence;_control_plane_and_timer_must_be_observed_by_operator_immediately_before_launch", "brev_instance": identity, "candidate_selection": _ref(root, candidate), "input_manifest": _ref(root, manifest), "selected_profile": {"training_config": _ref(root, training), "ppo_config": _ref(root, ppo), "zero_init_actor_output": True},
         "process_monitoring": {"poll_interval_s": 0.01, "hang_no_progress_timeout_s": 0.05},
         "runtime_inputs": {"nominal_evidence": _ref(root, evidence["nominal"]), "held_state": _ref(root, evidence["held"]), "parallel_contact_evidence": _ref(root, evidence["parallel"])},
         "seed_ppo_configs": {str(seed): _ref(root, path) for seed, path in seed_configs.items()}})
-    return {"root": root, "plan": plan, "selection": launch, "candidate": candidate, "output": root / "out", "guard_started": guard_started}
+    return {"root": root, "plan": plan, "selection": launch, "candidate": candidate, "output": root / "out", "guard_started": guard_started, "guard_deadline": guard_deadline, "guard_record": guard_record, "anchor": anchor, "manifest": manifest}
 
 
 def _raw_summary(_root, _ref, label, _attempts, _analyzer):
@@ -121,12 +147,18 @@ def _raw_summary(_root, _ref, label, _attempts, _analyzer):
 
 
 def _contract(f):
-    launch = f["guard_started"]
+    deadline = f["guard_deadline"]
     with mock.patch.object(MODULE, "_revalidate_pilot_report", side_effect=_raw_summary), mock.patch.object(MODULE, "_revalidate_pilot_bundle", return_value=None):
-        return MODULE.load_contract(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], deadline_utc=(launch + timedelta(hours=8)).strftime("%Y-%m-%dT%H:%M:%SZ"), python=Path(sys.executable), now=lambda: launch, disk_free=lambda _p: 10**12)
+        return MODULE.load_contract(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], deadline_utc=deadline.strftime("%Y-%m-%dT%H:%M:%SZ"), python=Path(sys.executable), now=lambda: f["guard_started"], disk_free=lambda _p: 10**12)
 
 
 def _arg(command, name): return command[list(command).index(name) + 1]
+
+
+def _refresh_manifest_ref(f):
+    launch = json.loads(f["selection"].read_text())
+    launch["input_manifest"] = _ref(f["root"], f["manifest"])
+    _write_json(f["selection"], launch)
 
 
 class FakeRunner:
@@ -165,6 +197,9 @@ class Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = _fixture(Path(d)); c = _contract(f)
             self.assertEqual(c.candidate_selection.path, f["candidate"])
+            self.assertEqual(c.guard_record.path, f["guard_record"])
+            self.assertEqual(c.guard_deadline_utc, f["guard_deadline"])
+            self.assertEqual(c.timer_target, "rby1-rj45-stop.timer")
             self.assertEqual(c.training_seeds, (20261101, 20261102, 20261103))
             self.assertIn("--zero-init-actor-output", MODULE.build_train_command(c, 20261101))
             self.assertNotIn("20261027", MODULE.build_evaluation_command(c, 20261101, Path("m.pt"), Path("r.json")))
@@ -192,7 +227,7 @@ class Tests(unittest.TestCase):
             f = _fixture(Path(d)); guard = f["guard_started"]; base = dict(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], python=Path(sys.executable), disk_free=lambda _p: 10**12)
             with self.assertRaisesRegex(MODULE.CampaignError, "already passed"):
                 MODULE.load_contract(**base, deadline_utc=(guard - timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%SZ"), now=lambda: guard)
-            with self.assertRaisesRegex(MODULE.CampaignError, "9-hour"):
+            with self.assertRaisesRegex(MODULE.CampaignError, "differs from the launch guard deadline"):
                 MODULE.load_contract(**base, deadline_utc=(guard + timedelta(hours=9, seconds=1)).strftime("%Y-%m-%dT%H:%M:%SZ"), now=lambda: guard)
             candidate = json.loads(f["candidate"].read_text()); candidate["selected_profile"]["zero_init_actor_output"] = False; _write_json(f["candidate"], candidate)
             with self.assertRaisesRegex(MODULE.CampaignError, "candidate selection SHA-256 mismatch"):
@@ -244,11 +279,32 @@ class Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             f = _fixture(Path(d)); guard = f["guard_started"]
             base = dict(project_root=f["root"], plan_path=f["plan"], expected_plan_sha256=_sha(f["plan"]), selection_path=f["selection"], expected_selection_sha256=_sha(f["selection"]), expected_instance_id="inst-123", expected_instance_name="rj45-long", expected_instance_organization="org-abc", output_dir=f["output"], python=Path(sys.executable), disk_free=lambda _p: 10**12)
-            with self.assertRaisesRegex(MODULE.CampaignError, "9-hour"):
+            with self.assertRaisesRegex(MODULE.CampaignError, "differs from the launch guard deadline"):
                 MODULE.load_contract(**base, deadline_utc=(guard + timedelta(hours=16)).strftime("%Y-%m-%dT%H:%M:%SZ"), now=lambda: guard + timedelta(hours=8))
             base["expected_instance_id"] = "other-instance"
             with self.assertRaisesRegex(MODULE.CampaignError, "identity differs"):
                 MODULE.load_contract(**base, deadline_utc=(guard + timedelta(hours=8)).strftime("%Y-%m-%dT%H:%M:%SZ"), now=lambda: guard)
+
+    def test_guard_record_manifest_identity_and_anchor_are_verified(self):
+        with tempfile.TemporaryDirectory() as d:
+            f = _fixture(Path(d)); manifest = json.loads(f["manifest"].read_text())
+            manifest["inputs"].pop(str(f["guard_record"].relative_to(f["root"])))
+            _write_json(f["manifest"], manifest); _refresh_manifest_ref(f)
+            with self.assertRaisesRegex(MODULE.CampaignError, "does not pin the launch guard record"):
+                _contract(f)
+        with tempfile.TemporaryDirectory() as d:
+            f = _fixture(Path(d)); record = json.loads(f["guard_record"].read_text())
+            record["brev_instance"]["id"] = "substituted-instance"; _write_json(f["guard_record"], record)
+            manifest = json.loads(f["manifest"].read_text())
+            manifest["inputs"][str(f["guard_record"].relative_to(f["root"]))] = _sha(f["guard_record"])
+            _write_json(f["manifest"], manifest)
+            launch = json.loads(f["selection"].read_text()); launch["guard_record"] = _ref(f["root"], f["guard_record"]); launch["input_manifest"] = _ref(f["root"], f["manifest"]); _write_json(f["selection"], launch)
+            with self.assertRaisesRegex(MODULE.CampaignError, "guard record Brev identity differs"):
+                _contract(f)
+        with tempfile.TemporaryDirectory() as d:
+            f = _fixture(Path(d)); anchor = json.loads(f["anchor"].read_text()); anchor["timer_target"] = "other.timer"; _write_json(f["anchor"], anchor)
+            with self.assertRaisesRegex(MODULE.CampaignError, "local guard anchor differs"):
+                _contract(f)
 
     def test_nonfinite_json_oom_and_new_source_rejected(self):
         with tempfile.TemporaryDirectory() as d:

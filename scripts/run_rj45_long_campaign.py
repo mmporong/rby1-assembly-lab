@@ -64,6 +64,7 @@ class CampaignContract:
     selection: FileRef
     candidate_selection: FileRef
     input_manifest: FileRef
+    guard_record: FileRef
     frozen_inputs: dict[Path, str]
     profile_label: str
     training_config: FileRef
@@ -83,6 +84,8 @@ class CampaignContract:
     attempts_per_policy: int
     minimum_free_bytes: int
     guard_started_utc: datetime
+    guard_deadline_utc: datetime
+    timer_target: str
     instance_id: str
     instance_name: str
     instance_organization: str
@@ -680,6 +683,9 @@ def load_contract(
     if selection.get("long_run_plan_sha256") != expected_plan_sha256:
         _fail("campaign launch manifest does not reference the supplied long-run plan")
     guard_started = _parse_deadline(selection.get("guard_started_utc"))
+    guard_deadline = _parse_deadline(selection.get("guard_deadline_utc"))
+    if guard_deadline != deadline:
+        _fail("CLI UTC deadline differs from the launch guard deadline")
     instance = _object(selection.get("brev_instance"), "launch.brev_instance")
     expected_identity = {
         "id": expected_instance_id,
@@ -707,6 +713,57 @@ def load_contract(
         frozen_inputs[path] = _sha(raw_digest, f"input manifest digest for {raw_path}")
     if not frozen_inputs:
         _fail("input manifest must contain at least one input")
+
+    candidate_ref = _file_ref(
+        project_root, selection.get("candidate_selection"), "launch.candidate_selection"
+    )
+    guard_record_ref = _file_ref(
+        project_root, selection.get("guard_record"), "launch.guard_record"
+    )
+    _verify_ref(guard_record_ref, "guard record")
+    if frozen_inputs.get(guard_record_ref.path) != guard_record_ref.sha256:
+        _fail("input manifest does not pin the launch guard record")
+    timer_target = _nonempty_string(selection.get("timer_target"), "launch timer target")
+    if selection.get("guard_verification_boundary") != (
+        "record_and_anchor_are_local_integrity_evidence;_control_plane_and_timer_must_be_observed_by_operator_immediately_before_launch"
+    ):
+        _fail("launch does not preserve the guard's local-only verification boundary")
+    guard_record = _load_json(guard_record_ref.path, "guard record")
+    if guard_record.get("schema_version") != 1:
+        _fail("guard record schema_version must be 1")
+    if guard_record.get("candidate_selection_sha256") != candidate_ref.sha256:
+        _fail("guard record candidate SHA differs from launch candidate")
+    if guard_record.get("long_run_plan_sha256") != plan_ref.sha256:
+        _fail("guard record plan SHA differs from the supplied plan")
+    if _parse_deadline(guard_record.get("guard_started_utc")) != guard_started:
+        _fail("guard record start differs from launch")
+    if _parse_deadline(guard_record.get("guard_deadline_utc")) != guard_deadline:
+        _fail("guard record deadline differs from launch")
+    if guard_record.get("brev_instance") != expected_identity:
+        _fail("guard record Brev identity differs from launch and caller expectations")
+    if guard_record.get("timer_target") != timer_target:
+        _fail("guard record timer target differs from launch")
+    if guard_record.get("observation_scope") != "operator_recorded_not_provider_authenticated":
+        _fail("guard record overstates its authentication boundary")
+    guard_anchor_path = project_root / "artifacts/rj45-long-campaign-guards" / (
+        f"{candidate_ref.sha256}-{plan_ref.sha256}.anchor.json"
+    )
+    expected_anchor = {
+        "schema_version": 1,
+        "candidate_selection_sha256": candidate_ref.sha256,
+        "long_run_plan_sha256": plan_ref.sha256,
+        "guard_record": {
+            "path": _relative(project_root, guard_record_ref.path),
+            "sha256": guard_record_ref.sha256,
+        },
+        "guard_started_utc": guard_started.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "guard_deadline_utc": guard_deadline.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "brev_instance": expected_identity,
+        "timer_target": timer_target,
+        "scope": "local_no_clobber_reissuance_anchor_not_provider_authenticated",
+    }
+    if _load_json(guard_anchor_path, "guard anchor") != expected_anchor:
+        _fail("local guard anchor differs from the launch guard contract")
 
     training = _object(plan.get("training"), "plan.training")
     development = _object(
@@ -761,9 +818,6 @@ def load_contract(
     if development.get("seed") == final.get("seed"):
         _fail("development seed must differ from sealed final seed")
 
-    candidate_ref = _file_ref(
-        project_root, selection.get("candidate_selection"), "launch.candidate_selection"
-    )
     profile_label, training_config, ppo_config, zero_init, pilot_audit = (
         _validate_candidate_selection(
             project_root=project_root,
@@ -822,6 +876,7 @@ def load_contract(
     required_refs = {
         "plan": plan_ref,
         "candidate selection": candidate_ref,
+        "guard record": guard_record_ref,
         "selected training config": training_config,
         "selected PPO config": ppo_config,
         "pilot audit": pilot_audit,
@@ -875,6 +930,7 @@ def load_contract(
         selection=selection_ref,
         candidate_selection=candidate_ref,
         input_manifest=input_manifest_ref,
+        guard_record=guard_record_ref,
         frozen_inputs=frozen_inputs,
         profile_label=profile_label,
         training_config=training_config,
@@ -898,6 +954,8 @@ def load_contract(
         ),
         minimum_free_bytes=minimum_free,
         guard_started_utc=guard_started,
+        guard_deadline_utc=guard_deadline,
+        timer_target=timer_target,
         instance_id=expected_instance_id,
         instance_name=expected_instance_name,
         instance_organization=expected_instance_organization,
@@ -1469,8 +1527,15 @@ def execute_campaign(
             "path": str(contract.input_manifest.path),
             "sha256": contract.input_manifest.sha256,
         },
+        "guard_record": {
+            "path": str(contract.guard_record.path),
+            "sha256": contract.guard_record.sha256,
+            "verification_scope": "local_integrity_only_not_provider_authenticated",
+        },
         "profile_label": contract.profile_label,
         "guard_started_utc": contract.guard_started_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "guard_deadline_utc": contract.guard_deadline_utc.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "timer_target": contract.timer_target,
         "brev_instance": {
             "id": contract.instance_id,
             "name": contract.instance_name,
