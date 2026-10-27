@@ -53,14 +53,19 @@
   "final_evaluation": {
     "seed": 20261027,
     "status": "sealed_until_candidate_and_common_checkpoint_and_final_protocol_are_frozen",
-    "rule": "If the development promotion rule passes, freeze a separate final protocol containing the chosen profile, common checkpoint age, all checkpoint hashes, training seeds and aggregation. Then evaluate one baseline and all three selected policies on the same 32 held-out calibration cases once.",
+    "rule": "If the development promotion rule passes, freeze a separate final protocol containing the chosen profile, common checkpoint age, all checkpoint hashes, training seeds and aggregation. Then evaluate one baseline and all three selected policies on the same 32 held-out calibration cases once. Do not reselect a profile, checkpoint age or training seed, or retrain after viewing final results.",
+    "infrastructure_failure": "Preserve the failed output and stop on a process crash, missing or corrupt report, failed input proof, or infrastructure-level held initialization failure. A retry requires a separately recorded incident and frozen retry protocol with the same checkpoint, seed and case IDs; never retry because an otherwise valid policy outcome was unsuccessful. Policy-caused failures count in the original denominator.",
     "limitation": "This seed holds out calibration cases, not a distinct physical grasp or a real-world setup."
   },
   "budget": {
     "estimated_usd_per_gpu_hour": 1.74,
     "bounded_guard_max_hours_from_follow_up_start": 9,
+    "maximum_estimated_guard_compute_usd": 15.66,
+    "guard_scope": "One complete follow-up campaign, not nine hours per model or process. Record the actual guard start and exact instance identity before the first follow-up process.",
+    "minimum_free_bytes_local_and_remote": 2147483648,
     "exclude": ["storage", "tax", "price changes", "other project usage"],
-    "policy": "Verify the selected exact instance identity; stop after artifact retrieval or failure, and do not automatically extend training beyond this preregistered run."
+    "policy": "Verify the selected exact instance identity; stop after artifact retrieval or failure, and do not automatically extend training beyond this preregistered run. Confirm the instance is stopped and only then disable this campaign's timer.",
+    "stop_conditions": "Stop the campaign and do not start the next seed on failed preflight, nonzero process exit, OOM, nonfinite training metrics, confirmed hang, insufficient disk space, checkpoint or input verification failure, missing or corrupt outputs, or failure to retrieve the required evidence. Preserve partial evidence and stop the exact instance."
   },
   "integrity": {
     "pilot_inputs": "Keep the original pilot plan and its frozen 57 inputs unmodified for the duration of the pilot.",
