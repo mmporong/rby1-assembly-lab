@@ -116,7 +116,23 @@ paired BC-zero 중앙 변화:
 2. **숨은 bias의 부분 관측성**: standard79만으로 새 calibration case의 teacher correction을 안정적으로 식별하기 어렵다. 최근접 관측의 label 충돌이 이를 지지하지만 불가능성 증명은 아니다.
 3. **held-grasp dev shift**: 8개 train grasp와 2개 dev grasp의 관절·grip 분포 차이가 기여할 수 있다. 다만 offline dev MSE가 낮아 grasp와 숨은 bias의 영향을 분리할 수 없다.
 
-사전 등록된 PPO-only와 BC→PPO 비교는 그대로 수행할 가치가 있다. PPO가 폐루프 상태 분포에서 actor를 수정하면 이 one-step BC 한계를 보완할 수 있는지 같은 paired 64 case로 판단할 수 있다. 현재 결과만으로 BC dataset이나 teacher 구현 자체가 잘못됐다고 결론 내릴 근거는 없다.
+첫 PPO-only·BC→PPO 비교는 BC→PPO의 초기 파지 안정화 검사에서 중단됐다. PPO-only의 200-update 결과는 32/64·27/64·31/64였으며, 두 학습 방법의 비교 결론은 아직 없다. [중단 기록](../paired-first-attempt/README.md)을 보존하고, 제한적 초기화 복구를 검증한 새 소스에서 두 군을 모두 다시 실행한다. 같은 개발 64조건으로 PPO가 BC의 폐루프 한계를 보완하는지 확인한다. 현재 결과만으로 BC dataset이나 teacher 구현 자체가 잘못됐다고 결론 내릴 근거는 없다.
+
+### 이전 행동 입력에 대한 오프라인 민감도
+
+성공한 교사 시연의 INSERT 관측에서 다른 입력을 고정하고, 오른손의 이전 행동 6개 값만 조금 바꿔 actor 출력을 다시 계산했다. 중앙 차분 간격은 무차원 행동값 `0.001`이며, train과 dev에서 일정 간격으로 최대 1,024행을 골랐다. 물리 시뮬레이터를 돌린 시험은 아니다.
+
+| 항목 | train | dev |
+| --- | ---: | ---: |
+| INSERT 관측 행 | 95,570 | 23,623 |
+| 국소 미분 계산에 사용한 행 | 1,017 | 985 |
+| actor의 교사 행동 MSE | `6.726e-6` | `5.798e-6` |
+| 이전 행동을 그대로 복사한 MSE | `6.892e-6` | `6.259e-6` |
+| 이전 행동 입력을 0으로 바꾼 MSE | `1.072e-3` | `1.088e-3` |
+| 국소 Jacobian 최대 특잇값 중앙값 | 0.9950 | 0.9949 |
+| 최대 특잇값이 1을 넘은 표본 비율 | 32.9% | 34.7% |
+
+이 입력을 0으로 바꾸면 예측 오차가 커졌으므로 학습된 actor가 이전 행동값에 민감하다는 점은 확인했다. 다만 0으로 바꾼 입력은 학습 분포를 벗어날 수 있다. 국소 미분이 1을 넘는 표본도 전체 로봇의 불안정이나 폐루프 실패 원인을 입증하지 않는다. 실제 행동이 다음 관측과 접촉에 미치는 영향은 rollout 시계열로 따로 확인해야 한다. 계산 결과와 입력·소스 해시는 [`action-sensitivity.json`](action-sensitivity.json)에 보존했다.
 
 ## 근거와 재현 범위
 
@@ -146,6 +162,7 @@ Git에는 대용량 HDF5와 actor checkpoint를 넣지 않았다. 네 입력은 
 - [`bc-only-repeat-evaluation.json`](bc-only-repeat-evaluation.json): 같은 64개 조건의 별도 BC-only 반복 평가 원본
 - [`biased-zero-evaluation.json`](biased-zero-evaluation.json): biased-zero 64개 평가 원본
 - [`diagnostic-results.json`](diagnostic-results.json): 재계산한 상세 통계와 실행 provenance
+- [`action-sensitivity.json`](action-sensitivity.json): 교사 관측에서 이전 행동 입력의 국소 민감도
 - [`source-manifest.json`](source-manifest.json): 공개 파일과 미포함 입력의 SHA-256, 크기, 출처
 - [`../../../../scripts/analyze_rj45_bc_closed_loop.py`](../../../../scripts/analyze_rj45_bc_closed_loop.py): 입력 SHA와 평가 실행 source map을 fail-closed로 확인하는 재현 스크립트
 
@@ -163,6 +180,11 @@ PYTHONPATH=src python scripts/analyze_rj45_bc_closed_loop.py \
   --bc-eval docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/bc-only-evaluation.json \
   --zero-eval docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/biased-zero-evaluation.json \
   --output /tmp/rj45-bc-closed-loop-diagnostic.json
+
+PYTHONPATH=src python scripts/analyze_rj45_bc_action_sensitivity.py \
+  --repo "$PWD" \
+  --teacher-root "$ARTIFACT_ROOT" \
+  --output /tmp/rj45-bc-action-sensitivity.json
 ```
 
 오프라인 MSE가 낮다는 사실은 폐루프 성공률 개선을 뜻하지 않는다. 이 결과에서는 BC dev MSE가 zero actor보다 99.73% 낮았지만, 동일 64개 조건의 폐루프 성공은 biased-zero `38/64`, BC-only `8/64`였다. 원인으로 제시한 autoregressive observation shift, 숨은 bias의 부분 관측성, held-grasp dev shift는 후속 시험이 필요한 가설이다.

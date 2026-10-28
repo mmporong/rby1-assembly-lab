@@ -15,8 +15,8 @@
     {
       "classification": "documentation",
       "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md",
-      "sha256": "754798ea89020decfe12c643c28d62e83f0ff6df58c0ac0ec2f543c0fba966de",
-      "size_bytes": 13879
+      "sha256": "74cae98499892543b5f8b7341bd71d7ca89c0a41291e7f3c1b4d86f09d0f5b76",
+      "size_bytes": 15842
     },
     {
       "classification": "derived_analysis",
@@ -44,6 +44,18 @@
       "sha256": "0533fd82ea947afd8f328fa32923cd70f31ff2e32103d47100e57633c356477e",
       "size_bytes": 415065,
       "source": "separate paired PPO campaign baseline; not substituted into the frozen diagnostic inputs"
+    },
+    {
+      "classification": "analysis_source",
+      "path": "scripts/analyze_rj45_bc_action_sensitivity.py",
+      "sha256": "6a4602eecca14b6746156deba2334d67a33fce17fe4b0cd0fe8a521fcece7d6a",
+      "size_bytes": 5659
+    },
+    {
+      "classification": "derived_analysis",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/action-sensitivity.json",
+      "sha256": "c6bbf2949bfaf78e59623ce8a76e664a4970f1df6b3eee19dcbf9e34cfff1b2a",
+      "size_bytes": 6026
     }
   ],
   "repeat_evaluation": {

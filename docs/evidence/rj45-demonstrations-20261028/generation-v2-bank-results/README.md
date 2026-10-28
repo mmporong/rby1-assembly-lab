@@ -25,5 +25,5 @@ source commit `8572ffd39f1f1959ba0e99e69b2a34791eab0b4e`에서 generation v2 pro
 
 ## 후속 reset 검증 상태
 
-파지 생성과 bank 선정은 완료됐다. 이어서 실행한 최초 N256 reset 검증은 quaternion 정규화 검사 오류 때문에 실패했으며, 이 실패는 production 파지의 물리 성공이나 12개 선정 결과를 뒤집는 측정이 아니다. checker 수정과 재검증이 진행 중이고 teacher 수집과 BC 학습은 아직 시작하지 않았다. 이 폴더의 production raw JSON은 reset checker 수정과 분리해 보존한다.
+파지 생성과 bank 선정은 완료됐다. 이어서 실행한 최초 N256 reset 검증은 quaternion 정규화 검사 오류 때문에 실패했다. checker 수정과 reset 재검증을 마친 뒤 교사 시연과 BC 학습까지 완료했으며, 그 결과는 [교사 데이터와 BC 초기화 결과](../teacher-bc-results/README.md)에 기록했다. 이 폴더의 production raw JSON은 당시 파지 생성·선정 기록으로 보존한다.
 

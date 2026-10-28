@@ -11,8 +11,10 @@
 | F 새 seed 반복 | 완료. 200 update 결과가 7/32·10/32·8/32로 승격 기준을 통과하지 못했다. 최종 조건은 봉인 상태다. | [후속 결과](evidence/rj45-refinement-20261028/scale-results/f-followup-summary.json) · [독립 검증](evidence/rj45-refinement-20261028/scale-results/independent-audit.json) |
 | 256환경 병렬 PPO 영상 | 완료. 16초·60 fps 개요와 근접 영상을 별도 동일 설정 실행으로 기록했다. | [미디어 검증](evidence/rj45-refinement-20261028/parallel-media.json) |
 | generation v2 pilot | 통과. 시뮬레이터 물리 파지 4개가 최대 clique 4를 이뤘다. | [생성 계약](evidence/rj45-demonstrations-20261028/grasp-generation-v2-protocol.json) · [실제 pilot 결과](evidence/rj45-demonstrations-20261028/generation-v2-pilot-results/README.md) |
-| production 파지 | 후보 20개 평가 중. 목표는 train 8·dev 2·final 2의 총 12개 파지다. | 완료 근거는 production 종료 뒤 고정한다. |
-| teacher·BC·BC 초기화 PPO | 미완료 | production 파지 검증 뒤 시작한다. |
+| production 파지 | 완료. 후보 20개 중 train 8·dev 2·final 2의 총 12개 파지를 선정했다. | [선정·거리 검증](evidence/rj45-demonstrations-20261028/generation-v2-bank-results/README.md) |
+| teacher·BC | 완료. train 256회·dev 64회 시연이 유효·독립 성공 판정을 받았다. BC dev MSE는 `5.7879e-6`이다. | [수집·학습 결과](evidence/rj45-demonstrations-20261028/teacher-bc-results/README.md) |
+| BC-only 폐루프 평가 | 완료. 기본 평가 12/64, 앞선 같은 계약 평가 8/64. 기준 제어는 38/64다. | [실패 진단과 반복 차이](evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md) |
+| 첫 PPO·BC 초기화 PPO | 중단. PPO 3개 seed는 200 update를 마쳤고 32/64·27/64·31/64였다. BC 학습 중 warmup 검사가 실패했다. | [실패·부분 결과 보존](evidence/rj45-demonstrations-20261028/paired-first-attempt/README.md). 복구 계약 검증 뒤 두 군을 모두 다시 실행한다. |
 
 4B에서 성능 승격이 막혔으므로 4C는 여러 파지 상태의 시연으로 actor를 초기화한 뒤 같은 학습량의 PPO 대조군과 비교한다. 아래 절은 완료된 4B 계약과 진행 중인 4C·5·6단계의 검증 기준을 함께 보존한다.
 
@@ -101,4 +103,4 @@ Isaac Sim 5.1과 Lab 2.3에서는 GPU를 숨기는 환경변수 대신 `--device
 - [Isaac Sim 5.1 GPU 선택](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_faq.html): renderer GPU 인덱스와 multi-GPU 설정. 고정 [Lab AppLauncher 소스](https://raw.githubusercontent.com/isaac-sim/IsaacLab/3c6e67bb5c7ada942a6d1884ab69338f57596f77/source/isaaclab/isaaclab/app/app_launcher.py)를 함께 대조한다.
 - [Isaac Lab v2.3.0](https://github.com/isaac-sim/IsaacLab/releases/tag/v2.3.0): 고정 런타임의 버전 근거.
 
-진행 상태: 4B 병렬 규모 측정과 네 설정 비교, F의 새 seed 3개·200-update 평가, 병렬 PPO 촬영을 마쳤다. F는 7/32·10/32·8/32로 승격 기준을 통과하지 못했고 최종 조건은 봉인했다. generation v2 pilot은 시뮬레이터 물리 파지 4개와 최대 clique 4로 통과했으며 고정 후보 20개를 평가해 train 8·dev 2·final 2의 총 12개 파지를 선정하고 있다. teacher 시연, BC, BC 초기화 PPO 비교, 미사용 조건 평가와 학습 정책 성공·실패 영상은 아직 완료되지 않았다.
+진행 상태: 4B 비교와 병렬 PPO 촬영, generation v2의 물리 파지 12개 선정, 교사 시연과 BC 학습·물리 평가를 마쳤다. 낮은 BC 예측 오차가 폐루프 성공률 개선으로 이어지지 않아 PPO와 BC 초기화 PPO를 비교했으나, BC 학습 중 초기화 검사 실패로 캠페인이 중단됐다. 동일 조건의 제한적 초기화 복구를 검증한 뒤 두 군을 새 소스에서 다시 실행한다. 지지팔 제어 비교와 실제 정책 실패 영상 분석은 후속 작업이다. 미사용 최종 조건은 봉인했으며, 개발 기준을 넘은 후보가 있을 때만 평가한다.

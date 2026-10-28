@@ -1,0 +1,84 @@
+{
+  "archive_sha256": "6fa54e08bc004197a421d1eb62907cb72ff2adccf4dc07d12a125d1f81de3e88",
+  "checkpoint_bytes_in_git": false,
+  "files": [
+    {
+      "classification": "derived_analysis_with_corrected_helper_provenance",
+      "original_relative_to_retrieval": "partial-audit.json",
+      "original_retrieval_sha256": "40ceab9985f73d196716f4283fd50f2e56e1b8f1eef4b3d0982dba62201edf94",
+      "path": "partial-audit.json",
+      "sha256": "8242e302c068dcd17da64b88657a908421e387dfc869c974aef6c93187901359",
+      "size_bytes": 27352
+    },
+    {
+      "path": "retrieval-verification.json",
+      "sha256": "002148fc10ad08467d8776ebf6e0028f6217af71a734e67c6282194e3111bf03",
+      "size_bytes": 416,
+      "source_relative_to_retrieval": "retrieval-verification.json"
+    },
+    {
+      "path": "campaign-summary.json",
+      "sha256": "5102ae4267923cffa84e659cbe360deb570c4e09b8d2f4f6dc0e1e945f76ff54",
+      "size_bytes": 249,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/summary.json"
+    },
+    {
+      "path": "biased-zero-dev.json",
+      "sha256": "f23dc79787e4e05ca4c203440fac56cf8ff3cb383ac0f52b382fcf6d8f1d4744",
+      "size_bytes": 400556,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/biased_zero-dev.json"
+    },
+    {
+      "path": "bc-only-dev.json",
+      "sha256": "0533fd82ea947afd8f328fa32923cd70f31ff2e32103d47100e57633c356477e",
+      "size_bytes": 415065,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/bc-dev.json"
+    },
+    {
+      "path": "ppo_only-20261131-199.json",
+      "sha256": "fbffc10c449ee5514fb84d04682b7d7a76bf3311761997e69e43bac0be19331a",
+      "size_bytes": 416211,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261131-199.json"
+    },
+    {
+      "path": "ppo_only-20261131-199-inspection.json",
+      "sha256": "d58962667e3f9bf2f81b4c67a7b8972f8c88ea2fa61566d32deffbf03cf9f04e",
+      "size_bytes": 2018,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/inspections/ppo_only-20261131-199.json"
+    },
+    {
+      "path": "ppo_only-20261132-199.json",
+      "sha256": "2deb60765ce0a6300179c1f4e1db257d7618b06527c06290132451d68e5f288f",
+      "size_bytes": 417008,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261132-199.json"
+    },
+    {
+      "path": "ppo_only-20261132-199-inspection.json",
+      "sha256": "e0d8926c70cb513bded3e21a160958cd1f8d52a9a29c1d95bfe9477ab4e9d27e",
+      "size_bytes": 2018,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/inspections/ppo_only-20261132-199.json"
+    },
+    {
+      "path": "ppo_only-20261133-199.json",
+      "sha256": "9944f1765ebb39009029043e5b454c5e2eafb5dcdf6691dda8e45573327fed64",
+      "size_bytes": 417004,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261133-199.json"
+    },
+    {
+      "path": "ppo_only-20261133-199-inspection.json",
+      "sha256": "a4cde5d7d982cc1fee29ace30c7f629c809b0e3cb419a73994f313f29720bb4b",
+      "size_bytes": 2018,
+      "source_relative_to_retrieval": "snapshot/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/inspections/ppo_only-20261133-199.json"
+    },
+    {
+      "classification": "documentation",
+      "path": "README.md",
+      "sha256": "9bda76e9e1aa727f058a946251d87e77cd62ebd6aad88658b9bb5511a6364c1a",
+      "size_bytes": 4317
+    }
+  ],
+  "final_opened": false,
+  "schema_version": 1,
+  "scope": "failed paired campaign, completed PPO-only measurements retained",
+  "source_commit": "8512a5932547b5495325b5ff0b6894fb072db98e"
+}

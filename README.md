@@ -15,8 +15,10 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 | 단일 GPU 병렬 처리량 | 64환경 223.39, 128환경 460.75, 256환경 868.43 전이/초 | 완료. update당 전이 수를 8,192개로 맞춰 비교했다. [결과 문서](docs/evidence/rj45-refinement-20261028/scale-results/README.md) |
 | 4개 설정의 96-update 개발 비교 | 기준 제어 7/32, Z1 7/32, F 11/32, N 10/32, R 9/32 | 완료. 사전 규칙으로 F를 후속 후보로 골랐다. [요약](docs/evidence/rj45-refinement-20261028/scale-results/refinement-summary.json) |
 | F의 새 seed 3개, 200 update | 7/32, 10/32, 8/32 | 완료. 평균 8.33/32로 승격 기준 10/32에 못 미쳤다. 최종 조건은 열지 않고 봉인했다. [결과](docs/evidence/rj45-refinement-20261028/scale-results/f-followup-summary.json) · [독립 검증](docs/evidence/rj45-refinement-20261028/scale-results/independent-audit.json) |
-| generation v2 파지 pilot | 시뮬레이터 물리 파지 4개, 최대 clique 4 | pilot 통과. 고정 후보 20개를 평가해 학습 8개·개발 검증 2개·최종 검증 2개를 선정하는 중이다. [생성 계약](docs/evidence/rj45-demonstrations-20261028/grasp-generation-v2-protocol.json) · [실제 pilot 결과](docs/evidence/rj45-demonstrations-20261028/generation-v2-pilot-results/README.md) |
-| teacher·BC·BC 초기화 PPO 비교 | 결과 없음 | production 파지 검증 뒤 실행한다. 아직 완료되지 않았다. [실행 계획](docs/rj45-next-stage-plan.md) |
+| generation v2 물리 파지 | 후보 20개를 평가해 train 8개·dev 2개·final 2개 선정 | 완료. 선정된 12개 사이의 66쌍이 최소 병진 거리 0.25 mm를 통과했다. 정책 성능은 선정에 쓰지 않았다. [선정 결과](docs/evidence/rj45-demonstrations-20261028/generation-v2-bank-results/README.md) |
+| 교사 시연과 BC 초기화 | train 256회·dev 64회 독립 성공, BC dev MSE `5.7879e-6` | 완료. 교사는 정답 상태를 쓰며 학생 입력은 79D로 제한한다. 교사 성공과 BC의 예측 오차는 정책의 물리 성공률과 구분한다. [데이터·학습 결과](docs/evidence/rj45-demonstrations-20261028/teacher-bc-results/README.md) |
+| BC-only 물리 평가 | 기본 평가 12/64, 앞선 같은 계약 평가 8/64; 기준 제어 38/64 | 완료. BC가 기준 제어보다 낮았고 실행 간 차이도 관찰됐다. [폐루프 진단](docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md) |
+| 첫 PPO와 BC 초기화 PPO 비교 | PPO 200 update는 32/64·27/64·31/64, BC 초기화 PPO는 중단 | BC 학습 중 파지 초기화 검사가 실패했다. 비교를 완료한 결과로 사용하지 않으며 복구 검증을 진행한다. [중단 기록](docs/evidence/rj45-demonstrations-20261028/paired-first-attempt/README.md) |
 
 ## 256환경 병렬 PPO 영상
 
@@ -112,6 +114,6 @@ RJ45 잔차 학습 환경은 검증된 파지 상태를 초기화 때 복원하�
 
 초기 79D·85D 단일 seed 실험과 논문 기반 예비 비교는 현재 결과를 만들기 전의 개발 기록이다. 수치와 원본 해시는 [강화학습 연구·실험 문서](docs/rj45-rl-research.md), [관측 방식 비교 자료](docs/media/rj45/target-offset42-observation-comparison-data.json), [과거 장기 결과](docs/evidence/rj45-paper-ablation/long-results/manifest.json)에 보존했다. 현재 판단에는 위의 `현재 결과` 표와 [규모 확대 결과](docs/evidence/rj45-refinement-20261028/scale-results/README.md)를 사용한다.
 
-다중 파지 production, teacher 시연, BC와 PPO 비교, 미사용 조건 평가는 아직 남아 있다. 한 파지 상태의 개발 성공률을 일반화 성능으로 해석하지 않는다.
+다중 파지 생성과 교사 시연, BC 학습·물리 평가는 완료했다. PPO와 BC 초기화 PPO의 비교는 초기화 검사 실패로 중단돼 복구를 검증하고 있다. 지지팔 제어 비교와 실패 영상 분석도 남아 있다. 개발 평가에 사용하는 파지는 2개이며 최종 파지와 평가 seed는 봉인했다. 개발 기준을 넘은 후보가 생길 때만 최종 평가를 연다.
 
 [실험 계약](docs/experiment-design.md)은 기준 제어 비교, 데이터 분리, 성공 판정과 남은 검증을 정의한다.

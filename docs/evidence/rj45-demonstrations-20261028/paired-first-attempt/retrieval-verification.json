@@ -1,0 +1,10 @@
+{
+  "archive_sha256": "6fa54e08bc004197a421d1eb62907cb72ff2adccf4dc07d12a125d1f81de3e88",
+  "duplicate_paths": false,
+  "files_verified": 211,
+  "manifest_sha256": "b4d6b26c6ce38e13c025d00582337e7447fc02c9549892fc77d434e1d7067760",
+  "regular_files_only": true,
+  "safe_extraction_verified": true,
+  "source_commit": "8512a5932547b5495325b5ff0b6894fb072db98e",
+  "status": "failed_campaign_preserved_not_complete"
+}

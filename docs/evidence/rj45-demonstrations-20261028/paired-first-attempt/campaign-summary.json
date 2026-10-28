@@ -1,0 +1,8 @@
+{
+  "completed_utc": "2026-10-28T10:56:04.822272+00:00",
+  "error": "stage failed: train-bc_then_ppo-20261132",
+  "error_type": "RuntimeError",
+  "failed_stage": "paired-training-and-evaluation",
+  "final_seed_opened": false,
+  "status": "failed"
+}

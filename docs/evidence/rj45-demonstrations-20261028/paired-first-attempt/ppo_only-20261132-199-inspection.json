@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "status": "checkpoint_payload_and_lineage_verified",
+  "checkpoint": {
+    "path": "/home/ubuntu/rby1-assembly-lab-rj45-data/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/runs/ppo_only/20261132/rj45-v1/2026-10-28_09-54-53/model_199.pt",
+    "sha256": "ff5316c95ab0124ccf880768cb662555c8346be86ac89d7fa7b5bc1f53ce6ca8",
+    "filename_iteration": 199,
+    "payload_iteration": 199,
+    "completed_updates": 200
+  },
+  "planned_training_updates": 200,
+  "checkpoint_manifest": {
+    "path": "/home/ubuntu/rby1-assembly-lab-rj45-data/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/runs/ppo_only/20261132/rj45-v1/2026-10-28_09-54-53/checkpoint_manifest.json",
+    "sha256": "b3698e99dcd1a9d67795b2cb1c38b506d3bdf88d30c9f019f526b5c347c2dee6",
+    "training_completed": true
+  },
+  "training_provenance": {
+    "path": "/home/ubuntu/rby1-assembly-lab-rj45-data/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/runs/ppo_only/20261132/rj45-v1/2026-10-28_09-54-53/training_provenance.json",
+    "sha256": "ddfa182218fa5ea9f71f248157957410c65e8ea59f01a40a7851bb386e4dff87",
+    "seed": 20261132
+  },
+  "runner_config": {
+    "path": "/home/ubuntu/rby1-assembly-lab-rj45-data/artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/runs/ppo_only/20261132/rj45-v1/2026-10-28_09-54-53/runner_config.json",
+    "sha256": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+    "seed": 20261132
+  },
+  "loader": {
+    "map_location": "cpu",
+    "weights_only": true
+  },
+  "completion_derivation": {
+    "formula": "completed_updates = checkpoint payload iter + 1",
+    "training_mode_basis": "assumed_fresh_no_resume_requires_review_of_pinned_training_script",
+    "checkpoint_scope": "checkpoints created in this run directory",
+    "rsl_rl_version": "3.0.1",
+    "training_script": {
+      "path": "/home/ubuntu/rby1-assembly-lab-rj45-data/scripts/train.py",
+      "sha256": "75280d1f1c9f37b227b33b5c4304de0c366e46b657e157d73ffbb765f7019456"
+    }
+  }
+}

@@ -1,0 +1,705 @@
+{
+  "audit_helper_source_sha256": "90a9b4f0bcaa50577a42fc62144e66ccb14ef241f7dcf90dc6490bc265281d49",
+  "baseline_successes": {
+    "bc_only": 12,
+    "biased_zero": 38
+  },
+  "bc_then_ppo_completed_training_runs": 0,
+  "campaign_status": "failed",
+  "failure_diagnostic": {
+    "environments": [
+      {
+        "contact_loads": {
+          "forbidden_load_n": {
+            "nonfinite": false,
+            "value": 0.0
+          },
+          "insertion_force_world_n": [
+            {
+              "nonfinite": false,
+              "value": 0.0
+            },
+            {
+              "nonfinite": false,
+              "value": 0.0
+            },
+            {
+              "nonfinite": false,
+              "value": 0.0
+            }
+          ],
+          "insertion_load_n": {
+            "nonfinite": false,
+            "value": 0.0
+          }
+        },
+        "env_id": 204,
+        "finger_force_n": {
+          "left_l1": {
+            "nonfinite": false,
+            "value": 1.4856032133102417
+          },
+          "left_l2": {
+            "nonfinite": false,
+            "value": 1.4858647584915161
+          },
+          "right_r1": {
+            "nonfinite": false,
+            "value": 3.768704652786255
+          },
+          "right_r2": {
+            "nonfinite": false,
+            "value": 3.7687418460845947
+          }
+        },
+        "gates": {
+          "grip_live": true,
+          "lift_left_ok": true,
+          "lift_right_ok": true,
+          "motion_finite": true,
+          "motion_settled": false,
+          "sensor_finite": true,
+          "stable": false,
+          "state_finite": true,
+          "within_limits": true
+        },
+        "joint_unit_maxima": {
+          "prismatic_reference_error_m": {
+            "nonfinite": false,
+            "value": 0.0038074839394539595
+          },
+          "prismatic_velocity_m_s": {
+            "nonfinite": false,
+            "value": 2.339510501769837e-05
+          },
+          "revolute_reference_error_rad": {
+            "nonfinite": false,
+            "value": 0.0025866031646728516
+          },
+          "revolute_velocity_rad_s": {
+            "nonfinite": false,
+            "value": 0.001683240057900548
+          }
+        },
+        "lift_m": {
+          "left": {
+            "nonfinite": false,
+            "value": 0.139001727104187
+          },
+          "right": {
+            "nonfinite": false,
+            "value": 0.11046314239501953
+          }
+        },
+        "nonfinite_readings": [],
+        "object_com_velocity_world": {
+          "plug": {
+            "angular_norm_rad_s": {
+              "nonfinite": false,
+              "value": 0.06147165969014168
+            },
+            "angular_rad_s": [
+              {
+                "nonfinite": false,
+                "value": 0.06069876253604889
+              },
+              {
+                "nonfinite": false,
+                "value": -0.008107793517410755
+              },
+              {
+                "nonfinite": false,
+                "value": -0.005356210749596357
+              }
+            ],
+            "linear_m_s": [
+              {
+                "nonfinite": false,
+                "value": 0.00018437462858855724
+              },
+              {
+                "nonfinite": false,
+                "value": -0.0003671657759696245
+              },
+              {
+                "nonfinite": false,
+                "value": 0.00028755783569067717
+              }
+            ],
+            "linear_norm_m_s": {
+              "nonfinite": false,
+              "value": 0.0005014920025132596
+            }
+          },
+          "socket": {
+            "angular_norm_rad_s": {
+              "nonfinite": false,
+              "value": 0.0016366521595045924
+            },
+            "angular_rad_s": [
+              {
+                "nonfinite": false,
+                "value": -0.000664932478684932
+              },
+              {
+                "nonfinite": false,
+                "value": 0.0014954392099753022
+              },
+              {
+                "nonfinite": false,
+                "value": -1.251774938282324e-05
+              }
+            ],
+            "linear_m_s": [
+              {
+                "nonfinite": false,
+                "value": 0.00016758714627940208
+              },
+              {
+                "nonfinite": false,
+                "value": -0.0001141289685619995
+              },
+              {
+                "nonfinite": false,
+                "value": -8.413475006818771e-05
+              }
+            ],
+            "linear_norm_m_s": {
+              "nonfinite": false,
+              "value": 0.00021952114184387028
+            }
+          }
+        },
+        "relative_velocity": {
+          "angular_rad_s": [
+            {
+              "nonfinite": false,
+              "value": 0.061363693326711655
+            },
+            {
+              "nonfinite": false,
+              "value": -0.009603233076632023
+            },
+            {
+              "nonfinite": false,
+              "value": -0.005343692842870951
+            }
+          ],
+          "linear_m_s": [
+            {
+              "nonfinite": false,
+              "value": 8.444095874438062e-05
+            },
+            {
+              "nonfinite": false,
+              "value": -0.00022924496443010867
+            },
+            {
+              "nonfinite": false,
+              "value": 0.0010783791076391935
+            }
+          ]
+        },
+        "steps": {
+          "required_stable": 6,
+          "stable": 0,
+          "timeout": 30,
+          "warmup": 30
+        }
+      }
+    ],
+    "failed_environment_ids": [
+      204
+    ],
+    "kind": "held_grasp_warmup_timeout",
+    "nonfinite_summary": {
+      "count": 0,
+      "locations": []
+    },
+    "schema_version": 1,
+    "thresholds": {
+      "grip_lift_proof_m": {
+        "nonfinite": false,
+        "value": 0.015
+      },
+      "max_object_angular_speed_rad_s": {
+        "nonfinite": false,
+        "value": 0.05
+      },
+      "max_object_linear_speed_m_s": {
+        "nonfinite": false,
+        "value": 0.005
+      },
+      "max_prismatic_joint_speed_m_s": {
+        "nonfinite": false,
+        "value": 0.005
+      },
+      "max_prismatic_tracking_error_m": {
+        "nonfinite": false,
+        "value": 0.005
+      },
+      "max_relative_angular_speed_rad_s": {
+        "nonfinite": false,
+        "value": 0.05
+      },
+      "max_relative_linear_speed_m_s": {
+        "nonfinite": false,
+        "value": 0.005
+      },
+      "max_revolute_joint_speed_rad_s": {
+        "nonfinite": false,
+        "value": 0.05
+      },
+      "max_revolute_tracking_error_rad": {
+        "nonfinite": false,
+        "value": 0.05
+      }
+    },
+    "timing": {
+      "required_stable_steps": 6,
+      "step_dt_s": {
+        "nonfinite": false,
+        "value": 0.03333333333333333
+      },
+      "timeout_steps": 30
+    }
+  },
+  "failure_log_sha256": "9780538ae2e7eeba5a8594a53c806bb101385a267c67f344f66b1bffe7b9c502",
+  "final_opened": false,
+  "generation_method": "interactive Python imported helper functions; full campaign CLI not executed; original interactive program not saved as a standalone file",
+  "ppo_only_completed_training_runs": 3,
+  "ppo_only_updates_per_run": 200,
+  "ppo_reports": [
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "f254dd4f13b86068c102d091e0154ce447490572b2c112bc0c4a2ad8af45ae33",
+        "checkpoint_manifest": "94ce3a6ea2dab6c2e2f823524a23de309f5bcc63027afa23ba91322a5d2d5a78",
+        "runner_config": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_provenance": "c229f96aee316b9e5c5b0f2e69c3de360fb82a6a91b2ca4aafa61da150d35b05"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 34,
+        "final_lateral_error_m": {
+          "0.0": 7.899492629803717e-06,
+          "0.25": 3.101212587353075e-05,
+          "0.5": 4.2098918129340746e-05,
+          "0.75": 7.30064493836835e-05,
+          "1.0": 0.0001365523785352707
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.436163902282715,
+        "invalid": 0,
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "success_elapsed_s": {
+          "0.0": 12.166666984558105,
+          "0.25": 12.266667366027832,
+          "0.5": 12.316667556762695,
+          "0.75": 13.008333921432495,
+          "1.0": 20.30000114440918
+        },
+        "successes": 30
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261131-19.json",
+      "report_sha256": "26b3ee627dd066ed2fb89bea42591f94eae728a8d412b22e8d7c9c2a205d0a02",
+      "seed": 20261131,
+      "updates": 20
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "6bc3caacf5982e020e2ce9a25ec95e7e2db0181fd789fb31f443e308c1a68d12",
+        "checkpoint_manifest": "94ce3a6ea2dab6c2e2f823524a23de309f5bcc63027afa23ba91322a5d2d5a78",
+        "runner_config": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_provenance": "c229f96aee316b9e5c5b0f2e69c3de360fb82a6a91b2ca4aafa61da150d35b05"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 29,
+        "final_lateral_error_m": {
+          "0.0": 5.363281729842129e-07,
+          "0.25": 1.9917665667890105e-05,
+          "0.5": 3.863266283588018e-05,
+          "0.75": 7.50081344449427e-05,
+          "1.0": 0.00015775143401697278
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.354000091552734,
+        "invalid": 0,
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "success_elapsed_s": {
+          "0.0": 12.100000381469727,
+          "0.25": 12.233333587646484,
+          "0.5": 12.233333587646484,
+          "0.75": 12.750000476837158,
+          "1.0": 15.700000762939453
+        },
+        "successes": 35
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261131-95.json",
+      "report_sha256": "0b44a9a3ca33771cf44839383a5095401ba5939509d4ace22b298cab691df242",
+      "seed": 20261131,
+      "updates": 96
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "c0951379cddcbf173bd6632ec009088be75c774728c17746089eddd14ee17b69",
+        "checkpoint_manifest": "94ce3a6ea2dab6c2e2f823524a23de309f5bcc63027afa23ba91322a5d2d5a78",
+        "runner_config": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_provenance": "c229f96aee316b9e5c5b0f2e69c3de360fb82a6a91b2ca4aafa61da150d35b05"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 32,
+        "final_lateral_error_m": {
+          "0.0": 5.4802308113721665e-06,
+          "0.25": 2.319551049367874e-05,
+          "0.5": 4.183322744211182e-05,
+          "0.75": 7.461219138349406e-05,
+          "1.0": 0.0001549666776554659
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.265092372894287,
+        "invalid": 0,
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "success_elapsed_s": {
+          "0.0": 12.100000381469727,
+          "0.25": 12.233333587646484,
+          "0.5": 12.233333587646484,
+          "0.75": 12.633333683013916,
+          "1.0": 23.500001907348633
+        },
+        "successes": 32
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261131-199.json",
+      "report_sha256": "fbffc10c449ee5514fb84d04682b7d7a76bf3311761997e69e43bac0be19331a",
+      "seed": 20261131,
+      "updates": 200
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "518f6e43a6bb23d4452f448ec70180bc08b8fcee7cba85b5cf5f1003946c35a5",
+        "checkpoint_manifest": "b3698e99dcd1a9d67795b2cb1c38b506d3bdf88d30c9f019f526b5c347c2dee6",
+        "runner_config": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "training_provenance": "ddfa182218fa5ea9f71f248157957410c65e8ea59f01a40a7851bb386e4dff87"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 56,
+        "final_lateral_error_m": {
+          "0.0": 2.231424559795414e-06,
+          "0.25": 6.106130786065478e-05,
+          "0.5": 7.28133054508362e-05,
+          "0.75": 8.349005838681478e-05,
+          "1.0": 0.00017815038154367357
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.356005668640137,
+        "invalid": 0,
+        "policy_config_sha256": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "success_elapsed_s": {
+          "0.0": 12.233333587646484,
+          "0.25": 12.266667366027832,
+          "0.5": 12.333333969116211,
+          "0.75": 13.425000667572021,
+          "1.0": 16.63333511352539
+        },
+        "successes": 8
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261132-19.json",
+      "report_sha256": "d0f20958b6962a91a03f5e423b5658e947361cace63ce3acb1ced29ed2278320",
+      "seed": 20261132,
+      "updates": 20
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "668923cc4756e5fdac0065087cd2f14ee8a6dc3428ad995768cb2235ae59827c",
+        "checkpoint_manifest": "b3698e99dcd1a9d67795b2cb1c38b506d3bdf88d30c9f019f526b5c347c2dee6",
+        "runner_config": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "training_provenance": "ddfa182218fa5ea9f71f248157957410c65e8ea59f01a40a7851bb386e4dff87"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 31,
+        "final_lateral_error_m": {
+          "0.0": 2.6743964554043487e-06,
+          "0.25": 2.449045632602065e-05,
+          "0.5": 4.039464874949772e-05,
+          "0.75": 7.132180689950474e-05,
+          "1.0": 0.00014229427324607968
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.319563865661621,
+        "invalid": 0,
+        "policy_config_sha256": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "success_elapsed_s": {
+          "0.0": 12.033333778381348,
+          "0.25": 12.133334159851074,
+          "0.5": 12.133334159851074,
+          "0.75": 12.533333778381348,
+          "1.0": 15.7333345413208
+        },
+        "successes": 33
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261132-95.json",
+      "report_sha256": "e8e90d759394e7d90aeaa3acdb43aff987e8b2b17cfc9d7a2bd1b629b4af34a2",
+      "seed": 20261132,
+      "updates": 96
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "ff5316c95ab0124ccf880768cb662555c8346be86ac89d7fa7b5bc1f53ce6ca8",
+        "checkpoint_manifest": "b3698e99dcd1a9d67795b2cb1c38b506d3bdf88d30c9f019f526b5c347c2dee6",
+        "runner_config": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "training_provenance": "ddfa182218fa5ea9f71f248157957410c65e8ea59f01a40a7851bb386e4dff87"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 37,
+        "final_lateral_error_m": {
+          "0.0": 1.362928105663741e-05,
+          "0.25": 2.9023825391050195e-05,
+          "0.5": 4.727982741314918e-05,
+          "0.75": 7.281183388840873e-05,
+          "1.0": 0.00013428047532215714
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.511415958404541,
+        "invalid": 0,
+        "policy_config_sha256": "3226813a27a5b349aa27ac035ec937276950abe8c758e6def94ce7bbb9e9ba97",
+        "success_elapsed_s": {
+          "0.0": 11.933334350585938,
+          "0.25": 12.066667556762695,
+          "0.5": 12.066667556762695,
+          "0.75": 12.800000667572021,
+          "1.0": 20.700000762939453
+        },
+        "successes": 27
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261132-199.json",
+      "report_sha256": "2deb60765ce0a6300179c1f4e1db257d7618b06527c06290132451d68e5f288f",
+      "seed": 20261132,
+      "updates": 200
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "c699d08fc7ca7be3225f242bc054f4937eb4387b6acd2dd7464993c245113f65",
+        "checkpoint_manifest": "d04748198789bd7b212fff43250f5c49e6a2f4f64197aa021771b94de86d2340",
+        "runner_config": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "training_provenance": "e2f90dc95edbba157fc71ab64460bc66227389ba087ad6f18912b2d201ebc500"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 28,
+        "final_lateral_error_m": {
+          "0.0": 1.7563024812261574e-06,
+          "0.25": 1.9850090211548377e-05,
+          "0.5": 4.109820110897999e-05,
+          "0.75": 7.223270040412899e-05,
+          "1.0": 0.00015743040421511978
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.322342872619629,
+        "invalid": 0,
+        "policy_config_sha256": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "success_elapsed_s": {
+          "0.0": 12.133334159851074,
+          "0.25": 12.266667366027832,
+          "0.5": 12.266667366027832,
+          "0.75": 12.641667366027832,
+          "1.0": 14.200000762939453
+        },
+        "successes": 36
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261133-19.json",
+      "report_sha256": "974a7ff6699040179e290e5faf3a456149e1f32fcbe8190c550d0556c75ad423",
+      "seed": 20261133,
+      "updates": 20
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "c69fe04bfe723227fdd2b2fba772c1ab075f4a0d9ff67884cf5eb7a28a504845",
+        "checkpoint_manifest": "d04748198789bd7b212fff43250f5c49e6a2f4f64197aa021771b94de86d2340",
+        "runner_config": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "training_provenance": "e2f90dc95edbba157fc71ab64460bc66227389ba087ad6f18912b2d201ebc500"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 28,
+        "final_lateral_error_m": {
+          "0.0": 4.7764565351826604e-06,
+          "0.25": 2.408868886050186e-05,
+          "0.5": 4.171433101873845e-05,
+          "0.75": 7.642921264050528e-05,
+          "1.0": 0.00016541309014428407
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.332383155822754,
+        "invalid": 0,
+        "policy_config_sha256": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "success_elapsed_s": {
+          "0.0": 12.133334159851074,
+          "0.25": 12.266667366027832,
+          "0.5": 12.266667366027832,
+          "0.75": 12.675000429153442,
+          "1.0": 14.366667747497559
+        },
+        "successes": 36
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261133-95.json",
+      "report_sha256": "b4cb241ebea96caad944404297b2973d25330ed912d906dfe0c4dd9423d87843",
+      "seed": 20261133,
+      "updates": 96
+    },
+    {
+      "checkpoint_bundle": {
+        "checkpoint": "1e91e4d2e005d74c76f2cce0cb69b7bdc5bdf8ee2d7e56bc4ce0409aff71ea7b",
+        "checkpoint_manifest": "d04748198789bd7b212fff43250f5c49e6a2f4f64197aa021771b94de86d2340",
+        "runner_config": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "training_provenance": "e2f90dc95edbba157fc71ab64460bc66227389ba087ad6f18912b2d201ebc500"
+      },
+      "metrics": {
+        "evaluation_horizon_s": 24.0,
+        "failed_elapsed_s": {
+          "0.0": 24.000001907348633,
+          "0.25": 24.000001907348633,
+          "0.5": 24.000001907348633,
+          "0.75": 24.000001907348633,
+          "1.0": 24.000001907348633
+        },
+        "failures": 33,
+        "final_lateral_error_m": {
+          "0.0": 3.3094520404119976e-06,
+          "0.25": 2.4837358523654984e-05,
+          "0.5": 4.5823067921446636e-05,
+          "0.75": 6.8452174673439e-05,
+          "1.0": 0.00016159059305209666
+        },
+        "forbidden_contact_peak_n": 0.0,
+        "force_proxy_max_n": 4.289637565612793,
+        "invalid": 0,
+        "policy_config_sha256": "4527b55cb6cced6e3b2d80f48dfcc5e6575129ad9318dbefd0cd4ab4611baa2b",
+        "success_elapsed_s": {
+          "0.0": 11.966667175292969,
+          "0.25": 12.100000381469727,
+          "0.5": 12.100000381469727,
+          "0.75": 12.566667556762695,
+          "1.0": 21.166667938232422
+        },
+        "successes": 31
+      },
+      "report": "artifacts/rj45-4c-ppo-bc-paired-eval-recovery-v1-20261028/reports/ppo_only-20261133-199.json",
+      "report_sha256": "9944f1765ebb39009029043e5b454c5e2eafb5dcdf6691dda8e45573327fed64",
+      "seed": 20261133,
+      "updates": 200
+    }
+  ],
+  "promotion_evaluated": false,
+  "retrieval_verification": {
+    "archive_sha256": "6fa54e08bc004197a421d1eb62907cb72ff2adccf4dc07d12a125d1f81de3e88",
+    "duplicate_paths": false,
+    "files_verified": 211,
+    "manifest_sha256": "b4d6b26c6ce38e13c025d00582337e7447fc02c9549892fc77d434e1d7067760",
+    "regular_files_only": true,
+    "safe_extraction_verified": true,
+    "source_commit": "8512a5932547b5495325b5ff0b6894fb072db98e",
+    "status": "failed_campaign_preserved_not_complete"
+  },
+  "schema_version": 1,
+  "scope": "historical partial campaign; not a completed paired comparison",
+  "source_commit": "8512a5932547b5495325b5ff0b6894fb072db98e",
+  "source_files_verified": 36,
+  "source_pins": {
+    "scripts/evaluate_policy.py": "ca578d7db304781e382aea33d1154545723eac5e5ae4bc512d3e0186c25aa1c8",
+    "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+    "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+    "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+    "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+    "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+    "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+    "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+    "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+    "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+    "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+    "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+    "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+    "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+    "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+    "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+    "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+    "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+    "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+    "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+    "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+    "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+    "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+    "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+    "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+    "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+    "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+    "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+    "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+    "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+    "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+    "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+    "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+    "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+    "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+    "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+  }
+}
