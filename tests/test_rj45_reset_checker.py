@@ -264,19 +264,21 @@ class NativePhysxIsolationTests(unittest.TestCase):
         env.plug.root_physx_view.velocities.value[0, 0] = -1.0
         self.assert_untouched(before, env, untouched)
 
-    def test_n64_single_target_reset_preserves_63_native_physx_rows(self) -> None:
-        env = _fake_environment(num_envs=64)
-        untouched = np.arange(1, 64)
-        before = self.snapshot(env, untouched)
-        env.robot.root_physx_view.dof_positions.value[0, 0] = -1.0
-        env.socket.root_physx_view.transforms.value[0, 0] = -1.0
-        env.plug.root_physx_view.velocities.value[0, 0] = -1.0
-        self.assertEqual(len(untouched), 63)
-        self.assert_untouched(before, env, untouched)
+    def test_large_single_target_reset_preserves_all_untouched_physx_rows(self) -> None:
+        for num_envs in (64, 128, 256):
+            with self.subTest(num_envs=num_envs):
+                env = _fake_environment(num_envs=num_envs)
+                untouched = np.arange(1, num_envs)
+                before = self.snapshot(env, untouched)
+                env.robot.root_physx_view.dof_positions.value[0, 0] = -1.0
+                env.socket.root_physx_view.transforms.value[0, 0] = -1.0
+                env.plug.root_physx_view.velocities.value[0, 0] = -1.0
+                self.assertEqual(len(untouched), num_envs - 1)
+                self.assert_untouched(before, env, untouched)
 
 
 class ParallelCliContractTests(unittest.TestCase):
-    def test_num_env_choices_include_n64_and_parallel_gate_applies_above_one(self) -> None:
+    def test_num_env_choices_include_scale_targets_and_parallel_gate_applies(self) -> None:
         tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
         num_env_call = next(
             node
@@ -293,13 +295,14 @@ class ParallelCliContractTests(unittest.TestCase):
             for keyword in num_env_call.keywords
             if keyword.arg == "choices"
         )
-        self.assertEqual(ast.literal_eval(choices), (1, 4, 64))
+        self.assertEqual(ast.literal_eval(choices), (1, 4, 64, 128, 256))
 
         required = _load_parallel_requirement_helper()
         self.assertFalse(required(1))
-        self.assertTrue(required(4))
-        self.assertTrue(required(64))
-        for invalid in (0, 2, 65, True):
+        for num_envs in (4, 64, 128, 256):
+            with self.subTest(num_envs=num_envs):
+                self.assertTrue(required(num_envs))
+        for invalid in (0, 2, 65, 127, 129, 255, 257, True):
             with self.subTest(invalid=invalid), self.assertRaises(ValueError):
                 required(invalid)
 
@@ -309,7 +312,23 @@ class ParallelCliContractTests(unittest.TestCase):
         )
         self.assertNotIn("args.num_envs == 4", source)
 
-    def test_report_separates_n4_contact_proof_from_n64_reset_measurement(self) -> None:
+    def test_app_launcher_disables_multi_gpu_for_selected_device(self) -> None:
+        tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
+        launcher_call = next(
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "AppLauncher"
+        )
+        multi_gpu = next(
+            keyword.value
+            for keyword in launcher_call.keywords
+            if keyword.arg == "multi_gpu"
+        )
+        self.assertIs(ast.literal_eval(multi_gpu), False)
+
+    def test_report_separates_n4_contact_proof_from_scaled_reset_measurement(self) -> None:
         source = CHECKER_PATH.read_text(encoding="utf-8")
         self.assertIn("preexisting N4 contact-routing evidence", source)
         self.assertIn('"measurement_num_envs": args.num_envs', source)

@@ -74,8 +74,8 @@ def _validate_report_path(path: Path, protected_paths) -> None:
 
 
 def _requires_parallel_contact_evidence(num_envs: int) -> bool:
-    if type(num_envs) is not int or num_envs not in (1, 4, 64):
-        raise ValueError("num_envs must be one of 1, 4, or 64")
+    if type(num_envs) is not int or num_envs not in (1, 4, 64, 128, 256):
+        raise ValueError("num_envs must be one of 1, 4, 64, 128, or 256")
     return num_envs > 1
 
 
@@ -175,7 +175,7 @@ from isaaclab.app import AppLauncher  # noqa: E402
 
 
 parser = argparse.ArgumentParser(description="Check RJ45 held-reset runtime isolation")
-parser.add_argument("--num-envs", type=int, choices=(1, 4, 64), required=True)
+parser.add_argument("--num-envs", type=int, choices=(1, 4, 64, 128, 256), required=True)
 parser.add_argument("--reset-cycles", type=int, default=1000)
 parser.add_argument(
     "--mode",
@@ -282,7 +282,7 @@ except Exception as error:
     finally:
         raise
 
-launcher = AppLauncher(args)
+launcher = AppLauncher(args, multi_gpu=False)
 simulation_app = launcher.app
 
 import omni.kit.app  # noqa: E402

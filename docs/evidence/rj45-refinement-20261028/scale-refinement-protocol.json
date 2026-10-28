@@ -13,11 +13,14 @@
     "guard_started_utc": "2026-10-28T03:44:14Z",
     "guard_deadline_utc": "2026-10-28T09:44:14Z",
     "max_wall_hours": 6,
-    "max_compute_estimate_usd": 105.0934,
-    "account_balance_verified": false,
+    "max_compute_estimate_usd": 130.38,
+    "account_balance_verified": true,
     "provider": "aws",
     "instance_type": "g6e.24xlarge",
-    "provisioning_status": "DEPLOYING"
+    "provisioning_status": "RUNNING",
+    "console_displayed_price_per_hour_usd": 21.73,
+    "console_displayed_org_balance_usd": 525.71,
+    "price_scope": "conservative six-hour cap at console price; catalog price retained separately"
   },
   "scale_benchmark": {
     "candidate_num_envs": [
@@ -175,6 +178,7 @@
     "failure_cause_known": false,
     "training_started": false,
     "provider": "nebius",
-    "instance_type": "gpu-l40s-d.4gpu-128vcpu-768gb"
+    "instance_type": "gpu-l40s-d.4gpu-128vcpu-768gb",
+    "console_billing_status": "No active charges"
   }
 }
