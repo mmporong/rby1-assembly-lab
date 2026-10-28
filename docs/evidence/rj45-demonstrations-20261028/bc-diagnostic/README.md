@@ -79,7 +79,7 @@ train/dev 관측 평균 이동은 전체적으로 작지만 grasp 차이가 보�
 | 실패 dwell 중앙값 | 0 s | 0 s |
 | 실패 insertion load 중앙값 | 0.0115 N | 0.218 N |
 
-성공 기준은 depth 12 mm 이상, lateral 50 µm 이하, orientation 8.727 mrad 이하, 연속 dwell 0.4초다. BC 실패의 중앙 depth와 orientation은 각 한계를 만족하지만 lateral 중앙값이 50 µm를 넘는다. 여러 조건이 동시에 0.4초 유지되지 않아 dwell이 0으로 끝난 것이 주된 관찰이다. 힘은 25 N 한계보다 훨씬 낮고 forbidden contact는 0이므로 하중 초과가 주원인이라는 근거는 없다.
+성공 판정은 깊이 12~13 mm, lateral 50 µm 이하, orientation 8.727 mrad 이하에 더해 상대 선속도 5 mm/s 이하, 상대 각속도 0.05 rad/s 이하, 양손 파지·리프트 유지와 하중 조건을 확인한다. 240 Hz 물리 계산에서 제어 스텝의 시작과 각 물리 스텝 끝을 포함한 9개 표본이 안정성 조건을 만족해야 연속 유지 시간 0.4초를 누적한다. BC 실패의 중앙 depth와 orientation은 각 한계를 만족하지만 lateral 중앙값은 50 µm를 넘고 최종 dwell 중앙값은 0초다. 종료 시점의 geometry와 dwell만으로 어느 중간 표본이나 속도 조건이 유지를 끊었는지는 특정할 수 없다. 힘은 25 N 한계보다 훨씬 낮고 forbidden contact는 0이므로 하중 초과가 주원인이라는 근거는 없다.
 
 동일 64개 paired case의 성공 전이는 다음과 같다.
 
