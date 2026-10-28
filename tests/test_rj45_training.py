@@ -33,6 +33,17 @@ A2_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v
 HASH = "a" * 64
 
 
+def load_a2_with_current_task_pin():
+    config = json.loads(A2_CONFIG_PATH.read_text(encoding="utf-8"))
+    source = config["reward_profile"]["keypoint_geometry"]["geometry_source"]
+    task_path = ROOT / source["task_config_path"]
+    source["task_config_sha256"] = hashlib.sha256(task_path.read_bytes()).hexdigest()
+    with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+        path = Path(temporary) / A2_CONFIG_PATH.name
+        path.write_text(json.dumps(config), encoding="utf-8")
+        return load_training_config(path)
+
+
 def valid_artifact():
     joint_names = [f"joint_{index}" for index in range(58)] + [
         "gripper_finger_l1",
@@ -179,7 +190,7 @@ class TrainingConfigurationTests(unittest.TestCase):
 
     def test_versioned_reward_profiles_and_runner_gamma_are_strict(self):
         a1 = load_training_config(A1_CONFIG_PATH)
-        a2 = load_training_config(A2_CONFIG_PATH)
+        a2 = load_a2_with_current_task_pin()
         self.assertEqual(
             reward_profile_metadata(a1),
             {
@@ -202,7 +213,7 @@ class TrainingConfigurationTests(unittest.TestCase):
         validate_reward_horizon_contract(legacy, is_finite_horizon=False)
 
     def test_a2_keypoints_are_pinned_to_current_drawing_geometry(self):
-        a2 = load_training_config(A2_CONFIG_PATH)
+        a2 = load_a2_with_current_task_pin()
         geometry = a2["reward_profile"]["keypoint_geometry"]
         points = geometry["plug_keypoints_tip_frame_m"]
         task = json.loads((ROOT / "configs/tasks/rj45-v1.json").read_text())
@@ -238,6 +249,19 @@ class TrainingConfigurationTests(unittest.TestCase):
             path.write_text(json.dumps(damaged))
             with self.assertRaisesRegex(ValueError, "source hash mismatch"):
                 load_training_config(path)
+
+    def test_historical_a2_rejects_current_task_sha_mismatch(self):
+        historical = json.loads(A2_CONFIG_PATH.read_text(encoding="utf-8"))
+        source = historical["reward_profile"]["keypoint_geometry"]["geometry_source"]
+        current_sha256 = hashlib.sha256(
+            (ROOT / source["task_config_path"]).read_bytes()
+        ).hexdigest()
+        self.assertNotEqual(source["task_config_sha256"], current_sha256)
+        with self.assertRaisesRegex(
+            ValueError,
+            "keypoint geometry source hash mismatch: configs/tasks/rj45-v1.json",
+        ):
+            load_training_config(A2_CONFIG_PATH)
 
     def test_low_exploration_ppo_config_changes_only_initial_noise(self):
         standard = json.loads((ROOT / "configs/ppo-rj45-v1.json").read_text())
