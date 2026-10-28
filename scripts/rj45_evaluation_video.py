@@ -12,6 +12,9 @@ from typing import Any, Callable
 from rby1_assembly.video_capture import PhysicsFrameCapture
 
 
+HELD_INITIALIZATION_WARMUP_TIMEOUT_S = 1.0
+
+
 def validate_evaluation_video_request(
     *,
     requested: bool,
@@ -40,8 +43,13 @@ def validate_evaluation_video_request(
 
 
 def evaluation_video_capture_plan(
-    *, physics_dt_s: float, control_decimation: int, fps: int, max_seconds: float
-) -> dict[str, int | float]:
+    *,
+    physics_dt_s: float,
+    control_decimation: int,
+    fps: int,
+    max_seconds: float,
+    warmup_budget_control_steps: int | None = 0,
+) -> dict[str, Any]:
     if not math.isfinite(physics_dt_s) or physics_dt_s <= 0.0:
         raise ValueError("physics_dt_s must be finite and positive")
     if type(control_decimation) is not int or control_decimation <= 0:
@@ -62,8 +70,32 @@ def evaluation_video_capture_plan(
     requested_frame_limit -= requested_frame_limit % frames_per_control
     if requested_frame_limit < frames_per_control:
         raise ValueError("evaluation video duration is shorter than one control step")
+    hard_frame_limit = math.floor(40.0 * fps)
+    hard_frame_limit -= hard_frame_limit % frames_per_control
     terminal_margin_frames = frames_per_control
-    frame_limit = requested_frame_limit + terminal_margin_frames
+    if requested_frame_limit + terminal_margin_frames > hard_frame_limit:
+        raise ValueError(
+            "evaluation video requested duration leaves no terminal margin under "
+            "the 40-second hard cap"
+        )
+    if warmup_budget_control_steps is None:
+        warmup_budget_frames = hard_frame_limit - requested_frame_limit - frames_per_control
+        if warmup_budget_frames < 0:
+            raise ValueError("evaluation video requested duration exceeds the hard cap")
+    else:
+        if (
+            type(warmup_budget_control_steps) is not int
+            or warmup_budget_control_steps < 0
+        ):
+            raise ValueError("warmup budget must be a non-negative integer or None")
+        warmup_budget_frames = warmup_budget_control_steps * frames_per_control
+    frame_limit = min(
+        requested_frame_limit + warmup_budget_frames + terminal_margin_frames,
+        hard_frame_limit,
+    )
+    applied_warmup_budget_frames = (
+        frame_limit - requested_frame_limit - terminal_margin_frames
+    )
     return {
         "physics_dt_s": float(physics_dt_s),
         "control_decimation": control_decimation,
@@ -73,11 +105,62 @@ def evaluation_video_capture_plan(
         "frames_per_control_step": frames_per_control,
         "requested_frame_limit": requested_frame_limit,
         "requested_max_seconds": requested_frame_limit / fps,
+        "warmup_budget_control_steps": (
+            applied_warmup_budget_frames // frames_per_control
+        ),
+        "warmup_budget_frames": applied_warmup_budget_frames,
+        "warmup_budget_seconds": applied_warmup_budget_frames / fps,
         "terminal_margin_control_steps": 1,
         "terminal_margin_frames": terminal_margin_frames,
         "terminal_margin_seconds": terminal_margin_frames / fps,
         "frame_limit": frame_limit,
         "max_seconds": frame_limit / fps,
+        "hard_cap_seconds": 40.0,
+    }
+
+
+def held_initialization_capture_budget(
+    env: Any, *, control_dt_s: float
+) -> dict[str, int | float | str | None]:
+    if not math.isfinite(control_dt_s) or control_dt_s <= 0.0:
+        raise ValueError("control_dt_s must be finite and positive")
+    config = getattr(env, "_training_config", None)
+    if not isinstance(config, dict):
+        return {
+            "control_steps": None,
+            "source": "40_second_hard_cap_missing_training_config",
+            "warmup_s": None,
+            "warmup_timeout_s": None,
+            "held_reset_staging_control_steps": None,
+        }
+    warmup_s = config.get("warmup_s")
+    staging = config.get("held_reset_staging")
+    staging_steps = staging.get("control_steps") if isinstance(staging, dict) else None
+    if (
+        not isinstance(warmup_s, (int, float))
+        or isinstance(warmup_s, bool)
+        or not math.isfinite(float(warmup_s))
+        or float(warmup_s) < 0.0
+        or type(staging_steps) is not int
+        or staging_steps < 0
+    ):
+        return {
+            "control_steps": None,
+            "source": "40_second_hard_cap_unbounded_training_config",
+            "warmup_s": None,
+            "warmup_timeout_s": None,
+            "held_reset_staging_control_steps": None,
+        }
+    warmup_timeout_s = HELD_INITIALIZATION_WARMUP_TIMEOUT_S
+    warmup_timeout_control_steps = max(
+        1, math.ceil(warmup_timeout_s / control_dt_s)
+    )
+    return {
+        "control_steps": warmup_timeout_control_steps + staging_steps,
+        "source": "rj45_training_env_held_warmup_timeout_plus_config_staging",
+        "warmup_s": float(warmup_s),
+        "warmup_timeout_s": warmup_timeout_s,
+        "held_reset_staging_control_steps": staging_steps,
     }
 
 
@@ -160,12 +243,27 @@ class EvaluationVideoRecorder:
         self.frames_path = Path(str(self.video_path) + ".frames.jsonl")
         self.metadata_path = Path(str(self.video_path) + ".metadata.json")
         self.evidence_path = Path(str(self.video_path) + ".evidence.json")
+        control_dt_s = float(env.cfg.sim.dt) * int(env.cfg.decimation)
+        warmup_budget = held_initialization_capture_budget(
+            env, control_dt_s=control_dt_s
+        )
+        warmup_budget_steps = warmup_budget["control_steps"]
+        assert warmup_budget_steps is None or type(warmup_budget_steps) is int
         self.plan = evaluation_video_capture_plan(
             physics_dt_s=float(env.cfg.sim.dt),
             control_decimation=int(env.cfg.decimation),
             fps=fps,
             max_seconds=max_seconds,
+            warmup_budget_control_steps=warmup_budget_steps,
         )
+        self.plan["warmup_budget_source"] = warmup_budget["source"]
+        self.plan["warmup_s_from_training_config"] = warmup_budget["warmup_s"]
+        self.plan["warmup_timeout_s_from_training_env"] = warmup_budget.get(
+            "warmup_timeout_s"
+        )
+        self.plan["held_reset_staging_control_steps"] = warmup_budget[
+            "held_reset_staging_control_steps"
+        ]
         self.policy_lineage = json.loads(json.dumps(policy_lineage, allow_nan=False))
         self.policy_lineage_sha256 = hashlib.sha256(
             json.dumps(
@@ -200,6 +298,7 @@ class EvaluationVideoRecorder:
         self._selected_terminal: dict[str, Any] | None = None
         self._terminal_timestamp_tolerance_s: float | None = None
         self._terminal_expected_timestamp_s: float | None = None
+        self._observed_held_initialization_offset_s = 0.0
         self._cleanup_errors: list[str] = []
         self.camera: dict[str, tuple[float, float, float]] | None = None
 
@@ -386,6 +485,14 @@ class EvaluationVideoRecorder:
         self._step_entry_episode_time_s = float(
             _scalar(self.env.episode_length_buf, self.env_index)
         ) * float(self.plan["control_dt_s"])
+        clock_offset_s = (
+            self._step_policy_input_timestamp_s - self._step_entry_episode_time_s
+        )
+        if not math.isfinite(clock_offset_s) or clock_offset_s < -1.0e-8:
+            raise RuntimeError("evaluation video clocks have an invalid warmup offset")
+        self._observed_held_initialization_offset_s = max(
+            self._observed_held_initialization_offset_s, max(0.0, clock_offset_s)
+        )
         grip_contact = float(
             self.env._last_contact_proxy_n[self.env_index]
             .max()
@@ -795,6 +902,22 @@ class EvaluationVideoRecorder:
             "capture_plan": self.plan,
             "captured_frames": self._written_frames,
             "captured_duration_s": self._written_frames / int(self.plan["fps"]),
+            "observed_held_initialization_offset_s": (
+                self._observed_held_initialization_offset_s
+            ),
+            "observed_held_initialization_control_steps": round(
+                self._observed_held_initialization_offset_s
+                / float(self.plan["control_dt_s"])
+            ),
+            "elapsed_clock_contract": {
+                "requested_episode_horizon_s": self.plan["requested_max_seconds"],
+                "capture_elapsed_s": self._written_frames / int(self.plan["fps"]),
+                "selected_terminal_episode_elapsed_s": (
+                    self._selected_terminal["timestamp_s"]
+                    if self._selected_terminal is not None
+                    else None
+                ),
+            },
             "frame_metadata_records": self._written_records,
             "captured_control_steps": self._control_step,
             "stop_reason": self._stop_reason,
@@ -861,6 +984,7 @@ class EvaluationVideoRecorder:
 __all__ = [
     "EvaluationVideoRecorder",
     "evaluation_video_capture_plan",
+    "held_initialization_capture_budget",
     "selected_environment_camera",
     "validate_evaluation_video_request",
 ]

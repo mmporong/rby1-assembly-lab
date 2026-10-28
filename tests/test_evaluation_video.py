@@ -12,6 +12,7 @@ from scripts.rj45_evaluation_video import (
     EvaluationVideoRecorder,
     _evaluator_orientation_error,
     evaluation_video_capture_plan,
+    held_initialization_capture_budget,
     selected_environment_camera,
     validate_evaluation_video_request,
 )
@@ -95,6 +96,10 @@ class FakeEnv:
             )
         )
         self.num_envs = 2
+        self._training_config = {
+            "warmup_s": 0.2,
+            "held_reset_staging": {"control_steps": 1},
+        }
         self._sim_step_counter = 0
         self._training_episode_index = torch.tensor([0, 0])
         self._training_last_policy_observation_valid = torch.tensor([True, False])
@@ -265,6 +270,26 @@ def test_plan_is_native_240hz_stride4_and_two_frames_per_control_step():
     assert plan["terminal_margin_seconds"] == pytest.approx(1.0 / 30.0)
     assert plan["frame_limit"] == 1442
     assert plan["max_seconds"] == pytest.approx(24.0 + 1.0 / 30.0)
+    held_plan = evaluation_video_capture_plan(
+        physics_dt_s=1.0 / 240.0,
+        control_decimation=8,
+        fps=60,
+        max_seconds=24.0,
+        warmup_budget_control_steps=31,
+    )
+    assert held_plan["warmup_budget_control_steps"] == 31
+    assert held_plan["warmup_budget_seconds"] == pytest.approx(31.0 / 30.0)
+    assert held_plan["frame_limit"] == 1504
+    assert held_plan["max_seconds"] == pytest.approx(24.0 + 32.0 / 30.0)
+    fallback_plan = evaluation_video_capture_plan(
+        physics_dt_s=1.0 / 240.0,
+        control_decimation=8,
+        fps=60,
+        max_seconds=24.0,
+        warmup_budget_control_steps=None,
+    )
+    assert fallback_plan["frame_limit"] == 2400
+    assert fallback_plan["max_seconds"] == 40.0
     with pytest.raises(ValueError, match="40"):
         evaluation_video_capture_plan(
             physics_dt_s=1.0 / 240.0,
@@ -272,6 +297,30 @@ def test_plan_is_native_240hz_stride4_and_two_frames_per_control_step():
             fps=60,
             max_seconds=40.1,
         )
+    with pytest.raises(ValueError, match="terminal margin"):
+        evaluation_video_capture_plan(
+            physics_dt_s=1.0 / 240.0,
+            control_decimation=8,
+            fps=60,
+            max_seconds=40.0,
+        )
+
+
+def test_held_initialization_budget_uses_warmup_and_staging_contract():
+    env = FakeEnv()
+    budget = held_initialization_capture_budget(env, control_dt_s=1.0 / 30.0)
+    assert budget == {
+        "control_steps": 31,
+        "source": "rj45_training_env_held_warmup_timeout_plus_config_staging",
+        "warmup_s": 0.2,
+        "warmup_timeout_s": 1.0,
+        "held_reset_staging_control_steps": 1,
+    }
+
+    del env._training_config["held_reset_staging"]
+    fallback = held_initialization_capture_budget(env, control_dt_s=1.0 / 30.0)
+    assert fallback["control_steps"] is None
+    assert fallback["source"] == "40_second_hard_cap_unbounded_training_config"
 
 
 def test_cli_contract_requires_cameras_60fps_and_positive_selected_quota():
@@ -470,6 +519,68 @@ def test_terminal_margin_captures_timeout_control_step_without_reset_frame():
         assert metadata["capture_plan"]["terminal_margin_frames"] == 2
         assert metadata["captured_frames"] == 4
         assert metadata["captured_duration_s"] == pytest.approx(2.0 / 30.0)
+
+
+def test_metadata_separates_observed_initialization_offset_from_horizon_budget():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        writers = []
+        video = recorder(directory, env, writers, max_seconds=24.0)
+        video.initialize()
+
+        observed_initialization_offset_s = 7.0 / 30.0
+        env._training_last_policy_observation_timestamp_s[0] = (
+            observed_initialization_offset_s
+        )
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        video.finalize_control_step(
+            extras(
+                success=False,
+                policy_input_timestamp_s=observed_initialization_offset_s,
+            ),
+            torch.tensor([False, False]),
+        )
+
+        env.episode_length_buf[0] = 719
+        terminal_policy_timestamp_s = 719.0 / 30.0 + observed_initialization_offset_s
+        env._training_last_policy_observation_timestamp_s[0] = (
+            terminal_policy_timestamp_s
+        )
+        with video.control_step():
+            for physics_step in (12, 16):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        env._training_episode_index[0] = 1
+        video.finalize_control_step(
+            extras(
+                success=False,
+                terminal_timestamp_s=24.0,
+                policy_input_timestamp_s=terminal_policy_timestamp_s,
+            ),
+            torch.tensor([True, False]),
+        )
+        video.close(rollout_completed=True)
+
+        metadata = json.loads(video.metadata_path.read_text(encoding="utf-8"))
+        assert metadata["capture_plan"]["warmup_budget_control_steps"] == 31
+        assert metadata["capture_plan"]["warmup_budget_seconds"] == pytest.approx(
+            31.0 / 30.0
+        )
+        assert metadata["capture_plan"]["frame_limit"] == 1504
+        assert metadata["observed_held_initialization_offset_s"] == pytest.approx(
+            observed_initialization_offset_s
+        )
+        assert metadata["observed_held_initialization_control_steps"] == 7
+        assert metadata["elapsed_clock_contract"] == {
+            "requested_episode_horizon_s": 24.0,
+            "capture_elapsed_s": pytest.approx(4.0 / 60.0),
+            "selected_terminal_episode_elapsed_s": 24.0,
+        }
 
 
 def test_frame_writer_rejects_data_beyond_terminal_margin_limit():
