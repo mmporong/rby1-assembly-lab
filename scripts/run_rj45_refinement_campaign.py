@@ -14,13 +14,14 @@ import math
 import os
 from pathlib import Path
 import shutil
+import signal
 import sys
 import tempfile
 import threading
 from typing import Any, Callable, NoReturn, Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from run_rj45_long_campaign import StageResult, run_subprocess
+from run_rj45_long_campaign import CampaignInterrupted, StageResult, run_subprocess
 
 
 PROFILE_LABELS = ("Z1", "F", "N", "R")
@@ -79,6 +80,33 @@ class Contract:
 
 def _fail(message: str) -> NoReturn:
     raise CampaignError(message)
+
+
+def _install_parallel_signal_relay(
+    stop_event: threading.Event,
+) -> tuple[dict[int, Any], list[int]]:
+    if threading.current_thread() is not threading.main_thread():
+        _fail("parallel campaign signal coordination requires the main thread")
+    previous_handlers: dict[int, Any] = {}
+    received_signals: list[int] = []
+
+    def relay_signal(signum: int, _frame: Any) -> None:
+        received_signals.append(signum)
+        stop_event.set()
+
+    try:
+        for signum in (signal.SIGINT, signal.SIGTERM):
+            previous_handlers[signum] = signal.getsignal(signum)
+            signal.signal(signum, relay_signal)
+    except BaseException:
+        _restore_signal_handlers(previous_handlers)
+        raise
+    return previous_handlers, received_signals
+
+
+def _restore_signal_handlers(previous_handlers: dict[int, Any]) -> None:
+    for signum, handler in previous_handlers.items():
+        signal.signal(signum, handler)
 
 
 def _sha_file(path: Path) -> str:
@@ -517,6 +545,10 @@ def execute_campaign(contract: Contract, *, runner: Callable[..., StageResult] =
     analyzer = _load_module(contract.root / "scripts/analyze_rj45_paired_v2.py", "_rj45_refinement_analyzer")
     stop_event = threading.Event()
     write_lock = threading.Lock()
+    previous_handlers: dict[int, Any] = {}
+    received_signals: list[int] = []
+    if contract.execution_mode == "parallel_profiles":
+        previous_handlers, received_signals = _install_parallel_signal_relay(stop_event)
     try:
         baseline_path = contract.output_dir / "reports" / "baseline.json"
         _run_stage(contract, "evaluate-baseline", build_baseline_command(contract, baseline_path), runner, disk_free, stop_event, write_lock)
@@ -564,6 +596,8 @@ def execute_campaign(contract: Contract, *, runner: Callable[..., StageResult] =
                     except BaseException as error:
                         stop_event.set()
                         errors.append(error)
+            if received_signals:
+                raise CampaignInterrupted(f"received signal {received_signals[0]}")
             if errors:
                 raise errors[0]
         else:
@@ -578,6 +612,8 @@ def execute_campaign(contract: Contract, *, runner: Callable[..., StageResult] =
     except BaseException as error:
         _atomic_json(status_path, {"schema_version": 1, "status": "failed", "execution_mode": contract.execution_mode, "profile_devices": contract.profile_devices, "error": {"type": type(error).__name__, "message": str(error)}, "final_seed_opened": False})
         raise
+    finally:
+        _restore_signal_handlers(previous_handlers)
 
 
 def main(argv: list[str] | None = None) -> int:

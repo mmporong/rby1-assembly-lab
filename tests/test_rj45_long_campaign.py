@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import importlib.util
 import json
@@ -373,6 +374,25 @@ class Tests(unittest.TestCase):
             if state_path.exists():
                 state = state_path.read_text()[state_path.read_text().rfind(")") + 2]
                 self.assertEqual(state, "Z")
+
+    def test_run_subprocess_allows_four_real_worker_threads(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+
+            def launch(index):
+                return MODULE.run_subprocess(
+                    [sys.executable, "-c", "import time; time.sleep(0.05)"],
+                    root,
+                    root / f"worker-{index}.log",
+                    datetime.now(timezone.utc) + timedelta(seconds=5),
+                    lambda: None,
+                    0.01,
+                    1.0,
+                )
+
+            with ThreadPoolExecutor(max_workers=4) as pool:
+                results = list(pool.map(launch, range(4)))
+            self.assertEqual([result.return_code for result in results], [0, 0, 0, 0])
 
     def test_live_oom_log_stops_stage_before_process_exit(self):
         for index, (token, error) in enumerate((("CUDA out of memory", "out-of-memory evidence"), ("loss nan", "non-finite numeric token"))):

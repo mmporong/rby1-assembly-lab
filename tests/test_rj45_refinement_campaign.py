@@ -7,6 +7,8 @@ import importlib.util
 import json
 from pathlib import Path
 import shutil
+import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -331,6 +333,81 @@ class RefinementCampaignTests(unittest.TestCase):
                 outcomes = list(pool.map(launch, MODULE.PROFILE_LABELS))
             self.assertEqual(sorted(cleaned), sorted(MODULE.PROFILE_LABELS))
             self.assertEqual(outcomes, ["failed"] * 4)
+
+    def test_main_sigterm_relay_cleans_four_real_process_groups(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result_path = root / "result.json"
+            child_dir = root / "children"
+            child_dir.mkdir()
+            script = f"""
+import json
+import os
+from pathlib import Path
+import signal
+import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta, timezone
+
+sys.path.insert(0, {str(ROOT / 'scripts')!r})
+import run_rj45_refinement_campaign as refinement
+from run_rj45_long_campaign import run_subprocess
+
+stop_event = threading.Event()
+original_sigint = signal.getsignal(signal.SIGINT)
+original_sigterm = signal.getsignal(signal.SIGTERM)
+previous, received = refinement._install_parallel_signal_relay(stop_event)
+
+child_dir = Path({str(child_dir)!r})
+def launch(index):
+    child_pid = child_dir / f"{{index}}.pid"
+    code = "import os,pathlib,time; pathlib.Path(" + repr(str(child_pid)) + ").write_text(str(os.getpid())); time.sleep(30)"
+    return run_subprocess(
+        [sys.executable, "-c", code], Path({str(root)!r}),
+        Path({str(root)!r}) / f"worker-{{index}}.log",
+        datetime.now(timezone.utc) + timedelta(seconds=20),
+        lambda: (_ for _ in ()).throw(RuntimeError("stop requested")) if stop_event.is_set() else None,
+        0.01, 5.0,
+    )
+
+with ThreadPoolExecutor(max_workers=4) as pool:
+    futures = [pool.submit(launch, index) for index in range(4)]
+    deadline = time.monotonic() + 5
+    while len(list(child_dir.glob("*.pid"))) != 4:
+        if time.monotonic() >= deadline:
+            raise RuntimeError("children did not start")
+        time.sleep(0.01)
+    os.kill(os.getpid(), signal.SIGTERM)
+    results = [future.result() for future in futures]
+refinement._restore_signal_handlers(previous)
+Path({str(result_path)!r}).write_text(json.dumps({{
+    "received": received,
+    "return_codes": [result.return_code for result in results],
+    "failure_reasons": [result.failure_reason for result in results],
+    "handlers_restored": (
+        signal.getsignal(signal.SIGINT) is original_sigint
+        and signal.getsignal(signal.SIGTERM) is original_sigterm
+    ),
+}}))
+"""
+            completed = subprocess.run(
+                [sys.executable, "-c", script],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                timeout=10,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            evidence = json.loads(result_path.read_text(encoding="utf-8"))
+            self.assertEqual(evidence["received"], [signal.SIGTERM])
+            self.assertEqual(evidence["return_codes"], [125, 125, 125, 125])
+            self.assertTrue(all("stop requested" in reason for reason in evidence["failure_reasons"]))
+            self.assertTrue(evidence["handlers_restored"])
+            for pid_path in child_dir.glob("*.pid"):
+                pid = int(pid_path.read_text(encoding="utf-8"))
+                self.assertFalse((Path("/proc") / str(pid)).exists(), f"child {pid} remained")
 
     def test_report_gate_allows_valid_failure_but_rejects_invalid_or_contact(self):
         class Analyzer:

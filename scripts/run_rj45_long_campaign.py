@@ -18,6 +18,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 from typing import Any, Callable, NoReturn, Sequence
 
@@ -1167,14 +1168,16 @@ def run_subprocess(
         )
         process_group = process.pid
         previous_handlers: dict[int, Any] = {}
+        install_signal_handlers = threading.current_thread() is threading.main_thread()
 
         def interrupt(signum, _frame):
             raise CampaignInterrupted(f"received signal {signum}")
 
         try:
-            for signum in (signal.SIGINT, signal.SIGTERM):
-                previous_handlers[signum] = signal.getsignal(signum)
-                signal.signal(signum, interrupt)
+            if install_signal_handlers:
+                for signum in (signal.SIGINT, signal.SIGTERM):
+                    previous_handlers[signum] = signal.getsignal(signum)
+                    signal.signal(signum, interrupt)
             last_snapshot = _process_group_snapshot(process_group, log_path)
             last_progress = time.monotonic()
             while True:
