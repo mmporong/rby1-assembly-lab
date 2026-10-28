@@ -1,0 +1,29 @@
+{
+  "status": "pass",
+  "archive_sha256": "6e566795fbaa22523330c7a728aebc67b543aecc8106ed0175d8f5039ecdc96a",
+  "manifest_sha256": "9203606c6e1290efeafb4147f84f1efb16cac63e10e8443d25ed5c178417729f",
+  "archive_members": 89,
+  "payload_files_verified": 89,
+  "payload_bytes_verified": 173989689,
+  "source_commit": "8572ffd39f1f1959ba0e99e69b2a34791eab0b4e",
+  "source_stability_during_archive": "pass_pre_and_post_hashes_equal",
+  "summary_status": "measurement_complete",
+  "nominal_return_code": 0,
+  "pilot_seeds": [
+    "20261301",
+    "20261302",
+    "20261303",
+    "20261304"
+  ],
+  "pilot_return_codes": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "pilot_gate_pass": true,
+  "maximum_pairwise_distinct_count": 4,
+  "all_four_attempts_preserved": true,
+  "summary_sha256": "4f5ba3e7e4df84750a0750187f2e34f0122f806e70882077acf346904a74a2a8",
+  "pilot_audit_sha256": "0c262bc4e0adfc3e814a050d87e7f3505fcaa6b33b26cef3e3f5d93e5f968e31"
+}

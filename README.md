@@ -6,6 +6,30 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 
 기존 toy 과제는 같은 Isaac Sim·PhysX 환경에서 검증했다. 단일 seed의 zero-residual 기준 제어기는 고정 조인트나 물체 자세 덮어쓰기 없이 양쪽 그리퍼의 마찰 접촉으로 두 부품을 들어 올리고, 30.66 mm 깊이와 1.08 mm 횡오차로 삽입한 상태를 0.4초 유지해 44.07초에 독립 성공 판정을 통과했다. 별도로 기록한 3개 seed도 독립 평가와 데이터 계약을 통과했으며 train 2개·eval 1개로 분리했다. 이 결과는 여유 끼워맞춤 toy 기준선이며 RJ45 삽입, 잼 회복, 잔차 정책 성능, 카메라 기반 제어 또는 실물 전이의 검증 결과가 아니다. 기존 MuJoCo 트레이 운반 프로젝트와 별도 저장소다.
 
+## 현재 결과
+
+완료된 검증과 진행 중인 작업을 구분했다. 수치는 모두 시뮬레이션 결과이며 센서 성능이나 실물 전이를 뜻하지 않는다.
+
+| 항목 | 결과 | 상태와 근거 |
+| --- | --- | --- |
+| 단일 GPU 병렬 처리량 | 64환경 223.39, 128환경 460.75, 256환경 868.43 전이/초 | 완료. update당 전이 수를 8,192개로 맞춰 비교했다. [결과 문서](docs/evidence/rj45-refinement-20261028/scale-results/README.md) |
+| 4개 설정의 96-update 개발 비교 | 기준 제어 7/32, Z1 7/32, F 11/32, N 10/32, R 9/32 | 완료. 사전 규칙으로 F를 후속 후보로 골랐다. [요약](docs/evidence/rj45-refinement-20261028/scale-results/refinement-summary.json) |
+| F의 새 seed 3개, 200 update | 7/32, 10/32, 8/32 | 완료. 평균 8.33/32로 승격 기준 10/32에 못 미쳤다. 최종 조건은 열지 않고 봉인했다. [결과](docs/evidence/rj45-refinement-20261028/scale-results/f-followup-summary.json) · [독립 검증](docs/evidence/rj45-refinement-20261028/scale-results/independent-audit.json) |
+| generation v2 파지 pilot | 시뮬레이터 물리 파지 4개, 최대 clique 4 | pilot 통과. 고정 후보 20개를 평가해 학습 8개·개발 검증 2개·최종 검증 2개를 선정하는 중이다. [생성 계약](docs/evidence/rj45-demonstrations-20261028/grasp-generation-v2-protocol.json) · [실제 pilot 결과](docs/evidence/rj45-demonstrations-20261028/generation-v2-pilot-results/README.md) |
+| teacher·BC·BC 초기화 PPO 비교 | 결과 없음 | production 파지 검증 뒤 실행한다. 아직 완료되지 않았다. [실행 계획](docs/rj45-next-stage-plan.md) |
+
+## 256환경 병렬 PPO 영상
+
+한 Isaac Sim 프로세스에서 256개 환경의 경험을 모아 정책 하나를 갱신하는 장면을 기록했다. 개요와 근접 영상은 같은 설정을 사용한 별도 실행이며, 각각 16초·60 fps·960프레임이다. 전체 학습 호출은 20 update를 마쳤고 영상 자막에는 프레임 시점의 시뮬레이션 시간과 현재 rollout 전 완료 update 수를 표시한다.
+
+- [256환경 전체 구도 영상](docs/media/rj45/parallel-ppo/rj45-parallel-ppo-overview.mp4)
+- [환경 0 근접 영상](docs/media/rj45/parallel-ppo/rj45-parallel-ppo-closeup.mp4)
+- [전체 구도 썸네일](docs/media/rj45/parallel-ppo/rj45-parallel-ppo-overview-thumbnail.png)
+- [근접 썸네일](docs/media/rj45/parallel-ppo/rj45-parallel-ppo-closeup-thumbnail.png)
+- [촬영 조건·원본·인코딩·프레임 검증](docs/evidence/rj45-refinement-20261028/parallel-media.json)
+
+두 영상은 실제 벡터화 PPO rollout을 보여주지만, 학습을 마친 삽입 성공 정책의 시연은 아니다. 개요와 근접 화면도 한 실행의 동기화된 두 카메라 영상이 아니다.
+
 ## 에셋과 데이터
 
 - 공식 RB-Y1 M v1.2와 기본 RB gripper를 source revision·파일 SHA-256으로 고정한다.
@@ -39,7 +63,7 @@ PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 
 실행 대상은 RTX 렌더링을 지원하는 GPU다. Isaac Sim 5.1.0 / Isaac Lab 2.3.0 / Python 3.11 / RSL-RL 3.0.1을 기준으로 구현했다. 최신 버전을 뜻하는 조합은 아니며, Sim 5.1은 현재 공식 문서에서 지원 종료로 표시된다. 이 프로젝트의 고정 버전으로 먼저 검증하고, 버전 변경은 별도 재검증한다.
 
-설치·실행·종료 절차와 검증 순서는 [Brev 실행 문서](docs/brev-run.md)에 있다. 실행기는 단계 변화와 물리 상태를 JSONL trace로 남기고, 단일 환경 실행을 MP4로 기록한다. 아래 기존 toy 근접 촬영은 1280×960에서 물리 상태를 초당 120장 기록했고, 공유용 4배속 영상과 정상 속도 전체 구도 영상은 모두 60 fps다. 물리 120 Hz·제어 30 Hz는 촬영 전후에 동일하다. RJ45 영상은 완료 판정과 출처 검증을 통과한 뒤 별도로 만든다.
+설치·실행·종료 절차와 검증 순서는 [Brev 실행 문서](docs/brev-run.md)에 있다. 실행기는 단계 변화와 물리 상태를 JSONL trace로 남기고, 단일 환경 실행을 MP4로 기록한다. 아래 기존 toy 근접 촬영은 1280×960에서 물리 상태를 초당 120장 기록했고, 공유용 4배속 영상과 정상 속도 전체 구도 영상은 모두 60 fps다. 물리 120 Hz·제어 30 Hz는 촬영 전후에 동일하다. RJ45 명목 영상과 병렬 PPO 영상은 서로 다른 계약으로 촬영했으며, 각 근거 문서에 프레임과 원본 해시를 기록했다.
 
 전용 Brev L40S에 고정 버전 환경을 설치하고 사용자가 승인한 NVIDIA Omniverse EULA 설정으로 GPU 연산·PhysX·렌더링을 실행했다. 컴퓨팅 예산과 중지 원칙은 [예산 설정](configs/compute-budget.json)에 기록한다.
 
@@ -62,7 +86,7 @@ PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 
 픽업 받침을 개선하기 전의 무학습 기준 제어에서, 오른손 접촉이 사라진 뒤 플러그가 129.84° 회전하고 초기 위치보다 36.925 mm 내려간 실패를 기록했다. 이 실행은 `grip_close_timeout`으로 종료됐다. 그래프는 같은 물리 조건을 재현한 trace의 높이·회전·손가락 접촉을 시간순으로 표시한다. 특정 학습 정책의 실패율이나 실물 결과를 뜻하지 않는다.
 
-- [파지 상실·플러그 회전·낙하 영상 — 60fps, 7.13초](docs/media/rj45/failure19-grip-loss-60fps.mp4)
+- [파지 상실·플러그 회전·낙하 영상 · 60fps, 7.13초](docs/media/rj45/failure19-grip-loss-60fps.mp4)
 - [영상 프레임·촬영·원본 해시](docs/media/rj45/failure19-grip-loss-60fps.json)
 - [실패 측정 그래프](docs/media/rj45/failure19-evidence.png)
 - [벡터 그래프](docs/media/rj45/failure19-evidence.svg)
@@ -84,8 +108,10 @@ RJ45 잔차 학습 환경은 검증된 파지 상태를 초기화 때 복원하�
 
 기존 toy 4환경 병렬 장면은 일반 USD clone과 GPU PhysX를 유지하면서 fast physics replication을 끄고, 환경 간·전역 지면 충돌 필터와 금지 접촉의 환경별 종료를 검사했다. 한 환경에 넣은 금지 접촉이 그 환경만 중단시키고 나머지 세 환경은 계속 진행했으며, 다른 환경의 plug와 palm을 겹친 음성 대조에서는 필터 기반 금지 접촉 하중과 미필터 palm net force가 모두 0 N이었다. 근거는 [병렬 장면 검사](docs/evidence/parallel-scene-probe.json)에 묶는다. RJ45 접촉 감시도 현재 `after-persistent-target-hook` 증거에서 4환경 양성 접촉·비접촉·reset·환경 간 음성 대조와 실제 body pose SAT 검사를 통과했다([RJ45 검증 근거](docs/evidence/rj45-validation.json)). 전체 물리 보고서의 최대 접촉 하중은 20.08854294 N이다. 5 step 주기와 최초 접촉·끝점만 남긴 trace의 최대값 19.72353172 N과 구분해 기록한다. 다환경 실행은 이 증거 specification과 보고서·trace·SAT·오프라인 toolchain의 해시, 실제 센서의 환경별 순서를 확인해야 시작된다. 이 시험은 접촉 감지 경로의 검증이며, 전체 RJ45 과제의 병렬 성공이나 학습 성능을 뜻하지 않는다.
 
-기존 toy PPO는 4환경·1 iteration·96 transition에서 프로세스 정상 종료, 유한한 체크포인트 가중치와 optimizer 상태만 확인했다. 이는 학습 파이프라인 스모크이며 정책 성능이나 개선을 뜻하지 않는다. 이전 79D v3 비교에서는 기준 제어가 13/32회, 학습 정책이 12/32회 성공해 개선을 확인하지 못했다. 초기화 무효는 두 조건 모두 0회였다. [사례별 비교 그림](docs/media/rj45/ppo-pilot40-comparison.png)과 [원시 사례 요약](docs/media/rj45/ppo-pilot40-comparison-data.json)을 함께 제공한다. 새 INSERT-only tip-target 79D PPO도 20-update 학습과 짝지은 평가를 마쳤다. 같은 32개 조건에서 기준 제어는 12회 성공했지만 학습 정책은 0회였고 모두 24초 제한으로 끝났다. 무효 episode와 금지 접촉 하중은 두 조건 모두 0이었으며 성공률 차이는 -37.5%p, 100,000회 paired bootstrap 95% 구간은 -53.125~-21.875%p였다. 이번 단일 seed 개발 실험에서는 정책이 기준보다 나빴다. 두 결과의 paired condition과 보정 오차는 일치하지만, 이전 기준 제어 결과 JSON에는 평가용 파지 artifact proof가 없어 그 JSON만으로 공통 파지 상태를 검증할 수 없다. 79D와 85D 결과는 [관측 방식 비교 그래프](docs/media/rj45/target-offset42-observation-comparison.png)와 [사례별 수치·원본 해시](docs/media/rj45/target-offset42-observation-comparison-data.json)에 묶었다. RJ45 학습기는 성공한 1환경 명목 실행의 보고서와 trace, 런타임 버전, 소스·설정·에셋 해시를 모두 확인해야 시작된다. 기존 50 µm 엄격 기준을 유지하면서 논문을 근거로 할인된 보상, 플러그 형상 대응점, 탐색 크기와 잔차 actor 0 초기화를 별도 비교한다. 출처·적용 범위와 비교 조건은 [강화학습 연구·실험 문서](docs/rj45-rl-research.md)에 있다. 여러 물리 파지 상태와 학습 seed를 분리한 최종 평가는 남아 있다.
+## 이전 학습 실험
 
-논문 기반 20회 예비 비교의 같은 32개 개발 조건에서 기준 제어는 12회, 다섯 정책은 각각 0·0·3·7·10회 성공했다. 무효 사례는 없었고, 가장 높은 Z1도 이 비교에서 기준 제어보다 2회 적게 성공했다. 다섯 checkpoint의 실제 20회 갱신 여부를 확인했으며, Z1을 세 학습 seed로 각각 200회까지 갱신하고 20·96·200회 checkpoint를 비교하는 [후속 계획](docs/evidence/rj45-paper-ablation/long-run-plan.json)의 후보로 선택했다. 가상환경 오류를 수정한 후 세 seed의 200회 학습과 9개 checkpoint 평가를 완료했다. 공통 최선인 96회 모델의 성공은 10/32·12/32·11/32로, 평균 11/32가 기준 제어 12/32를 넘지 못해 최종 평가 조건은 열지 않았다. [장기 결과와 검증 경계](docs/evidence/rj45-paper-ablation/long-results/manifest.json)를 보존한다. 다음 단계는 고정 학습률·탐색 크기·미세정렬 보상을 같은 학습량으로 비교하고, 시연 데이터와 여러 물리 파지를 검증하는 것이다. [개선·일반화·영상 계획](docs/rj45-next-stage-plan.md)에 병렬 학습과 규모 확대 절차를 정리했다. 다른 파지 상태에서의 일반화는 아직 검증되지 않았다.
+초기 79D·85D 단일 seed 실험과 논문 기반 예비 비교는 현재 결과를 만들기 전의 개발 기록이다. 수치와 원본 해시는 [강화학습 연구·실험 문서](docs/rj45-rl-research.md), [관측 방식 비교 자료](docs/media/rj45/target-offset42-observation-comparison-data.json), [과거 장기 결과](docs/evidence/rj45-paper-ablation/long-results/manifest.json)에 보존했다. 현재 판단에는 위의 `현재 결과` 표와 [규모 확대 결과](docs/evidence/rj45-refinement-20261028/scale-results/README.md)를 사용한다.
+
+다중 파지 production, teacher 시연, BC와 PPO 비교, 미사용 조건 평가는 아직 남아 있다. 한 파지 상태의 개발 성공률을 일반화 성능으로 해석하지 않는다.
 
 [실험 계약](docs/experiment-design.md)은 기준 제어 비교, 데이터 분리, 성공 판정과 남은 검증을 정의한다.

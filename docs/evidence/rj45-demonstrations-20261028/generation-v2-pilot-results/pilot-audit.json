@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "catalog_id": "rj45-grasp-generation-v2",
+  "catalog_path": "configs/rj45-grasp-generation-v2.json",
+  "catalog_sha256": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+  "attempts": [
+    {
+      "seed": 20261301,
+      "catalog_entry_id": "grasp-00",
+      "assignment_group": "pilot",
+      "status": "success",
+      "descriptor_sha256": "663dcf1a8c24a02c690c487cc92e196e475856ed6a4167f70ff5f6fb844ffe86"
+    },
+    {
+      "seed": 20261302,
+      "catalog_entry_id": "grasp-01",
+      "assignment_group": "pilot",
+      "status": "success",
+      "descriptor_sha256": "cf382a70459e17e5c8321566d14df8eeaf7fa66a23a0691a613b5d51f2f623d0"
+    },
+    {
+      "seed": 20261303,
+      "catalog_entry_id": "grasp-02",
+      "assignment_group": "pilot",
+      "status": "success",
+      "descriptor_sha256": "4175abbec3a596f972d0609c84dd83a252494d1411f84b7f4abd74b107a4857d"
+    },
+    {
+      "seed": 20261304,
+      "catalog_entry_id": "grasp-03",
+      "assignment_group": "pilot",
+      "status": "success",
+      "descriptor_sha256": "68e34443520bfe5bb05b774f2f07e2b126e457a1c724f802b33217b89a0a7ea2"
+    }
+  ],
+  "all_four_attempts_preserved": true,
+  "policy_metric_selection_used": false,
+  "translation_threshold_m": 0.00025,
+  "rotation_threshold_rad": 0.004,
+  "separation_rule": "translation_gte_threshold_or_rotation_gte_threshold",
+  "pairwise_edges": [
+    {
+      "left_seed": 20261301,
+      "right_seed": 20261302,
+      "object_to_ee_translation_m": 0.0011795054845873765,
+      "object_to_ee_rotation_rad": 0.004564401042726934,
+      "joint_position_linf_si": 0.007435321807861328,
+      "separated": true
+    },
+    {
+      "left_seed": 20261301,
+      "right_seed": 20261303,
+      "object_to_ee_translation_m": 0.0020753480928618626,
+      "object_to_ee_rotation_rad": 0.008583284282829305,
+      "joint_position_linf_si": 0.012666523456573486,
+      "separated": true
+    },
+    {
+      "left_seed": 20261301,
+      "right_seed": 20261304,
+      "object_to_ee_translation_m": 0.0003620914357200241,
+      "object_to_ee_rotation_rad": 0.0028433440723983393,
+      "joint_position_linf_si": 0.005024075508117676,
+      "separated": true
+    },
+    {
+      "left_seed": 20261302,
+      "right_seed": 20261303,
+      "object_to_ee_translation_m": 0.001046097579990978,
+      "object_to_ee_rotation_rad": 0.004762489271811957,
+      "joint_position_linf_si": 0.005446314811706543,
+      "separated": true
+    },
+    {
+      "left_seed": 20261302,
+      "right_seed": 20261304,
+      "object_to_ee_translation_m": 0.0008459853160126846,
+      "object_to_ee_rotation_rad": 0.003506016404265111,
+      "joint_position_linf_si": 0.004809975624084473,
+      "separated": true
+    },
+    {
+      "left_seed": 20261303,
+      "right_seed": 20261304,
+      "object_to_ee_translation_m": 0.0017606873135528227,
+      "object_to_ee_rotation_rad": 0.00785689451344802,
+      "joint_position_linf_si": 0.010210156440734863,
+      "separated": true
+    }
+  ],
+  "maximum_pairwise_distinct_count": 4,
+  "representative_sets": [
+    [
+      20261301,
+      20261302,
+      20261303,
+      20261304
+    ]
+  ],
+  "gate_required_count": 3,
+  "gate_pass": true,
+  "attempt_manifest_path": "artifacts/rj45-4c-generation-v2-20261028/attempts.json",
+  "attempt_manifest_sha256": "f737f73323a96b0d235c9fceb60b994111cc7aac6dfe5a4d02ab0c4a64c744d4"
+}

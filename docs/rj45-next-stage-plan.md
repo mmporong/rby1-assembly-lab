@@ -4,13 +4,23 @@
 
 사용자가 2026-10-28 승인한 4·5·6단계를 하나의 Codex goal로 수행한다. 기존 제어에 추가한 학습 보정의 개선 여부를 검증하고, 개발 기준을 통과한 후보가 생기면 여러 파지 상태와 미사용 조건에서 재검증한다. 후보가 기준을 넘지 못하면 실패 원인과 한계를 결과로 남긴다. 실물 이동이나 공개 게시·알림은 범위에 포함하지 않는다.
 
-첫 장기 실험은 Z1을 세 seed로 200회씩 학습하고 20·96·200회 모델을 평가했다. 공통 최선인 96회 모델의 성공은 10/32·12/32·11/32였고 기준 제어는 12/32였다. 사전 승격 조건을 충족하지 못했으므로 기존 최종 보정 seed는 열지 않는다. [장기 결과 근거](evidence/rj45-paper-ablation/long-results/manifest.json)를 보존한다.
+| 단계 | 현재 상태 | 근거 |
+| --- | --- | --- |
+| 4B 병렬 규모 측정 | 완료. 단일 GPU에서 64·128·256환경 처리량은 223.39·460.75·868.43 전이/초였다. | [규모 확대 결과](evidence/rj45-refinement-20261028/scale-results/README.md) |
+| 4B 설정 비교 | 완료. 96 update에서 F가 11/32로 가장 높았다. | [설정 비교](evidence/rj45-refinement-20261028/scale-results/refinement-summary.json) |
+| F 새 seed 반복 | 완료. 200 update 결과가 7/32·10/32·8/32로 승격 기준을 통과하지 못했다. 최종 조건은 봉인 상태다. | [후속 결과](evidence/rj45-refinement-20261028/scale-results/f-followup-summary.json) · [독립 검증](evidence/rj45-refinement-20261028/scale-results/independent-audit.json) |
+| 256환경 병렬 PPO 영상 | 완료. 16초·60 fps 개요와 근접 영상을 별도 동일 설정 실행으로 기록했다. | [미디어 검증](evidence/rj45-refinement-20261028/parallel-media.json) |
+| generation v2 pilot | 통과. 시뮬레이터 물리 파지 4개가 최대 clique 4를 이뤘다. | [생성 계약](evidence/rj45-demonstrations-20261028/grasp-generation-v2-protocol.json) · [실제 pilot 결과](evidence/rj45-demonstrations-20261028/generation-v2-pilot-results/README.md) |
+| production 파지 | 후보 20개 평가 중. 목표는 train 8·dev 2·final 2의 총 12개 파지다. | 완료 근거는 production 종료 뒤 고정한다. |
+| teacher·BC·BC 초기화 PPO | 미완료 | production 파지 검증 뒤 시작한다. |
+
+4B에서 성능 승격이 막혔으므로 4C는 여러 파지 상태의 시연으로 actor를 초기화한 뒤 같은 학습량의 PPO 대조군과 비교한다. 아래 절은 완료된 4B 계약과 진행 중인 4C·5·6단계의 검증 기준을 함께 보존한다.
 
 ## 4. 원인 분석과 개선 실험
 
 ### 먼저 고정할 사실
 
-- 평가 시드와 파지 artifact를 맞춘 비교를 사용한다. 성공 기준 strict-v1의 12–13 mm 깊이, 50 µm 횡오차, 0.5° 방향 오차, 0.4초 유지 및 파지·하중 조건은 그대로 유지한다. 50 µm는 프로젝트 기준이며 제조사 규격이 아니다.
+- 평가 시드와 파지 artifact를 맞춘 비교를 사용한다. 성공 기준 strict-v1의 12~13 mm 깊이, 50 µm 횡오차, 0.5° 방향 오차, 0.4초 유지 및 파지·하중 조건은 그대로 유지한다. 50 µm는 프로젝트 기준이며 제조사 규격이 아니다.
 - 기존 79D 관측은 단위별 수동 scaling을 한다. empirical normalization이 꺼져 있다는 사실만으로 입력 정규화가 없다고 해석하지 않는다.
 - 79D는 관절 기반 고정 파지 추정기와 episode 고정 보정 오차를 사용한다. 삽입 접촉의 3축 합력 proxy와 손별 파지 proxy가 포함되며 손목 6축 F/T 측정값이 아니다.
 - 기존 보고서의 1.5 mm·1° observation-noise 값은 상속된 기본 환경 설정이다. RJ45 wrapper의 정책 관측에는 그 per-step 잡음이 적용되지 않았다. 새 실행 기록에는 실제 적용 여부와 episode 고정 bias를 구분한다.
@@ -35,9 +45,9 @@
 
 ### 4B 실행 규모와 병렬 촬영
 
-사용자의 규모 확대 지시에 따라 L40S 4장 장비를 준비한다. 첫 Nebius 128코어 장비가 공급 단계에서 실패해 AWS의 96코어 구성으로 대체했다. 실제 사용 장비와 마감·단가는 실행 계약으로 고정한다. 먼저 64·128·256환경에서 PPO 갱신당 총 8,192 transition을 맞춰 처리량을 측정한다. 환경당 rollout은 각각 128·64·32 step이다. 첫 3회 갱신은 워밍업으로 제외하고 다음 5회 갱신의 처리량을 비교한다. 물리·접촉·유한값 검사를 통과한 구성 중 최고 처리량의 90% 이상인 가장 작은 환경 수를 선택한다. 성공률이나 보상은 규모 선택에 쓰지 않는다.
+사용자의 규모 확대 지시에 따라 L40S 4장 AWS 장비에서 실행했다. 첫 Nebius 128코어 장비는 공급 단계에서 실패해 AWS의 96코어 구성으로 대체했다. 실제 사용 장비와 마감·단가는 실행 계약으로 고정했다. 64·128·256환경에서 PPO 갱신당 총 8,192 transition을 맞춰 처리량을 측정했고, 환경당 rollout은 각각 128·64·32 step이었다. 첫 3회 갱신을 준비 구간으로 제외하고 다음 5회 학습의 처리량을 비교했다. 물리·접촉·유한값 검사를 통과한 구성 중 최고 처리량의 90% 이상인 가장 작은 환경 수를 고르는 규칙에 따라 256환경을 선택했다. 성공률과 보상은 규모 선택에 쓰지 않았다.
 
-벤치마크 후에는 원시 갱신 시간·유효성 검사·선택 결과를 저장하고, 실제 `num_envs × num_steps_per_env = 8192`가 되도록 설정한다. 현재 PPO 설정 파일은 64×128 템플릿이다. 네 군의 실제 설정, 소스, 명목 실행·파지·접촉 증거, GPU·CPU 배정과 마감을 별도 실행 계획 및 입력 SHA manifest로 고정하고 runner 계약 검사를 통과해야 비교 학습을 시작한다. 촬영도 전체·근접 구도의 명령, seed, 설정·소스·영상·JSONL 해시를 별도 기록한다.
+벤치마크의 원시 갱신 시간·유효성 검사·선택 결과를 저장하고 `num_envs × num_steps_per_env = 8192`를 확인했다. 네 군의 실제 설정, 소스, 명목 실행·파지·접촉 증거, GPU·CPU 배정과 마감은 별도 실행 계획과 입력 SHA manifest로 고정했다. 전체·근접 촬영도 명령, seed, 설정·소스·영상·JSONL 해시를 기록했다.
 
 환경 수와 GAE rollout 길이가 바뀌면 이전 64환경 실험의 완전 재현은 아니다. 새 Z1·F·N·R은 같은 환경 수, rollout 길이, 갱신 횟수와 미니배치 크기를 적용한다. 기준 제어를 먼저 평가하고, 각 GPU에 프로필 하나씩 배치해 네 실험을 동시에 실행한다. 하나의 프로세스 안에서는 여러 독립 환경의 경험을 모아 정책 하나를 갱신한다. 서로 다른 GPU의 네 프로세스는 다른 설정을 비교하는 독립 학습이다.
 
@@ -73,7 +83,7 @@ Isaac Sim 5.1과 Lab 2.3에서는 GPU를 숨기는 환경변수 대신 `--device
 - 성공률, 힘 proxy 최대값, 완료 시간, 시드별 편차와 조건별 결과 그래프. 실패·무효 사례를 분모에서 숨기지 않는다.
 - 논문 아이디어, 프로젝트에서 바꾼 부분, 개선 여부·한계, 재현 명령을 설명하는 문서.
 - 렌더 프레임 시각·누락 검사와 소스·설정·모델·영상 SHA. 60 fps 공유본은 실제 기록 프레임에 근거한다.
-- 하나의 Isaac Sim에서 여러 환경을 동시에 학습하는 영상. 전체 격자와 일부 환경 근접 구도를 제공하고, 병렬 환경 수와 실제 PPO 갱신을 표시한다.
+- 완료: 하나의 Isaac Sim에서 256개 환경을 동시에 학습하는 개요·근접 영상. 두 구도는 별도 동일 설정 실행이며 병렬 환경 수, 시뮬레이션 시각, 현재 rollout 전 완료 update 수를 표시한다. [미디어 검증](evidence/rj45-refinement-20261028/parallel-media.json)
 
 최종 평가로 승격하지 못하면 개발 실험 영상으로 표시한다. 개선 실패를 성공으로 포장하지 않고 원인·방법·측정 결과·한계를 담은 포트폴리오를 만든다.
 
@@ -91,4 +101,4 @@ Isaac Sim 5.1과 Lab 2.3에서는 GPU를 숨기는 환경변수 대신 `--device
 - [Isaac Sim 5.1 GPU 선택](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_faq.html): renderer GPU 인덱스와 multi-GPU 설정. 고정 [Lab AppLauncher 소스](https://raw.githubusercontent.com/isaac-sim/IsaacLab/3c6e67bb5c7ada942a6d1884ab69338f57596f77/source/isaaclab/isaaclab/app/app_launcher.py)를 함께 대조한다.
 - [Isaac Lab v2.3.0](https://github.com/isaac-sim/IsaacLab/releases/tag/v2.3.0): 고정 런타임의 버전 근거.
 
-진행 상태: 장기 결과 집계와 독립 리뷰 완료. 원인 진단을 반영한 다음 실험과 4-GPU 장비를 준비 중이다. 개선 실험·다중 파지 데이터·최종 평가·학습 정책 영상은 아직 완료되지 않았다.
+진행 상태: 4B 병렬 규모 측정과 네 설정 비교, F의 새 seed 3개·200-update 평가, 병렬 PPO 촬영을 마쳤다. F는 7/32·10/32·8/32로 승격 기준을 통과하지 못했고 최종 조건은 봉인했다. generation v2 pilot은 시뮬레이터 물리 파지 4개와 최대 clique 4로 통과했으며 고정 후보 20개를 평가해 train 8·dev 2·final 2의 총 12개 파지를 선정하고 있다. teacher 시연, BC, BC 초기화 PPO 비교, 미사용 조건 평가와 학습 정책 성공·실패 영상은 아직 완료되지 않았다.

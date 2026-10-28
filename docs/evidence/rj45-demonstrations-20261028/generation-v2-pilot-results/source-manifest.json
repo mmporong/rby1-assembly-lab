@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "verified_byte_preserved_public_subset",
+  "source_commit": "8572ffd39f1f1959ba0e99e69b2a34791eab0b4e",
+  "retrieval": {
+    "archive_name": "rj45-4c-generation-v2-evidence-20261028.tar.gz",
+    "archive_bytes": 35928663,
+    "archive_sha256": "6e566795fbaa22523330c7a728aebc67b543aecc8106ed0175d8f5039ecdc96a",
+    "payload_manifest_name": "payload-manifest.json",
+    "payload_manifest_sha256": "9203606c6e1290efeafb4147f84f1efb16cac63e10e8443d25ed5c178417729f",
+    "payload_files_verified": 89,
+    "payload_bytes_verified": 173989689,
+    "source_stability_during_archive": "pass_pre_and_post_hashes_equal"
+  },
+  "preregistered_contract": {
+    "path": "../grasp-generation-v2-protocol.json",
+    "sha256": "76754a620a38fc68fd3d326c27e301594cd6241fba55fbfb9c0120458f25c224",
+    "role": "pre-execution generation-only protocol; not a measurement result"
+  },
+  "package_files": [
+    {
+      "path": "summary.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-generation-v2-20261028/summary.json",
+      "bytes": 5287,
+      "sha256": "4f5ba3e7e4df84750a0750187f2e34f0122f806e70882077acf346904a74a2a8",
+      "byte_preserved": true,
+      "role": "run completion, source commit, process return codes, cleanup, and input stability"
+    },
+    {
+      "path": "pilot-audit.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-generation-v2-20261028/pilot-audit.json",
+      "bytes": 3389,
+      "sha256": "0c262bc4e0adfc3e814a050d87e7f3505fcaa6b33b26cef3e3f5d93e5f968e31",
+      "byte_preserved": true,
+      "role": "pairwise physical-grasp separation measurements and frozen gate result"
+    },
+    {
+      "path": "attempts.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-generation-v2-20261028/attempts.json",
+      "bytes": 1274,
+      "sha256": "f737f73323a96b0d235c9fceb60b994111cc7aac6dfe5a4d02ab0c4a64c744d4",
+      "byte_preserved": true,
+      "role": "all four seed-to-catalog assignments and held-artifact hashes"
+    },
+    {
+      "path": "retrieval-verification.json",
+      "source_archive_relative_path": "retrieval-verification.json",
+      "bytes": 933,
+      "sha256": "0ad8de6c403109f9bba66acf8d5acbfdb71e751098e32791733f52e5bc9f5480",
+      "byte_preserved": true,
+      "role": "archive and payload-manifest verification result"
+    }
+  ],
+  "measured_result": {
+    "nominal_return_code": 0,
+    "pilot_attempts": 4,
+    "pilot_physical_successes": 4,
+    "pairwise_comparisons": 6,
+    "pairwise_separated": 6,
+    "translation_threshold_m": 0.00025,
+    "rotation_threshold_rad": 0.004,
+    "separation_rule": "translation_gte_threshold_or_rotation_gte_threshold",
+    "minimum_observed_pairwise_translation_m": 0.0003620914357200241,
+    "maximum_pairwise_distinct_count": 4,
+    "gate_required_count": 3,
+    "gate_pass": true,
+    "policy_metric_selection_used": false
+  },
+  "scope_exclusions": [
+    "large JSONL traces, process logs, held-state payloads, CAD, assets, and source snapshots",
+    "production grasp generation and validation",
+    "teacher collection, behavior cloning, PPO comparison, final evaluation, and policy media"
+  ]
+}

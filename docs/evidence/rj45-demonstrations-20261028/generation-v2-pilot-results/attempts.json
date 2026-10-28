@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "catalog_sha256": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+  "attempts": [
+    {
+      "seed": 20261301,
+      "catalog_entry_id": "grasp-00",
+      "status": "success",
+      "artifact_path": "artifacts/rj45-4c-generation-v2-20261028/seed-20261301/held.json",
+      "artifact_sha256": "0770d400a633e51ee8823cbdd2e60aeafb3f9cf3b9c337191e7792c9dbf0728f"
+    },
+    {
+      "seed": 20261302,
+      "catalog_entry_id": "grasp-01",
+      "status": "success",
+      "artifact_path": "artifacts/rj45-4c-generation-v2-20261028/seed-20261302/held.json",
+      "artifact_sha256": "698edc125fff395d3aadb056acdafff9ff5ea9784675688574aac9f9efc24e91"
+    },
+    {
+      "seed": 20261303,
+      "catalog_entry_id": "grasp-02",
+      "status": "success",
+      "artifact_path": "artifacts/rj45-4c-generation-v2-20261028/seed-20261303/held.json",
+      "artifact_sha256": "5e3a7d04f843a9cdcb8c871adbf4e26817ddf2d2fddd52805d2e858544a65ba1"
+    },
+    {
+      "seed": 20261304,
+      "catalog_entry_id": "grasp-03",
+      "status": "success",
+      "artifact_path": "artifacts/rj45-4c-generation-v2-20261028/seed-20261304/held.json",
+      "artifact_sha256": "c364014c2a1415a93d3b3a6ca6b5662df320bd17bd42d688c4409f8f19e0662a"
+    }
+  ]
+}
