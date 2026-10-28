@@ -1,0 +1,107 @@
+{
+  "evaluation_source_verification": {
+    "all_git_show_bytes_verified": true,
+    "bc_only_commit": "8512a5932547b5495325b5ff0b6894fb072db98e",
+    "biased_zero_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "embedded_source_files_per_report": 36
+  },
+  "files": [
+    {
+      "classification": "analysis_source",
+      "path": "scripts/analyze_rj45_bc_closed_loop.py",
+      "sha256": "d090f00eb48afeb79ff3326c2e1f67933c01d976350bc2b9a4aed5e17a56c98a",
+      "size_bytes": 24099
+    },
+    {
+      "classification": "documentation",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md",
+      "sha256": "f007ddc67c7433200aa1785b59035f7513e46836a05594caf5c43964524244e8",
+      "size_bytes": 13520
+    },
+    {
+      "classification": "derived_analysis",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/diagnostic-results.json",
+      "sha256": "71ce2f8854c0574303035293b478317c8e84be2984bd2d69d0791007d96f0d27",
+      "size_bytes": 48528
+    },
+    {
+      "classification": "byte_preserved_evaluation_report",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/bc-only-evaluation.json",
+      "sha256": "5c61a1ca92cda3f473f61888d70f308eb6a920f3d26acae47d4413cfbc90413f",
+      "size_bytes": 414324,
+      "source": "reviewed BC-only evaluation result"
+    },
+    {
+      "classification": "byte_preserved_evaluation_report",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/biased-zero-evaluation.json",
+      "sha256": "ea6c92c0cd2ac70f04429842244ffadd65a1bf12af455c965efbeaa2c3b3aea5",
+      "size_bytes": 400561,
+      "source": "reviewed biased-zero evaluation result"
+    },
+    {
+      "classification": "byte_preserved_repeat_evaluation_report",
+      "path": "docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/bc-only-repeat-evaluation.json",
+      "sha256": "0533fd82ea947afd8f328fa32923cd70f31ff2e32103d47100e57633c356477e",
+      "size_bytes": 415065,
+      "source": "separate paired PPO campaign baseline; not substituted into the frozen diagnostic inputs"
+    }
+  ],
+  "repeat_evaluation": {
+    "attempts_per_run": 64,
+    "cause_identified": false,
+    "initial_report_sha256": "5c61a1ca92cda3f473f61888d70f308eb6a920f3d26acae47d4413cfbc90413f",
+    "initial_successes": 8,
+    "paired_cases_equal": true,
+    "repeat_report_sha256": "0533fd82ea947afd8f328fa32923cd70f31ff2e32103d47100e57633c356477e",
+    "repeat_successes": 12,
+    "source_config_actor_runtime_contract_equal": true,
+    "success_transitions": {
+      "failure_to_failure": 50,
+      "failure_to_success": 6,
+      "success_to_failure": 2,
+      "success_to_success": 6
+    }
+  },
+  "required_inputs": {
+    "bc-only-evaluation.json": {
+      "included_in_git": true,
+      "sha256": "5c61a1ca92cda3f473f61888d70f308eb6a920f3d26acae47d4413cfbc90413f",
+      "size_bytes": 414324
+    },
+    "bc/bc_actor_init.pt": {
+      "included_in_git": false,
+      "sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5",
+      "size_bytes": 484967
+    },
+    "bc/training_report.json": {
+      "included_in_git": false,
+      "sha256": "32aa18808dfb9ae2ccc6bb4019f24e9c5782005ee69c99889af7ee2816467bbf",
+      "size_bytes": 10639
+    },
+    "biased-zero-evaluation.json": {
+      "included_in_git": true,
+      "sha256": "ea6c92c0cd2ac70f04429842244ffadd65a1bf12af455c965efbeaa2c3b3aea5",
+      "size_bytes": 400561
+    },
+    "teacher-dev.h5": {
+      "included_in_git": false,
+      "sha256": "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830",
+      "size_bytes": 12191046
+    },
+    "teacher-train.h5": {
+      "included_in_git": false,
+      "sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+      "size_bytes": 49550865
+    }
+  },
+  "retrieval": {
+    "archive_name": "rj45-4c-teacher-bc-collector-recovery-evidence-20261028.tar.gz",
+    "archive_sha256": "a5f6ce84a0534931302cc000b2d74ce87ea775398ed9b2f785b4f2f23953ad0c",
+    "archive_size_bytes": 31981163,
+    "before_after_stable": true,
+    "payload_manifest_sha256": "8781b2a804109a82c5a24ebf4361691dadd7d1c31f3ad20c7c2b8bb25ea17165",
+    "safe_extraction_verified": true
+  },
+  "schema_version": 1,
+  "scope": "portable RJ45 BC closed-loop diagnostic"
+}
