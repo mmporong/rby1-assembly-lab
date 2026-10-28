@@ -14,7 +14,9 @@ import sys
 import traceback
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SCRIPTS_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
+sys.path.insert(0, str(SCRIPTS_ROOT))
 
 from rby1_assembly.run_provenance import (  # noqa: E402
     InputMutationError,
@@ -30,11 +32,13 @@ from rby1_assembly.rj45_support_ablation import (  # noqa: E402
     make_rj45_support_ablation_env_type,
     support_ablation_terminal_metrics,
 )
-from rby1_assembly.evaluation_video import (  # noqa: E402
+from rj45_evaluation_video import (  # noqa: E402
     EvaluationVideoRecorder,
     evaluation_video_capture_plan,
     validate_evaluation_video_request,
 )
+
+EVALUATION_VIDEO_HELPER = SCRIPTS_ROOT / "rj45_evaluation_video.py"
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -411,7 +415,7 @@ _bootstrap_input_snapshot = capture_run_inputs(
         *((PROJECT_ROOT / "configs/rj45-assets.json",) if _bootstrap_task == "rj45" else ()),
     ),
     source_roots=((PROJECT_ROOT / "src", True),),
-    source_files=(Path(__file__).resolve(),),
+    source_files=(Path(__file__).resolve(), EVALUATION_VIDEO_HELPER),
     extra_paths=(
         PROJECT_ROOT / "scripts/train.py",
         PROJECT_ROOT / "scripts/run_sim.py",
@@ -668,7 +672,10 @@ def main() -> int:
             *((connector_assets_path,) if args.task == "rj45" else ()),
         ),
         source_roots=((PROJECT_ROOT / "src", True),),
-        source_files=(PROJECT_ROOT / "scripts/evaluate_policy.py",),
+        source_files=(
+            PROJECT_ROOT / "scripts/evaluate_policy.py",
+            EVALUATION_VIDEO_HELPER,
+        ),
         extra_paths=(
             PROJECT_ROOT / "scripts/train.py",
             PROJECT_ROOT / "scripts/run_sim.py",

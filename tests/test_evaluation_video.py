@@ -1,3 +1,4 @@
+import ast
 import json
 from pathlib import Path
 import tempfile
@@ -6,7 +7,7 @@ import types
 import pytest
 import torch
 
-from rby1_assembly.evaluation_video import (
+from scripts.rj45_evaluation_video import (
     EvaluationVideoRecorder,
     evaluation_video_capture_plan,
     selected_environment_camera,
@@ -323,3 +324,23 @@ def test_evaluate_cli_is_opt_in_and_wraps_only_real_env_step():
     assert "evaluation_video.finalize_control_step(extras, dones)" in source
     assert "evaluation_video.close(" in source
     assert "rollout_completed=True" in source
+    assert 'EVALUATION_VIDEO_HELPER = SCRIPTS_ROOT / "rj45_evaluation_video.py"' in source
+    tree = ast.parse(source)
+    capture_calls = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Name)
+        and node.func.id == "capture_run_inputs"
+    ]
+    assert len(capture_calls) == 2
+    for call in capture_calls:
+        source_files = next(
+            keyword.value for keyword in call.keywords if keyword.arg == "source_files"
+        )
+        assert isinstance(source_files, ast.Tuple)
+        assert any(
+            isinstance(element, ast.Name)
+            and element.id == "EVALUATION_VIDEO_HELPER"
+            for element in source_files.elts
+        )
