@@ -30,6 +30,11 @@ from rby1_assembly.rj45_support_ablation import (  # noqa: E402
     make_rj45_support_ablation_env_type,
     support_ablation_terminal_metrics,
 )
+from rby1_assembly.evaluation_video import (  # noqa: E402
+    EvaluationVideoRecorder,
+    evaluation_video_capture_plan,
+    validate_evaluation_video_request,
+)
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -460,6 +465,9 @@ parser.add_argument(
     default="cartesian_correction",
     help="RJ45 scripted support-arm comparison; default preserves current correction.",
 )
+parser.add_argument("--evaluation-video", type=Path)
+parser.add_argument("--video-env-index", type=int, default=0)
+parser.add_argument("--video-fps", type=int, default=60)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
@@ -482,6 +490,19 @@ if args.task == "toy" and args.checkpoint is None:
     parser.error("toy evaluation requires a checkpoint")
 if args.task != "rj45" and args.support_arm_mode != "cartesian_correction":
     parser.error("--support-arm-mode insert_joint_hold is RJ45-only")
+try:
+    validate_evaluation_video_request(
+        requested=args.evaluation_video is not None,
+        task=args.task,
+        baseline_mode=args.baseline_mode,
+        cameras_enabled=bool(getattr(args, "enable_cameras", False)),
+        fps=args.video_fps,
+        env_index=args.video_env_index,
+        num_envs=args.num_envs,
+        episodes=args.episodes,
+    )
+except ValueError as error:
+    parser.error(str(error))
 evaluation_start_error = _evaluation_start_configuration_error(
     args.task,
     args.evaluation_start,
@@ -677,6 +698,28 @@ def main() -> int:
     apply_runtime_timing(cfg, input_snapshot.json_for(PROJECT_ROOT / "configs/runtime.json"))
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
+    if args.evaluation_video is not None:
+        video_plan = evaluation_video_capture_plan(
+            physics_dt_s=float(cfg.sim.dt),
+            control_decimation=int(cfg.decimation),
+            fps=args.video_fps,
+            max_seconds=40.0,
+        )
+        if (
+            video_plan["render_stride_physics_steps"] != 4
+            or video_plan["frames_per_control_step"] != 2
+            or not math.isclose(
+                float(video_plan["control_dt_s"]),
+                1.0 / 30.0,
+                rel_tol=0.0,
+                abs_tol=1.0e-12,
+            )
+        ):
+            raise ValueError(
+                "evaluation video requires 240 Hz physics, stride 4, and 30 Hz control"
+            )
+        cfg.sim.render_interval = int(video_plan["render_stride_physics_steps"])
+        cfg.viewer.resolution = (960, 720)
     env_type = Rby1AssemblyEnv
     selected_task = input_snapshot.json_for(task_path)
     verified_checkpoint_evidence = None
@@ -940,8 +983,14 @@ def main() -> int:
             env_type, args.support_arm_mode
         )
     input_snapshot.assert_unchanged()
-    env = env_type(cfg)
+    env = (
+        env_type(cfg, render_mode="rgb_array")
+        if args.evaluation_video is not None
+        else env_type(cfg)
+    )
     wrapped = RslRlVecEnvWrapper(env, clip_actions=runner_cfg.get("clip_actions", 1.0))
+    evaluation_video = None
+    evaluation_video_evidence = None
     try:
         evaluation_horizon_s = float(cfg.episode_length_s)
         if args.task == "rj45":
@@ -979,6 +1028,37 @@ def main() -> int:
                 device=observation.device,
             )
         observations = wrapped.get_observations()
+        if args.evaluation_video is not None:
+            policy_lineage = {
+                "mode": args.baseline_mode,
+                "checkpoint": (
+                    {
+                        "path": str(args.checkpoint.resolve()),
+                        "sha256": input_snapshot.hash_for(args.checkpoint),
+                        "verified_checkpoint_evidence": verified_checkpoint_evidence,
+                    }
+                    if learned_mode
+                    else None
+                ),
+                "bc_actor": bc_artifact_evidence,
+                "policy_config_sha256": input_snapshot.hash_for(args.config),
+                "training_config_sha256": input_snapshot.hash_for(args.rj45_training_config),
+                "bank_manifest_sha256": (
+                    held_bank_proof["manifest_sha256"]
+                    if held_bank_proof is not None
+                    else None
+                ),
+            }
+            evaluation_video = EvaluationVideoRecorder(
+                env,
+                video_path=args.evaluation_video,
+                env_index=args.video_env_index,
+                fps=args.video_fps,
+                max_seconds=min(evaluation_horizon_s, 40.0),
+                policy_lineage=policy_lineage,
+                source_and_config_sha256=input_snapshot.sha256,
+            )
+            evaluation_video.initialize()
         attempts = 0
         episode_quotas = (
             _fixed_environment_episode_quotas(args.episodes, args.num_envs)
@@ -1001,7 +1081,12 @@ def main() -> int:
         while attempts < args.episodes:
             with torch.inference_mode():
                 actions = policy(observations)
-                observations, _, dones, extras = wrapped.step(actions)
+                if evaluation_video is None:
+                    observations, _, dones, extras = wrapped.step(actions)
+                else:
+                    with evaluation_video.control_step():
+                        observations, _, dones, extras = wrapped.step(actions)
+                    evaluation_video.finalize_control_step(extras, dones)
             ended = torch.nonzero(dones, as_tuple=False).flatten()
             if len(ended) == 0:
                 continue
@@ -1220,6 +1305,17 @@ def main() -> int:
                         flush=True,
                     )
         valid_episodes = valid_successes + valid_failures
+        if evaluation_video is not None:
+            evaluation_video_evidence = evaluation_video.close(
+                rollout_completed=True
+            )
+            if (
+                not isinstance(evaluation_video_evidence, dict)
+                or evaluation_video_evidence.get("completed") is not True
+            ):
+                raise RuntimeError(
+                    "evaluation completed without a terminal episode-zero video"
+                )
         build_report_path = input_snapshot.build_report_path
         input_snapshot.assert_unchanged()
         nominal_evidence_reverified = False
@@ -1409,11 +1505,15 @@ def main() -> int:
             report["training_environment"] = env.rj45_training_report()
         if hasattr(env, "rj45_support_ablation_report"):
             report["support_arm_ablation"] = env.rj45_support_ablation_report()
+        if evaluation_video_evidence is not None:
+            report["evaluation_video"] = evaluation_video_evidence
         atomic_write_json(args.report, report)
         input_snapshot.assert_unchanged()
         print(json.dumps(report, indent=2, allow_nan=False), flush=True)
         return 0
     finally:
+        if evaluation_video is not None:
+            evaluation_video.close(rollout_completed=False)
         wrapped.close()
 
 

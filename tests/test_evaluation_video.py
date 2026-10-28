@@ -1,0 +1,325 @@
+import json
+from pathlib import Path
+import tempfile
+import types
+
+import pytest
+import torch
+
+from rby1_assembly.evaluation_video import (
+    EvaluationVideoRecorder,
+    evaluation_video_capture_plan,
+    selected_environment_camera,
+    validate_evaluation_video_request,
+)
+
+
+class FakeSim:
+    def __init__(self):
+        self.step = 0
+        self.settings = {"/isaaclab/render/rtx_sensors": False}
+        self.camera = None
+
+    def render(self):
+        return None
+
+    def get_setting(self, name):
+        return self.settings[name]
+
+    def set_setting(self, name, value):
+        self.settings[name] = value
+
+    def set_camera_view(self, eye, lookat):
+        self.camera = (tuple(eye), tuple(lookat))
+
+
+class FakeWriter:
+    def __init__(self, path):
+        self.frames = []
+        self.closed = False
+        path.write_bytes(b"fake-video")
+
+    def append_data(self, frame):
+        self.frames.append(frame)
+
+    def close(self):
+        self.closed = True
+
+
+class FakeEnv:
+    def __init__(self):
+        self.cfg = types.SimpleNamespace(
+            sim=types.SimpleNamespace(dt=1.0 / 240.0), decimation=8
+        )
+        self.sim = FakeSim()
+        self.scene = types.SimpleNamespace(
+            env_origins=torch.tensor(
+                [[0.0, 0.0, 0.0], [2.5, 0.0, 0.0]], dtype=torch.float64
+            )
+        )
+        self.num_envs = 2
+        self._sim_step_counter = 0
+        self._training_episode_index = torch.tensor([0, 0])
+        self._training_last_policy_observation_valid = torch.tensor([True, False])
+        self._training_last_policy_observation_timestamp_s = torch.tensor(
+            [0.0, 0.0], dtype=torch.float64
+        )
+        self.episode_length_buf = torch.tensor([0, 0])
+        self._phase = torch.tensor([4, 3])
+        self._last_contact_proxy_n = torch.tensor([[2.0, 3.0], [1.0, 1.5]])
+        self._last_insertion_contact_load_n = torch.tensor([4.0, 2.0])
+        self.position = torch.tensor([[0.0, 0.01, 0.0], [0.001, 0.002, 0.0]])
+        self.quaternion = torch.tensor(
+            [[1.0, 0.0, 0.0, 0.0], [0.99995, 0.01, 0.0, 0.0]]
+        )
+
+    def render(self, recompute=False):
+        return torch.ones((2, 2, 3), dtype=torch.uint8).numpy()
+
+    def _relative_object_pose(self):
+        return self.position, self.quaternion
+
+
+def extras(*, success=True):
+    return {
+        "success": torch.tensor([success, False]),
+        "evaluation": {"valid": torch.tensor([True, True])},
+        "terminal_evaluation": {
+            "termination_reason": ["independent_success", "none"]
+        },
+        "terminal_snapshot": {
+            "episode_index": torch.tensor([0, 0]),
+            "timestamp_s": torch.tensor([1.0 / 30.0, 1.0 / 30.0]),
+            "actual_depth_m": torch.tensor([0.01, 0.002]),
+            "actual_lateral_error_m": torch.tensor([0.0, 0.001]),
+            "actual_orientation_error_rad": torch.tensor([0.0, 0.02]),
+            "phase_name_by_code": {3: "align", 4: "insert"},
+        },
+    }
+
+
+def recorder(
+    directory: str,
+    env: FakeEnv,
+    writers: list[FakeWriter],
+    *,
+    max_seconds: float = 1.0 / 30.0,
+):
+    def factory(path, fps):
+        assert fps == 60
+        result = FakeWriter(path)
+        writers.append(result)
+        return result
+
+    return EvaluationVideoRecorder(
+        env,
+        video_path=Path(directory) / "evaluation.mp4",
+        env_index=0,
+        fps=60,
+        max_seconds=max_seconds,
+        policy_lineage={"mode": "learned", "checkpoint": {"sha256": "a" * 64}},
+        source_and_config_sha256={"scripts/evaluate_policy.py": "b" * 64},
+        writer_factory=factory,
+        frame_reader=lambda: "rgb",
+    )
+
+
+def test_plan_is_native_240hz_stride4_and_two_frames_per_control_step():
+    plan = evaluation_video_capture_plan(
+        physics_dt_s=1.0 / 240.0,
+        control_decimation=8,
+        fps=60,
+        max_seconds=24.0,
+    )
+    assert plan["render_stride_physics_steps"] == 4
+    assert plan["frames_per_control_step"] == 2
+    assert plan["frame_limit"] == 1440
+    with pytest.raises(ValueError, match="40"):
+        evaluation_video_capture_plan(
+            physics_dt_s=1.0 / 240.0,
+            control_decimation=8,
+            fps=60,
+            max_seconds=40.1,
+        )
+
+
+def test_cli_contract_requires_cameras_60fps_and_positive_selected_quota():
+    validate_evaluation_video_request(
+        requested=True, task="rj45", baseline_mode="learned",
+        cameras_enabled=True, fps=60, env_index=63, num_envs=64, episodes=64,
+    )
+    validate_evaluation_video_request(
+        requested=False, task="rj45", baseline_mode="learned",
+        cameras_enabled=True, fps=24, env_index=63, num_envs=64, episodes=64,
+    )
+    cases = (
+        (False, 60, 63, 64, 64, "learned", "enable_cameras"),
+        (True, 30, 63, 64, 64, "learned", "video-fps 60"),
+        (True, 60, 64, 64, 64, "learned", "active environment"),
+        (True, 60, 32, 64, 32, "learned", "positive episode quota"),
+        (True, 60, 63, 64, 64, "oracle", "learned, bc, or biased_zero"),
+    )
+    for cameras, fps, env_index, num_envs, episodes, mode, message in cases:
+        with pytest.raises(ValueError, match=message):
+            validate_evaluation_video_request(
+                requested=True,
+                task="rj45",
+                baseline_mode=mode,
+                cameras_enabled=cameras,
+                fps=fps,
+                env_index=env_index,
+                num_envs=num_envs,
+                episodes=episodes,
+            )
+
+
+def test_camera_uses_selected_environment_origin():
+    camera = selected_environment_camera(
+        torch.tensor([[0.0, 0.0, 0.0], [5.0, 2.5, 0.0]]), 1
+    )
+    assert camera["eye_world_m"] == pytest.approx((5.95, 1.9, 1.25))
+    assert camera["lookat_world_m"] == pytest.approx((5.36, 2.5, 0.87))
+
+
+def test_real_step_cadence_stops_at_episode_zero_terminal_without_reset_frame():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        writers = []
+        video = recorder(directory, env, writers)
+        state_before = {
+            "episode": env._training_episode_index.clone(),
+            "phase": env._phase.clone(),
+            "position": env.position.clone(),
+            "valid": env._training_last_policy_observation_valid.clone(),
+        }
+        video.initialize()
+        assert env._sim_step_counter == 0
+        with video.control_step():
+            for physics_step, contact in ((4, 9.0), (8, 12.0)):
+                env._last_contact_proxy_n[0] = contact
+                env._last_insertion_contact_load_n[0] = contact
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        # DirectRLEnv auto-reset has happened by the time wrapped.step returns.
+        env._training_episode_index[0] = 1
+        video.finalize_control_step(extras(), torch.tensor([True, False]))
+        evidence = video.close(rollout_completed=True)
+
+        assert evidence is not None
+        assert evidence["completed"] is True
+        assert writers[0].frames == ["rgb", "rgb"]
+        rows = [
+            json.loads(line)
+            for line in video.frames_path.read_text(encoding="utf-8").splitlines()
+        ]
+        assert [row["physics_step"] for row in rows] == [4, 8]
+        assert [row["simulation_time_s"] for row in rows] == pytest.approx(
+            [4 / 240, 8 / 240]
+        )
+        assert all(row["episode_index"] == 0 for row in rows)
+        assert all(row["frame_state_is_pre_autoreset_physics"] for row in rows)
+        assert rows[0]["success_observed_after_control_step"] is False
+        assert rows[1]["success_observed_after_control_step"] is True
+        assert rows[1]["control_step_entry_contact_force_proxy_n"] == 4.0
+        assert rows[1]["contact_timing"] == "control_step_entry_not_rendered_physics_step"
+        assert rows[1]["control_step_entry_policy_input_timestamp_s"] == 0.0
+        assert rows[1]["control_time_s"] == 0.0
+        assert rows[1]["time_since_policy_input_s"] == pytest.approx(1.0 / 30.0)
+        assert rows[1]["policy_input_valid"] is True
+        assert rows[1]["policy_lineage_sha256"] == evidence["policy_lineage_sha256"]
+        torch.testing.assert_close(env._phase, state_before["phase"])
+        torch.testing.assert_close(env.position, state_before["position"])
+        torch.testing.assert_close(
+            env._training_last_policy_observation_valid, state_before["valid"]
+        )
+        assert env._training_episode_index[0].item() == 1
+        assert env.sim.settings["/isaaclab/render/rtx_sensors"] is False
+        metadata = json.loads(video.metadata_path.read_text(encoding="utf-8"))
+        assert metadata["selected_terminal"]["timestamp_s"] == pytest.approx(1 / 30)
+        assert metadata["selected_terminal"]["actual_depth_m"] == pytest.approx(0.01)
+        assert metadata["selected_terminal"]["last_pre_autoreset_physics_step"] == 8
+
+
+def test_policy_input_timestamp_must_be_finite_and_strictly_increasing():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [], max_seconds=2.0 / 30.0)
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        video.finalize_control_step(extras(success=False), torch.tensor([False, False]))
+        env.episode_length_buf[0] = 1
+        with pytest.raises(RuntimeError, match="must increase"):
+            with video.control_step():
+                pass
+        video.close(rollout_completed=False)
+
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        env._training_last_policy_observation_timestamp_s[0] = float("nan")
+        video = recorder(directory, env, [])
+        video.initialize()
+        with pytest.raises(RuntimeError, match="finite and non-negative"):
+            with video.control_step():
+                pass
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize("mismatch", ["geometry", "physics_boundary", "timestamp"])
+def test_terminal_snapshot_must_match_last_pre_autoreset_frame(mismatch):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        if mismatch == "geometry":
+            terminal["terminal_snapshot"]["actual_depth_m"][0] = 0.02
+            message = "actual_depth_m differs"
+        elif mismatch == "physics_boundary":
+            env._sim_step_counter = 12
+            message = "physics boundary"
+        else:
+            terminal["terminal_snapshot"]["timestamp_s"][0] = 0.1
+            message = "terminal timestamp"
+        with pytest.raises(RuntimeError, match=message):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+def test_partial_capture_is_preserved_and_marked_incomplete():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        writers = []
+        video = recorder(directory, env, writers)
+        video.initialize()
+        evidence = video.close(rollout_completed=False)
+        assert evidence is not None
+        assert evidence["completed"] is False
+        assert evidence["rollout_completed"] is False
+        assert evidence["artifacts"]["video"]["sha256"]
+        metadata = json.loads(video.metadata_path.read_text(encoding="utf-8"))
+        assert metadata["stop_reason"] == "evaluation_closed_before_selected_terminal"
+        assert metadata["warmup_physics_steps_added"] == 0
+
+
+def test_evaluate_cli_is_opt_in_and_wraps_only_real_env_step():
+    source = (
+        Path(__file__).resolve().parents[1] / "scripts/evaluate_policy.py"
+    ).read_text(encoding="utf-8")
+    assert 'parser.add_argument("--evaluation-video", type=Path)' in source
+    assert "validate_evaluation_video_request(" in source
+    assert 'env_type(cfg, render_mode="rgb_array")' in source
+    assert "else env_type(cfg)" in source
+    assert "with evaluation_video.control_step():" in source
+    assert "evaluation_video.finalize_control_step(extras, dones)" in source
+    assert "evaluation_video.close(" in source
+    assert "rollout_completed=True" in source
