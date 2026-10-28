@@ -17,7 +17,7 @@ def compiled_helper(name: str):
     function = next(
         node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == name
     )
-    namespace: dict[str, object] = {}
+    namespace: dict[str, object] = {"torch": torch}
     exec(
         compile(
             ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[])),
@@ -38,6 +38,111 @@ def proof() -> dict[str, object]:
 
 
 class Rj45BankEvaluationContractTests(unittest.TestCase):
+    def test_bc_actor_receives_only_the_student_policy_tensor(self) -> None:
+        extract = compiled_helper("_bc_student_policy_observation")
+        policy_observation = torch.randn(3, 79)
+        critic_observation = torch.randn(3, 17)
+
+        class FakeTensorDict:
+            def __init__(self) -> None:
+                self.accessed_keys: list[str] = []
+
+            def __getitem__(self, key: str) -> torch.Tensor:
+                self.accessed_keys.append(key)
+                return {
+                    "policy": policy_observation,
+                    "critic": critic_observation,
+                }[key]
+
+        observations = FakeTensorDict()
+        student = extract(observations, expected_dimension=79)
+        self.assertIs(student, policy_observation)
+        self.assertEqual(observations.accessed_keys, ["policy"])
+        actor = torch.nn.Sequential(torch.nn.Linear(79, 6))
+        self.assertEqual(tuple(actor(student).shape), (3, 6))
+        self.assertIs(extract(policy_observation, expected_dimension=79), policy_observation)
+
+    def test_bc_student_observation_fails_closed_on_invalid_contract(self) -> None:
+        extract = compiled_helper("_bc_student_policy_observation")
+        for observation, message in (
+            ({}, "contain a policy tensor"),
+            ({"policy": torch.zeros(2, 78)}, "shape"),
+            ({"policy": torch.zeros(79)}, "shape"),
+            ({"policy": object()}, "torch.Tensor"),
+            (
+                {"policy": torch.full((2, 79), float("nan"))},
+                "finite",
+            ),
+        ):
+            with self.subTest(message=message), self.assertRaisesRegex(
+                (TypeError, ValueError), message
+            ):
+                extract(observation, expected_dimension=79)
+
+    def test_main_policy_callsite_selects_bc_tensor_and_preserves_learned_tensordict(self) -> None:
+        tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
+        main = next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "main"
+        )
+        policy_input_assignments = [
+            node
+            for node in ast.walk(main)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "policy_observations"
+                for target in node.targets
+            )
+        ]
+        self.assertEqual(len(policy_input_assignments), 1)
+        policy_input_expression = policy_input_assignments[0].value
+        self.assertIsInstance(policy_input_expression, ast.IfExp)
+
+        policy_observation = torch.randn(2, 79)
+        observations = {"policy": policy_observation, "critic": torch.randn(2, 17)}
+        expression = compile(
+            ast.fix_missing_locations(ast.Expression(policy_input_expression)),
+            SCRIPT,
+            "eval",
+        )
+        extract = compiled_helper("_bc_student_policy_observation")
+        bc_input = eval(
+            expression,
+            {
+                "_bc_student_policy_observation": extract,
+                "observations": observations,
+                "observation_dimension": 79,
+                "bc_mode": True,
+            },
+        )
+        learned_input = eval(
+            expression,
+            {
+                "observations": observations,
+                "bc_mode": False,
+            },
+        )
+        self.assertIs(bc_input, policy_observation)
+        self.assertIs(learned_input, observations)
+
+        policy_calls = [
+            node
+            for node in ast.walk(main)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Name) and target.id == "actions"
+                for target in node.targets
+            )
+            and isinstance(node.value, ast.Call)
+            and isinstance(node.value.func, ast.Name)
+            and node.value.func.id == "policy"
+        ]
+        self.assertEqual(len(policy_calls), 1)
+        self.assertEqual(len(policy_calls[0].value.args), 1)
+        self.assertIsInstance(policy_calls[0].value.args[0], ast.Name)
+        self.assertEqual(policy_calls[0].value.args[0].id, "policy_observations")
+
     def test_terminal_index_maps_to_verified_ordered_grasp_identity(self) -> None:
         identity = compiled_helper("_rj45_bank_terminal_identity")
         snapshot = {"held_grasp_index": torch.tensor([1, 0])}
