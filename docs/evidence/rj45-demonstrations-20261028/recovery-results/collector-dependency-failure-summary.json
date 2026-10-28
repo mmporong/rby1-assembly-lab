@@ -1,0 +1,9 @@
+{
+  "completed_utc": "2026-10-28T08:45:47.745671+00:00",
+  "error": "train teacher collection summary is incomplete",
+  "error_type": "ValueError",
+  "failed_stage": "teacher-collection",
+  "final_evaluation_started": false,
+  "ppo_started": false,
+  "status": "failed"
+}

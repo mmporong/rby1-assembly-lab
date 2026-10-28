@@ -1,5 +1,8 @@
+import hashlib
+import json
 import math
 from pathlib import Path
+import tempfile
 from types import SimpleNamespace
 import unittest
 
@@ -21,6 +24,18 @@ from rby1_assembly.rj45_training import (
 
 
 ROOT = Path(__file__).resolve().parents[2]
+A2_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
+
+
+def load_a2_with_current_task_pin():
+    config = json.loads(A2_CONFIG_PATH.read_text(encoding="utf-8"))
+    source = config["reward_profile"]["keypoint_geometry"]["geometry_source"]
+    task_path = ROOT / source["task_config_path"]
+    source["task_config_sha256"] = hashlib.sha256(task_path.read_bytes()).hexdigest()
+    with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+        path = Path(temporary) / A2_CONFIG_PATH.name
+        path.write_text(json.dumps(config), encoding="utf-8")
+        return load_training_config(path)
 
 
 def config():
@@ -298,9 +313,7 @@ class Rj45TrainingMathTests(unittest.TestCase):
         self.assertAlmostEqual(float(components["terminal"][2]), -3.0, places=12)
 
     def test_keypoint_potential_is_quaternion_sign_invariant_and_batch_isolated(self):
-        a2 = load_training_config(
-            ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
-        )
+        a2 = load_a2_with_current_task_pin()
         position = torch.tensor(
             [[0.0, 0.012, 0.0], [0.0005, 0.012, 0.0]], dtype=torch.float64
         )
@@ -314,9 +327,7 @@ class Rj45TrainingMathTests(unittest.TestCase):
         torch.testing.assert_close(isolated, potential[:1], atol=1e-12, rtol=0)
 
     def test_keypoint_rotation_changes_corner_alignment_in_metres(self):
-        a2 = load_training_config(
-            ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
-        )
+        a2 = load_a2_with_current_task_pin()
         position = torch.tensor([[0.0, 0.012, 0.0]] * 2, dtype=torch.float64)
         quaternion = torch.tensor(
             [[1.0, 0.0, 0.0, 0.0], [math.sqrt(0.5), 0.0, math.sqrt(0.5), 0.0]],

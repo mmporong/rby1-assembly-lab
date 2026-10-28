@@ -1,0 +1,19 @@
+{
+  "classification": "derived_summary",
+  "source": {
+    "path": "artifacts/cloud/rj45-reset-state-diagnostic-v1-20261028/state-difference.json",
+    "sha256": "282cdd800b7104f7c89a5034f6d2ec769e9c385e4b6a2321c15e5d152f8d546b"
+  },
+  "object": "socket",
+  "environment_count": 256,
+  "physics_step": 8,
+  "failing_component": "quaternion_w",
+  "expected_value": 1.0,
+  "observed_value": 1.0000001192092896,
+  "absolute_difference": 1.1920928955078125e-07,
+  "float32_ulp_from_one": 1,
+  "maximum_position_difference_m": 0.0,
+  "maximum_linear_or_angular_velocity_difference": 0.0,
+  "maximum_other_quaternion_component_difference": 9.094947017729282e-13,
+  "instrumentation": "sys.settrace reads exception locals; no simulator or source state mutation"
+}

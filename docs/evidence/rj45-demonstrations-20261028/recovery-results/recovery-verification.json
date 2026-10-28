@@ -1,0 +1,31 @@
+{
+  "classification": "derived_verification_summary",
+  "quaternion_fix": {
+    "commit": "eec12601085abf558c137966258264199b2920a7",
+    "commit_subject": "fix(validation): PhysX 쿼터니언의 동일 회전을 정규화해 비교",
+    "isolated_test_command": "python3 -m pytest tests/test_rj45_reset_checker.py -q",
+    "isolated_test_result": "20 passed in 1.53s",
+    "reset_check_passed": true,
+    "measurement_num_envs": 256,
+    "physical_warmup_cycles_completed": 4,
+    "reset_environments_per_cycle": 64,
+    "untouched_environments_per_cycle": 192,
+    "success_and_safety_gates_relaxed": false,
+    "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  },
+  "collector_dependency_failure": {
+    "expected_distribution_count": 7,
+    "observed_distribution_count": 6,
+    "missing_distribution": "rsl-rl-lib",
+    "completed_attempts": 0,
+    "dataset_published": false,
+    "bc_started": false
+  },
+  "collector_recovery": {
+    "commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "commit_subject": "fix(data): 교사 수집 환경 검사와 실패 종료 코드 보완",
+    "fresh_nominal_return_code": 0,
+    "fresh_nominal_cleanup": true,
+    "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  }
+}

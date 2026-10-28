@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "passed": false,
+  "physics_executed": true,
+  "error": {
+    "type": "RuntimeError",
+    "message": "held-bank socket pose or velocity differs before physics"
+  }
+}

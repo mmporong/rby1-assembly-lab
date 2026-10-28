@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "source_head": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "retrieval": {
+    "remote_package_root": "artifacts/cloud/rj45-4c-recovery-retrieval-package-20261028",
+    "local_package_root": "rby1-assembly-lab/artifacts/cloud/retrieved-4c-recovery-20261028",
+    "archive_name": "rj45-4c-recovery-evidence-20261028.tar.gz",
+    "archive_size_bytes": 14126952,
+    "archive_sha256": "7a58eba9e10dc8f5b2723ef56a1b0320e82a2be14362f60b32a7ce1a7f4a1c13",
+    "payload_manifest_sha256": "cbf082c74d5b0139c179b7721cdbbd0a17d9699decebfe1681623cd089434b7b",
+    "archive_verification_sha256": "659098b49b1c266b1b1574900da18ba62de5d60f64ce0330591c3b6f292409c0",
+    "payload_file_count": 48,
+    "payload_size_bytes": 69580222,
+    "before_after_stable": true,
+    "safe_extraction_verified": true,
+    "file_hashes_verified": true,
+    "excluded_running_root": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028"
+  },
+  "files": [
+    {
+      "path": "README.md",
+      "classification": "documentation",
+      "size_bytes": 3541,
+      "sha256": "fc6f73b3e03bd09a9886f08e4fea192d1fa8cefec88453bcb15dc71f3b51bb2f"
+    },
+    {
+      "path": "collector-dependency-failure-summary.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-teacher-bc-reset-recovery-v1-20261028/summary.json",
+      "size_bytes": 272,
+      "sha256": "77914abceec66df8c731712913508308a2eea050cbc80cb10dd21d85b4a729c6"
+    },
+    {
+      "path": "collector-nominal-exit.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-collector-recovery-20261028/nominal/exit.json",
+      "size_bytes": 131,
+      "sha256": "f90fbbc5b2b6b8e87d86898303c21d122a713eedc561ada2b40ffa8dfc84f5b2"
+    },
+    {
+      "path": "collector-train-summary.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-teacher-bc-reset-recovery-v1-20261028/teacher-train.summary.json",
+      "size_bytes": 378,
+      "sha256": "a2df24c914c65636c0cfc62b603bcf3685897f749d469fb1466c9bdf10198a95"
+    },
+    {
+      "path": "diagnostic-summary.json",
+      "classification": "derived_summary",
+      "source_path": "artifacts/cloud/rj45-reset-state-diagnostic-v1-20261028/state-difference.json",
+      "source_sha256": "282cdd800b7104f7c89a5034f6d2ec769e9c385e4b6a2321c15e5d152f8d546b",
+      "size_bytes": 757,
+      "sha256": "b64b0e3978b3212330c77fef500757195a473c279f4bbb0df12f0c1965306652"
+    },
+    {
+      "path": "eec-nominal-exit.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-reset-check-recovery-20261028/nominal/exit.json",
+      "size_bytes": 131,
+      "sha256": "b513decb1176be90a494b86e5f6adb943b1a32bebbcf6f6f368b8a7cbf416d6d"
+    },
+    {
+      "path": "first-reset-check.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-teacher-bc-v1-20261028/reset-check.json",
+      "size_bytes": 193,
+      "sha256": "936b7a81d3ee18217e531638368c3a3a27b988c9f8120a37e09cd14065ad9538"
+    },
+    {
+      "path": "first-reset-failure-summary.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-teacher-bc-v1-20261028/summary.json",
+      "size_bytes": 437,
+      "sha256": "f07af2abc587082eb8d5558f54c7b6fe68c4570021833dcb69d8ab3698fb47de"
+    },
+    {
+      "path": "recovery-verification.json",
+      "classification": "derived_verification_summary",
+      "size_bytes": 1302,
+      "sha256": "dad441898151ccf3f0bb7a87764b3e6bb3e1b94450717938313b7b137c3e6ea0"
+    },
+    {
+      "path": "reset-recovery-check.json",
+      "classification": "byte_preserved_copy",
+      "source_path": "artifacts/rj45-4c-teacher-bc-reset-recovery-v1-20261028/reset-check.json",
+      "size_bytes": 141073,
+      "sha256": "03fe9c73e8000074c18a8f8d609672bab9e0b0ef85a584b354b934a1317e026a"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "failed_stage": "reset-check",
+  "final_evaluation_started": false,
+  "ppo_started": false,
+  "record": {
+    "failure_reason": null,
+    "log": {
+      "path": "artifacts/rj45-4c-teacher-bc-v1-20261028/reset-check.log",
+      "sha256": "3d663ded62e0404b165548061e6c563e651deb6d13d3afa0fc0b6b762abcbed8"
+    },
+    "process_group_cleanup_confirmed": true,
+    "return_code": 1,
+    "stage": "reset-check"
+  },
+  "status": "failed"
+}
