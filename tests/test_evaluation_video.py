@@ -145,21 +145,39 @@ def test_orientation_error_reuses_evaluator_quaternion_api(
     torch.testing.assert_close(fake_isaaclab_quat_error[0][1], identity)
 
 
-def extras(*, success=True, episode_index=0):
+def extras(
+    *,
+    success=True,
+    episode_index=0,
+    terminal_timestamp_s=1.0 / 30.0,
+    policy_input_timestamp_s=0.0,
+):
     return {
         "success": torch.tensor([success, False]),
         "evaluation": {"valid": torch.tensor([True, True])},
         "terminal_evaluation": {
-            "termination_reason": ["independent_success", "none"]
+            "termination_reason": ["independent_success", "none"],
+            "criteria": {
+                "depth": torch.tensor([True, False]),
+                "lateral": torch.tensor([True, True]),
+                "orientation": torch.tensor([True, True]),
+                "grasp_live_and_proven": torch.tensor([True, False]),
+                "dwell": torch.tensor([True, False]),
+                "force": torch.tensor([True, True]),
+                "forbidden_contact": torch.tensor([True, True]),
+            },
         },
         "terminal_snapshot": {
             "episode_index": torch.tensor([episode_index, 0]),
-            "timestamp_s": torch.tensor([1.0 / 30.0, 1.0 / 30.0]),
+            "timestamp_s": torch.tensor(
+                [terminal_timestamp_s, terminal_timestamp_s]
+            ),
             "policy_input_observation": torch.arange(
                 158, dtype=torch.float64
             ).reshape(2, 79),
             "policy_input_timestamp_s": torch.tensor(
-                [0.0, 0.0], dtype=torch.float64
+                [policy_input_timestamp_s, policy_input_timestamp_s],
+                dtype=torch.float64,
             ),
             "policy_input_valid": torch.tensor([True, False]),
             "requested_expanded_residual_action": torch.arange(
@@ -173,6 +191,31 @@ def extras(*, success=True, episode_index=0):
                 12, dtype=torch.float64
             ).reshape(2, 6)
             / 100.0,
+            "independent_eval_dwell_s": torch.tensor([0.4, 0.0]),
+            "grip_live": torch.tensor([[True, True], [True, False]]),
+            "grip_proven": torch.tensor([[True, True], [True, False]]),
+            "rj45_evaluation_stability": {
+                "depth_within_window": torch.tensor([True, False]),
+                "relative_linear_speed_ok": torch.tensor([True, True]),
+                "relative_angular_speed_ok": torch.tensor([True, True]),
+                "relative_linear_speed_m_s": torch.tensor([0.001, 0.002]),
+                "relative_angular_speed_rad_s": torch.tensor([0.01, 0.02]),
+                "physics_substeps_complete": torch.tensor([True, True]),
+                "physics_all_samples_stable": torch.tensor([True, False]),
+                "physics_sample_finite": torch.ones((2, 9), dtype=torch.bool),
+                "physics_sample_stable": torch.tensor(
+                    [[True] * 9, [True] * 8 + [False]]
+                ),
+                "physics_sample_depth_m": torch.full((2, 9), 0.012),
+                "physics_sample_lateral_error_m": torch.full((2, 9), 0.0001),
+                "physics_sample_orientation_error_rad": torch.full((2, 9), 0.001),
+                "physics_sample_relative_linear_speed_m_s": torch.full(
+                    (2, 9), 0.001
+                ),
+                "physics_sample_relative_angular_speed_rad_s": torch.full(
+                    (2, 9), 0.01
+                ),
+            },
             "actual_depth_m": torch.tensor([0.01, 0.002]),
             "actual_lateral_error_m": torch.tensor([0.0, 0.001]),
             "actual_orientation_error_rad": torch.tensor([0.0, 0.02]),
@@ -216,7 +259,12 @@ def test_plan_is_native_240hz_stride4_and_two_frames_per_control_step():
     )
     assert plan["render_stride_physics_steps"] == 4
     assert plan["frames_per_control_step"] == 2
-    assert plan["frame_limit"] == 1440
+    assert plan["requested_frame_limit"] == 1440
+    assert plan["terminal_margin_control_steps"] == 1
+    assert plan["terminal_margin_frames"] == 2
+    assert plan["terminal_margin_seconds"] == pytest.approx(1.0 / 30.0)
+    assert plan["frame_limit"] == 1442
+    assert plan["max_seconds"] == pytest.approx(24.0 + 1.0 / 30.0)
     with pytest.raises(ValueError, match="40"):
         evaluation_video_capture_plan(
             physics_dt_s=1.0 / 240.0,
@@ -325,6 +373,24 @@ def test_real_step_cadence_stops_at_initial_episode_terminal_without_reset_frame
         assert len(step_snapshot["applied_tip_target_offset_entry_6d"]) == 6
         assert step_snapshot["policy_input_timestamp_s"] == 0.0
         assert step_snapshot["policy_input_valid"] is True
+        assert step_snapshot["independent_eval_dwell_s"] == pytest.approx(0.4)
+        assert step_snapshot["grip_live"] == [True, True]
+        assert step_snapshot["grip_proven"] == [True, True]
+        stability = step_snapshot["rj45_evaluation_stability"]
+        assert stability["physics_sample_count"] == 9
+        assert len(stability["physics_sample_depth_m"]) == 9
+        assert len(stability["physics_sample_relative_linear_speed_m_s"]) == 9
+        assert stability["physics_substeps_complete"] is True
+        assert all(stability["physics_sample_finite"])
+        assert step_snapshot["terminal_evaluation_criteria"] == {
+            "depth": True,
+            "lateral": True,
+            "orientation": True,
+            "grasp_live_and_proven": True,
+            "dwell": True,
+            "force": True,
+            "forbidden_contact": True,
+        }
         assert "control-step start" in step_snapshot["timing_contract"]
         assert "control-step end" in step_snapshot["timing_contract"]
         torch.testing.assert_close(env._phase, state_before["phase"])
@@ -356,6 +422,64 @@ def test_capture_rejects_reset_before_initial_episode_terminal():
                 env._sim_step_counter = 4
                 env.sim.step = 4
                 env.sim.render()
+        video.close(rollout_completed=False)
+
+
+def test_terminal_margin_captures_timeout_control_step_without_reset_frame():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        writers = []
+        video = recorder(directory, env, writers, max_seconds=1.0 / 30.0)
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        video.finalize_control_step(extras(success=False), torch.tensor([False, False]))
+
+        env.episode_length_buf[0] = 1
+        env._training_last_policy_observation_timestamp_s[0] = 1.0 / 30.0
+        with video.control_step():
+            for physics_step in (12, 16):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        env._training_episode_index[0] = 1
+        video.finalize_control_step(
+            extras(
+                success=False,
+                terminal_timestamp_s=2.0 / 30.0,
+                policy_input_timestamp_s=1.0 / 30.0,
+            ),
+            torch.tensor([True, False]),
+        )
+        evidence = video.close(rollout_completed=True)
+
+        assert evidence is not None
+        assert evidence["completed"] is True
+        rows = [
+            json.loads(line)
+            for line in video.frames_path.read_text(encoding="utf-8").splitlines()
+        ]
+        assert [row["physics_step"] for row in rows] == [4, 8, 12, 16]
+        assert all(row["episode_index"] == 0 for row in rows)
+        assert rows[-1]["terminal_observed_after_control_step"] is True
+        metadata = json.loads(video.metadata_path.read_text(encoding="utf-8"))
+        assert metadata["capture_plan"]["requested_frame_limit"] == 2
+        assert metadata["capture_plan"]["terminal_margin_frames"] == 2
+        assert metadata["captured_frames"] == 4
+        assert metadata["captured_duration_s"] == pytest.approx(2.0 / 30.0)
+
+
+def test_frame_writer_rejects_data_beyond_terminal_margin_limit():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [], max_seconds=1.0 / 30.0)
+        video.initialize()
+        video._written_frames = int(video.plan["frame_limit"])
+        with pytest.raises(RuntimeError, match="frame limit exceeded"):
+            video._write_frame("rgb")
         video.close(rollout_completed=False)
 
 
@@ -532,6 +656,118 @@ def test_control_step_snapshot_rejects_invalid_scalar(field, value, message):
         with pytest.raises(RuntimeError, match=message):
             video.finalize_control_step(terminal, torch.tensor([True, False]))
         video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "physics_sample_finite",
+        "physics_sample_stable",
+        "physics_sample_depth_m",
+        "physics_sample_lateral_error_m",
+        "physics_sample_orientation_error_rad",
+        "physics_sample_relative_linear_speed_m_s",
+        "physics_sample_relative_angular_speed_rad_s",
+    ),
+)
+def test_physics_stability_snapshot_requires_decimation_plus_endpoint(field):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        stability = terminal["terminal_snapshot"]["rj45_evaluation_stability"]
+        stability[field] = stability[field][:, :8]
+        with pytest.raises(RuntimeError, match="shape \\(9,\\)"):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "physics_sample_depth_m",
+        "physics_sample_lateral_error_m",
+        "physics_sample_orientation_error_rad",
+        "physics_sample_relative_linear_speed_m_s",
+        "physics_sample_relative_angular_speed_rad_s",
+    ),
+)
+def test_physics_stability_snapshot_rejects_nonfinite_sample(field):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        stability = terminal["terminal_snapshot"]["rj45_evaluation_stability"]
+        stability[field][0, 4] = float("nan")
+        with pytest.raises(RuntimeError, match=f"{field} must be finite"):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+def test_physics_stability_snapshot_rejects_nonboolean_sample_flags():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        stability = terminal["terminal_snapshot"]["rj45_evaluation_stability"]
+        stability["physics_sample_finite"] = torch.ones((2, 9))
+        with pytest.raises(RuntimeError, match="physics_sample_finite must be boolean"):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+def test_control_step_snapshot_requires_stability_dwell_grip_and_criteria():
+    mutations = (
+        lambda payload: payload["terminal_snapshot"].pop(
+            "rj45_evaluation_stability"
+        ),
+        lambda payload: payload["terminal_snapshot"].pop(
+            "independent_eval_dwell_s"
+        ),
+        lambda payload: payload["terminal_snapshot"].pop("grip_live"),
+        lambda payload: payload["terminal_snapshot"].pop("grip_proven"),
+        lambda payload: payload["terminal_evaluation"].pop("criteria"),
+    )
+    messages = (
+        "rj45_evaluation_stability",
+        "independent_eval_dwell_s",
+        "grip_live",
+        "grip_proven",
+        "terminal_evaluation.criteria",
+    )
+    for mutate, message in zip(mutations, messages, strict=True):
+        with tempfile.TemporaryDirectory() as directory:
+            env = FakeEnv()
+            video = recorder(directory, env, [])
+            video.initialize()
+            with video.control_step():
+                for physics_step in (4, 8):
+                    env._sim_step_counter = physics_step
+                    env.sim.step = physics_step
+                    env.sim.render()
+            terminal = extras()
+            mutate(terminal)
+            with pytest.raises(RuntimeError, match=message):
+                video.finalize_control_step(terminal, torch.tensor([True, False]))
+            video.close(rollout_completed=False)
 
 
 def test_partial_capture_is_preserved_and_marked_incomplete():

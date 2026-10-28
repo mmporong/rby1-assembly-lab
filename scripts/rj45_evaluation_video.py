@@ -58,10 +58,12 @@ def evaluation_video_capture_plan(
     if control_decimation % stride:
         raise ValueError("evaluation video cadence must divide each control step")
     frames_per_control = control_decimation // stride
-    frame_limit = math.floor(max_seconds * fps)
-    frame_limit -= frame_limit % frames_per_control
-    if frame_limit < frames_per_control:
+    requested_frame_limit = math.floor(max_seconds * fps)
+    requested_frame_limit -= requested_frame_limit % frames_per_control
+    if requested_frame_limit < frames_per_control:
         raise ValueError("evaluation video duration is shorter than one control step")
+    terminal_margin_frames = frames_per_control
+    frame_limit = requested_frame_limit + terminal_margin_frames
     return {
         "physics_dt_s": float(physics_dt_s),
         "control_decimation": control_decimation,
@@ -69,6 +71,11 @@ def evaluation_video_capture_plan(
         "fps": fps,
         "render_stride_physics_steps": stride,
         "frames_per_control_step": frames_per_control,
+        "requested_frame_limit": requested_frame_limit,
+        "requested_max_seconds": requested_frame_limit / fps,
+        "terminal_margin_control_steps": 1,
+        "terminal_margin_frames": terminal_margin_frames,
+        "terminal_margin_seconds": terminal_margin_frames / fps,
         "frame_limit": frame_limit,
         "max_seconds": frame_limit / fps,
     }
@@ -411,7 +418,12 @@ class EvaluationVideoRecorder:
         phase_names = snapshot.get("phase_name_by_code")
         if not isinstance(phase_names, dict):
             raise RuntimeError("evaluation video requires phase names")
-        control_step_snapshot = self._control_step_snapshot(snapshot)
+        terminal_evaluation = extras.get("terminal_evaluation")
+        if not isinstance(terminal_evaluation, dict):
+            raise RuntimeError("evaluation video requires terminal_evaluation telemetry")
+        control_step_snapshot = self._control_step_snapshot(
+            snapshot, terminal_evaluation
+        )
         if terminal:
             self._validate_terminal_snapshot(snapshot)
         last_pre_autoreset_frame = dict(self._pending_frames[-1])
@@ -487,21 +499,57 @@ class EvaluationVideoRecorder:
         elif self._written_frames == int(self.plan["frame_limit"]):
             self._stop_capture("maximum_duration_reached_before_terminal")
 
-    def _control_step_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
-        def vector(name: str, size: int) -> list[float]:
-            value = snapshot.get(name)
+    def _control_step_snapshot(
+        self,
+        snapshot: dict[str, Any],
+        terminal_evaluation: dict[str, Any],
+    ) -> dict[str, Any]:
+        def vector(
+            source: dict[str, Any],
+            name: str,
+            size: int,
+            *,
+            label: str = "terminal_snapshot",
+            boolean: bool = False,
+        ) -> list[float] | list[bool]:
+            value = source.get(name)
             if value is None:
-                raise RuntimeError(f"evaluation video requires terminal_snapshot.{name}")
+                raise RuntimeError(f"evaluation video requires {label}.{name}")
             selected = value[self.env_index]
             if hasattr(selected, "detach"):
                 selected = selected.detach().clone().cpu()
             if getattr(selected, "shape", None) != (size,):
                 raise RuntimeError(
-                    f"terminal_snapshot.{name} must have selected shape ({size},)"
+                    f"{label}.{name} must have selected shape ({size},)"
                 )
-            result = [float(item) for item in selected.tolist()]
+            raw_result = selected.tolist()
+            if boolean:
+                if not all(type(item) is bool for item in raw_result):
+                    raise RuntimeError(f"{label}.{name} must be boolean")
+                return raw_result
+            result = [float(item) for item in raw_result]
             if not all(math.isfinite(item) for item in result):
-                raise RuntimeError(f"terminal_snapshot.{name} must be finite")
+                raise RuntimeError(f"{label}.{name} must be finite")
+            return result
+
+        def scalar(
+            source: dict[str, Any],
+            name: str,
+            *,
+            label: str = "terminal_snapshot",
+            boolean: bool = False,
+        ) -> float | bool:
+            value = source.get(name)
+            if value is None:
+                raise RuntimeError(f"evaluation video requires {label}.{name}")
+            result = _scalar(value, self.env_index)
+            if boolean:
+                if type(result) is not bool:
+                    raise RuntimeError(f"{label}.{name} must be boolean")
+                return result
+            result = float(result)
+            if not math.isfinite(result):
+                raise RuntimeError(f"{label}.{name} must be finite")
             return result
 
         timestamp_value = snapshot.get("policy_input_timestamp_s")
@@ -534,23 +582,129 @@ class EvaluationVideoRecorder:
         policy_input_valid = _scalar(policy_input_valid_value, self.env_index)
         if type(policy_input_valid) is not bool:
             raise RuntimeError("terminal_snapshot.policy_input_valid must be boolean")
+        stability = snapshot.get("rj45_evaluation_stability")
+        if not isinstance(stability, dict):
+            raise RuntimeError(
+                "evaluation video requires terminal_snapshot.rj45_evaluation_stability"
+            )
+        sample_count = int(self.plan["control_decimation"]) + 1
+        stability_snapshot: dict[str, Any] = {
+            name: scalar(
+                stability,
+                name,
+                label="terminal_snapshot.rj45_evaluation_stability",
+                boolean=True,
+            )
+            for name in (
+                "depth_within_window",
+                "relative_linear_speed_ok",
+                "relative_angular_speed_ok",
+                "physics_substeps_complete",
+                "physics_all_samples_stable",
+            )
+        }
+        stability_snapshot.update(
+            {
+                name: scalar(
+                    stability,
+                    name,
+                    label="terminal_snapshot.rj45_evaluation_stability",
+                )
+                for name in (
+                    "relative_linear_speed_m_s",
+                    "relative_angular_speed_rad_s",
+                )
+            }
+        )
+        stability_snapshot.update(
+            {
+                name: vector(
+                    stability,
+                    name,
+                    sample_count,
+                    label="terminal_snapshot.rj45_evaluation_stability",
+                    boolean=True,
+                )
+                for name in (
+                    "physics_sample_finite",
+                    "physics_sample_stable",
+                )
+            }
+        )
+        stability_snapshot.update(
+            {
+                name: vector(
+                    stability,
+                    name,
+                    sample_count,
+                    label="terminal_snapshot.rj45_evaluation_stability",
+                )
+                for name in (
+                    "physics_sample_depth_m",
+                    "physics_sample_lateral_error_m",
+                    "physics_sample_orientation_error_rad",
+                    "physics_sample_relative_linear_speed_m_s",
+                    "physics_sample_relative_angular_speed_rad_s",
+                )
+            }
+        )
+        stability_snapshot["physics_sample_count"] = sample_count
+        stability_snapshot["sample_contract"] = (
+            "control_decimation pre-physics samples plus the final control-step endpoint"
+        )
+        criteria = terminal_evaluation.get("criteria")
+        if not isinstance(criteria, dict):
+            raise RuntimeError(
+                "evaluation video requires terminal_evaluation.criteria"
+            )
+        criteria_snapshot: dict[str, bool] = {}
+        for name in (
+            "depth",
+            "lateral",
+            "orientation",
+            "grasp_live_and_proven",
+            "dwell",
+            "force",
+            "forbidden_contact",
+        ):
+            criterion = scalar(
+                criteria,
+                name,
+                label="terminal_evaluation.criteria",
+                boolean=True,
+            )
+            assert isinstance(criterion, bool)
+            criteria_snapshot[name] = criterion
+        independent_eval_dwell_s = scalar(snapshot, "independent_eval_dwell_s")
+        assert isinstance(independent_eval_dwell_s, float)
+        if independent_eval_dwell_s < 0.0:
+            raise RuntimeError(
+                "terminal_snapshot.independent_eval_dwell_s must be non-negative"
+            )
         return {
-            "policy_input_observation": vector("policy_input_observation", 79),
+            "policy_input_observation": vector(
+                snapshot, "policy_input_observation", 79
+            ),
             "policy_input_timestamp_s": timestamp,
             "policy_input_valid": policy_input_valid,
             "requested_expanded_residual_action": vector(
-                "requested_expanded_residual_action", 12
+                snapshot, "requested_expanded_residual_action", 12
             ),
             "applied_bounded_residual_action": vector(
-                "applied_bounded_residual_action", 12
+                snapshot, "applied_bounded_residual_action", 12
             ),
             "applied_tip_target_offset_entry_6d": vector(
-                "applied_tip_target_offset_entry_6d", 6
+                snapshot, "applied_tip_target_offset_entry_6d", 6
             ),
+            "independent_eval_dwell_s": independent_eval_dwell_s,
+            "grip_live": vector(snapshot, "grip_live", 2, boolean=True),
+            "grip_proven": vector(snapshot, "grip_proven", 2, boolean=True),
+            "rj45_evaluation_stability": stability_snapshot,
+            "terminal_evaluation_criteria": criteria_snapshot,
             "timing_contract": (
                 "policy input is cached at control-step start; requested and bounded "
-                "actions apply during that control step; applied target is recorded at "
-                "control-step end"
+                "actions apply during that control step; applied target, 240 Hz physics "
+                "stability samples, dwell, grip, and criteria are recorded at control-step end"
             ),
         }
 
@@ -640,6 +794,7 @@ class EvaluationVideoRecorder:
             "camera": self.camera,
             "capture_plan": self.plan,
             "captured_frames": self._written_frames,
+            "captured_duration_s": self._written_frames / int(self.plan["fps"]),
             "frame_metadata_records": self._written_records,
             "captured_control_steps": self._control_step,
             "stop_reason": self._stop_reason,
