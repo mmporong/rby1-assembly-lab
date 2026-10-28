@@ -609,6 +609,37 @@ def _bank_staging_snapshot(env, env_ids) -> dict:
     }
 
 
+def _quaternions_same_rotation(
+    actual, expected, *, orientation_atol: float = 1.0e-7
+) -> bool:
+    """Compare batched quaternions without rejecting PhysX float32 round-off."""
+
+    if actual.shape != expected.shape or actual.shape[-1] != 4:
+        return False
+    actual64 = actual.to(dtype=torch.float64)
+    expected64 = expected.to(dtype=torch.float64)
+    if not bool(torch.isfinite(actual64).all() and torch.isfinite(expected64).all()):
+        return False
+
+    actual_norm = torch.linalg.vector_norm(actual64, dim=-1)
+    expected_norm = torch.linalg.vector_norm(expected64, dim=-1)
+    # PhysX stores root state in float32. Four float32 epsilons cover the
+    # observed one-ULP scalar round-off while rejecting scaled quaternions.
+    norm_atol = 4.0 * float(torch.finfo(torch.float32).eps)
+    one = torch.ones_like(actual_norm)
+    if not bool(torch.all(torch.abs(actual_norm - one) <= norm_atol)):
+        return False
+    if not bool(torch.all(torch.abs(expected_norm - one) <= norm_atol)):
+        return False
+
+    actual_unit = actual64 / actual_norm.unsqueeze(-1)
+    expected_unit = expected64 / expected_norm.unsqueeze(-1)
+    same_sign_distance = torch.linalg.vector_norm(actual_unit - expected_unit, dim=-1)
+    opposite_sign_distance = torch.linalg.vector_norm(actual_unit + expected_unit, dim=-1)
+    rotation_distance = torch.minimum(same_sign_distance, opposite_sign_distance)
+    return bool(torch.all(rotation_distance <= orientation_atol))
+
+
 def _assert_selected_bank_initial_state(env, env_ids) -> dict:
     """Check selected bank state after restoration and before its first physics step."""
 
@@ -677,9 +708,17 @@ def _assert_selected_bank_initial_state(env, env_ids) -> dict:
         expected_root = torch.cat(
             (expected_transform[:, index], expected_object_velocity[:, index]), dim=1
         )
-        if not torch.allclose(
-            native[f"{name}_root_state"], expected_root, rtol=0.0, atol=1.0e-7
-        ):
+        actual_root = native[f"{name}_root_state"]
+        position_matches = torch.allclose(
+            actual_root[:, :3], expected_root[:, :3], rtol=0.0, atol=1.0e-7
+        )
+        orientation_matches = _quaternions_same_rotation(
+            actual_root[:, 3:7], expected_root[:, 3:7]
+        )
+        velocity_matches = torch.allclose(
+            actual_root[:, 7:], expected_root[:, 7:], rtol=0.0, atol=1.0e-7
+        )
+        if not (position_matches and orientation_matches and velocity_matches):
             raise RuntimeError(
                 f"held-bank {name} pose or velocity differs before physics"
             )
