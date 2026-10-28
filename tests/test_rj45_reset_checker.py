@@ -550,7 +550,15 @@ class HeldBankIndependentSourceTests(unittest.TestCase):
                 "plug_root_state": torch.cat((transform[:, 1], velocities[:, 1]), dim=1),
             }
         tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
-        definitions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in {"_resolve_bank_grasp_ids", "_assert_selected_bank_initial_state"}]
+        selected_names = {
+                "_resolve_bank_grasp_ids",
+                "_quaternions_same_rotation",
+                "_assert_selected_bank_initial_state",
+        }
+        definitions: list[ast.stmt] = []
+        for node in tree.body:
+            if isinstance(node, ast.FunctionDef) and node.name in selected_names:
+                definitions.append(node)
         namespace = {
             "torch": torch, "bank_mode": True, "bank_proof": proof,
             "verified_bank_reference": copy.deepcopy(bank),
@@ -564,6 +572,58 @@ class HeldBankIndependentSourceTests(unittest.TestCase):
         result = check(env, ids)
         self.assertEqual(result["selected_grasp_ids"], ["g0", "g1"])
         self.assertEqual(result["selected_artifact_sha256"], ["a" * 64, "b" * 64])
+
+    def test_physx_float32_quaternion_roundoff_and_equivalent_forms_pass(self) -> None:
+        import torch
+
+        check, env, _, ids = self._fixture()
+        original_native_state = check.__globals__["_native_physx_state"]
+
+        def rounded_native_state(current_env, current_ids):
+            state = original_native_state(current_env, current_ids)
+            state["socket_root_state"][0, 3:7] = torch.tensor(
+                [9.0e-13, -9.0e-13, 0.0, 1.0000001192092896]
+            )
+            state["plug_root_state"][1, 3:7] *= -1.0
+            return state
+
+        check.__globals__["_native_physx_state"] = rounded_native_state
+        check(env, ids)
+
+    def test_quaternion_comparison_accepts_near_unit_scale_but_rejects_invalid_rotation(self) -> None:
+        import torch
+
+        check, _, _, _ = self._fixture()
+        compare = check.__globals__["_quaternions_same_rotation"]
+        epsilon = torch.finfo(torch.float32).eps
+        expected = torch.tensor([[0.0, 0.0, 0.0, 1.0]], dtype=torch.float32)
+        equivalent = expected * (1.0 + epsilon)
+        self.assertTrue(compare(equivalent, expected))
+
+        rejected = {
+            "scaled": expected * 2.0,
+            "nan": torch.tensor([[0.0, 0.0, 0.0, float("nan")]]),
+            "zero": torch.zeros((1, 4)),
+            "different_rotation": torch.tensor([[0.0, 0.0, 1.0e-4, 1.0]]),
+        }
+        for label, actual in rejected.items():
+            with self.subTest(label=label):
+                self.assertFalse(compare(actual, expected))
+
+    def test_native_position_and_velocity_tolerances_remain_strict(self) -> None:
+        for column in (0, 7):
+            with self.subTest(column=column):
+                check, env, _, ids = self._fixture()
+                original_native_state = check.__globals__["_native_physx_state"]
+
+                def changed_native_state(current_env, current_ids):
+                    state = original_native_state(current_env, current_ids)
+                    state["socket_root_state"][0, column] += 2.0e-7
+                    return state
+
+                check.__globals__["_native_physx_state"] = changed_native_state
+                with self.assertRaisesRegex(RuntimeError, "pose or velocity"):
+                    check(env, ids)
 
     def test_mutating_cache_and_native_together_does_not_hide_wrong_bank_row(self) -> None:
         for field in ("position", "velocity", "reference", "local_pose", "object_velocity"):
