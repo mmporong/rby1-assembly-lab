@@ -255,4 +255,3 @@ def make_action_telemetry_wrapper_type(
 
     ActionTelemetryWrapper.__name__ = f"ActionTelemetry{base_wrapper_type.__name__}"
     return ActionTelemetryWrapper
-

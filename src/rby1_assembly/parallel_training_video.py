@@ -439,4 +439,3 @@ class ParallelTrainingVideoRecorder:
             raise RuntimeError(
                 "parallel video training completed without the requested frame and metadata count"
             )
-
