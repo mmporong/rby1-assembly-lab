@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import sys
 import tempfile
+import traceback
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -51,6 +52,37 @@ def _atomic_json(path: Path, payload: dict[str, object]) -> None:
         os.replace(temporary, path)
     finally:
         Path(temporary).unlink(missing_ok=True)
+
+
+def _runtime_versions() -> dict[str, str]:
+    return {
+        name: metadata.version(name)
+        for name in (
+            "isaacsim",
+            "isaaclab",
+            "isaaclab-rl",
+            "rsl-rl-lib",
+            "torch",
+            "numpy",
+            "h5py",
+        )
+    }
+
+
+def _close_simulation_app(simulation_app, exit_code: int) -> int:
+    """Close Kit without allowing its SystemExit(0) to mask a main failure."""
+
+    try:
+        simulation_app.close()
+    except SystemExit as error:
+        close_code = error.code
+        if close_code is None or close_code == 0:
+            return exit_code
+        return close_code if type(close_code) is int else 1
+    except BaseException:
+        traceback.print_exc()
+        return 1
+    return exit_code
 
 
 parser = argparse.ArgumentParser(description=__doc__)
@@ -161,10 +193,7 @@ def main() -> int:
             else None
         )
         verify_runtime_versions(
-            {
-                name: metadata.version(name)
-                for name in ("isaacsim", "isaaclab", "isaaclab-rl", "torch", "numpy", "h5py")
-            },
+            _runtime_versions(),
             input_snapshot.json_for(PROJECT_ROOT / "configs/runtime.json"),
         )
         cfg = Rby1AssemblyEnvCfg()
@@ -284,7 +313,11 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    exit_code = 1
     try:
-        raise SystemExit(main())
+        exit_code = main()
+    except BaseException:
+        traceback.print_exc()
     finally:
-        simulation_app.close()
+        exit_code = _close_simulation_app(simulation_app, exit_code)
+    raise SystemExit(exit_code)

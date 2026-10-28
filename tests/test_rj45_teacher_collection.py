@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import ast
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import types
+from typing import Any
 import unittest
 
 import numpy as np
@@ -64,6 +67,74 @@ def _snapshot(
 
 
 class Rj45TeacherCollectionTests(unittest.TestCase):
+    @staticmethod
+    def _script_helpers():
+        script = Path(__file__).resolve().parents[1] / "scripts/collect_rj45_teacher.py"
+        tree = ast.parse(script.read_text(encoding="utf-8"))
+        selected: list[ast.stmt] = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name in {"_runtime_versions", "_close_simulation_app"}
+        ]
+        calls: list[str] = []
+        namespace: dict[str, Any] = {
+            "metadata": types.SimpleNamespace(
+                version=lambda name: calls.append(name) or f"version:{name}"
+            ),
+            "traceback": types.SimpleNamespace(print_exc=lambda: calls.append("traceback")),
+        }
+        exec(compile(ast.Module(body=selected, type_ignores=[]), script, "exec"), namespace)
+        return namespace, calls
+
+    def test_collector_runtime_versions_include_exact_required_distributions(self) -> None:
+        helpers, calls = self._script_helpers()
+        versions = helpers["_runtime_versions"]()
+        expected = {
+            "isaacsim",
+            "isaaclab",
+            "isaaclab-rl",
+            "rsl-rl-lib",
+            "torch",
+            "numpy",
+            "h5py",
+        }
+        self.assertEqual(set(versions), expected)
+        self.assertEqual(set(calls), expected)
+        self.assertEqual(versions["rsl-rl-lib"], "version:rsl-rl-lib")
+        script_source = (
+            Path(__file__).resolve().parents[1] / "scripts/collect_rj45_teacher.py"
+        ).read_text(encoding="utf-8")
+        self.assertIn("verify_runtime_versions(\n            _runtime_versions(),", script_source)
+
+    def test_kit_close_cannot_mask_main_failure_with_system_exit_zero(self) -> None:
+        helpers, calls = self._script_helpers()
+        close = helpers["_close_simulation_app"]
+
+        class App:
+            def __init__(self, error=None):
+                self.error = error
+
+            def close(self):
+                if self.error is not None:
+                    raise self.error
+
+        self.assertEqual(close(App(SystemExit(0)), 1), 1)
+        self.assertEqual(close(App(SystemExit(0)), 0), 0)
+        self.assertEqual(close(App(SystemExit(7)), 0), 7)
+        self.assertEqual(close(App(RuntimeError("close failed")), 0), 1)
+        self.assertEqual(close(App(), 3), 3)
+        self.assertEqual(calls, ["traceback"])
+        script_source = (
+            Path(__file__).resolve().parents[1] / "scripts/collect_rj45_teacher.py"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("raise SystemExit(main())", script_source)
+        self.assertIn(
+            "exit_code = _close_simulation_app(simulation_app, exit_code)",
+            script_source,
+        )
+        self.assertIn("raise SystemExit(exit_code)", script_source)
+
     def test_cli_rejects_sealed_final_seed_before_reading_inputs_or_launching_isaac(self) -> None:
         script = Path(__file__).resolve().parents[1] / "scripts" / "collect_rj45_teacher.py"
         result = subprocess.run(
