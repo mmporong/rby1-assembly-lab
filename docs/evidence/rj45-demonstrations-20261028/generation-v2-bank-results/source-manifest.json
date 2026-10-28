@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "status": "verified_byte_preserved_public_subset",
+  "source_commit": "8572ffd39f1f1959ba0e99e69b2a34791eab0b4e",
+  "retrieval": {
+    "archive_name": "rj45-4c-bank-generation-v2-evidence-20261028.tar.gz",
+    "archive_bytes": 218326658,
+    "archive_sha256": "886d05d64305293300ae1950f043b50810c1465170c70a6f8294c5bba4617bef",
+    "payload_manifest_name": "payload-manifest.json",
+    "payload_manifest_bytes": 42267,
+    "payload_manifest_sha256": "4d4a01b6c370375ac949bb3b0364f34fc2338f847d9c7861f57c213b0de5ebbd",
+    "payload_files_verified": 215,
+    "payload_bytes_verified": 868754278,
+    "all_payload_sha_verified": true,
+    "source_before_after_stability_reported": true
+  },
+  "package_files": [
+    {
+      "path": "summary.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/summary.json",
+      "bytes": 651,
+      "sha256": "3f6610b46bcaa378d531f3e1c85494656cb2548324f4cd8f1129095d75bdd173",
+      "byte_preserved": true,
+      "role": "run completion, selected split counts, cleanup, and input stability"
+    },
+    {
+      "path": "selection-audit.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/selection-audit.json",
+      "bytes": 19818,
+      "sha256": "05726540de33e25a4060fa61712b85026a6e53baa2568c8619237845b5b63e55",
+      "byte_preserved": true,
+      "role": "all 20 candidate decisions and distances to prior accepted grasps"
+    },
+    {
+      "path": "accepted-candidate-plan.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/accepted-candidate-plan.json",
+      "bytes": 2583,
+      "sha256": "0b558968d8aec5f89aeb1b97e38f8bc1c6d67a23550aec7b3c2e6f4e554040bb",
+      "byte_preserved": true,
+      "role": "selected seed, split, grasp ID, and source report plan"
+    },
+    {
+      "path": "held-grasp-bank.json",
+      "source_archive_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+      "bytes": 73219,
+      "sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+      "byte_preserved": true,
+      "role": "12 selected grasp descriptors and artifact bindings"
+    },
+    {
+      "path": "retrieval-verification.json",
+      "source_archive_relative_path": "retrieval-verification.json",
+      "bytes": 633,
+      "sha256": "d37218211b9e193d612d7a16763ec6341dc94e12aad10c9c5f863bc1c0c610d0",
+      "byte_preserved": true,
+      "role": "archive and payload-manifest verification result"
+    }
+  ],
+  "measured_result": {
+    "attempts": 20,
+    "nominal_return_code_zero": 20,
+    "physical_valid": 20,
+    "selected_counts": {
+      "train": 8,
+      "dev": 2,
+      "final": 2
+    },
+    "selected_seeds": {
+      "train": [20261211, 20261212, 20261213, 20261214, 20261215, 20261216, 20261217, 20261218],
+      "dev": [20261231, 20261232],
+      "final": [20261241, 20261243]
+    },
+    "candidate_20261242_rejection_reason": "duplicate_object_to_ee_geometry",
+    "selected_pairwise_comparisons": 66,
+    "selected_pairwise_translation_threshold_m": 0.00025,
+    "selected_pairwise_minimum_translation_m": 0.0002714145600635222,
+    "all_selected_pairs_pass_translation_threshold": true,
+    "gate_pass": true,
+    "joint_difference_used": false,
+    "policy_performance_used": false,
+    "final_policy_seed_opened": false
+  },
+  "scope_exclusions": [
+    "large traces, process logs, individual held-state payloads, CAD, assets, and source snapshots",
+    "reset checker validity and N256 reset success",
+    "teacher collection, behavior cloning, PPO comparison, final evaluation, and policy media"
+  ]
+}

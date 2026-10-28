@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "task_id": "rj45-v1",
+  "position_noise_m": [
+    8e-05,
+    8e-05,
+    0.0
+  ],
+  "candidates": [
+    {
+      "grasp_id": "rj45-train-01",
+      "split": "train",
+      "generation_seed": 20261211,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-02",
+      "split": "train",
+      "generation_seed": 20261212,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-03",
+      "split": "train",
+      "generation_seed": 20261213,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-04",
+      "split": "train",
+      "generation_seed": 20261214,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-05",
+      "split": "train",
+      "generation_seed": 20261215,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-06",
+      "split": "train",
+      "generation_seed": 20261216,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-07",
+      "split": "train",
+      "generation_seed": 20261217,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/report.json"
+    },
+    {
+      "grasp_id": "rj45-train-08",
+      "split": "train",
+      "generation_seed": 20261218,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/report.json"
+    },
+    {
+      "grasp_id": "rj45-dev-01",
+      "split": "dev",
+      "generation_seed": 20261231,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261231/report.json"
+    },
+    {
+      "grasp_id": "rj45-dev-02",
+      "split": "dev",
+      "generation_seed": 20261232,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261232/report.json"
+    },
+    {
+      "grasp_id": "rj45-final-01",
+      "split": "final",
+      "generation_seed": 20261241,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261241/report.json"
+    },
+    {
+      "grasp_id": "rj45-final-02",
+      "split": "final",
+      "generation_seed": 20261243,
+      "nominal_report": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261243/report.json"
+    }
+  ]
+}

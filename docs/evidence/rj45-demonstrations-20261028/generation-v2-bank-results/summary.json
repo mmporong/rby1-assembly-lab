@@ -1,0 +1,17 @@
+{
+  "status": "measurement_complete_bank_created",
+  "source_commit": "8572ffd39f1f1959ba0e99e69b2a34791eab0b4e",
+  "attempt_count": 20,
+  "selected_counts": {
+    "train": 8,
+    "dev": 2,
+    "final": 2
+  },
+  "candidate_plan_sha256": "0b558968d8aec5f89aeb1b97e38f8bc1c6d67a23550aec7b3c2e6f4e554040bb",
+  "bank_manifest_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+  "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+  "builder_cleanup_confirmed": true,
+  "inputs_unchanged": true,
+  "final_policy_seed_opened": false,
+  "completed_utc": "2026-10-28T08:12:28.886337+00:00"
+}

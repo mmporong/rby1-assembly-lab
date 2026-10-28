@@ -1,0 +1,575 @@
+{
+  "schema_version": 1,
+  "selection_order": [
+    "train",
+    "dev",
+    "final"
+  ],
+  "translation_threshold_m": 0.00025,
+  "rotation_threshold_rad": 0.004,
+  "joint_difference_used": false,
+  "policy_performance_used": false,
+  "counts": {
+    "train": 8,
+    "dev": 2,
+    "final": 2
+  },
+  "required_counts": {
+    "train": 8,
+    "dev": 2,
+    "final": 2
+  },
+  "gate_pass": true,
+  "decisions": [
+    {
+      "seed": 20261211,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 1,
+      "distances_to_prior_accepted": []
+    },
+    {
+      "seed": 20261212,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 2,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.001091867439844437,
+          "object_to_ee_rotation_rad": 0.004165163899944625,
+          "joint_position_linf_si": 0.0064847469329833984
+        }
+      ]
+    },
+    {
+      "seed": 20261213,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 3,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0006483196688770364,
+          "object_to_ee_rotation_rad": 0.0044964498197071125,
+          "joint_position_linf_si": 0.005813777446746826
+        },
+        {
+          "object_to_ee_translation_m": 0.000683968867692425,
+          "object_to_ee_rotation_rad": 0.0034141636839881526,
+          "joint_position_linf_si": 0.0027320384979248047
+        }
+      ]
+    },
+    {
+      "seed": 20261214,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 4,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0009302787522938491,
+          "object_to_ee_rotation_rad": 0.0036911007722435344,
+          "joint_position_linf_si": 0.004810452461242676
+        },
+        {
+          "object_to_ee_translation_m": 0.0003000907705396319,
+          "object_to_ee_rotation_rad": 0.002244778388271767,
+          "joint_position_linf_si": 0.002655506134033203
+        },
+        {
+          "object_to_ee_translation_m": 0.0005274899755681483,
+          "object_to_ee_rotation_rad": 0.004811875635207978,
+          "joint_position_linf_si": 0.003196239471435547
+        }
+      ]
+    },
+    {
+      "seed": 20261215,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 5,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0007762385593296105,
+          "object_to_ee_rotation_rad": 0.008589291866460368,
+          "joint_position_linf_si": 0.009251713752746582
+        },
+        {
+          "object_to_ee_translation_m": 0.0005081655507122978,
+          "object_to_ee_rotation_rad": 0.007339189800947146,
+          "joint_position_linf_si": 0.004185914993286133
+        },
+        {
+          "object_to_ee_translation_m": 0.0002998425222659086,
+          "object_to_ee_rotation_rad": 0.004344682385906412,
+          "joint_position_linf_si": 0.003437936305999756
+        },
+        {
+          "object_to_ee_translation_m": 0.0004551350331552138,
+          "object_to_ee_rotation_rad": 0.009029277409606979,
+          "joint_position_linf_si": 0.005053877830505371
+        }
+      ]
+    },
+    {
+      "seed": 20261216,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 6,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0008044402373803603,
+          "object_to_ee_rotation_rad": 0.005035408388867889,
+          "joint_position_linf_si": 0.0032575130462646484
+        },
+        {
+          "object_to_ee_translation_m": 0.0011050186859371328,
+          "object_to_ee_rotation_rad": 0.004812951177192474,
+          "joint_position_linf_si": 0.005285501480102539
+        },
+        {
+          "object_to_ee_translation_m": 0.00045765292110121815,
+          "object_to_ee_rotation_rad": 0.0017005225059574518,
+          "joint_position_linf_si": 0.002593696117401123
+        },
+        {
+          "object_to_ee_translation_m": 0.0009757629452726188,
+          "object_to_ee_rotation_rad": 0.005727159252893492,
+          "joint_position_linf_si": 0.005749702453613281
+        },
+        {
+          "object_to_ee_translation_m": 0.0006239246219091745,
+          "object_to_ee_rotation_rad": 0.004121449720275924,
+          "joint_position_linf_si": 0.006031632423400879
+        }
+      ]
+    },
+    {
+      "seed": 20261217,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 7,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0010212637980236985,
+          "object_to_ee_rotation_rad": 0.004278003034368308,
+          "joint_position_linf_si": 0.005681931972503662
+        },
+        {
+          "object_to_ee_translation_m": 0.0003138175455256173,
+          "object_to_ee_rotation_rad": 0.001701868406486848,
+          "joint_position_linf_si": 0.0023654699325561523
+        },
+        {
+          "object_to_ee_translation_m": 0.0005175631065435862,
+          "object_to_ee_rotation_rad": 0.0035525721657318696,
+          "joint_position_linf_si": 0.003300786018371582
+        },
+        {
+          "object_to_ee_translation_m": 0.0004250894325333794,
+          "object_to_ee_rotation_rad": 0.0017719685100267496,
+          "joint_position_linf_si": 0.0014840960502624512
+        },
+        {
+          "object_to_ee_translation_m": 0.0004630093931161655,
+          "object_to_ee_rotation_rad": 0.007519562067006584,
+          "joint_position_linf_si": 0.00475466251373291
+        },
+        {
+          "object_to_ee_translation_m": 0.0009329508913710561,
+          "object_to_ee_rotation_rad": 0.004440563345615182,
+          "joint_position_linf_si": 0.005854249000549316
+        }
+      ]
+    },
+    {
+      "seed": 20261218,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 8,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0004597663852797951,
+          "object_to_ee_rotation_rad": 0.0018698485191908714,
+          "joint_position_linf_si": 0.003383636474609375
+        },
+        {
+          "object_to_ee_translation_m": 0.0015270744710980373,
+          "object_to_ee_rotation_rad": 0.005760171361480613,
+          "joint_position_linf_si": 0.009122669696807861
+        },
+        {
+          "object_to_ee_translation_m": 0.00102136221194067,
+          "object_to_ee_rotation_rad": 0.005050727507035955,
+          "joint_position_linf_si": 0.008451700210571289
+        },
+        {
+          "object_to_ee_translation_m": 0.0013797060433722622,
+          "object_to_ee_rotation_rad": 0.0054237125458895955,
+          "joint_position_linf_si": 0.007370114326477051
+        },
+        {
+          "object_to_ee_translation_m": 0.0011519861306373742,
+          "object_to_ee_rotation_rad": 0.00859493529763462,
+          "joint_position_linf_si": 0.011889636516571045
+        },
+        {
+          "object_to_ee_translation_m": 0.0009892703966065907,
+          "object_to_ee_rotation_rad": 0.005092960919604536,
+          "joint_position_linf_si": 0.005858004093170166
+        },
+        {
+          "object_to_ee_translation_m": 0.0014597063644304234,
+          "object_to_ee_rotation_rad": 0.005741408595668358,
+          "joint_position_linf_si": 0.008319854736328125
+        }
+      ]
+    },
+    {
+      "seed": 20261219,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261220,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261221,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261222,
+      "split": "train",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261231,
+      "split": "dev",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 1,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0004622758267694621,
+          "object_to_ee_rotation_rad": 0.00165261708557636,
+          "joint_position_linf_si": 0.0019315481185913086
+        },
+        {
+          "object_to_ee_translation_m": 0.0010677691889995665,
+          "object_to_ee_rotation_rad": 0.0036020022784632347,
+          "joint_position_linf_si": 0.006030619144439697
+        },
+        {
+          "object_to_ee_translation_m": 0.000446319585358152,
+          "object_to_ee_rotation_rad": 0.0029889332654471986,
+          "joint_position_linf_si": 0.005359649658203125
+        },
+        {
+          "object_to_ee_translation_m": 0.0009315486469971468,
+          "object_to_ee_rotation_rad": 0.0036471757077918138,
+          "joint_position_linf_si": 0.005431413650512695
+        },
+        {
+          "object_to_ee_translation_m": 0.000595920706922174,
+          "object_to_ee_rotation_rad": 0.007079641689545299,
+          "joint_position_linf_si": 0.00879758596420288
+        },
+        {
+          "object_to_ee_translation_m": 0.00042466571334144506,
+          "object_to_ee_rotation_rad": 0.0033933225951700233,
+          "joint_position_linf_si": 0.002765953540802002
+        },
+        {
+          "object_to_ee_translation_m": 0.0009552042393665738,
+          "object_to_ee_rotation_rad": 0.003495294057459806,
+          "joint_position_linf_si": 0.0055359601974487305
+        },
+        {
+          "object_to_ee_translation_m": 0.0006538783714509762,
+          "object_to_ee_rotation_rad": 0.002387145488897649,
+          "joint_position_linf_si": 0.003092050552368164
+        }
+      ]
+    },
+    {
+      "seed": 20261232,
+      "split": "dev",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 2,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0004242940904616656,
+          "object_to_ee_rotation_rad": 0.002405837350187297,
+          "joint_position_linf_si": 0.003202199935913086
+        },
+        {
+          "object_to_ee_translation_m": 0.0013613337727629597,
+          "object_to_ee_rotation_rad": 0.005406951118614861,
+          "joint_position_linf_si": 0.0073517560958862305
+        },
+        {
+          "object_to_ee_translation_m": 0.000939055638458198,
+          "object_to_ee_rotation_rad": 0.003959759138047917,
+          "joint_position_linf_si": 0.006530940532684326
+        },
+        {
+          "object_to_ee_translation_m": 0.0012494256737460565,
+          "object_to_ee_rotation_rad": 0.005474001141536412,
+          "joint_position_linf_si": 0.007188677787780762
+        },
+        {
+          "object_to_ee_translation_m": 0.0010080754701015772,
+          "object_to_ee_rotation_rad": 0.007267499380970365,
+          "joint_position_linf_si": 0.009968876838684082
+        },
+        {
+          "object_to_ee_translation_m": 0.0009759873276330345,
+          "object_to_ee_rotation_rad": 0.0038290079692312917,
+          "joint_position_linf_si": 0.003968715667724609
+        },
+        {
+          "object_to_ee_translation_m": 0.0013446475198406209,
+          "object_to_ee_rotation_rad": 0.005355620317988355,
+          "joint_position_linf_si": 0.007293224334716797
+        },
+        {
+          "object_to_ee_translation_m": 0.00029911551603423994,
+          "object_to_ee_rotation_rad": 0.0013727701951077242,
+          "joint_position_linf_si": 0.0019207596778869629
+        },
+        {
+          "object_to_ee_translation_m": 0.0006101606683035584,
+          "object_to_ee_rotation_rad": 0.0018926700762413465,
+          "joint_position_linf_si": 0.0023903846740722656
+        }
+      ]
+    },
+    {
+      "seed": 20261233,
+      "split": "dev",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261234,
+      "split": "dev",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    },
+    {
+      "seed": 20261241,
+      "split": "final",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 1,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.00045701961201358453,
+          "object_to_ee_rotation_rad": 0.0018644012878202658,
+          "joint_position_linf_si": 0.0030829906463623047
+        },
+        {
+          "object_to_ee_translation_m": 0.0015247623122266758,
+          "object_to_ee_rotation_rad": 0.005756089981101593,
+          "joint_position_linf_si": 0.009010136127471924
+        },
+        {
+          "object_to_ee_translation_m": 0.0010211488053253274,
+          "object_to_ee_rotation_rad": 0.00505009190797816,
+          "joint_position_linf_si": 0.008339166641235352
+        },
+        {
+          "object_to_ee_translation_m": 0.0013775835366133882,
+          "object_to_ee_rotation_rad": 0.005425226564219793,
+          "joint_position_linf_si": 0.007083296775817871
+        },
+        {
+          "object_to_ee_translation_m": 0.001151087304469023,
+          "object_to_ee_rotation_rad": 0.008594093108388242,
+          "joint_position_linf_si": 0.011777102947235107
+        },
+        {
+          "object_to_ee_translation_m": 0.0009916897908457518,
+          "object_to_ee_rotation_rad": 0.005098971751005556,
+          "joint_position_linf_si": 0.0057454705238342285
+        },
+        {
+          "object_to_ee_translation_m": 0.001458190339525901,
+          "object_to_ee_rotation_rad": 0.005744659764000972,
+          "joint_position_linf_si": 0.008207321166992188
+        },
+        {
+          "object_to_ee_translation_m": 0.0003000033859166221,
+          "object_to_ee_rotation_rad": 2.4861121629393526e-05,
+          "joint_position_linf_si": 0.0006101131439208984
+        },
+        {
+          "object_to_ee_translation_m": 0.0006552516099023834,
+          "object_to_ee_rotation_rad": 0.0023892379028860548,
+          "joint_position_linf_si": 0.0030672550201416016
+        },
+        {
+          "object_to_ee_translation_m": 0.0002714145600635222,
+          "object_to_ee_rotation_rad": 0.0013765325626466885,
+          "joint_position_linf_si": 0.0018082261085510254
+        }
+      ]
+    },
+    {
+      "seed": 20261242,
+      "split": "final",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "duplicate_object_to_ee_geometry",
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0005316180786737082,
+          "object_to_ee_rotation_rad": 0.00207875386190721,
+          "joint_position_linf_si": 0.004083871841430664
+        },
+        {
+          "object_to_ee_translation_m": 0.0013256350314933161,
+          "object_to_ee_rotation_rad": 0.005130452322718656,
+          "joint_position_linf_si": 0.007606148719787598
+        },
+        {
+          "object_to_ee_translation_m": 0.0009302966380302114,
+          "object_to_ee_rotation_rad": 0.0039313972229783585,
+          "joint_position_linf_si": 0.006293177604675293
+        },
+        {
+          "object_to_ee_translation_m": 0.0012496047976744593,
+          "object_to_ee_rotation_rad": 0.005302306742147953,
+          "joint_position_linf_si": 0.00807034969329834
+        },
+        {
+          "object_to_ee_translation_m": 0.0009501364035764446,
+          "object_to_ee_rotation_rad": 0.007351024566026824,
+          "joint_position_linf_si": 0.009731113910675049
+        },
+        {
+          "object_to_ee_translation_m": 0.0009427895120207941,
+          "object_to_ee_rotation_rad": 0.004084386131684929,
+          "joint_position_linf_si": 0.0046446919441223145
+        },
+        {
+          "object_to_ee_translation_m": 0.0013379609087400455,
+          "object_to_ee_rotation_rad": 0.005281603375518877,
+          "joint_position_linf_si": 0.008174896240234375
+        },
+        {
+          "object_to_ee_translation_m": 0.00046160713965827166,
+          "object_to_ee_rotation_rad": 0.0013188133707225165,
+          "joint_position_linf_si": 0.0023883581161499023
+        },
+        {
+          "object_to_ee_translation_m": 0.000599111718641032,
+          "object_to_ee_rotation_rad": 0.0018137956210346772,
+          "joint_position_linf_si": 0.0030663609504699707
+        },
+        {
+          "object_to_ee_translation_m": 0.00022631623444831624,
+          "object_to_ee_rotation_rad": 0.0006904740598619771,
+          "joint_position_linf_si": 0.0018373727798461914
+        },
+        {
+          "object_to_ee_translation_m": 0.0004599759570412819,
+          "object_to_ee_rotation_rad": 0.0013105609066520695,
+          "joint_position_linf_si": 0.002439260482788086
+        }
+      ]
+    },
+    {
+      "seed": 20261243,
+      "split": "final",
+      "input_status": "physical_valid",
+      "accepted": true,
+      "accepted_index": 2,
+      "distances_to_prior_accepted": [
+        {
+          "object_to_ee_translation_m": 0.0006055074685184709,
+          "object_to_ee_rotation_rad": 0.0027521805596978513,
+          "joint_position_linf_si": 0.0036603212356567383
+        },
+        {
+          "object_to_ee_translation_m": 0.0007355230375272902,
+          "object_to_ee_rotation_rad": 0.0023408979063839026,
+          "joint_position_linf_si": 0.0035022497177124023
+        },
+        {
+          "object_to_ee_translation_m": 0.0004239388286038936,
+          "object_to_ee_rotation_rad": 0.0025700819049358243,
+          "joint_position_linf_si": 0.0025312304496765137
+        },
+        {
+          "object_to_ee_translation_m": 0.0005212594971031066,
+          "object_to_ee_rotation_rad": 0.002524935775758478,
+          "joint_position_linf_si": 0.0019603967666625977
+        },
+        {
+          "object_to_ee_translation_m": 0.0004460611014961475,
+          "object_to_ee_rotation_rad": 0.006877107059345748,
+          "joint_position_linf_si": 0.0059691667556762695
+        },
+        {
+          "object_to_ee_translation_m": 0.0005665033448757344,
+          "object_to_ee_rotation_rad": 0.0032988908934536666,
+          "joint_position_linf_si": 0.0037893056869506836
+        },
+        {
+          "object_to_ee_translation_m": 0.0005244385037409072,
+          "object_to_ee_rotation_rad": 0.0018986659876808532,
+          "joint_position_linf_si": 0.0024650096893310547
+        },
+        {
+          "object_to_ee_translation_m": 0.0010050221914488164,
+          "object_to_ee_rotation_rad": 0.003956748769154887,
+          "joint_position_linf_si": 0.005920469760894775
+        },
+        {
+          "object_to_ee_translation_m": 0.000521759251902626,
+          "object_to_ee_rotation_rad": 0.0016223985857067456,
+          "joint_position_linf_si": 0.0034710168838500977
+        },
+        {
+          "object_to_ee_translation_m": 0.000957519959635957,
+          "object_to_ee_rotation_rad": 0.0034616947760703924,
+          "joint_position_linf_si": 0.005228281021118164
+        },
+        {
+          "object_to_ee_translation_m": 0.0010044988476281777,
+          "object_to_ee_rotation_rad": 0.003959948243278177,
+          "joint_position_linf_si": 0.005807936191558838
+        }
+      ]
+    },
+    {
+      "seed": 20261244,
+      "split": "final",
+      "input_status": "physical_valid",
+      "accepted": false,
+      "rejection_reason": "split_quota_filled"
+    }
+  ]
+}

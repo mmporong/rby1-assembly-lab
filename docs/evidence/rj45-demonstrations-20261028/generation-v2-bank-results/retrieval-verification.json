@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "archive_sha256": "886d05d64305293300ae1950f043b50810c1465170c70a6f8294c5bba4617bef",
+  "manifest_sha256": "4d4a01b6c370375ac949bb3b0364f34fc2338f847d9c7861f57c213b0de5ebbd",
+  "payload_count": 215,
+  "payload_bytes": 868754278,
+  "archive_members": 216,
+  "source_commit": "8572ffd39f1f1959ba0e99e69b2a34791eab0b4e",
+  "selected_counts": {
+    "train": 8,
+    "dev": 2,
+    "final": 2
+  },
+  "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+  "all_payload_sha_verified": true,
+  "source_before_after_stability_reported": true,
+  "final_policy_seed_opened": false
+}
