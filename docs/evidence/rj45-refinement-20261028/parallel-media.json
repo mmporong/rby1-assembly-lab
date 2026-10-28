@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "status": "verified",
+  "purpose": "portfolio packaging of the audited 256-environment parallel PPO capture",
+  "source": {
+    "retrieved_root": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-parallel-media-20261028/extracted/artifacts/rj45-scale-runtime-20261028/parallel-capture",
+    "source_commit": "63f96e5951c7de4a4a5e804c0584c70721d05e8c",
+    "audit": {
+      "path": "capture-audit-resume-v3.json",
+      "sha256": "fa37cdbb70918476cefb5d123e7bad483726c0cac286289493a9a35243b30d13"
+    },
+    "overview": {
+      "video": {
+        "path": "rj45-parallel-overview-n256.mp4",
+        "sha256": "447297f16d26d5bf668a2bf724520b4e41ccf4d91141c03e8cb1b3c05417625f"
+      },
+      "metadata": {
+        "path": "rj45-parallel-overview-n256.mp4.metadata.json",
+        "sha256": "6cf430c396f5eff5cb8dd012c56695e62fbd043f1411a9556f269a4eabc86553"
+      },
+      "evidence": {
+        "path": "rj45-parallel-overview-n256.mp4.evidence.json",
+        "sha256": "a80394d1d97288b24d33189ed9226ef2712b08f084fa47c5d8e396f58c46e14d"
+      },
+      "frames": {
+        "path": "rj45-parallel-overview-n256.mp4.frames.jsonl",
+        "sha256": "b5ee5264e9878ff919af0a75d89bbf76ab35f6b3dfae019a2eefc1eb50257a30"
+      }
+    },
+    "closeup": {
+      "video": {
+        "path": "rj45-parallel-closeup-n256.mp4",
+        "sha256": "1e1c20ba96382b86c7ac123d23ead47788b9c5108deef6202ce9ceff7d95aba2"
+      },
+      "metadata": {
+        "path": "rj45-parallel-closeup-n256.mp4.metadata.json",
+        "sha256": "5b797a97e27e0d41eedbf737eccbf9c1b8e7a75fc65245504bfa2af1e4ceda94"
+      },
+      "evidence": {
+        "path": "rj45-parallel-closeup-n256.mp4.evidence.json",
+        "sha256": "46bae7c3c8829445b394ce8458ce5f3c6cf038a28728d18008f597262122f2c0"
+      },
+      "frames": {
+        "path": "rj45-parallel-closeup-n256.mp4.frames.jsonl",
+        "sha256": "0c50c51ec63d661a431e6efb6349fff00d2e3019f256059f3938e574d24d31f1"
+      }
+    }
+  },
+  "caption_facts": {
+    "num_envs": 256,
+    "selected_closeup_environment": 0,
+    "captured_simulation_time_s": 16.0,
+    "ppo_updates_completed_by_training_call": 20,
+    "views_are_separate_fresh_same_config_runs": true
+  },
+  "frame_counter_validation": {
+    "records_per_view": 960,
+    "physics_hz": 240,
+    "control_hz": 30,
+    "video_fps": 60,
+    "first_recorded_simulation_time_s": 0.016666666666666666,
+    "last_recorded_simulation_time_s": 16.0,
+    "active_rollout_formula": "floor((control_step - 1) / 32)",
+    "recorded_rsl_field_formula": "max(0, active_rollout - 1)",
+    "active_rollouts_in_capture": [
+      0,
+      14
+    ],
+    "completed_updates_before_final_captured_rollout": 14,
+    "final_raw_runner_current_learning_iteration": 13,
+    "caption_formula": {
+      "simulation_time_s": "round((frame_index + 1) / 60, 2)",
+      "completed_updates_before_current_rollout": "floor(frame_index / 64)"
+    },
+    "caption_samples": [
+      {
+        "frame_index": 0,
+        "simulation_time_s": 0.02,
+        "completed_updates_before_current_rollout": 0
+      },
+      {
+        "frame_index": 480,
+        "simulation_time_s": 8.02,
+        "completed_updates_before_current_rollout": 7
+      },
+      {
+        "frame_index": 959,
+        "simulation_time_s": 16.0,
+        "completed_updates_before_current_rollout": 14
+      }
+    ],
+    "validation": "all 960 records in each view matched frame_index, physics_step, control_step, and corrected RSL counter formulas"
+  },
+  "outputs": {
+    "overview": {
+      "video": {
+        "path": "docs/media/rj45/parallel-ppo/rj45-parallel-ppo-overview.mp4",
+        "bytes": 11385661,
+        "sha256": "9becb21c8df57b4a03f5a33108a8aa4020fe31a22cda6bf1f1ec7cca8eb65b96"
+      },
+      "thumbnail": {
+        "path": "docs/media/rj45/parallel-ppo/rj45-parallel-ppo-overview-thumbnail.png",
+        "bytes": 896734,
+        "sha256": "1b51b0586889b07ce89b8c62d9d1c1865e695033c03cb88aa34d013191633b53"
+      },
+      "decoded_frame_md5_manifest_sha256": "78896e8c382bf7daa90ca46b44ad739884162a2c6dc8995557047c3a03d5d328"
+    },
+    "closeup": {
+      "video": {
+        "path": "docs/media/rj45/parallel-ppo/rj45-parallel-ppo-closeup.mp4",
+        "bytes": 8837293,
+        "sha256": "911a0d8c64cbc83334c25d45b88aff5ee83d5658f6b675a9b98b83c7a694985f"
+      },
+      "thumbnail": {
+        "path": "docs/media/rj45/parallel-ppo/rj45-parallel-ppo-closeup-thumbnail.png",
+        "bytes": 449018,
+        "sha256": "1de29d79c591c4987c9c69579fee0ace88ecfbff8a01391d2ea98c74531b9e8e"
+      },
+      "decoded_frame_md5_manifest_sha256": "43531f140a871061e0f771865e5bba7cf2f80c9f7550ad2b176dedc9566ed2f2"
+    }
+  },
+  "encoding": {
+    "ffmpeg_version": "6.1.1-3ubuntu5",
+    "font": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+    "common_video_arguments": [
+      "-an",
+      "-c:v libx264",
+      "-preset slow",
+      "-crf 10",
+      "-pix_fmt yuv420p",
+      "-r 60",
+      "-fps_mode cfr",
+      "-movflags +faststart"
+    ],
+    "dynamic_time_expression": "%{eif\\:floor(round((n+1)*5/3)/100)\\:d}.%{eif\\:mod(round((n+1)*5/3)\\,100)\\:d\\:2}",
+    "dynamic_completed_update_expression": "%{eif\\:floor(n/64)\\:d}",
+    "overview_filter": "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='256 PARALLEL ENVS  |  SIM <dynamic_time_expression> s  |  UPDATES BEFORE ROLLOUT <dynamic_completed_update_expression>':fontcolor=white:fontsize=22:x=18:y=18:box=1:boxcolor=black@0.58:boxborderw=9,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='FULL TRAINING RUN\\: 20 UPDATES  |  OVERVIEW  |  SEPARATE SAME-CONFIG RUN':fontcolor=white:fontsize=17:x=18:y=61:box=1:boxcolor=black@0.58:boxborderw=7",
+    "closeup_filter": "drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='256 ENVS  |  SELECTED ENV 0  |  SIM <dynamic_time_expression> s  |  UPDATES BEFORE ROLLOUT <dynamic_completed_update_expression>':fontcolor=white:fontsize=18:x=14:y=14:box=1:boxcolor=black@0.58:boxborderw=8,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='FULL TRAINING RUN\\: 20 UPDATES  |  CLOSE-UP  |  SEPARATE SAME-CONFIG RUN':fontcolor=white:fontsize=15:x=14:y=51:box=1:boxcolor=black@0.58:boxborderw=6",
+    "frame_policy": "caption overlay only; no interpolation, frame insertion, slow motion, or temporal retiming"
+  },
+  "verification": {
+    "ffprobe": {
+      "overview": "h264, 1280x720, yuv420p, 60/1 fps, 16.000000 s, 960 frames",
+      "closeup": "h264, 960x720, yuv420p, 60/1 fps, 16.000000 s, 960 frames"
+    },
+    "decoded_frames": {
+      "overview": 960,
+      "overview_unique_md5": 960,
+      "closeup": 960,
+      "closeup_unique_md5": 960
+    },
+    "visual_review": {
+      "overview": "caption stays in the outer top margin and the 256-environment grid remains visible",
+      "closeup": "caption stays at the top edge and leaves the selected environment's gripper, plug, and adapter workspace visible"
+    },
+    "caption_sample_visual_check": "frames 0, 480, and 959 show 0.02 s / 0 updates, 8.02 s / 7 updates, and 16.00 s / 14 updates in both views"
+  },
+  "limitations": [
+    "The overview and close-up are independent fresh runs with the same pinned configuration; they are not two synchronized cameras from one run.",
+    "The videos record real vectorized PPO learning rollouts, but they do not demonstrate a trained insertion-success policy.",
+    "The complete training call finished 20 PPO updates; the captured window spans active rollouts 0 through 14, with 14 updates complete before the final captured rollout.",
+    "The raw RSL-RL runner field ends at 13 because it is sampled before the current rollout update is committed; it must not be presented as the corrected completed-update count.",
+    "Captioning re-encodes the pixels with H.264; frame count, order, rate, duration, and timing are preserved, and all 960 decoded frames remain distinct in each result.",
+    "No claim is made about real-hardware transfer, camera sensor fusion, or insertion success from these media files alone."
+  ]
+}
