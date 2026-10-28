@@ -115,6 +115,26 @@ STABILITY_LIMITS = {
 
 
 class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
+    def test_policy_observation_timestamp_buffer_is_float64(self):
+        tree = ast.parse(TRAINING_ENV_PATH.read_text(encoding="utf-8"))
+        assignment = next(
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Assign)
+            and any(
+                isinstance(target, ast.Attribute)
+                and target.attr == "_training_last_policy_observation_timestamp_s"
+                for target in node.targets
+            )
+        )
+        self.assertIsInstance(assignment.value, ast.Call)
+        dtype = next(
+            keyword.value
+            for keyword in assignment.value.keywords
+            if keyword.arg == "dtype"
+        )
+        self.assertEqual(ast.unparse(dtype), "torch.float64")
+
     def test_held_warmup_potential_uses_the_imported_profile_selector(self):
         source = TRAINING_ENV_PATH.read_text(encoding="utf-8")
         self.assertNotIn("normalized_insertion_potential(", source)

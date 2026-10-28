@@ -311,7 +311,8 @@ def _architecture() -> dict[str, Any]:
 
 
 def _validate_runtime_actor(actor: nn.Module) -> None:
-    reference = build_bc_actor()
+    with torch.random.fork_rng(devices=[]):
+        reference = build_bc_actor()
     if not isinstance(actor, nn.Sequential) or len(actor) != len(reference):
         raise BcContractError("actor must be the standard79 256-256-128 ELU 6D architecture")
     for actual, expected in zip(actor, reference, strict=True):
@@ -360,7 +361,8 @@ def _validate_optimizer_owns_actor(
 def _validate_actor_state(state: object) -> None:
     if not isinstance(state, dict) or tuple(state) != EXPECTED_ACTOR_KEYS:
         raise BcContractError("actor_state_dict keys are invalid")
-    reference = build_bc_actor().state_dict()
+    with torch.random.fork_rng(devices=[]):
+        reference = build_bc_actor().state_dict()
     for name, tensor in state.items():
         if not isinstance(tensor, torch.Tensor) or tensor.shape != reference[name].shape:
             raise BcContractError(f"actor tensor {name} has an invalid shape")

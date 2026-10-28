@@ -26,6 +26,10 @@ from rby1_assembly.held_grasp import (  # noqa: E402
     bank_source_contract_sha256,
     held_grasp_bank_dependency_paths,
 )
+from rby1_assembly.rj45_support_ablation import (  # noqa: E402
+    make_rj45_support_ablation_env_type,
+    support_ablation_terminal_metrics,
+)
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -450,6 +454,12 @@ parser.add_argument(
 )
 parser.add_argument("--bc-actor-init", type=Path)
 parser.add_argument("--bc-actor-init-sha256")
+parser.add_argument(
+    "--support-arm-mode",
+    choices=("cartesian_correction", "insert_joint_hold"),
+    default="cartesian_correction",
+    help="RJ45 scripted support-arm comparison; default preserves current correction.",
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
@@ -470,6 +480,8 @@ if args.seed is not None and args.seed < 0:
     parser.error("--seed must be non-negative")
 if args.task == "toy" and args.checkpoint is None:
     parser.error("toy evaluation requires a checkpoint")
+if args.task != "rj45" and args.support_arm_mode != "cartesian_correction":
+    parser.error("--support-arm-mode insert_joint_hold is RJ45-only")
 evaluation_start_error = _evaluation_start_configuration_error(
     args.task,
     args.evaluation_start,
@@ -924,6 +936,9 @@ def main() -> int:
                 held_bank_proof if args.evaluation_start == "held" else None
             ),
         )
+        env_type = make_rj45_support_ablation_env_type(
+            env_type, args.support_arm_mode
+        )
     input_snapshot.assert_unchanged()
     env = env_type(cfg)
     wrapped = RslRlVecEnvWrapper(env, clip_actions=runner_cfg.get("clip_actions", 1.0))
@@ -1012,6 +1027,7 @@ def main() -> int:
                      "actual_lateral_error_m", "actual_orientation_error_rad"))
                 bias_finite = True
                 rj45_attempt_metrics = None
+                support_attempt_metrics: dict[str, object] = {}
                 terminal_evidence = None
                 start_contract_valid = True
                 start_contract_invalid_reason = None
@@ -1020,6 +1036,10 @@ def main() -> int:
                         _rj45_terminal_attempt_metrics(snapshot, env_id)
                     )
                     finite = finite and rj45_metrics_finite
+                    support_attempt_metrics, support_metrics_finite = (
+                        support_ablation_terminal_metrics(snapshot, env_id)
+                    )
+                    finite = finite and support_metrics_finite
                     bias_finite = all(
                         bool(torch.isfinite(snapshot[key][env_id]).all().item())
                         for key in (
@@ -1176,6 +1196,7 @@ def main() -> int:
                         "invalid_reason": invalid_reason,
                         **terminal_evidence,
                         **rj45_attempt_metrics,
+                        **support_attempt_metrics,
                     }
                     episode_outcomes.append(outcome)
                     print(
@@ -1348,6 +1369,7 @@ def main() -> int:
                 inputs_reverified_at_end=evaluation_inputs_reverified,
             )
             report["baseline_mode"] = args.baseline_mode
+            report["support_arm_mode"] = args.support_arm_mode
             report["evaluation_held_grasp_bank_proof"] = held_bank_proof
             report["training_held_grasp_bank_proof"] = training_bank_proof
             report["evaluation_start"] = args.evaluation_start
@@ -1385,6 +1407,8 @@ def main() -> int:
             report["task_model"] = env.rj45_task_report()
         if hasattr(env, "rj45_training_report"):
             report["training_environment"] = env.rj45_training_report()
+        if hasattr(env, "rj45_support_ablation_report"):
+            report["support_arm_ablation"] = env.rj45_support_ablation_report()
         atomic_write_json(args.report, report)
         input_snapshot.assert_unchanged()
         print(json.dumps(report, indent=2, allow_nan=False), flush=True)

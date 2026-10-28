@@ -1,0 +1,210 @@
+{
+  "schema_version": 1,
+  "status": "preregistered_before_physical_pilot",
+  "scope": "Held-grasp diversity and privileged-teacher actor initialization for standard79 RJ45 insertion",
+  "final_seed_sealed": 20261027,
+  "physics_pilot": {
+    "generation_seeds": [
+      20261201,
+      20261202,
+      20261203,
+      20261204
+    ],
+    "position_noise_m": [
+      8e-05,
+      8e-05,
+      0.0
+    ],
+    "calibration_bias_enabled": false,
+    "num_envs_per_process": 1,
+    "maximum_simultaneous_processes": 4,
+    "required_nominal_completion": true,
+    "required_friction_lift_and_held_stability": true,
+    "geometry_constraint": "80 um initial x/y jitter is below the configured 150 um nominal locator side/front gaps; this is a static configuration check, not a claim of dynamic collision-free operation",
+    "separation": {
+      "object_to_ee_translation_m": 0.00025,
+      "object_to_ee_rotation_rad": 0.004,
+      "joint_position_linf_si": 0.005,
+      "acceptance": "Every accepted pair must exceed at least one object-to-EE threshold; joint posture alone cannot qualify a grasp",
+      "joint_threshold_role": "diagnostic only"
+    },
+    "production_gate": "At least three of the four fixed-seed runs must have verified held states with pairwise object-to-EE grasp separation",
+    "failure_action": "Keep the pilot evidence; do not expand object jitter into locator walls or lower the separation threshold. Audit tangential local grasp targets and preregister a new physical generation method before production."
+  },
+  "production_bank": {
+    "target_counts": {
+      "train": 8,
+      "dev": 2,
+      "final": 2
+    },
+    "ordered_candidate_seeds": {
+      "train": [
+        20261211,
+        20261212,
+        20261213,
+        20261214,
+        20261215,
+        20261216,
+        20261217,
+        20261218,
+        20261219,
+        20261220,
+        20261221,
+        20261222
+      ],
+      "dev": [
+        20261231,
+        20261232,
+        20261233,
+        20261234
+      ],
+      "final": [
+        20261241,
+        20261242,
+        20261243,
+        20261244
+      ]
+    },
+    "selection": "First physically valid and geometrically separated candidates in each fixed seed list, without policy-performance selection; preserve every rejection reason",
+    "final_scope": "Physical generation and manifest metadata only; no final-policy evaluation or final demonstrations during development",
+    "required_common_contract": [
+      "source",
+      "task",
+      "runtime",
+      "assets",
+      "generation method"
+    ],
+    "generalization_claim_limit": "Small-bank held-state robustness within one simulated robot, connector geometry, and contact model",
+    "build_evidence_sidecar": "Pin candidate-plan/protocol SHA, thresholds, ordered candidates and every rejection; bank metadata and policy-selection inputs cannot replace this record"
+  },
+  "teacher_data": {
+    "train": {
+      "seed": 20261120,
+      "num_envs": 256,
+      "episodes": 256
+    },
+    "dev": {
+      "seed": 20261121,
+      "num_envs": 64,
+      "episodes": 64
+    },
+    "policy_observation": "standard79; no privileged teacher ground truth in student input",
+    "teacher_target": "G_true times F_actual times inverse(F_hat), at committed insertion depth",
+    "action": "Existing bounded right-only 6D tip-target action; left action remains zero",
+    "recording": "All fixed per-environment episode quotas, including failures and invalid warmup rows; both global action-input time and actual observation time retained",
+    "dataset_gate": "Verified mixed-bank physical resets, completed current-source nominal evidence, zero invalid terminal episodes, finite records, and successful valid demonstrations for every train/dev grasp",
+    "final_demonstration_collection": false
+  },
+  "behavior_cloning": {
+    "recipe": "configs/rj45-bc-v1.json",
+    "architecture": "79 -> 256 ELU -> 256 ELU -> 128 ELU -> 6; no added observation normalization",
+    "initial_actor_output": "zero",
+    "optimizer_data": "Successful valid train rows only",
+    "epoch_selection": "Lowest dev MSE among completed epochs 1..40; earliest epoch on an exact tie",
+    "diagnostic": "Fixed-seed cross-episode nearest-neighbor label variation, excluded from model selection",
+    "extra_compute_accounting": "Report teacher simulation transitions, BC gradient updates/sample visits/time separately from PPO transitions"
+  },
+  "comparison": {
+    "conditions": [
+      "biased baseline",
+      "PPO only",
+      "BC only",
+      "BC then PPO"
+    ],
+    "ppo_seed_sets": [
+      20261131,
+      20261132,
+      20261133
+    ],
+    "ppo_updates_per_seed": 200,
+    "ppo_num_envs": 256,
+    "ppo_steps_per_env": 32,
+    "development_seed": 20261122,
+    "development_attempts": 64,
+    "paired_conditions": "Same dev grasp IDs, per-environment quotas, calibration-bias seed and episode index",
+    "evaluation_checkpoints": [
+      20,
+      96,
+      200
+    ],
+    "selection_checkpoint": 200,
+    "promotion_gate": "BC-then-PPO mean dev successes must exceed both baseline and PPO-only mean by at least 6/64, with zero invalid episodes and zero forbidden-contact load in all paired runs",
+    "failure_action": "Keep final seed sealed and report the failed promotion; investigate observed limits without changing the success tolerance",
+    "profile_selection": {
+      "rule": "Use the eligible F/N/R profile selected by the already fixed 4B scale protocol; if none is eligible, use N for both PPO-only and BC-then-PPO. Freeze this choice before teacher data collection and every 4C policy run.",
+      "candidate_config_inputs": {
+        "Z1_ppo": {
+          "path": "configs/ppo-rj45-refinement-z1.json",
+          "sha256": "a5f866abce4ee8926aaf857d93d4ce398891f6737c24aa59901e3a69419e39f8"
+        },
+        "F_ppo": {
+          "path": "configs/ppo-rj45-refinement-f.json",
+          "sha256": "c909830f5bce676b8372c272adad25796c9dee3a9c744546eba786eac3739519"
+        },
+        "N_R_ppo": {
+          "path": "configs/ppo-rj45-refinement-n.json",
+          "sha256": "9b3c531a67411b50a0b4f112fbc78647e4879ec0718b01068f24bfe4c7210bdf"
+        },
+        "Z1_F_N_training": {
+          "path": "configs/rj45-training-target-offset-v1.json",
+          "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+        },
+        "R_training": {
+          "path": "configs/rj45-training-refinement-r.json",
+          "sha256": "fe359ffa3fbd0489c68e2659e2139bd2b5a23f7517fc0b6e3f1430446ab7d43e"
+        },
+        "profile_selection_protocol": {
+          "path": "docs/evidence/rj45-refinement-20261028/scale-refinement-protocol.json",
+          "sha256": "44d9c6ee35a992af20d79afa93d29443de59216bd7a5b719bd2cfb10e24534e4"
+        }
+      },
+      "ppo_derived_fields_only": [
+        "seed",
+        "num_steps_per_env",
+        "max_iterations"
+      ],
+      "derived_values": {
+        "num_steps_per_env": 32,
+        "max_iterations": 200,
+        "save_interval_unchanged": 19
+      }
+    },
+    "fairness_contract": {
+      "training_conditions": [
+        "PPO only",
+        "BC then PPO"
+      ],
+      "paired_training_runs": 6,
+      "shared_seed_pairs": [
+        [
+          20261131,
+          20261131
+        ],
+        [
+          20261132,
+          20261132
+        ],
+        [
+          20261133,
+          20261133
+        ]
+      ],
+      "identical_except_actor_initialization": [
+        "PPO runner configuration excluding the same paired seed override",
+        "training configuration including reward and observation",
+        "physics and assets",
+        "source commit and source file hashes",
+        "train bank manifest and ordered train grasp IDs",
+        "critic initialization",
+        "policy noise initialization",
+        "optimizer state",
+        "random-generator state after actor initialization",
+        "evaluation bank and per-environment episode quotas"
+      ],
+      "PPO_only_actor_initialization": "zero actor output layer",
+      "BC_then_PPO_actor_initialization": "verified actor-only artifact; preserve critic, policy noise, optimizer, and RNG state",
+      "launch_gate": "Before launching any teacher data or policy run, freeze exact derived PPO/training path and SHA, source/config/asset SHA map, bank manifest SHA, dataset SHA, BC recipe/artifact SHA, commands, paired seed mapping, and all evaluation quotas in a create-new input manifest; fail closed on every later mutation",
+      "evaluation_pairing": "For each seed and declared checkpoint, compare all attempts on the same dev IDs/bias cases. Compare 200-update results for promotion; 20/96 are diagnostic only."
+    }
+  }
+}

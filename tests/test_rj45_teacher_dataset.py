@@ -16,6 +16,7 @@ except ImportError:  # local lightweight test environments need not install Isaa
     torch = None
 
 from rby1_assembly.rj45_teacher import teacher_tip_target_action
+from rby1_assembly.rj45_training_env import _store_policy_input_telemetry
 from rby1_assembly.rj45_teacher_dataset import (
     TeacherDatasetContractError,
     TeacherDatasetWriter,
@@ -81,6 +82,44 @@ def terminal(*, success: bool = True, valid: bool = True) -> TeacherEpisodeTermi
 
 
 class TeacherDatasetTests(unittest.TestCase):
+    def test_float64_policy_clock_round_trips_repeated_one_thirtieth_steps(self) -> None:
+        if torch is None:
+            self.skipTest("Torch is unavailable in this interpreter")
+        observation_buffer = torch.zeros((1, 79), dtype=torch.float32)
+        valid_buffer = torch.zeros(1, dtype=torch.bool)
+        timestamp_buffer = torch.full((1,), -1.0, dtype=torch.float64)
+        step_indices = (1, 2, 3, 100_001)
+        captured = []
+        for step_index in step_indices:
+            timestamp = step_index * (1.0 / 30.0)
+            _store_policy_input_telemetry(
+                observation_buffer,
+                torch.ones(1, dtype=torch.bool),
+                timestamp,
+                observation_buffer,
+                valid_buffer,
+                timestamp_buffer,
+            )
+            captured.append(timestamp_buffer.item())
+        expected = np.asarray(
+            [step_index * (1.0 / 30.0) for step_index in step_indices],
+            dtype=np.float64,
+        )
+        np.testing.assert_array_equal(np.asarray(captured), expected)
+
+        fixture = rows(count=len(step_indices))
+        object.__setattr__(fixture, "observation_timestamp", expected.copy())
+        object.__setattr__(fixture, "policy_observation_timestamp", np.asarray(captured))
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "teacher.h5"
+            with TeacherDatasetWriter(path) as writer:
+                writer.add_episode("float64-clock", provenance(), fixture, terminal())
+            with h5py.File(path, "r") as file:
+                stored = file[
+                    "episodes/float64-clock/policy_observation_timestamp"
+                ][:]
+        np.testing.assert_array_equal(stored, expected)
+
     def test_round_trip_79d_6d_and_student_allowlist(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "teacher.h5"
@@ -120,6 +159,18 @@ class TeacherDatasetTests(unittest.TestCase):
             with h5py.File(path, "r") as file:
                 self.assertEqual(file.attrs["schema_name"], "rj45_teacher_episode_v1")
                 self.assertEqual(file.attrs["observation_mode"], "standard79")
+                self.assertEqual(
+                    file.attrs["observation_timestamp_clock"],
+                    "collector_pre_step_global_sim_time_s",
+                )
+                self.assertEqual(
+                    file.attrs["policy_observation_timestamp_clock"],
+                    "environment_common_step_global_sim_time_s",
+                )
+                np.testing.assert_array_equal(
+                    file["episodes/success/policy_observation_timestamp"][:],
+                    file["episodes/success/observation_timestamp"][:],
+                )
                 self.assertIn("privileged", file["episodes/success"])
 
     def test_wrong_shape_nan_timestamp_and_action_alignment_are_rejected(self) -> None:
@@ -147,6 +198,23 @@ class TeacherDatasetTests(unittest.TestCase):
                 writer = TeacherDatasetWriter(Path(directory) / "teacher.h5")
                 with self.assertRaises(TeacherDatasetContractError):
                     writer.add_episode("bad", provenance(), item, terminal())
+                writer.abort()
+
+    def test_policy_timestamp_rejects_nonfinite_future_and_negative_valid_rows(self) -> None:
+        cases = (
+            (np.asarray([0.0, np.nan]), np.asarray([False, True]), "finite"),
+            (np.asarray([0.01, 0.02]), np.asarray([False, True]), "later"),
+            (np.asarray([-1.0, 0.01]), np.asarray([True, True]), "non-negative"),
+            (np.asarray([-0.5, 0.01]), np.asarray([False, True]), "-1"),
+            (np.asarray([0.01, 0.01]), np.asarray([False, True]), "strictly increasing"),
+        )
+        for index, (timestamps, validity, message) in enumerate(cases):
+            item = rows(valid=validity)
+            object.__setattr__(item, "policy_observation_timestamp", timestamps)
+            with self.subTest(index=index), tempfile.TemporaryDirectory() as directory:
+                writer = TeacherDatasetWriter(Path(directory) / "teacher.h5")
+                with self.assertRaisesRegex(TeacherDatasetContractError, message):
+                    writer.add_episode("bad-clock", provenance(), item, terminal())
                 writer.abort()
 
     def test_terminal_missing_and_final_split_are_rejected_without_output(self) -> None:

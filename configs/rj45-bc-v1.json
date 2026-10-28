@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "epochs": 40,
+  "batch_size": 1024,
+  "learning_rate": 0.0003,
+  "seed": 20261120,
+  "threads": 8
+}

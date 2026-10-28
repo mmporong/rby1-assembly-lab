@@ -93,6 +93,7 @@ class TeacherEpisodeRows:
     applied_offset: np.ndarray
     phase: Sequence[str]
     timestep: np.ndarray
+    policy_observation_timestamp: np.ndarray | None = None
     teacher_gt_delta: np.ndarray | None = None
     teacher_gt_pose: np.ndarray | None = None
 
@@ -150,6 +151,16 @@ def _normalize_rows(
         raise TeacherDatasetContractError("observation_timestamp must be non-negative")
     if not np.all(np.diff(timestamp) > 0.0):
         raise TeacherDatasetContractError("observation_timestamp must be strictly increasing")
+    policy_timestamp = (
+        timestamp.copy()
+        if rows.policy_observation_timestamp is None
+        else _finite_array(
+            "policy_observation_timestamp",
+            rows.policy_observation_timestamp,
+            (count,),
+            np.float64,
+        )
+    )
     requested = _finite_array("teacher_requested", rows.teacher_requested, (count, ACTION_DIM), np.float32)
     applied = _finite_array("teacher_applied", rows.teacher_applied, (count, ACTION_DIM), np.float32)
     offset = _finite_array("applied_offset", rows.applied_offset, (count, ACTION_DIM), np.float32)
@@ -166,6 +177,24 @@ def _normalize_rows(
     valid = np.asarray(rows.valid)
     if valid.shape != (count,) or valid.dtype.kind != "b":
         raise TeacherDatasetContractError("valid must be a boolean array with shape (N,)")
+    negative_policy_time = policy_timestamp < 0.0
+    if np.any(negative_policy_time & ~np.isclose(policy_timestamp, -1.0, rtol=0.0, atol=1.0e-12)):
+        raise TeacherDatasetContractError(
+            "policy_observation_timestamp must be -1 or non-negative"
+        )
+    if np.any(valid & negative_policy_time):
+        raise TeacherDatasetContractError(
+            "valid rows require a non-negative policy_observation_timestamp"
+        )
+    observed_policy_time = policy_timestamp[~negative_policy_time]
+    if not np.all(np.diff(observed_policy_time) > 0.0):
+        raise TeacherDatasetContractError(
+            "non-negative policy_observation_timestamp values must be strictly increasing"
+        )
+    if np.any(policy_timestamp > timestamp + 1.0e-9):
+        raise TeacherDatasetContractError(
+            "policy_observation_timestamp cannot be later than the pre-step observation_timestamp"
+        )
     timestep = np.asarray(rows.timestep)
     if timestep.shape != (count,) or timestep.dtype.kind not in "iu":
         raise TeacherDatasetContractError("timestep must be an integer array with shape (N,)")
@@ -178,6 +207,7 @@ def _normalize_rows(
     normalized: dict[str, np.ndarray] = {
         "observation": observation,
         "observation_timestamp": timestamp,
+        "policy_observation_timestamp": policy_timestamp,
         "valid": valid.astype(np.bool_),
         "teacher_requested": requested,
         "teacher_applied": applied,
@@ -211,6 +241,12 @@ class TeacherDatasetWriter:
         self._file.attrs["observation_mode"] = "standard79"
         self._file.attrs["observation_dim"] = OBSERVATION_DIM
         self._file.attrs["action_dim"] = ACTION_DIM
+        self._file.attrs["observation_timestamp_clock"] = (
+            "collector_pre_step_global_sim_time_s"
+        )
+        self._file.attrs["policy_observation_timestamp_clock"] = (
+            "environment_common_step_global_sim_time_s"
+        )
         self._file.create_group("episodes")
         self._episode_count = 0
         self._closed = False
@@ -253,6 +289,10 @@ class TeacherDatasetWriter:
         group.attrs["failure_reason"] = terminal.failure_reason
         group.create_dataset("observation", data=normalized["observation"])
         group.create_dataset("observation_timestamp", data=normalized["observation_timestamp"])
+        group.create_dataset(
+            "policy_observation_timestamp",
+            data=normalized["policy_observation_timestamp"],
+        )
         group.create_dataset("valid", data=normalized["valid"])
         group.create_dataset("teacher_requested", data=normalized["teacher_requested"])
         group.create_dataset("teacher_applied", data=normalized["teacher_applied"])
@@ -336,6 +376,16 @@ def load_student_episodes(
             raise TeacherDatasetContractError("root observation_dim must be 79")
         if file.attrs.get("action_dim") != ACTION_DIM:
             raise TeacherDatasetContractError("root action_dim must be 6")
+        if file.attrs.get("observation_timestamp_clock") != (
+            "collector_pre_step_global_sim_time_s"
+        ):
+            raise TeacherDatasetContractError("observation_timestamp clock basis is invalid")
+        if file.attrs.get("policy_observation_timestamp_clock") != (
+            "environment_common_step_global_sim_time_s"
+        ):
+            raise TeacherDatasetContractError(
+                "policy_observation_timestamp clock basis is invalid"
+            )
         if "episodes" not in file:
             raise TeacherDatasetContractError("episodes group is missing")
         validated: list[
@@ -364,6 +414,7 @@ def load_student_episodes(
                     for name in (
                         "observation",
                         "observation_timestamp",
+                        "policy_observation_timestamp",
                         "valid",
                         "teacher_requested",
                         "teacher_applied",
@@ -377,6 +428,9 @@ def load_student_episodes(
                 TeacherEpisodeRows(
                     observation=row_values["observation"],
                     observation_timestamp=row_values["observation_timestamp"],
+                    policy_observation_timestamp=row_values[
+                        "policy_observation_timestamp"
+                    ],
                     valid=row_values["valid"],
                     teacher_requested=row_values["teacher_requested"],
                     teacher_applied=row_values["teacher_applied"],

@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import ast
+import copy
+import importlib.util
 import json
 from pathlib import Path
 import shutil
@@ -8,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import types
+from typing import Any
 import unittest
 
 import numpy as np
@@ -84,14 +87,15 @@ class _PhysxView:
 def _load_native_physx_helpers():
     tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
     names = {"_native_physx_state", "_assert_native_physx_untouched_equal"}
-    functions = [
+    function_defs = [
         node
         for node in tree.body
         if isinstance(node, ast.FunctionDef) and node.name in names
     ]
-    if {node.name for node in functions} != names:
+    if {node.name for node in function_defs} != names:
         raise AssertionError("native PhysX reset helpers are missing")
-    namespace = {"torch": _TorchShim}
+    functions: list[ast.stmt] = [*function_defs]
+    namespace: dict[str, Any] = {"torch": _TorchShim}
     exec(
         compile(ast.Module(body=functions, type_ignores=[]), CHECKER_PATH, "exec"),
         namespace,
@@ -113,6 +117,32 @@ def _load_parallel_requirement_helper():
         namespace,
     )
     return namespace["_requires_parallel_contact_evidence"]
+
+
+def _load_bank_contract_helpers():
+    tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
+    names = {
+        "_bank_cycle_indices",
+        "_validate_bank_cli_contract",
+        "_resolve_bank_grasp_ids",
+        "_assert_bank_identity_unchanged",
+        "_assert_origin_applied_once",
+        "_assert_bank_check_coverage",
+    }
+    function_defs = [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name in names
+    ]
+    if {node.name for node in function_defs} != names:
+        raise AssertionError("held-bank checker contract helpers are missing")
+    functions: list[ast.stmt] = [*function_defs]
+    namespace: dict[str, Any] = {}
+    exec(
+        compile(ast.Module(body=functions, type_ignores=[]), CHECKER_PATH, "exec"),
+        namespace,
+    )
+    return namespace
 
 
 def _fake_environment(num_envs: int = 4):
@@ -332,7 +362,8 @@ class ParallelCliContractTests(unittest.TestCase):
         source = CHECKER_PATH.read_text(encoding="utf-8")
         self.assertIn("preexisting N4 contact-routing evidence", source)
         self.assertIn('"measurement_num_envs": args.num_envs', source)
-        self.assertIn('"untouched_environments_per_cycle": args.num_envs - 1', source)
+        self.assertIn('"untouched_environments_per_cycle"', source)
+        self.assertIn("'quarter-bank' if bank_mode else 'one-environment'", source)
 
     def test_report_limits_state_claims_and_exposes_per_cycle_warmup_counts(self) -> None:
         source = CHECKER_PATH.read_text(encoding="utf-8")
@@ -362,6 +393,198 @@ class ParallelCliContractTests(unittest.TestCase):
             "plug_root_state",
         ):
             self.assertIn(f'"{native_group}"', source)
+
+
+class HeldBankCheckerContractTests(unittest.TestCase):
+    def test_bank_mode_requires_n64_or_n256_and_exactly_four_cycles(self) -> None:
+        validate = _load_bank_contract_helpers()["_validate_bank_cli_contract"]
+        self.assertFalse(validate("held.json", None, num_envs=1, reset_cycles=1000))
+        for num_envs in (64, 256):
+            self.assertTrue(
+                validate(None, "bank.json", num_envs=num_envs, reset_cycles=4)
+            )
+        for invalid in (1, 4, 128):
+            with self.subTest(num_envs=invalid), self.assertRaisesRegex(
+                ValueError, "64 or 256"
+            ):
+                validate(None, "bank.json", num_envs=invalid, reset_cycles=4)
+        with self.assertRaisesRegex(ValueError, "reset-cycles 4"):
+            validate(None, "bank.json", num_envs=64, reset_cycles=3)
+        with self.assertRaisesRegex(ValueError, "physical-warmup-cycles"):
+            validate(
+                None,
+                "bank.json",
+                num_envs=64,
+                reset_cycles=4,
+                mode="reset-api-stress",
+            )
+        for held, bank in ((None, None), ("held.json", "bank.json")):
+            with self.assertRaisesRegex(ValueError, "exactly one"):
+                validate(held, bank)
+
+    def test_four_partial_cycles_cover_every_environment_once(self) -> None:
+        indices = _load_bank_contract_helpers()["_bank_cycle_indices"]
+        for num_envs in (64, 256):
+            groups = [indices(num_envs, cycle) for cycle in range(4)]
+            self.assertTrue(all(0 < len(group) < num_envs for group in groups))
+            self.assertEqual(
+                sorted(value for group in groups for value in group),
+                list(range(num_envs)),
+            )
+
+    def test_stale_grasp_identity_is_rejected(self) -> None:
+        resolve = _load_bank_contract_helpers()["_resolve_bank_grasp_ids"]
+        self.assertEqual(
+            resolve([1, 0], ["grasp-a", "grasp-b"]),
+            ["grasp-b", "grasp-a"],
+        )
+        with self.assertRaisesRegex(ValueError, "stale"):
+            resolve(
+                [1, 0],
+                ["grasp-a", "grasp-b"],
+                ["grasp-a", "grasp-b"],
+            )
+
+    def test_artifact_hash_drift_and_double_origin_are_rejected(self) -> None:
+        helpers = _load_bank_contract_helpers()
+        unchanged = helpers["_assert_bank_identity_unchanged"]
+        start = {
+            "manifest_sha256": "a" * 64,
+            "source_contract_sha256": "b" * 64,
+            "artifact_sha256": ["c" * 64],
+        }
+        unchanged(start, dict(start), 1, 1)
+        changed = {**start, "artifact_sha256": ["d" * 64]}
+        with self.assertRaisesRegex(ValueError, "identity changed"):
+            unchanged(start, changed, 1, 1)
+
+        check_origin = helpers["_assert_origin_applied_once"]
+        local = [[[0.1, 0.2, 0.3]]]
+        origins = [[10.0, 20.0, 30.0]]
+        check_origin([[[10.1, 20.2, 30.3]]], local, origins)
+        with self.assertRaisesRegex(ValueError, "exactly once"):
+            check_origin([[[20.1, 40.2, 60.3]]], local, origins)
+
+    def test_restoration_records_require_exact_groups_and_physics_boundary(self) -> None:
+        helpers = _load_bank_contract_helpers()
+        checks = []
+        for cycle, ids in [(-1, list(range(64)))] + [
+            (cycle, list(helpers["_bank_cycle_indices"](64, cycle))) for cycle in range(4)
+        ]:
+            checks.append({
+                "environment_ids": ids, "reset_cycle": cycle,
+                "control_step": (cycle + 2) * 10,
+                "physics_step_before_restore": (cycle + 2) * 80,
+                "physics_step_after_check": (cycle + 2) * 80,
+                "required_staging_control_steps": 2,
+                "staging_before_restore": {"queued": [True] * len(ids), "restored": [False] * len(ids), "waited_control_steps": [2] * len(ids)},
+                "staging_after_restore": {"queued": [False] * len(ids), "restored": [True] * len(ids), "waited_control_steps": [2] * len(ids)},
+            })
+        validate = helpers["_assert_bank_check_coverage"]
+        validate(checks, 64)
+        for key, value in (
+            ("environment_ids", checks[1]["environment_ids"]),
+            ("reset_cycle", 0),
+            ("control_step", 0),
+            ("physics_step_after_check", 999),
+            ("staging_before_restore", {"queued": [True] * 16, "restored": [False] * 16, "waited_control_steps": [1] * 16}),
+            ("staging_after_restore", {"queued": [False] * 16, "restored": [False] * 16, "waited_control_steps": [2] * 16}),
+        ):
+            with self.subTest(key=key):
+                corrupted = copy.deepcopy(checks)
+                corrupted[2][key] = value
+                with self.assertRaises(RuntimeError):
+                    validate(corrupted, 64)
+
+
+@unittest.skipUnless(importlib.util.find_spec("torch"), "requires torch CPU")
+class HeldBankIndependentSourceTests(unittest.TestCase):
+    def _fixture(self):
+        import torch
+
+        bank = [{
+            "joint_names": ["b", "a", "d", "c"],
+            "state": {
+                "joint_positions_si": [0.2 + i, 0.1 + i, 0.4 + i, 0.3 + i],
+                "joint_velocities_si": [0.02, 0.01, 0.04, 0.03],
+                "joint_reference_si": [0.22 + i, 0.11 + i, 0.44 + i, 0.33 + i],
+                "object_poses_world_wxyz": [[0.1 + i, 0.2, 0.3, 1, 0, 0, 0], [0.4, 0.5 + i, 0.6, 1, 0, 0, 0]],
+                "object_com_velocities_world": [[0.01] * 6, [0.02] * 6],
+            },
+        } for i in range(2)]
+        proof = {"selected_grasp_ids": ["g0", "g1"], "selected_artifact_sha256": ["a" * 64, "b" * 64]}
+        cache = {
+            name: torch.tensor([[row["state"][field][i] for i in (1, 0, 3, 2)] for row in bank])
+            for name, field in (("position", "joint_positions_si"), ("velocity", "joint_velocities_si"), ("reference", "joint_reference_si"))
+        }
+        cache["local_pose"] = torch.tensor([row["state"]["object_poses_world_wxyz"] for row in bank])
+        cache["object_velocity"] = torch.tensor([row["state"]["object_com_velocities_world"] for row in bank])
+        origins = torch.tensor([[0.0, 0, 0], [3.0, 4.0, 0]])
+        def object_state(ids):
+            poses = cache["local_pose"][ids].clone()
+            poses[:, :, :3] += origins[ids, None, :]
+            return poses, cache["object_velocity"][ids]
+        env = types.SimpleNamespace(
+            device="cpu", robot=types.SimpleNamespace(joint_names=["a", "b", "c", "d"]),
+            scene=types.SimpleNamespace(env_origins=origins),
+            _training_grasp_index=torch.tensor([0, 1]),
+            _training_episode_index=torch.tensor([0, 0]),
+            _training_held_bank_proof=copy.deepcopy(proof),
+            _training_held_bank_object_pose=cache["local_pose"],
+            _held_artifact_joint_state=lambda ids: tuple(cache[key][ids] for key in ("position", "velocity", "reference")),
+            _held_artifact_object_state=object_state,
+            _joint_targets=cache["reference"].clone(),
+            _insert_joint_targets=cache["reference"][:, :2].clone(),
+            _torso_hold_targets=cache["reference"][:, 2:3].clone(),
+            _gripper_command=cache["reference"][:, 3:4].clone(),
+            _arm_joint_ids=[0, 1], _torso_joint_ids=[2], _gripper_joint_ids=[3],
+        )
+        def native_state(_env, ids):
+            # Deliberately share corrupted cache/native values: independent source must reject them.
+            poses, velocities = object_state(ids)
+            transform = poses[:, :, (0, 1, 2, 4, 5, 6, 3)]
+            return {
+                "robot_joint_position": cache["position"][ids].clone(),
+                "robot_joint_velocity": cache["velocity"][ids].clone(),
+                "socket_root_state": torch.cat((transform[:, 0], velocities[:, 0]), dim=1),
+                "plug_root_state": torch.cat((transform[:, 1], velocities[:, 1]), dim=1),
+            }
+        tree = ast.parse(CHECKER_PATH.read_text(encoding="utf-8"))
+        definitions = [node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name in {"_resolve_bank_grasp_ids", "_assert_selected_bank_initial_state"}]
+        namespace = {
+            "torch": torch, "bank_mode": True, "bank_proof": proof,
+            "verified_bank_reference": copy.deepcopy(bank),
+            "task": {"data": {"evaluation_seed": 0}}, "_native_physx_state": native_state,
+        }
+        exec(compile(ast.Module(body=definitions, type_ignores=[]), CHECKER_PATH, "exec"), namespace)
+        return namespace["_assert_selected_bank_initial_state"], env, cache, torch.tensor([0, 1])
+
+    def test_verified_source_reorders_joints_and_origin_once(self) -> None:
+        check, env, _, ids = self._fixture()
+        result = check(env, ids)
+        self.assertEqual(result["selected_grasp_ids"], ["g0", "g1"])
+        self.assertEqual(result["selected_artifact_sha256"], ["a" * 64, "b" * 64])
+
+    def test_mutating_cache_and_native_together_does_not_hide_wrong_bank_row(self) -> None:
+        for field in ("position", "velocity", "reference", "local_pose", "object_velocity"):
+            with self.subTest(field=field):
+                check, env, cache, ids = self._fixture()
+                cache[field][0].reshape(-1)[0] += 0.1
+                with self.assertRaisesRegex(RuntimeError, "verified source artifact"):
+                    check(env, ids)
+
+    def test_stale_schedule_identity_and_actuator_targets_fail(self) -> None:
+        for kind in ("selection", "identity", "target"):
+            with self.subTest(kind=kind):
+                check, env, _, ids = self._fixture()
+                if kind == "selection":
+                    env._training_grasp_index[:] = 0
+                elif kind == "identity":
+                    env._training_held_bank_proof["selected_grasp_ids"].reverse()
+                else:
+                    env._joint_targets[0, 0] += 0.1
+                with self.assertRaises((ValueError, RuntimeError)):
+                    check(env, ids)
 
 
 class ReportPathPreimportTests(unittest.TestCase):

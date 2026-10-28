@@ -986,7 +986,7 @@ def make_rj45_training_env_type(
                 self.num_envs, dtype=torch.bool, device=self.device
             )
             self._training_last_policy_observation_timestamp_s = torch.full(
-                (self.num_envs,), -1.0, device=self.device
+                (self.num_envs,), -1.0, dtype=torch.float64, device=self.device
             )
             self._training_action_delta = torch.zeros_like(
                 self._training_previous_action
