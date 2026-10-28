@@ -1,0 +1,2614 @@
+{
+  "schema_version": 1,
+  "status": "development_promotion_failed",
+  "inputs": {
+    "long_run_plan": {
+      "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-paper-ablation/long-run-plan.json",
+      "sha256": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c"
+    },
+    "paired_baseline": {
+      "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-paper-ablation/pilot-results/baseline.json",
+      "sha256": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61"
+    },
+    "retrieval_manifest": {
+      "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-long-retry-retrieval-20261027.json",
+      "sha256": "667d60b0219dfac125fee06cde9e03c13d708ffd4ad42255ac4f039257ec5507",
+      "terminal_status": "completed"
+    },
+    "campaign_contract": {
+      "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/campaign-contract.json",
+      "sha256": "35a113253752e37dc809f6ccf868118e7916c6baa10393699343047f7bcf4d1b",
+      "profile_label": "Z1",
+      "input_manifest_sha256": "7a6407b033d4560a83c194657b9af7c08d1972ec3b157297e183d1196b3d9f55",
+      "verified_input_anchors": {
+        "artifacts/rj45-paper-ablation/baseline.json": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61",
+        "docs/evidence/rj45-paper-ablation/long-run-plan.json": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c",
+        "artifacts/rj45-paper-ablation/long-candidate.json": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868"
+      },
+      "candidate_sha256": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868"
+    },
+    "analyzers": {
+      "gate": {
+        "path": "/home/lim/rby1-assembly-lab/scripts/analyze_rj45_paired.py",
+        "sha256": "cdd087abb1298178cdf57b21a98c98c098da28d4730dd77b22429e72b37699a7",
+        "role": "pre-run-manifest-and-candidate-pinned frozen v1 analyzer used for every gate count"
+      },
+      "posthoc_bundle_verifier": {
+        "path": "/home/lim/rby1-assembly-lab/scripts/analyze_rj45_paired_v2.py",
+        "sha256": "c23899444268dc14b711f99ef0a0552df4e313dff0f6265618dd1b7777563f76",
+        "role": "post-hoc v2 bundle and inspection verifier; cannot change gate counts"
+      }
+    }
+  },
+  "integrity": {
+    "remote_payload_check": {
+      "meaning": "saved remote payload exactly matches terminal status and the 93 SHA claims in the local retrieval manifest",
+      "payload_path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/.retrieval.json",
+      "payload_sha256": "5c98d331d01c4ba62798f849dc9666183f6192d7520af93e3c9caf3adc036cd9",
+      "matched": true
+    },
+    "local_byte_check": {
+      "meaning": "all 93 retrieved files were read locally and their SHA-256 values were recomputed",
+      "file_count": 93,
+      "matched": true
+    },
+    "checkpoint_payload_check": {
+      "meaning": "the nine saved inspection records attest CPU weights_only payload inspection; this summary rechecks their bytes and lineage but does not load checkpoint tensors again",
+      "status": "inspection_records_and_bundle_lineage_verified"
+    },
+    "training_source_and_config_check": {
+      "by_training_seed": {
+        "20261101": {
+          "training_provenance_sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+          "source_and_config_entry_count": 49,
+          "frozen_pre_run_digest_match_count": 48,
+          "frozen_pre_run_digests": {
+            "artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261101.json": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+            "assets/generated/tasks/rj45-v1/build-report.json": "6093e6bdfde796b4e556cb5b97a5c688d5a28ff66285a961452fe851de75c8be",
+            "assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+            "assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+            "assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+            "assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+            "assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+            "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+            "configs/compute-budget.json": "c05a7732523cad431899cad47c2907508362dcb87325f909f50e4922b93ba4d8",
+            "configs/failure-scenarios.json": "e0df6acd75ddd956126f3de6d19cc5588c7f34ed640b5f379e6c276643e4e58f",
+            "configs/ppo-rj45-low-exploration-v1.json": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+            "configs/ppo-rj45-v1.json": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+            "configs/ppo.json": "98a1e68a36d30e20b66daf76eafdcaf6ad5cd7ff0a6ff03118944ff78807bd91",
+            "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+            "configs/rj45-training-bias-observability.json": "27d13188724a7e2f4dbac90bff19e89010154fc0a5c620e497a12d39d03657a8",
+            "configs/rj45-training-target-offset-a1-discounted-pose-v2.json": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+            "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+            "configs/rj45-training-target-offset-bias-observability.json": "f95d6c61ad52477d1a37d63940a7dcd5ca365c49c539a7c7697dac5e6406044c",
+            "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "configs/rj45-training-v1.json": "28b0c3ad204f4593342623afa0e8607c8dc7da63627f97ba771071601010de23",
+            "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+            "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+            "configs/tasks/rj45-v1.json": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+            "scripts/train.py": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2",
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+            "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+            "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+            "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+            "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+            "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+            "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+            "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+            "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+            "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+            "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+            "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+            "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+            "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+          },
+          "runner_config_exception": {
+            "path": "artifacts/rj45-long-retry-20261027/runs/20261101/rj45-v1/2026-10-27_04-00-34/runner_config.json",
+            "sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+            "reason": "run-directory runner config was created for the run and is linked to the contract-pinned seed PPO config by identical bytes"
+          },
+          "verification_boundary": "For frozen training source/config paths, recorded provenance digests were matched to the contract-hashed pre-run input manifest. Those source bytes are not present in the retrieved snapshot and were not rehashed by this summary."
+        },
+        "20261102": {
+          "training_provenance_sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+          "source_and_config_entry_count": 49,
+          "frozen_pre_run_digest_match_count": 48,
+          "frozen_pre_run_digests": {
+            "artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261102.json": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+            "assets/generated/tasks/rj45-v1/build-report.json": "6093e6bdfde796b4e556cb5b97a5c688d5a28ff66285a961452fe851de75c8be",
+            "assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+            "assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+            "assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+            "assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+            "assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+            "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+            "configs/compute-budget.json": "c05a7732523cad431899cad47c2907508362dcb87325f909f50e4922b93ba4d8",
+            "configs/failure-scenarios.json": "e0df6acd75ddd956126f3de6d19cc5588c7f34ed640b5f379e6c276643e4e58f",
+            "configs/ppo-rj45-low-exploration-v1.json": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+            "configs/ppo-rj45-v1.json": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+            "configs/ppo.json": "98a1e68a36d30e20b66daf76eafdcaf6ad5cd7ff0a6ff03118944ff78807bd91",
+            "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+            "configs/rj45-training-bias-observability.json": "27d13188724a7e2f4dbac90bff19e89010154fc0a5c620e497a12d39d03657a8",
+            "configs/rj45-training-target-offset-a1-discounted-pose-v2.json": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+            "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+            "configs/rj45-training-target-offset-bias-observability.json": "f95d6c61ad52477d1a37d63940a7dcd5ca365c49c539a7c7697dac5e6406044c",
+            "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "configs/rj45-training-v1.json": "28b0c3ad204f4593342623afa0e8607c8dc7da63627f97ba771071601010de23",
+            "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+            "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+            "configs/tasks/rj45-v1.json": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+            "scripts/train.py": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2",
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+            "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+            "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+            "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+            "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+            "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+            "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+            "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+            "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+            "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+            "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+            "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+            "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+            "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+          },
+          "runner_config_exception": {
+            "path": "artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json",
+            "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+            "reason": "run-directory runner config was created for the run and is linked to the contract-pinned seed PPO config by identical bytes"
+          },
+          "verification_boundary": "For frozen training source/config paths, recorded provenance digests were matched to the contract-hashed pre-run input manifest. Those source bytes are not present in the retrieved snapshot and were not rehashed by this summary."
+        },
+        "20261103": {
+          "training_provenance_sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+          "source_and_config_entry_count": 49,
+          "frozen_pre_run_digest_match_count": 48,
+          "frozen_pre_run_digests": {
+            "artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261103.json": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+            "assets/generated/tasks/rj45-v1/build-report.json": "6093e6bdfde796b4e556cb5b97a5c688d5a28ff66285a961452fe851de75c8be",
+            "assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+            "assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+            "assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+            "assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+            "assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+            "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+            "configs/compute-budget.json": "c05a7732523cad431899cad47c2907508362dcb87325f909f50e4922b93ba4d8",
+            "configs/failure-scenarios.json": "e0df6acd75ddd956126f3de6d19cc5588c7f34ed640b5f379e6c276643e4e58f",
+            "configs/ppo-rj45-low-exploration-v1.json": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+            "configs/ppo-rj45-v1.json": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+            "configs/ppo.json": "98a1e68a36d30e20b66daf76eafdcaf6ad5cd7ff0a6ff03118944ff78807bd91",
+            "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+            "configs/rj45-training-bias-observability.json": "27d13188724a7e2f4dbac90bff19e89010154fc0a5c620e497a12d39d03657a8",
+            "configs/rj45-training-target-offset-a1-discounted-pose-v2.json": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+            "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+            "configs/rj45-training-target-offset-bias-observability.json": "f95d6c61ad52477d1a37d63940a7dcd5ca365c49c539a7c7697dac5e6406044c",
+            "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "configs/rj45-training-v1.json": "28b0c3ad204f4593342623afa0e8607c8dc7da63627f97ba771071601010de23",
+            "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+            "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36",
+            "configs/tasks/rj45-v1.json": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+            "scripts/train.py": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2",
+            "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+            "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+            "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+            "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+            "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+            "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+            "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+            "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+            "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+            "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+            "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+            "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+            "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+            "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+            "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+            "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+            "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+            "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+            "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+            "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+            "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+            "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+          },
+          "runner_config_exception": {
+            "path": "artifacts/rj45-long-retry-20261027/runs/20261103/rj45-v1/2026-10-27_07-52-43/runner_config.json",
+            "sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+            "reason": "run-directory runner config was created for the run and is linked to the contract-pinned seed PPO config by identical bytes"
+          },
+          "verification_boundary": "For frozen training source/config paths, recorded provenance digests were matched to the contract-hashed pre-run input manifest. Those source bytes are not present in the retrieved snapshot and were not rehashed by this summary."
+        }
+      },
+      "pre_run_input_manifest_entry_count": 96,
+      "training_relevant_union_count": 50,
+      "non_training_provenance_input_count": 46,
+      "non_training_provenance_inputs": [
+        "artifacts/cloud/rj45-long-guard-20261027.json",
+        "artifacts/rj45-paper-ablation/A0.json",
+        "artifacts/rj45-paper-ablation/A1.json",
+        "artifacts/rj45-paper-ablation/A2.json",
+        "artifacts/rj45-paper-ablation/E1.json",
+        "artifacts/rj45-paper-ablation/Z1.json",
+        "artifacts/rj45-paper-ablation/baseline.json",
+        "artifacts/rj45-paper-ablation/held.json",
+        "artifacts/rj45-paper-ablation/long-candidate.json",
+        "artifacts/rj45-paper-ablation/nominal.json",
+        "artifacts/rj45-paper-ablation/nominal.jsonl",
+        "artifacts/rj45-paper-ablation/paired-audit.json",
+        "artifacts/rj45-paper-ablation/run_remote_experiment.sh",
+        "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/checkpoint_manifest.json",
+        "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/model_19.pt",
+        "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/runner_config.json",
+        "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/training_provenance.json",
+        "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/checkpoint_manifest.json",
+        "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/model_19.pt",
+        "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/runner_config.json",
+        "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/training_provenance.json",
+        "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/checkpoint_manifest.json",
+        "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/model_19.pt",
+        "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/runner_config.json",
+        "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/training_provenance.json",
+        "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/checkpoint_manifest.json",
+        "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/model_19.pt",
+        "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/runner_config.json",
+        "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/training_provenance.json",
+        "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/checkpoint_manifest.json",
+        "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/model_19.pt",
+        "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/runner_config.json",
+        "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/training_provenance.json",
+        "artifacts/rj45-paper-ablation/validate_gpu_smoke.py",
+        "artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json",
+        "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+        "artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json",
+        "artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl",
+        "docs/evidence/rj45-paper-ablation/experiment-plan.json",
+        "docs/evidence/rj45-paper-ablation/long-run-plan.json",
+        "scripts/analyze_rj45_paired.py",
+        "scripts/check_rj45_reset.py",
+        "scripts/evaluate_policy.py",
+        "scripts/inspect_rj45_checkpoint.py",
+        "scripts/run_rj45_long_campaign.py",
+        "scripts/run_sim.py"
+      ],
+      "scope_boundary": "The remaining pre-run manifest inputs are launch, pilot, evaluation, or evidence inputs. This summary does not claim they are training source_and_config entries or that their bytes were present in the retrieved snapshot."
+    },
+    "consumed_snapshot_artifact_check": {
+      "meaning": "every report, inspection, checkpoint, run metadata file, and campaign contract consumed by the summary is listed in the retrieval manifest and matches its SHA-256 claim",
+      "file_count": 37,
+      "files_sha256": {
+        "campaign-contract.json": "35a113253752e37dc809f6ccf868118e7916c6baa10393699343047f7bcf4d1b",
+        "inspections/seed-20261101-model_19.json": "2c3cbc7103a9dcb475d382b87a09045819000bda8df7e5b3cc93892c18d41479",
+        "inspections/seed-20261101-model_199.json": "497e3892165ff8805ca57ca4e616f5d38c73ecefb08d7a332b893f6a4aa0ddc4",
+        "inspections/seed-20261101-model_95.json": "638eb3fdc57bacd2b7243c473e3328e49a1a06217ea679419542c772f7179232",
+        "inspections/seed-20261102-model_19.json": "55862863eb90d25ba30fa01e0b6da96950c4b62557db6c0ca18c7a19021a5586",
+        "inspections/seed-20261102-model_199.json": "7a6f36ca61284dd5dd4f72fe3fc7984005f73346df5c7e76ed3bf32297272c60",
+        "inspections/seed-20261102-model_95.json": "8111e2db010d3224efdf0dbaf092d8d1724f7c7eacbc21d501ab5e5d60a2f79e",
+        "inspections/seed-20261103-model_19.json": "efd6dba83e4c0ea35acfed6f335a0f50b05c8129ee3ba608c9de9acf9675dacf",
+        "inspections/seed-20261103-model_199.json": "53e5e20f35d6136c5212dd504c150e7ec13141dc18629d616f0eddb44ba014b4",
+        "inspections/seed-20261103-model_95.json": "3a1b14b4d93d4fc89c21593daa98fcb9be23847aa07a57773184e57ad042c8d7",
+        "reports/seed-20261101-iter-19.json": "8c435c90960f35821a03e6b98f7e4f374c6d4641596b4f8b468002c4c5dbfa33",
+        "reports/seed-20261101-iter-199.json": "c50098e37bcd0d29a40d0fa90da3ef81bde37a6588715cf3e58ae4fac3f1559f",
+        "reports/seed-20261101-iter-95.json": "b8ab065cf9f1a882e55ed5d79892a3ca13cc4aac0560ff2be6988e377a1d952c",
+        "reports/seed-20261102-iter-19.json": "c69d42de6f6d67dd544f2a0f3a09e5b1f0f38889a457e3df0c3830141040ec49",
+        "reports/seed-20261102-iter-199.json": "c162ee51b436b53fceb8c78be4c656afbb94553dcb4c4ef425ccfafd95566dd8",
+        "reports/seed-20261102-iter-95.json": "49749b05acb9d0f1ab094e9fee50c62847a499b4062f48184a2d46018bc26021",
+        "reports/seed-20261103-iter-19.json": "f7e0921b81f020921fed45057a7bbfc9fd742590dab2b8a94d91851166ed22ce",
+        "reports/seed-20261103-iter-199.json": "76a6641db4a1401a5d45167a47ebcf10dc48ec9e0395a05f88db02b56f680846",
+        "reports/seed-20261103-iter-95.json": "a290c6c1ec759b1c6876482bb33c3169bf5cfd3f97e2c704fb2340940964b742",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/checkpoint_manifest.json": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/model_19.pt": "2a12cc1e1b4d2c40b7a0fc74b977f4e745382e1661491b12f38e82f67dd8935c",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/model_199.pt": "6df67bf3b4cd6e55978049cde8e953da67d774f91bd78093112a8aa9b64f6a29",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/model_95.pt": "cfbeb16beab8bcebd7a27cb7a7609e14e7ae80f37a5242cf7f2cc7acdb119608",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/runner_config.json": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+        "runs/20261101/rj45-v1/2026-10-27_04-00-34/training_provenance.json": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/checkpoint_manifest.json": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/model_19.pt": "339a1b3adf83dfa43ce25f03d340df2bbb17d3f294d5c454e8c34e286c5e2210",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/model_199.pt": "92cb02137d9bcc7df3c0577ea9356f60d940f17d61471ad28be538d61df07cd2",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/model_95.pt": "ee00ce449e1e4af7c29aeb9811a61626f9f266e67fb9d9ae82b997d90e35cae2",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+        "runs/20261102/rj45-v1/2026-10-27_05-56-34/training_provenance.json": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/checkpoint_manifest.json": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/model_19.pt": "c7b65da3c8074cf62f01ca53e2fb4219051349a57474e7e2b058ac579c1f4596",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/model_199.pt": "d9a50d8a26822f258e40dca9c6ac11f60431bd9f728262cafd203efa27649a9d",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/model_95.pt": "e897077b0567e8fbe379d3f47e5dc091c9988d1f7ffee0352a30a65a6e43bc07",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/runner_config.json": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+        "runs/20261103/rj45-v1/2026-10-27_07-52-43/training_provenance.json": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb"
+      },
+      "matched": true
+    }
+  },
+  "development_results": [
+    {
+      "training_seed": 20261101,
+      "completed_updates": 20,
+      "iteration_index": 19,
+      "successes": 10,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "8c435c90960f35821a03e6b98f7e4f374c6d4641596b4f8b468002c4c5dbfa33",
+      "checkpoint_sha256": "2a12cc1e1b4d2c40b7a0fc74b977f4e745382e1661491b12f38e82f67dd8935c",
+      "checkpoint_inspection_sha256": "2c3cbc7103a9dcb475d382b87a09045819000bda8df7e5b3cc93892c18d41479",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261101,
+      "completed_updates": 96,
+      "iteration_index": 95,
+      "successes": 10,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "b8ab065cf9f1a882e55ed5d79892a3ca13cc4aac0560ff2be6988e377a1d952c",
+      "checkpoint_sha256": "cfbeb16beab8bcebd7a27cb7a7609e14e7ae80f37a5242cf7f2cc7acdb119608",
+      "checkpoint_inspection_sha256": "638eb3fdc57bacd2b7243c473e3328e49a1a06217ea679419542c772f7179232",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261101,
+      "completed_updates": 200,
+      "iteration_index": 199,
+      "successes": 11,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "c50098e37bcd0d29a40d0fa90da3ef81bde37a6588715cf3e58ae4fac3f1559f",
+      "checkpoint_sha256": "6df67bf3b4cd6e55978049cde8e953da67d774f91bd78093112a8aa9b64f6a29",
+      "checkpoint_inspection_sha256": "497e3892165ff8805ca57ca4e616f5d38c73ecefb08d7a332b893f6a4aa0ddc4",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261102,
+      "completed_updates": 20,
+      "iteration_index": 19,
+      "successes": 10,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "c69d42de6f6d67dd544f2a0f3a09e5b1f0f38889a457e3df0c3830141040ec49",
+      "checkpoint_sha256": "339a1b3adf83dfa43ce25f03d340df2bbb17d3f294d5c454e8c34e286c5e2210",
+      "checkpoint_inspection_sha256": "55862863eb90d25ba30fa01e0b6da96950c4b62557db6c0ca18c7a19021a5586",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261102,
+      "completed_updates": 96,
+      "iteration_index": 95,
+      "successes": 12,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "49749b05acb9d0f1ab094e9fee50c62847a499b4062f48184a2d46018bc26021",
+      "checkpoint_sha256": "ee00ce449e1e4af7c29aeb9811a61626f9f266e67fb9d9ae82b997d90e35cae2",
+      "checkpoint_inspection_sha256": "8111e2db010d3224efdf0dbaf092d8d1724f7c7eacbc21d501ab5e5d60a2f79e",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261102,
+      "completed_updates": 200,
+      "iteration_index": 199,
+      "successes": 11,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "c162ee51b436b53fceb8c78be4c656afbb94553dcb4c4ef425ccfafd95566dd8",
+      "checkpoint_sha256": "92cb02137d9bcc7df3c0577ea9356f60d940f17d61471ad28be538d61df07cd2",
+      "checkpoint_inspection_sha256": "7a6f36ca61284dd5dd4f72fe3fc7984005f73346df5c7e76ed3bf32297272c60",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261103,
+      "completed_updates": 20,
+      "iteration_index": 19,
+      "successes": 7,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "f7e0921b81f020921fed45057a7bbfc9fd742590dab2b8a94d91851166ed22ce",
+      "checkpoint_sha256": "c7b65da3c8074cf62f01ca53e2fb4219051349a57474e7e2b058ac579c1f4596",
+      "checkpoint_inspection_sha256": "efd6dba83e4c0ea35acfed6f335a0f50b05c8129ee3ba608c9de9acf9675dacf",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261103,
+      "completed_updates": 96,
+      "iteration_index": 95,
+      "successes": 11,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "a290c6c1ec759b1c6876482bb33c3169bf5cfd3f97e2c704fb2340940964b742",
+      "checkpoint_sha256": "e897077b0567e8fbe379d3f47e5dc091c9988d1f7ffee0352a30a65a6e43bc07",
+      "checkpoint_inspection_sha256": "3a1b14b4d93d4fc89c21593daa98fcb9be23847aa07a57773184e57ad042c8d7",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    },
+    {
+      "training_seed": 20261103,
+      "completed_updates": 200,
+      "iteration_index": 199,
+      "successes": 9,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "forbidden_contact_load_peak_n": 0.0,
+      "report_sha256": "76a6641db4a1401a5d45167a47ebcf10dc48ec9e0395a05f88db02b56f680846",
+      "checkpoint_sha256": "d9a50d8a26822f258e40dca9c6ac11f60431bd9f728262cafd203efa27649a9d",
+      "checkpoint_inspection_sha256": "53e5e20f35d6136c5212dd504c150e7ec13141dc18629d616f0eddb44ba014b4",
+      "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked"
+    }
+  ],
+  "paired_audits": {
+    "seed-20261101-updates-20": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261101-updates-20": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_19.pt",
+          "checkpoint_sha256": "2a12cc1e1b4d2c40b7a0fc74b977f4e745382e1661491b12f38e82f67dd8935c",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+            "checkpoint_manifest_sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+              "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+            "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261101.json",
+          "policy_config_sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 10,
+          "success_rate_all_attempts": 0.3125,
+          "termination_counts": {
+            "episode_timeout": 22,
+            "independent_success": 10
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261101-updates-20",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.0625,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.25,
+          0.125
+        ],
+        "candidate_only_successes": 3,
+        "reference_only_successes": 5
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_19.pt",
+          "sha256": "2a12cc1e1b4d2c40b7a0fc74b977f4e745382e1661491b12f38e82f67dd8935c"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/checkpoint_manifest.json",
+          "sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/training_provenance.json",
+          "sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/runner_config.json",
+          "sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f"
+        },
+        "training_seed": 20261101,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 20,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+          "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261101-model_19.json",
+          "sha256": "2c3cbc7103a9dcb475d382b87a09045819000bda8df7e5b3cc93892c18d41479",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261101-updates-96": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261101-updates-96": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_95.pt",
+          "checkpoint_sha256": "cfbeb16beab8bcebd7a27cb7a7609e14e7ae80f37a5242cf7f2cc7acdb119608",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+            "checkpoint_manifest_sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+              "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+            "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261101.json",
+          "policy_config_sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 10,
+          "success_rate_all_attempts": 0.3125,
+          "termination_counts": {
+            "episode_timeout": 22,
+            "independent_success": 10
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261101-updates-96",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.0625,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.1875,
+          0.0625
+        ],
+        "candidate_only_successes": 1,
+        "reference_only_successes": 3
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_95.pt",
+          "sha256": "cfbeb16beab8bcebd7a27cb7a7609e14e7ae80f37a5242cf7f2cc7acdb119608"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/checkpoint_manifest.json",
+          "sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/training_provenance.json",
+          "sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/runner_config.json",
+          "sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f"
+        },
+        "training_seed": 20261101,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 96,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+          "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261101-model_95.json",
+          "sha256": "638eb3fdc57bacd2b7243c473e3328e49a1a06217ea679419542c772f7179232",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261101-updates-200": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261101-updates-200": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_199.pt",
+          "checkpoint_sha256": "6df67bf3b4cd6e55978049cde8e953da67d774f91bd78093112a8aa9b64f6a29",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+            "checkpoint_manifest_sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+              "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+            "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261101.json",
+          "policy_config_sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 11,
+          "success_rate_all_attempts": 0.34375,
+          "termination_counts": {
+            "episode_timeout": 21,
+            "independent_success": 11
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261101-updates-200",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.03125,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.15625,
+          0.0625
+        ],
+        "candidate_only_successes": 1,
+        "reference_only_successes": 2
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/model_199.pt",
+          "sha256": "6df67bf3b4cd6e55978049cde8e953da67d774f91bd78093112a8aa9b64f6a29"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/checkpoint_manifest.json",
+          "sha256": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/training_provenance.json",
+          "sha256": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261101/rj45-v1/2026-10-27_04-00-34/runner_config.json",
+          "sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f"
+        },
+        "training_seed": 20261101,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 200,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "36a6200d40dd217dbd69c3e8685cc96f0b8e397874a3d2296947064089731604",
+          "pre_bias_sha256": "33e6cc47f3f6c44c63d1fc989bd40ee6cac7ff153bf25594fe310bf092dca174",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261101-model_199.json",
+          "sha256": "497e3892165ff8805ca57ca4e616f5d38c73ecefb08d7a332b893f6a4aa0ddc4",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261102-updates-20": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261102-updates-20": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_19.pt",
+          "checkpoint_sha256": "339a1b3adf83dfa43ce25f03d340df2bbb17d3f294d5c454e8c34e286c5e2210",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+            "checkpoint_manifest_sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+              "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+            "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261102.json",
+          "policy_config_sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 10,
+          "success_rate_all_attempts": 0.3125,
+          "termination_counts": {
+            "episode_timeout": 22,
+            "independent_success": 10
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261102-updates-20",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.0625,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.15625,
+          0.0
+        ],
+        "candidate_only_successes": 0,
+        "reference_only_successes": 2
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_19.pt",
+          "sha256": "339a1b3adf83dfa43ce25f03d340df2bbb17d3f294d5c454e8c34e286c5e2210"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/checkpoint_manifest.json",
+          "sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/training_provenance.json",
+          "sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json",
+          "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3"
+        },
+        "training_seed": 20261102,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 20,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+          "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261102-model_19.json",
+          "sha256": "55862863eb90d25ba30fa01e0b6da96950c4b62557db6c0ca18c7a19021a5586",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261102-updates-96": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261102-updates-96": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_95.pt",
+          "checkpoint_sha256": "ee00ce449e1e4af7c29aeb9811a61626f9f266e67fb9d9ae82b997d90e35cae2",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+            "checkpoint_manifest_sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+              "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+            "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261102.json",
+          "policy_config_sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261102-updates-96",
+        "reference": "baseline",
+        "paired_success_rate_difference": 0.0,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.09375,
+          0.09375
+        ],
+        "candidate_only_successes": 1,
+        "reference_only_successes": 1
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_95.pt",
+          "sha256": "ee00ce449e1e4af7c29aeb9811a61626f9f266e67fb9d9ae82b997d90e35cae2"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/checkpoint_manifest.json",
+          "sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/training_provenance.json",
+          "sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json",
+          "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3"
+        },
+        "training_seed": 20261102,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 96,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+          "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261102-model_95.json",
+          "sha256": "8111e2db010d3224efdf0dbaf092d8d1724f7c7eacbc21d501ab5e5d60a2f79e",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261102-updates-200": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261102-updates-200": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_199.pt",
+          "checkpoint_sha256": "92cb02137d9bcc7df3c0577ea9356f60d940f17d61471ad28be538d61df07cd2",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+            "checkpoint_manifest_sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+              "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+            "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261102.json",
+          "policy_config_sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 11,
+          "success_rate_all_attempts": 0.34375,
+          "termination_counts": {
+            "episode_timeout": 21,
+            "independent_success": 11
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261102-updates-200",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.03125,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.09375,
+          0.0
+        ],
+        "candidate_only_successes": 0,
+        "reference_only_successes": 1
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_199.pt",
+          "sha256": "92cb02137d9bcc7df3c0577ea9356f60d940f17d61471ad28be538d61df07cd2"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/checkpoint_manifest.json",
+          "sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/training_provenance.json",
+          "sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json",
+          "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3"
+        },
+        "training_seed": 20261102,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 200,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "c08e8db78e0dd7af4834f2894813048d78fd82346bfe58e1bae385d592c1750a",
+          "pre_bias_sha256": "3a3dc90660e047ce7d1cdf99bc196957e24e62f5f92a8255c85333050de1b882",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261102-model_199.json",
+          "sha256": "7a6f36ca61284dd5dd4f72fe3fc7984005f73346df5c7e76ed3bf32297272c60",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261103-updates-20": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261103-updates-20": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_19.pt",
+          "checkpoint_sha256": "c7b65da3c8074cf62f01ca53e2fb4219051349a57474e7e2b058ac579c1f4596",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+            "checkpoint_manifest_sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+              "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+            "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261103.json",
+          "policy_config_sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 7,
+          "success_rate_all_attempts": 0.21875,
+          "termination_counts": {
+            "episode_timeout": 25,
+            "independent_success": 7
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261103-updates-20",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.15625,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.34375,
+          0.03125
+        ],
+        "candidate_only_successes": 2,
+        "reference_only_successes": 7
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_19.pt",
+          "sha256": "c7b65da3c8074cf62f01ca53e2fb4219051349a57474e7e2b058ac579c1f4596"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/checkpoint_manifest.json",
+          "sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/training_provenance.json",
+          "sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/runner_config.json",
+          "sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b"
+        },
+        "training_seed": 20261103,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 20,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+          "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261103-model_19.json",
+          "sha256": "efd6dba83e4c0ea35acfed6f335a0f50b05c8129ee3ba608c9de9acf9675dacf",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261103-updates-96": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261103-updates-96": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_95.pt",
+          "checkpoint_sha256": "e897077b0567e8fbe379d3f47e5dc091c9988d1f7ffee0352a30a65a6e43bc07",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+            "checkpoint_manifest_sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+              "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+            "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261103.json",
+          "policy_config_sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 11,
+          "success_rate_all_attempts": 0.34375,
+          "termination_counts": {
+            "episode_timeout": 21,
+            "independent_success": 11
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261103-updates-96",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.03125,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.125,
+          0.0625
+        ],
+        "candidate_only_successes": 1,
+        "reference_only_successes": 2
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_95.pt",
+          "sha256": "e897077b0567e8fbe379d3f47e5dc091c9988d1f7ffee0352a30a65a6e43bc07"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/checkpoint_manifest.json",
+          "sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/training_provenance.json",
+          "sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/runner_config.json",
+          "sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b"
+        },
+        "training_seed": 20261103,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 96,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+          "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261103-model_95.json",
+          "sha256": "3a1b14b4d93d4fc89c21593daa98fcb9be23847aa07a57773184e57ad042c8d7",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    },
+    "seed-20261103-updates-200": {
+      "results": {
+        "baseline": {
+          "baseline_mode": "biased_zero",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": null,
+          "checkpoint_sha256": null,
+          "verified_checkpoint_evidence": null,
+          "policy_initialization": null,
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/configs/ppo-rj45-v1.json",
+          "policy_config_sha256": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 12,
+          "success_rate_all_attempts": 0.375,
+          "termination_counts": {
+            "episode_timeout": 20,
+            "independent_success": 12
+          }
+        },
+        "seed-20261103-updates-200": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_199.pt",
+          "checkpoint_sha256": "d9a50d8a26822f258e40dca9c6ac11f60431bd9f728262cafd203efa27649a9d",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+            "checkpoint_manifest_sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "7a3d495cfee9af9bd62801f80d5ad39617d54b6d81ab1deb07edae590711e9f9",
+              "nominal_report_sha256": "9ac3ef8abb9dd378ba41cb262510e4324c64f45ab1d8be4f4d4232ea5ae9a408",
+              "nominal_trace_sha256": "76589ce6724f258b31f0f8758e60c7740812d887fae6baa74afc3d4299b8ee50",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 64,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+              "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+            "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261103.json",
+          "policy_config_sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 9,
+          "success_rate_all_attempts": 0.28125,
+          "termination_counts": {
+            "episode_timeout": 23,
+            "independent_success": 9
+          }
+        }
+      },
+      "paired_contrast": {
+        "candidate": "seed-20261103-updates-200",
+        "reference": "baseline",
+        "paired_success_rate_difference": -0.09375,
+        "paired_bootstrap_95_percentile_interval": [
+          -0.21875,
+          0.0
+        ],
+        "candidate_only_successes": 0,
+        "reference_only_successes": 3
+      },
+      "scope": {
+        "verification_status": "report_proof_hashes_consistent_inputs_not_rehashed",
+        "description": "paired RJ45 evaluation audit with mutually consistent reported nominal/held proof hashes",
+        "data_limitations": [
+          "Calibration-bias cases report the same nominal/held proof hashes.",
+          "They are not independent grasp states, demonstrations, or sensor measurements.",
+          "Invalid episodes remain in the all-attempt denominator.",
+          "Bootstrap intervals are conditional on one evaluation seed and one reported held state.",
+          "Report proof hashes are consistency claims until referenced files are rehashed.",
+          "Policy initialization is report provenance until a training bundle is byte-verified."
+        ]
+      },
+      "gate_analyzer": "frozen_v1",
+      "posthoc_v2_semantics_match": true,
+      "training_artifact_verification": {
+        "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+        "checkpoint": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/model_199.pt",
+          "sha256": "d9a50d8a26822f258e40dca9c6ac11f60431bd9f728262cafd203efa27649a9d"
+        },
+        "checkpoint_manifest": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/checkpoint_manifest.json",
+          "sha256": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b"
+        },
+        "training_provenance": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/training_provenance.json",
+          "sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb"
+        },
+        "runner_config": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/runs/20261103/rj45-v1/2026-10-27_07-52-43/runner_config.json",
+          "sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b"
+        },
+        "training_seed": 20261103,
+        "training_num_envs": 64,
+        "rollout_steps_per_env": 128,
+        "planned_training_updates": 200,
+        "checkpoint_completed_updates": 200,
+        "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+        "initial_action_noise_std": 0.1,
+        "policy_initialization_status": "evaluation_and_training_provenance_match",
+        "policy_initialization": {
+          "mode": "residual_actor_final_linear_zero",
+          "zero_actor_output_layer": true,
+          "actor_module_path": "runner.alg.policy.actor",
+          "final_layer_index": 4,
+          "final_layer_class": "torch.nn.Linear",
+          "input_dimension": 79,
+          "output_dimension": 6,
+          "pre_weight_sha256": "4d0f82428cf4bb4de1710e49e35dee0db2699627c6e9698b6a5afca45a60aca5",
+          "pre_bias_sha256": "019b960a3f9a5a1caed89dc43f76a2ae0acf2e6acdaf75cfb047b1939f3904b9",
+          "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+          "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+          "weight_all_zero_after_initialization": true,
+          "bias_all_zero_after_initialization": true,
+          "deterministic_actor_test_input_count": 3,
+          "deterministic_actor_output_all_zero": true,
+          "deterministic_actor_output_max_abs": 0.0,
+          "stochastic_policy_noise_modified": false,
+          "method_reference": {
+            "title": "Residual Policy Learning",
+            "url": "https://arxiv.org/pdf/1812.06298",
+            "section": "IV-A",
+            "adaptation": "zero initialization of final residual actor mean layer only"
+          }
+        },
+        "checkpoint_inspection": {
+          "path": "/home/lim/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/snapshot-bd1ca6f152f2e89082a77b0fe8cb9d00e767afe8e900708a4ca985357a536d2a/inspections/seed-20261103-model_199.json",
+          "sha256": "53e5e20f35d6136c5212dd504c150e7ec13141dc18629d616f0eddb44ba014b4",
+          "status": "checkpoint_payload_and_lineage_verified"
+        },
+        "posthoc_v2_original_unverified": [
+          "source and non-runner config bytes referenced by training provenance",
+          "preregistered experiment plan"
+        ],
+        "summary_wrapper_cross_checks": {
+          "frozen_training_source_and_config_digests": "matched to the contract-hashed pre-run input manifest",
+          "preregistered_plan": "supplied bytes matched the pre-run input manifest and campaign contract"
+        },
+        "remaining_unverified": [
+          "Frozen training source/config bytes were not present in the retrieved snapshot; only their recorded digests were matched to the contract-hashed pre-run map."
+        ]
+      }
+    }
+  },
+  "common_checkpoint_selection": {
+    "candidates": [
+      {
+        "completed_updates": 20,
+        "successes_by_training_seed": {
+          "20261101": 10,
+          "20261102": 10,
+          "20261103": 7
+        },
+        "total_successes": 27,
+        "mean_successes": 9.0
+      },
+      {
+        "completed_updates": 96,
+        "successes_by_training_seed": {
+          "20261101": 10,
+          "20261102": 12,
+          "20261103": 11
+        },
+        "total_successes": 33,
+        "mean_successes": 11.0
+      },
+      {
+        "completed_updates": 200,
+        "successes_by_training_seed": {
+          "20261101": 11,
+          "20261102": 11,
+          "20261103": 9
+        },
+        "total_successes": 31,
+        "mean_successes": 10.333333333333334
+      }
+    ],
+    "selected": {
+      "completed_updates": 96,
+      "successes_by_training_seed": {
+        "20261101": 10,
+        "20261102": 12,
+        "20261103": 11
+      },
+      "total_successes": 33,
+      "mean_successes": 11.0
+    }
+  },
+  "promotion_gate": {
+    "baseline_successes": 12,
+    "attempts_per_policy": 32,
+    "minimum_training_seeds_strictly_above_baseline": 2,
+    "actual_training_seeds_strictly_above_baseline": 0,
+    "minimum_mean_successes": 15,
+    "actual_mean_successes": 11.0,
+    "zero_invalid_and_forbidden_contact_for_all_selected_models": true,
+    "passed": false,
+    "final_evaluation_seed_may_be_opened": false
+  },
+  "interpretation_limit": "The three learned policies share 32 calibration cases and one physical held grasp; they are not 96 independent physical grasp trials.",
+  "evidence_copy": {
+    "directory": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-paper-ablation/long-results",
+    "files_sha256": {
+      "inputs/long-run-plan.json": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c",
+      "inputs/baseline.json": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61",
+      "inputs/retrieval-manifest.json": "667d60b0219dfac125fee06cde9e03c13d708ffd4ad42255ac4f039257ec5507",
+      "inputs/remote-retrieval-payload.json": "5c98d331d01c4ba62798f849dc9666183f6192d7520af93e3c9caf3adc036cd9",
+      "inputs/campaign-contract.json": "35a113253752e37dc809f6ccf868118e7916c6baa10393699343047f7bcf4d1b",
+      "inputs/input-manifest.json": "7a6407b033d4560a83c194657b9af7c08d1972ec3b157297e183d1196b3d9f55",
+      "inputs/long-candidate.json": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868",
+      "inputs/frozen-gate-analyzer.py": "cdd087abb1298178cdf57b21a98c98c098da28d4730dd77b22429e72b37699a7",
+      "inputs/posthoc-bundle-analyzer-v2.py": "c23899444268dc14b711f99ef0a0552df4e313dff0f6265618dd1b7777563f76",
+      "raw/runs/20261101/checkpoint_manifest.json": "1d4cbda59319800f11ab9ac9c4805ffd365ba33ddb096d8ed2e06ff2bbc71cc9",
+      "raw/runs/20261101/training_provenance.json": "d425ef44c9ac3c8bbad7fbbada4af0903075b49e0dbb2e0590a1561520ab8ca3",
+      "raw/runs/20261101/runner_config.json": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f",
+      "raw/reports/seed-20261101-iter-19.json": "8c435c90960f35821a03e6b98f7e4f374c6d4641596b4f8b468002c4c5dbfa33",
+      "raw/inspections/seed-20261101-model_19.json": "2c3cbc7103a9dcb475d382b87a09045819000bda8df7e5b3cc93892c18d41479",
+      "raw/reports/seed-20261101-iter-95.json": "b8ab065cf9f1a882e55ed5d79892a3ca13cc4aac0560ff2be6988e377a1d952c",
+      "raw/inspections/seed-20261101-model_95.json": "638eb3fdc57bacd2b7243c473e3328e49a1a06217ea679419542c772f7179232",
+      "raw/reports/seed-20261101-iter-199.json": "c50098e37bcd0d29a40d0fa90da3ef81bde37a6588715cf3e58ae4fac3f1559f",
+      "raw/inspections/seed-20261101-model_199.json": "497e3892165ff8805ca57ca4e616f5d38c73ecefb08d7a332b893f6a4aa0ddc4",
+      "raw/runs/20261102/checkpoint_manifest.json": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+      "raw/runs/20261102/training_provenance.json": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+      "raw/runs/20261102/runner_config.json": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+      "raw/reports/seed-20261102-iter-19.json": "c69d42de6f6d67dd544f2a0f3a09e5b1f0f38889a457e3df0c3830141040ec49",
+      "raw/inspections/seed-20261102-model_19.json": "55862863eb90d25ba30fa01e0b6da96950c4b62557db6c0ca18c7a19021a5586",
+      "raw/reports/seed-20261102-iter-95.json": "49749b05acb9d0f1ab094e9fee50c62847a499b4062f48184a2d46018bc26021",
+      "raw/inspections/seed-20261102-model_95.json": "8111e2db010d3224efdf0dbaf092d8d1724f7c7eacbc21d501ab5e5d60a2f79e",
+      "raw/reports/seed-20261102-iter-199.json": "c162ee51b436b53fceb8c78be4c656afbb94553dcb4c4ef425ccfafd95566dd8",
+      "raw/inspections/seed-20261102-model_199.json": "7a6f36ca61284dd5dd4f72fe3fc7984005f73346df5c7e76ed3bf32297272c60",
+      "raw/runs/20261103/checkpoint_manifest.json": "9ce73b8e5d0788d8d3e77454734e3a4d8fe7ad90f79c2333e53e9ab9c666448b",
+      "raw/runs/20261103/training_provenance.json": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+      "raw/runs/20261103/runner_config.json": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b",
+      "raw/reports/seed-20261103-iter-19.json": "f7e0921b81f020921fed45057a7bbfc9fd742590dab2b8a94d91851166ed22ce",
+      "raw/inspections/seed-20261103-model_19.json": "efd6dba83e4c0ea35acfed6f335a0f50b05c8129ee3ba608c9de9acf9675dacf",
+      "raw/reports/seed-20261103-iter-95.json": "a290c6c1ec759b1c6876482bb33c3169bf5cfd3f97e2c704fb2340940964b742",
+      "raw/inspections/seed-20261103-model_95.json": "3a1b14b4d93d4fc89c21593daa98fcb9be23847aa07a57773184e57ad042c8d7",
+      "raw/reports/seed-20261103-iter-199.json": "76a6641db4a1401a5d45167a47ebcf10dc48ec9e0395a05f88db02b56f680846",
+      "raw/inspections/seed-20261103-model_199.json": "53e5e20f35d6136c5212dd504c150e7ec13141dc18629d616f0eddb44ba014b4"
+    },
+    "checkpoint_binaries_copied": false
+  }
+}

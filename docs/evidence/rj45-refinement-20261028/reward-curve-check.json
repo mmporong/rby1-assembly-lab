@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "scope": "CPU potential curve; no physical training success claim",
+  "lateral_errors_m": [
+    0.0,
+    2.5e-05,
+    4.9e-05,
+    5e-05,
+    5.1e-05,
+    7.5e-05,
+    0.0001,
+    0.00015,
+    0.0005,
+    0.001,
+    0.0015
+  ],
+  "fixed_depth_m": 0.012,
+  "quaternion_wxyz": [
+    1,
+    0,
+    0,
+    0
+  ],
+  "variants": {
+    "base": {
+      "config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+      "potential": [
+        1.0,
+        0.95,
+        0.902,
+        0.9,
+        0.898,
+        0.85,
+        0.8,
+        0.7,
+        0.0,
+        -1.0,
+        -2.0
+      ],
+      "improvement_100_to_50_um": 0.09999999999999998
+    },
+    "R": {
+      "config_sha256": "fe359ffa3fbd0489c68e2659e2139bd2b5a23f7517fc0b6e3f1430446ab7d43e",
+      "potential": [
+        1.0,
+        0.5,
+        0.02000000000000013,
+        0.0,
+        -0.020000000000000018,
+        -0.4999999999999998,
+        -1.0,
+        -1.9999999999999996,
+        -9.0,
+        -19.0,
+        -19.0
+      ],
+      "improvement_100_to_50_um": 1.0
+    }
+  },
+  "finite": true,
+  "monotone_nonincreasing_with_lateral_error": true,
+  "implementation_sha256": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7"
+}

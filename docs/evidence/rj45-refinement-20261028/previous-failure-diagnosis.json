@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "created_date": "2026-10-28",
+  "scope": "read-only diagnosis of Z1 3-seed x 200-update development results; no final holdout opened",
+  "confirmed_results": {
+    "baseline_successes": 12,
+    "attempts_per_checkpoint": 32,
+    "successes_by_training_seed_and_update": {
+      "20261101": {
+        "20": 10,
+        "96": 10,
+        "200": 11
+      },
+      "20261102": {
+        "20": 10,
+        "96": 12,
+        "200": 11
+      },
+      "20261103": {
+        "20": 7,
+        "96": 11,
+        "200": 9
+      }
+    },
+    "all_invalid_episode_counts": 0,
+    "all_max_forbidden_contact_load_n": 0.0,
+    "all_failure_termination_reason": "episode_timeout",
+    "failure_bottleneck": "final lateral error above 50 um; depth and orientation generally satisfied",
+    "final_lateral_error_um_by_outcome_ranges_across_nine_reports": {
+      "success_mean_range": [
+        24.4,
+        39.2
+      ],
+      "failure_mean_range": [
+        75.6,
+        82.8
+      ]
+    }
+  },
+  "hypotheses_ranked": [
+    {
+      "rank": 1,
+      "name": "zero-initialized actor interacts with per-mini-batch adaptive KL schedule",
+      "confidence": "learning-rate increase is observed and intentional library behavior; causal performance impact is unknown until fixed-LR comparison",
+      "evidence": {
+        "configured_learning_rate": 0.0003,
+        "schedule": "adaptive",
+        "desired_kl": 0.01,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "tensorboard_learning_rate": {
+          "20261101": {
+            "step0": 0.003417,
+            "step19": 0.002278,
+            "step95": 0.000256,
+            "step199": 7.6e-05,
+            "min": 1e-05,
+            "max": 0.005126
+          },
+          "20261102": {
+            "step0": 0.005126,
+            "step19": 0.001519,
+            "step95": 0.000114,
+            "step199": 0.000384,
+            "min": 1e-05,
+            "max": 0.005126
+          },
+          "20261103": {
+            "step0": 0.001519,
+            "step19": 0.001013,
+            "step95": 0.000171,
+            "step199": 0.000171,
+            "min": 1e-05,
+            "max": 0.005126
+          }
+        },
+        "exact_multiplier_match": "0.0003 * 1.5^7 = 0.00512578",
+        "rsl_rl_v3_0_1_source": {
+          "repository": "https://github.com/leggedrobotics/rsl_rl",
+          "commit": "2fc1f78bc1d796ffa8f07ce6b09898227db284bb",
+          "file": "rsl_rl/algorithms/ppo.py",
+          "lines": "260-287",
+          "behavior": "when KL is below desired_kl/2, learning rate is multiplied by 1.5 for each mini-batch, capped at 1e-2"
+        },
+        "value_loss": {
+          "20261101": {
+            "step19": 0.010605,
+            "step95": 0.665623,
+            "step199": 0.376221
+          },
+          "20261102": {
+            "step19": 0.008859,
+            "step95": 0.319803,
+            "step199": 0.892659
+          },
+          "20261103": {
+            "step19": 0.130289,
+            "step95": 0.382298,
+            "step199": 0.703459
+          }
+        }
+      },
+      "minimal_test": "keep Z1 unchanged except schedule=fixed and learning_rate=3e-4; compare the same frozen development conditions"
+    },
+    {
+      "rank": 2,
+      "name": "stochastic exploration remains larger than the lateral success window",
+      "confidence": "exploration scale exceeds the strict lateral tolerance; impairment of training precision remains a hypothesis",
+      "evidence": {
+        "initial_action_std": 0.1,
+        "translation_action_bound_m": 0.0015,
+        "initial_translation_std_um_per_axis": 150.0,
+        "success_lateral_threshold_um": 50.0,
+        "tensorboard_mean_noise_std_min_max": {
+          "20261101": [
+            0.077348,
+            0.101046
+          ],
+          "20261102": [
+            0.07384,
+            0.098876
+          ],
+          "20261103": [
+            0.083954,
+            0.099369
+          ]
+        },
+        "equivalent_translation_std_um_range": [
+          110.76,
+          151.57
+        ],
+        "entropy_coefficient": 0.005,
+        "pilot_directional_evidence": "std 0.6 A0 scored 0/32, std 0.1 E1 scored 7/32, and std 0.1 plus zero-init Z1 scored 10/32"
+      },
+      "minimal_test": "after fixed-LR result, keep fixed LR and reduce initial std to 0.02-0.03; retain entropy initially to isolate std"
+    },
+    {
+      "rank": 3,
+      "name": "legacy lateral shaping is ten times coarser than the success threshold and terminal credit is long-horizon sparse",
+      "confidence": "medium; report telemetry shows weak separation but prior discounted-shaping runs are exploration-confounded",
+      "evidence": {
+        "lateral_reward_scale_um": 500.0,
+        "success_lateral_threshold_um": 50.0,
+        "gamma": 0.995,
+        "lambda": 0.95,
+        "typical_policy_active_steps": "about 600",
+        "potential_progress_mean_success_range": [
+          1.4966,
+          1.5577
+        ],
+        "potential_progress_mean_failure_range": [
+          1.3821,
+          1.4284
+        ],
+        "terminal_bonus_success": 10.0,
+        "terminal_penalty_timeout": -3.0,
+        "action_cost_report_mean": "absolute value below 1e-4 in all nine reports",
+        "action_saturation": "zero in every evaluated episode"
+      },
+      "minimal_test": "after fixed-LR and lower-std tests, change only lateral scale toward 50 um or use a smooth threshold-margin term"
+    },
+    {
+      "rank": 4,
+      "name": "standard 79D policy failed to learn a lateral bias-cancelling map",
+      "confidence": "high for the observed behavior; unknown whether the cause is weak cue or optimization",
+      "evidence": {
+        "lateral_bias_norm_to_final_lateral_error_pearson_r": {
+          "baseline": 0.8618,
+          "seed20261101_update96": 0.861,
+          "seed20261102_update96": 0.8154,
+          "seed20261103_update96": 0.8541
+        },
+        "mean_final_lateral_error_um": {
+          "baseline": 59.92,
+          "seed20261101_update96": 62.82,
+          "seed20261102_update96": 61.92,
+          "seed20261103_update96": 63.01
+        },
+        "bias_lateral_norm_um_success_mean_median": {
+          "baseline": [
+            30.6,
+            24.7
+          ],
+          "seed20261101_update96": [
+            25.2,
+            20.2
+          ],
+          "seed20261102_update96": [
+            30.9,
+            24.7
+          ],
+          "seed20261103_update96": [
+            28.9,
+            21.7
+          ]
+        },
+        "paired_gain_loss_at_update96": {
+          "20261101": {
+            "overlap": 9,
+            "gain": 1,
+            "loss": 3
+          },
+          "20261102": {
+            "overlap": 11,
+            "gain": 1,
+            "loss": 1
+          },
+          "20261103": {
+            "overlap": 10,
+            "gain": 1,
+            "loss": 2
+          }
+        },
+        "paired_gain_loss_at_update200": {
+          "20261101": {
+            "overlap": 10,
+            "gain": 1,
+            "loss": 2
+          },
+          "20261102": {
+            "overlap": 11,
+            "gain": 0,
+            "loss": 1
+          },
+          "20261103": {
+            "overlap": 9,
+            "gain": 0,
+            "loss": 3
+          }
+        }
+      },
+      "minimal_diagnosis": "record valid 79D rollout observations and fit held-out linear/MLP probes from observation to the sampled bias 6D; separately run same zero-init, low-noise, fixed-LR setup with the existing 85D privileged diagnostic"
+    }
+  ],
+  "ruled_down_or_not_supported": [
+    {
+      "claim": "inactive setup steps dominate PPO samples",
+      "finding": "not supported",
+      "evidence": "mean inactive steps per episode were 4.19-4.41 at 30 Hz versus roughly 600 active steps"
+    },
+    {
+      "claim": "action clipping or residual bounds are the main limitation",
+      "finding": "not established for stochastic training; only deterministic evaluation saturation was measured",
+      "evidence": "all nine deterministic evaluation reports recorded zero saturation; this does not establish whether PPO training actions were clipped"
+    },
+    {
+      "claim": "empirical observation normalization being false is itself the root cause",
+      "finding": "not supported",
+      "evidence": "the 79D builder already scales position, rotation, joint, force, command, and tracking-error fields explicitly"
+    },
+    {
+      "claim": "the 79D observation is provably non-identifiable",
+      "finding": "not established",
+      "evidence": "fixed held start and scripted ALIGN can encode bias-correlated cues in joint pose and tracking error; existing 85D 20-update result used std 0.6 and no Z1 zero-init comparison"
+    }
+  ],
+  "observation_contract": {
+    "manual_scaling": {
+      "relative_position_x_z": "x1000",
+      "relative_position_depth": "/0.012",
+      "relative_quaternion_vector": "x 2/(1 degree)",
+      "arm_joint_position_velocity": "/pi",
+      "grip_and_entry_contact_force": "/8",
+      "previous_action": "unchanged",
+      "command_depth": "/0.012",
+      "joint_reference_error": "/0.03"
+    },
+    "entry_contact_force": "signed 3D vector in socket-entry frame",
+    "standard_observation_bias": "episode-fixed biased frozen estimator; no explicit bias latent",
+    "privileged_85d_mode": "appends normalized sampled translation and rotation bias 6D"
+  },
+  "provenance_discrepancy": {
+    "finding": "reports record base observation noise values of 1.5 mm and 1 degree, but the RJ45 training wrapper bypasses base noisy observation construction",
+    "actual_policy_input": "wrapper uses the frozen biased estimator without per-step Gaussian position/rotation noise",
+    "impact": "do not attribute Z1 failure to the reported 1.5 mm / 1 degree values; document them as inherited base config not applied to wrapper policy input"
+  },
+  "recommended_sequential_ablation": [
+    "Z1 with fixed LR 3e-4 only",
+    "same fixed LR with init noise std 0.02 only",
+    "same fixed LR and std 0.02 with lateral reward scale 50 um only",
+    "then 79D bias-predictability probe and matched 85D privileged diagnostic before adding data or multiple grasps",
+    "after a learning signal is demonstrated on the frozen held state, add multiple held grasps and separate train/development/generalization splits"
+  ],
+  "plan_risk": "Changing lateral_scale to exactly 50 um may create a steep or noisy gradient at the strict threshold; predeclare 50-100 um or use a smooth margin term and change only one reward dimension. Do not change LR, noise, and reward in one run if causal attribution is required.",
+  "code_references": [
+    {
+      "path": "configs/ppo-rj45-low-exploration-v1.json",
+      "lines": "10-45",
+      "sha256": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd"
+    },
+    {
+      "path": "configs/rj45-training-target-offset-v1.json",
+      "lines": "17-34",
+      "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    {
+      "path": "configs/tasks/rj45-v1.json",
+      "lines": "137-152",
+      "sha256": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772"
+    },
+    {
+      "path": "src/rby1_assembly/rj45_training.py",
+      "lines": "789-810, 865-983, 986-1101",
+      "sha256": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7"
+    },
+    {
+      "path": "src/rby1_assembly/rj45_training_env.py",
+      "lines": "1006-1093, 1187-1303, 1548-1754",
+      "sha256": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5"
+    },
+    {
+      "path": "src/rby1_assembly/isaac_env.py",
+      "lines": "716-726",
+      "sha256": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a"
+    }
+  ],
+  "artifact_sha256": {
+    "baseline_report": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61",
+    "tensorboard_20261101": "d7cec7c93e858f34e06dc8e6c7278644c52408f9931b43aa0d6daa9ec3013b56",
+    "tensorboard_20261102": "19fd49f2e85cd52b977a3b535c373be1586b6aa9fc98a97b0daece7a2567c435",
+    "tensorboard_20261103": "af5f7eae314ca3fb056205fe79de131950c2e404d39643737d891abacebfe4a9",
+    "report_20261101_20": "8c435c90960f35821a03e6b98f7e4f374c6d4641596b4f8b468002c4c5dbfa33",
+    "report_20261101_96": "b8ab065cf9f1a882e55ed5d79892a3ca13cc4aac0560ff2be6988e377a1d952c",
+    "report_20261101_200": "c50098e37bcd0d29a40d0fa90da3ef81bde37a6588715cf3e58ae4fac3f1559f",
+    "report_20261102_20": "c69d42de6f6d67dd544f2a0f3a09e5b1f0f38889a457e3df0c3830141040ec49",
+    "report_20261102_96": "49749b05acb9d0f1ab094e9fee50c62847a499b4062f48184a2d46018bc26021",
+    "report_20261102_200": "c162ee51b436b53fceb8c78be4c656afbb94553dcb4c4ef425ccfafd95566dd8",
+    "report_20261103_20": "f7e0921b81f020921fed45057a7bbfc9fd742590dab2b8a94d91851166ed22ce",
+    "report_20261103_96": "a290c6c1ec759b1c6876482bb33c3169bf5cfd3f97e2c704fb2340940964b742",
+    "report_20261103_200": "76a6641db4a1401a5d45167a47ebcf10dc48ec9e0395a05f88db02b56f680846"
+  },
+  "diagnostic_source_file_sha256": "fa2654e657cf96650bcb11ec4a09160afc5a5792853bbca1b9bb32a4fe614a65"
+}

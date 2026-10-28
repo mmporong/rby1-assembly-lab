@@ -21,6 +21,7 @@ from rby1_assembly.run_provenance import (  # noqa: E402
     RunInputSnapshot,
     capture_run_inputs,
 )
+from rby1_assembly.training_telemetry import observation_noise_contract  # noqa: E402
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -422,7 +423,7 @@ if args.checkpoint is not None and not args.checkpoint.is_file():
     parser.error(f"checkpoint does not exist: {args.checkpoint}")
 if not args.config.is_file():
     parser.error(f"config does not exist: {args.config}")
-launcher = AppLauncher(args)
+launcher = AppLauncher(args, multi_gpu=False)
 simulation_app = launcher.app
 
 import torch  # noqa: E402
@@ -723,11 +724,20 @@ def main() -> int:
                     "runtime_versions": current_versions,
                     "physics_dt_s": cfg.sim.dt, "control_decimation": cfg.decimation,
                     "control_dt_s": cfg.sim.dt * cfg.decimation,
-                    "observation_noise": {
-                        "distribution": "independent_zero_mean_gaussian_position_and_rotation_vector",
-                        "position_std_m": cfg.observation_position_noise_std_m,
-                        "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
-                    },
+                    "observation_noise": observation_noise_contract(
+                        task="rj45",
+                        configured_position_std_m=(
+                            cfg.observation_position_noise_std_m
+                        ),
+                        configured_rotation_vector_std_rad=(
+                            cfg.observation_rotation_noise_std_rad
+                        ),
+                        calibration_bias=training_config["calibration_bias"],
+                        bias_level=training_config["calibration_bias"][
+                            "initial_level"
+                        ],
+                        calibration_bias_enabled=True,
+                    ),
                     "baseline_controller_state_source": (
                         "joint_encoder_frozen_grasp_estimator_with_episode_fixed_"
                         "calibration_bias"
@@ -1097,13 +1107,34 @@ def main() -> int:
                     "torch": torch.__version__,
                     "physics_backend": "PhysX through Isaac Sim",
                 },
+                "selected_device": str(args.device),
+                "app_launcher_gpu_contract": {
+                    "multi_gpu": False,
+                    "cuda_visible_devices_modified": False,
+                },
                 "physics_dt_s": float(cfg.sim.dt),
                 "control_decimation": int(cfg.decimation),
                 "control_dt_s": float(cfg.sim.dt * cfg.decimation),
-                "observation_noise": {
-                    "position_std_m": float(cfg.observation_position_noise_std_m),
-                    "rotation_std_rad": float(cfg.observation_rotation_noise_std_rad),
-                },
+                "observation_noise": observation_noise_contract(
+                    task=args.task,
+                    configured_position_std_m=cfg.observation_position_noise_std_m,
+                    configured_rotation_vector_std_rad=(
+                        cfg.observation_rotation_noise_std_rad
+                    ),
+                    calibration_bias=(
+                        training_config["calibration_bias"]
+                        if args.task == "rj45"
+                        else None
+                    ),
+                    bias_level=(
+                        training_config["calibration_bias"]["initial_level"]
+                        if args.task == "rj45"
+                        else None
+                    ),
+                    calibration_bias_enabled=(
+                        args.baseline_mode != "oracle" if args.task == "rj45" else True
+                    ),
+                ),
                 "parameter_provenance": "simulation_design_assumptions_not_hardware_calibration",
             },
         }

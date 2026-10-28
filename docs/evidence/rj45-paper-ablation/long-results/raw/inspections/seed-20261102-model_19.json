@@ -1,0 +1,41 @@
+{
+  "schema_version": 2,
+  "status": "checkpoint_payload_and_lineage_verified",
+  "checkpoint": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/model_19.pt",
+    "sha256": "339a1b3adf83dfa43ce25f03d340df2bbb17d3f294d5c454e8c34e286c5e2210",
+    "filename_iteration": 19,
+    "payload_iteration": 19,
+    "completed_updates": 20
+  },
+  "planned_training_updates": 200,
+  "checkpoint_manifest": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/checkpoint_manifest.json",
+    "sha256": "71f308222adedcaba649d7b86f1b2a07d67ac9fed3838edfc89ff3b32c2f2ae8",
+    "training_completed": true
+  },
+  "training_provenance": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/training_provenance.json",
+    "sha256": "ec503725a1d96ef7f1189a4d562e5193787e89cbfe247bfad098cee7bed56b4a",
+    "seed": 20261102
+  },
+  "runner_config": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-retry-20261027/runs/20261102/rj45-v1/2026-10-27_05-56-34/runner_config.json",
+    "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3",
+    "seed": 20261102
+  },
+  "loader": {
+    "map_location": "cpu",
+    "weights_only": true
+  },
+  "completion_derivation": {
+    "formula": "completed_updates = checkpoint payload iter + 1",
+    "training_mode_basis": "assumed_fresh_no_resume_requires_review_of_pinned_training_script",
+    "checkpoint_scope": "checkpoints created in this run directory",
+    "rsl_rl_version": "3.0.1",
+    "training_script": {
+      "path": "/home/ubuntu/rby1-assembly-lab/scripts/train.py",
+      "sha256": "70bfb8f2163e07a065695de8422fa32a511a9ef408f9fc21d7a62dee97951eb2"
+    }
+  }
+}

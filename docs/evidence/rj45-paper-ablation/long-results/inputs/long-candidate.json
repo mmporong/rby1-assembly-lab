@@ -1,0 +1,297 @@
+{
+  "schema_version": 2,
+  "decision": {
+    "selected_group": "Z1",
+    "selected_successes_all_attempts": 10,
+    "attempts": 32,
+    "selection_metric": "strict-v1 successes_all_attempts",
+    "tie_break_order": [
+      "Z1",
+      "E1",
+      "A2",
+      "A1",
+      "A0"
+    ],
+    "reward_sums_used": false
+  },
+  "ranking": [
+    {
+      "group": "Z1",
+      "eligible": true,
+      "successes_all_attempts": 10,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "maximum_forbidden_contact_load_peak_n": 0.0,
+      "checkpoint_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+      "tie_break_position": 0,
+      "exclusion_reasons": []
+    },
+    {
+      "group": "E1",
+      "eligible": true,
+      "successes_all_attempts": 7,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "maximum_forbidden_contact_load_peak_n": 0.0,
+      "checkpoint_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+      "tie_break_position": 1,
+      "exclusion_reasons": []
+    },
+    {
+      "group": "A2",
+      "eligible": true,
+      "successes_all_attempts": 3,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "maximum_forbidden_contact_load_peak_n": 0.0,
+      "checkpoint_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+      "tie_break_position": 2,
+      "exclusion_reasons": []
+    },
+    {
+      "group": "A1",
+      "eligible": true,
+      "successes_all_attempts": 0,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "maximum_forbidden_contact_load_peak_n": 0.0,
+      "checkpoint_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+      "tie_break_position": 3,
+      "exclusion_reasons": []
+    },
+    {
+      "group": "A0",
+      "eligible": true,
+      "successes_all_attempts": 0,
+      "attempts": 32,
+      "invalid_episodes": 0,
+      "maximum_forbidden_contact_load_peak_n": 0.0,
+      "checkpoint_bundle_status": "checkpoint_manifest_provenance_runner_bytes_verified",
+      "tie_break_position": 4,
+      "exclusion_reasons": []
+    }
+  ],
+  "verification_scope": {
+    "status": "raw_reports_and_training_bundles_rehashed_and_fresh_analyzer_replayed",
+    "success_interpretation": "Evaluator-reported terminal metrics were revalidated by the frozen paired analyzer, with the declared 13 mm upper depth checked here.",
+    "unverified": [
+      "Force, relative-velocity, and dwell time histories are not independently recomputed; their thresholds and evaluator-reported terminal outcome remain tied to the frozen task config and evaluator.",
+      "CUDA calibration RNG vectors are not regenerated on CPU; exact vectors and canonical case IDs are compared across the six raw reports."
+    ]
+  },
+  "selected_profile": {
+    "training_config": {
+      "path": "configs/rj45-training-target-offset-v1.json",
+      "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    "ppo_config": {
+      "path": "configs/ppo-rj45-low-exploration-v1.json",
+      "sha256": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd"
+    },
+    "zero_init_actor_output": true
+  },
+  "candidate_evidence": {
+    "A0": {
+      "raw_report": {
+        "path": "artifacts/rj45-paper-ablation/A0.json",
+        "sha256": "2652372c1bd43481f2d24e5aebeb681519801023fe454512083808ad1c2cef64"
+      },
+      "checkpoint_bundle": {
+        "checkpoint": {
+          "path": "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/model_19.pt",
+          "sha256": "1c78e8f5627cb648873b0770d4432f798ed035feb16334ee743bd84e0ecbdf37"
+        },
+        "checkpoint_manifest": {
+          "path": "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/checkpoint_manifest.json",
+          "sha256": "e43513c9ada74a0d634a8a91630d3bf9d2f7c5b16fe154e9d72c671ecfd9419c"
+        },
+        "training_provenance": {
+          "path": "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/training_provenance.json",
+          "sha256": "1337ca1396e7a580b6db5cf5e31da4d55deefc2f27975030ca88784b0e6fad9c"
+        },
+        "runner_config": {
+          "path": "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/runner_config.json",
+          "sha256": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87"
+        }
+      }
+    },
+    "A1": {
+      "raw_report": {
+        "path": "artifacts/rj45-paper-ablation/A1.json",
+        "sha256": "b547404d7b02cf6870fa9e463fc6f6e70f426e25bcfe955897919ac46c26cd0f"
+      },
+      "checkpoint_bundle": {
+        "checkpoint": {
+          "path": "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/model_19.pt",
+          "sha256": "6a1a81ea3aeea00f348c9468348f2f7094c1b441ea94bd80a39133c779a1ce0c"
+        },
+        "checkpoint_manifest": {
+          "path": "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/checkpoint_manifest.json",
+          "sha256": "99a2f095ad0b1826200d4291e784fb378b76b8dc5587683e4d8a7b80695dd991"
+        },
+        "training_provenance": {
+          "path": "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/training_provenance.json",
+          "sha256": "d653f69547e53f3b0f1d290ddcb1e42eeed3ade035bf9828d2ba945528780a72"
+        },
+        "runner_config": {
+          "path": "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/runner_config.json",
+          "sha256": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87"
+        }
+      }
+    },
+    "A2": {
+      "raw_report": {
+        "path": "artifacts/rj45-paper-ablation/A2.json",
+        "sha256": "dfa91e166c94e4b43fa2c5af8c6762ed82efd0a1c5dce3ff28cc1667fa02d2b1"
+      },
+      "checkpoint_bundle": {
+        "checkpoint": {
+          "path": "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/model_19.pt",
+          "sha256": "c38451e0b7a6c15cf0a48b6c64038adb84a1807cf677a4f3eed475a2d8d39a58"
+        },
+        "checkpoint_manifest": {
+          "path": "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/checkpoint_manifest.json",
+          "sha256": "2bde4f9cc65c3635406e87403ebaf2d417813f854701fc9c6cfc52310953c60d"
+        },
+        "training_provenance": {
+          "path": "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/training_provenance.json",
+          "sha256": "84972a38d7ee4825de8c20f52f8656d151df11a9ec0a76003d42414ea94f5f6a"
+        },
+        "runner_config": {
+          "path": "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/runner_config.json",
+          "sha256": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87"
+        }
+      }
+    },
+    "E1": {
+      "raw_report": {
+        "path": "artifacts/rj45-paper-ablation/E1.json",
+        "sha256": "d339edc51e3139d6053757ad35b4c4fc7c5496f7ae50ad2fc3d9ad2ad8968db1"
+      },
+      "checkpoint_bundle": {
+        "checkpoint": {
+          "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/model_19.pt",
+          "sha256": "f14c282c17c0e14291ec66318923af57fec1f883cae9aace267846ae72b7a972"
+        },
+        "checkpoint_manifest": {
+          "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/checkpoint_manifest.json",
+          "sha256": "475e841f2d93fe13fcbda2369292ded374e19fdff9eba7bbeba62bd53018b147"
+        },
+        "training_provenance": {
+          "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/training_provenance.json",
+          "sha256": "263b41fbf69bee265febc52866a73fd19ab22624d86315fde81a83f5b5ec9a6c"
+        },
+        "runner_config": {
+          "path": "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/runner_config.json",
+          "sha256": "796f630bddc1a8d4f3310f5143e1101e6b38efeb81a6c16d0cc4af674c43487e"
+        }
+      }
+    },
+    "Z1": {
+      "raw_report": {
+        "path": "artifacts/rj45-paper-ablation/Z1.json",
+        "sha256": "b887f85ca4b90698361430c59655ce3b99d21bd0c8f20c66b8f245d5e2322860"
+      },
+      "checkpoint_bundle": {
+        "checkpoint": {
+          "path": "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/model_19.pt",
+          "sha256": "0ca5231c1defaef58f782f1b38b93717368034fbeca4271c12111c538652f2c8"
+        },
+        "checkpoint_manifest": {
+          "path": "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/checkpoint_manifest.json",
+          "sha256": "cfc7a746740c339e2efaf1e1b4c6ed0e8081fd823c097306881f8cf3cc2db4df"
+        },
+        "training_provenance": {
+          "path": "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/training_provenance.json",
+          "sha256": "6a5e2f957a0b793be310ac2cff22eb7c6f881e5ae035ab1c9c3d7ed8a01b8444"
+        },
+        "runner_config": {
+          "path": "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/runner_config.json",
+          "sha256": "796f630bddc1a8d4f3310f5143e1101e6b38efeb81a6c16d0cc4af674c43487e"
+        }
+      }
+    }
+  },
+  "inputs": {
+    "stored_paired_audit": {
+      "path": "artifacts/rj45-paper-ablation/paired-audit.json",
+      "sha256": "ba19af686fcc5b997709d7a761339281b9f0295c787c82ca2a14a58188a9b091"
+    },
+    "long_run_plan": {
+      "path": "docs/evidence/rj45-paper-ablation/long-run-plan.json",
+      "sha256": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c",
+      "expected_sha256_provenance": "caller_supplied",
+      "provenance_note": "This program does not authenticate the caller-supplied value's remote origin."
+    },
+    "parent_pilot_plan": {
+      "path": "docs/evidence/rj45-paper-ablation/experiment-plan.json",
+      "sha256": "d6520ccd7ad0e2c287c58b9b691924d5446f66d749e5daeee92735445ba0cb42"
+    },
+    "frozen_analyzer": {
+      "path": "scripts/analyze_rj45_paired.py",
+      "sha256": "cdd087abb1298178cdf57b21a98c98c098da28d4730dd77b22429e72b37699a7"
+    },
+    "raw_evidence_sha256": {
+      "artifacts/rj45-paper-ablation/A0.json": "2652372c1bd43481f2d24e5aebeb681519801023fe454512083808ad1c2cef64",
+      "artifacts/rj45-paper-ablation/A1.json": "b547404d7b02cf6870fa9e463fc6f6e70f426e25bcfe955897919ac46c26cd0f",
+      "artifacts/rj45-paper-ablation/A2.json": "dfa91e166c94e4b43fa2c5af8c6762ed82efd0a1c5dce3ff28cc1667fa02d2b1",
+      "artifacts/rj45-paper-ablation/E1.json": "d339edc51e3139d6053757ad35b4c4fc7c5496f7ae50ad2fc3d9ad2ad8968db1",
+      "artifacts/rj45-paper-ablation/Z1.json": "b887f85ca4b90698361430c59655ce3b99d21bd0c8f20c66b8f245d5e2322860",
+      "artifacts/rj45-paper-ablation/baseline.json": "b1c82b3704dae971abae41d91e88f6e6e2c94f625132fc06cea8a8d2dc47da61",
+      "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/checkpoint_manifest.json": "e43513c9ada74a0d634a8a91630d3bf9d2f7c5b16fe154e9d72c671ecfd9419c",
+      "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/model_19.pt": "1c78e8f5627cb648873b0770d4432f798ed035feb16334ee743bd84e0ecbdf37",
+      "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/runner_config.json": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87",
+      "artifacts/rj45-paper-ablation/runs/A0/rj45-v1/2026-10-27_02-23-51/training_provenance.json": "1337ca1396e7a580b6db5cf5e31da4d55deefc2f27975030ca88784b0e6fad9c",
+      "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/checkpoint_manifest.json": "99a2f095ad0b1826200d4291e784fb378b76b8dc5587683e4d8a7b80695dd991",
+      "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/model_19.pt": "6a1a81ea3aeea00f348c9468348f2f7094c1b441ea94bd80a39133c779a1ce0c",
+      "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/runner_config.json": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87",
+      "artifacts/rj45-paper-ablation/runs/A1/rj45-v1/2026-10-27_02-39-01/training_provenance.json": "d653f69547e53f3b0f1d290ddcb1e42eeed3ade035bf9828d2ba945528780a72",
+      "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/checkpoint_manifest.json": "2bde4f9cc65c3635406e87403ebaf2d417813f854701fc9c6cfc52310953c60d",
+      "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/model_19.pt": "c38451e0b7a6c15cf0a48b6c64038adb84a1807cf677a4f3eed475a2d8d39a58",
+      "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/runner_config.json": "4b42c3998a52ed7c8b48c5217bb0644efa62d657e9a31e5e1706884ee5c26e87",
+      "artifacts/rj45-paper-ablation/runs/A2/rj45-v1/2026-10-27_02-54-13/training_provenance.json": "84972a38d7ee4825de8c20f52f8656d151df11a9ec0a76003d42414ea94f5f6a",
+      "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/checkpoint_manifest.json": "475e841f2d93fe13fcbda2369292ded374e19fdff9eba7bbeba62bd53018b147",
+      "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/model_19.pt": "f14c282c17c0e14291ec66318923af57fec1f883cae9aace267846ae72b7a972",
+      "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/runner_config.json": "796f630bddc1a8d4f3310f5143e1101e6b38efeb81a6c16d0cc4af674c43487e",
+      "artifacts/rj45-paper-ablation/runs/E1/rj45-v1/2026-10-27_03-09-21/training_provenance.json": "263b41fbf69bee265febc52866a73fd19ab22624d86315fde81a83f5b5ec9a6c",
+      "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/checkpoint_manifest.json": "cfc7a746740c339e2efaf1e1b4c6ed0e8081fd823c097306881f8cf3cc2db4df",
+      "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/model_19.pt": "0ca5231c1defaef58f782f1b38b93717368034fbeca4271c12111c538652f2c8",
+      "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/runner_config.json": "796f630bddc1a8d4f3310f5143e1101e6b38efeb81a6c16d0cc4af674c43487e",
+      "artifacts/rj45-paper-ablation/runs/Z1/rj45-v1/2026-10-27_03-24-31/training_provenance.json": "6a5e2f957a0b793be310ac2cff22eb7c6f881e5ae035ab1c9c3d7ed8a01b8444"
+    },
+    "immutable_inputs_sha256": {
+      "configs/ppo-rj45-low-exploration-v1.json": "ccbdaddfa0be15406174c31a5ef9a2651e2e46e97f4ac71b4ec8fb86f027dffd",
+      "configs/ppo-rj45-v1.json": "7229da017a96a17fc9293d7221b59e496449a99f52a8a295f2c13b5d674e9c65",
+      "configs/rj45-training-target-offset-a1-discounted-pose-v2.json": "f2ccc9c6c4421481399720c56221644a6e6fb276d926359094ed3afcfb6daa28",
+      "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json": "f54a91193cfb38b841b6111ee41a96efac5377d5cc1b61ec1ec7dac57f081df8",
+      "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+      "configs/tasks/rj45-v1.json": "7531a355d47f8a6579530b84b92761682f3a2f40e00d2db5191bd4e5f7cfe772",
+      "scripts/analyze_rj45_paired.py": "cdd087abb1298178cdf57b21a98c98c098da28d4730dd77b22429e72b37699a7",
+      "scripts/evaluate_policy.py": "c9dca6af77a5db11d70e17687ed58162976f3c4d4d26ae2bbc55e874ab748e43",
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "9913ffe78d1d938a5d52d9cc505432b9954bc6a594a843fc8b918f78358afa7e",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "72acf93110c9286d565cce5594bb7f32f07c9e8736e83b4d04232ea45907d20c",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_task.py": "068bc79446d0de15ab1075466ed41b75aa0be8c290c8e0254ab003cf3e4802da",
+      "src/rby1_assembly/rj45_training.py": "006da4ac23eae0ae0db08660438b6a13861280d02d00528d0da12612900cafb7",
+      "src/rby1_assembly/rj45_training_env.py": "2f14764f1d9f294cb767b34f39ce7832e8700ab691a9e3a47cc2fb84d31624c5",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    }
+  }
+}

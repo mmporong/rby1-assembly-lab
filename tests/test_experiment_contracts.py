@@ -858,8 +858,9 @@ class TrainingPreflightTests(unittest.TestCase):
                 "    @staticmethod\n"
                 "    def add_app_launcher_args(parser):\n"
                 "        parser.add_argument('--device', default='cpu')\n"
-                "    def __init__(self, args):\n"
-                "        raise AssertionError('launcher started')\n",
+                "    def __init__(self, args, **kwargs):\n"
+                "        assert kwargs == {'multi_gpu': False}\n"
+                "        raise AssertionError('launcher started with one-GPU contract')\n",
                 encoding="utf-8",
             )
             environment = dict(os.environ)
@@ -890,7 +891,7 @@ class TrainingPreflightTests(unittest.TestCase):
                 check=False,
             )
         self.assertNotEqual(completed.returncode, 2)
-        self.assertIn("launcher started", completed.stderr)
+        self.assertIn("launcher started with one-GPU contract", completed.stderr)
 
 
 if __name__ == "__main__":

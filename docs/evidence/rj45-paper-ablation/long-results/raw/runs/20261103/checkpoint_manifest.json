@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "training_completed": true,
+  "training_provenance_sha256": "0c8f433d55c2a1af45bb791e4d7bbbfa0945ebc0752d95f382b5a0de5be930fb",
+  "checkpoints": {
+    "model_0.pt": "69f33f75d7961cf0c57faf8826b3350ef08c52904da9437fd472be18fcedac5a",
+    "model_114.pt": "46cfa22ff1382d5dd6f735454f43ea4d755fa8b67ab5b50012bf1f26b9dc560d",
+    "model_133.pt": "53128151fca21ee3e97a6137b1dccc7ed223cec11beaa6009382ef727b0f2f9f",
+    "model_152.pt": "89f22675c119359264c389533e869f66c79f27cb87a63393d1ac1df1158975e1",
+    "model_171.pt": "2d254e6b84ecbef76306c1ff67b1c4ee15563a134e7fdd5f3af42541105b7d52",
+    "model_19.pt": "c7b65da3c8074cf62f01ca53e2fb4219051349a57474e7e2b058ac579c1f4596",
+    "model_190.pt": "13d5954f1937c30aab9edc5858e517f3c962c921b285261d18bcdf37dee3a830",
+    "model_199.pt": "d9a50d8a26822f258e40dca9c6ac11f60431bd9f728262cafd203efa27649a9d",
+    "model_38.pt": "7547aa6e677f97eed823c206228754d764714df84fda30b2c9f523cb9f631afa",
+    "model_57.pt": "d79b9af178558c9386894b146cc629d192cb589302c70e8181d31e57b3d60445",
+    "model_76.pt": "c50feeed6df88875929d7bb0788c3f55a53ec2b5633abbad774ef0da1a211efe",
+    "model_95.pt": "e897077b0567e8fbe379d3f47e5dc091c9988d1f7ffee0352a30a65a6e43bc07"
+  }
+}

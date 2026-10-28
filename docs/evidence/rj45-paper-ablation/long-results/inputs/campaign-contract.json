@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "plan": {
+    "path": "/home/ubuntu/rby1-assembly-lab/docs/evidence/rj45-paper-ablation/long-run-plan.json",
+    "sha256": "a818b2cd87709cd90ceb380872316cf15ea4b3f11bddb331bc05aeb5f543ba1c"
+  },
+  "selection": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/launch-manifest.json",
+    "sha256": "b4df208320f18552dcc014f1e8357aa24abb0b006c5901288880bcb6718b6669"
+  },
+  "candidate_selection": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-paper-ablation/long-candidate.json",
+    "sha256": "7d13e2276ae9a3c7e8f60efa74f500faad25c2819fac398adc8c4a93a9d4e868"
+  },
+  "input_manifest": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/input-manifest.json",
+    "sha256": "7a6407b033d4560a83c194657b9af7c08d1972ec3b157297e183d1196b3d9f55"
+  },
+  "guard_record": {
+    "path": "/home/ubuntu/rby1-assembly-lab/artifacts/cloud/rj45-long-guard-20261027.json",
+    "sha256": "7adc531650bdaf391a073d1776e2f78785ce19bd8442791d553a520c09f1bc02",
+    "verification_scope": "local_integrity_only_not_provider_authenticated"
+  },
+  "profile_label": "Z1",
+  "guard_started_utc": "2026-10-27T03:52:55Z",
+  "guard_deadline_utc": "2026-10-27T12:47:55Z",
+  "timer_target": "rby1-rj45-stop-20261027-b.timer",
+  "brev_instance": {
+    "id": "d1gwdve58",
+    "name": "rby1-assembly-20261025",
+    "organization": "mmporong-3ec75d-5yzu"
+  },
+  "training_seeds": [
+    20261101,
+    20261102,
+    20261103
+  ],
+  "seed_ppo_configs": {
+    "20261101": {
+      "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261101.json",
+      "sha256": "65a3b0f7d099c0e1e517e43436afc67a5718d3e59513e77d1fa00dc52cd0146f"
+    },
+    "20261102": {
+      "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261102.json",
+      "sha256": "c97f0762b45f32583d22a66e60271ff5fa3a63125375aaeb43c1145c24afe9d3"
+    },
+    "20261103": {
+      "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-long-inputs-retry-20261027/ppo-seed-20261103.json",
+      "sha256": "ff091ab99f6409098b981220faa262b8471e28a866713b7399ca0c8689dd023b"
+    }
+  },
+  "assessed_checkpoints": [
+    {
+      "filename": "model_19.pt",
+      "iteration_index": 19,
+      "completed_updates": 20
+    },
+    {
+      "filename": "model_95.pt",
+      "iteration_index": 95,
+      "completed_updates": 96
+    },
+    {
+      "filename": "model_199.pt",
+      "iteration_index": 199,
+      "completed_updates": 200
+    }
+  ],
+  "development_evaluation_seed": 20261028,
+  "validation_boundary": {
+    "checkpoint": "inspector helper reloaded payload bytes and bundle lineage",
+    "evaluation": "frozen paired analyzer revalidated finite episode outcomes, invalid aggregates, forbidden-contact terminal values, and provenance hashes",
+    "unverified": "force, relative-velocity, and dwell time histories are not independently recomputed by this campaign runner",
+    "hang_detection": "only an owned process group whose members are all OS-stopped (T/t) is classified as a confirmed hang; other quiet processes run until deadline or an independently verified failure"
+  },
+  "deadline_utc": "2026-10-27T12:47:55Z",
+  "final_holdout_opened": false
+}

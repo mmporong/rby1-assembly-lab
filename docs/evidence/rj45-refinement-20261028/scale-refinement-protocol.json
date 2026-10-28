@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "created_utc": "2026-10-28T03:49:14Z",
+  "scope": "prespecified compute scale selection and Z1 F N R matched development comparison",
+  "status": "protocol_frozen_before_runtime_benchmarks",
+  "final_seed_sealed": 20261027,
+  "compute": {
+    "instance_name": "rby1-rj45-4gpu-aws-20261028",
+    "instance_id": "ndntytgdv",
+    "gpu": "4 x NVIDIA L40S 48GB",
+    "vcpu": 96,
+    "catalog_price_per_hour_usd": 18.078708,
+    "guard_started_utc": "2026-10-28T03:44:14Z",
+    "guard_deadline_utc": "2026-10-28T09:44:14Z",
+    "max_wall_hours": 6,
+    "max_compute_estimate_usd": 105.0934,
+    "account_balance_verified": false,
+    "provider": "aws",
+    "instance_type": "g6e.24xlarge",
+    "provisioning_status": "DEPLOYING"
+  },
+  "scale_benchmark": {
+    "candidate_num_envs": [
+      64,
+      128,
+      256
+    ],
+    "transitions_per_update": 8192,
+    "steps_per_env": [
+      128,
+      64,
+      32
+    ],
+    "warmup_updates": 3,
+    "measured_updates": 5,
+    "seed": 20261110,
+    "profile": "Z1",
+    "rendering_enabled": false,
+    "comparison_metric": "environment_transitions_per_second_in_measured_PPO_updates",
+    "correctness_gates": [
+      "current_source_nominal_and_held_proof",
+      "parallel_contact_environment_order_verified",
+      "no_nonfinite_or_GPU_memory_errors",
+      "finite_actual_checkpoint_and_optimizer_state"
+    ],
+    "selection_rule": "among valid candidates within 10 percent of highest measured throughput choose smallest num_envs",
+    "performance_outcomes_used_for_selection": false,
+    "oom_policy": "record failure and exclude candidate; do not change physics or collision settings",
+    "historical_comparability": "num_envs and GAE rollout horizon can differ from previous 64x128; only the four newly matched profiles isolate the configured differences"
+  },
+  "refinement": {
+    "training_seed": 20261104,
+    "development_seed": 20261028,
+    "development_attempts": 32,
+    "development_num_envs": 32,
+    "updates": 96,
+    "transitions_per_update": 8192,
+    "transitions_per_profile": 786432,
+    "checkpoint_completed_updates": [
+      20,
+      96
+    ],
+    "selection_checkpoint_updates": 96,
+    "intermediate20_selection_allowed": false,
+    "zero_init_actor_output_all": true,
+    "profiles": [
+      {
+        "label": "Z1",
+        "changes": "reference: adaptive LR .0003, std .1, lateral scale .0005m",
+        "device": "cuda:0"
+      },
+      {
+        "label": "F",
+        "changes": "Z1 with fixed LR only",
+        "device": "cuda:1"
+      },
+      {
+        "label": "N",
+        "changes": "F with initial std .02 only",
+        "device": "cuda:2"
+      },
+      {
+        "label": "R",
+        "changes": "N with lateral scale .00005m only",
+        "device": "cuda:3"
+      }
+    ],
+    "fixed_parameters": [
+      "action authority",
+      "strict-v1 success criteria",
+      "entropy coefficient .005",
+      "minibatch size and learning epochs",
+      "episode horizon",
+      "physical held grasp",
+      "development calibration vectors"
+    ],
+    "selection": {
+      "candidates": [
+        "F",
+        "N",
+        "R"
+      ],
+      "maximum_selected": 1,
+      "metric": "strict_successes_all_32_attempts",
+      "eligibility": [
+        "zero invalid attempts",
+        "zero forbidden contact load",
+        "finite checkpoint and complete provenance",
+        "at least 3 additional successes versus fresh baseline",
+        "at least 3 additional successes versus fresh Z1 at 96 updates"
+      ],
+      "tie_order": [
+        "F",
+        "N",
+        "R"
+      ],
+      "none_eligible": "no final holdout; proceed to observability and demonstration-data diagnostics",
+      "next_validation": "selected configuration only, three new independent training seeds x 200 updates at matched transition budget; final selection rules frozen before launch"
+    },
+    "infrastructure_retry": "one retry only for independently observed infrastructure error before any model outcome; preserve failed attempt and same settings; no retry for low success"
+  },
+  "parallel_media": {
+    "capture_scope": "one actual Isaac Sim process containing concurrent independent environment clones",
+    "requested_fps": 60,
+    "physics_hz": 240,
+    "control_hz": 30,
+    "views": [
+      "whole environment grid",
+      "selected environment closeup"
+    ],
+    "raw_frame_tick_provenance_required": true,
+    "same_frame_montage_from_sequential_episodes_allowed": false,
+    "labels": [
+      "num_envs",
+      "actual environment IDs",
+      "simulation time",
+      "PPO completed update count",
+      "phase",
+      "insertion depth",
+      "lateral error",
+      "terminal success/failure"
+    ],
+    "recording_during_throughput_benchmark": false,
+    "learned_policy_claim_requires": "checkpoint SHA and actual runner evidence",
+    "capture_timing": "bounded separate training recording, not benchmark result selection",
+    "separate_capture_contract_required": [
+      "exact overview and closeup commands",
+      "source/config/held/contact hashes",
+      "seed and num_envs",
+      "raw video, frame JSONL, metadata and evidence hashes",
+      "actual PPO update indexing convention"
+    ]
+  },
+  "post_benchmark_launch_freeze": {
+    "required_before_any_refinement_training": true,
+    "artifacts": [
+      "five measured update timings per candidate and raw log SHA",
+      "correctness checks and topology-selection result",
+      "training.num_envs and num_steps_per_env with product exactly 8192",
+      "selected profile configs SHA after replacing only num_steps_per_env",
+      "current source and nominal/held/contact proof SHA",
+      "execution profile GPU map and CPU thread limits",
+      "actual provider identity and six-hour deadline",
+      "launch-plan JSON and full input-manifest JSON SHA"
+    ],
+    "validate_with": "scripts/run_rj45_refinement_campaign.py load_contract before starting baseline",
+    "current_config_status": "64x128 templates only; not an executable campaign contract",
+    "no_outcome_adaptation": "only throughput and predeclared correctness criteria choose topology; no success/reward results used"
+  },
+  "previous_provisioning_attempt": {
+    "instance_name": "rby1-rj45-scale-20261028",
+    "instance_id": "d04f116ri",
+    "status": "FAILURE",
+    "failure_stage": "provider_provisioning_before_ssh",
+    "failure_cause_known": false,
+    "training_started": false,
+    "provider": "nebius",
+    "instance_type": "gpu-l40s-d.4gpu-128vcpu-768gb"
+  }
+}

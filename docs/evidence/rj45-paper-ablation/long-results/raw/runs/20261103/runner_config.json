@@ -1,0 +1,53 @@
+{
+  "algorithm": {
+    "class_name": "PPO",
+    "clip_param": 0.2,
+    "desired_kl": 0.01,
+    "entropy_coef": 0.005,
+    "gamma": 0.995,
+    "lam": 0.95,
+    "learning_rate": 0.0003,
+    "max_grad_norm": 1.0,
+    "num_learning_epochs": 5,
+    "num_mini_batches": 4,
+    "schedule": "adaptive",
+    "use_clipped_value_loss": true,
+    "value_loss_coef": 1.0
+  },
+  "class_name": "OnPolicyRunner",
+  "clip_actions": 1.0,
+  "device": "cuda:0",
+  "empirical_normalization": false,
+  "experiment_name": "rby1_rj45_residual",
+  "logger": "tensorboard",
+  "max_iterations": 200,
+  "num_steps_per_env": 128,
+  "obs_groups": {
+    "critic": [
+      "policy"
+    ],
+    "policy": [
+      "policy"
+    ]
+  },
+  "policy": {
+    "activation": "elu",
+    "actor_hidden_dims": [
+      256,
+      256,
+      128
+    ],
+    "actor_obs_normalization": false,
+    "class_name": "ActorCritic",
+    "critic_hidden_dims": [
+      256,
+      256,
+      128
+    ],
+    "critic_obs_normalization": false,
+    "init_noise_std": 0.1
+  },
+  "run_name": "",
+  "save_interval": 19,
+  "seed": 20261103
+}

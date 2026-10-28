@@ -10,6 +10,7 @@ from datetime import datetime
 import hashlib
 from importlib import metadata
 import json
+import math
 from pathlib import Path
 import sys
 import traceback
@@ -18,6 +19,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from rby1_assembly.run_provenance import InputMutationError, capture_run_inputs  # noqa: E402
+from rby1_assembly.training_telemetry import (  # noqa: E402
+    make_action_telemetry_wrapper_type,
+    observation_noise_contract,
+)
+from rby1_assembly.parallel_training_video import (  # noqa: E402
+    ParallelTrainingVideoRecorder,
+)
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -177,6 +185,16 @@ parser.add_argument(
         "Linear layer; Gaussian policy noise remains configured by PPO"
     ),
 )
+parser.add_argument(
+    "--parallel-video",
+    type=Path,
+    help="record a bounded raw-camera clip during real vectorized PPO rollout steps",
+)
+parser.add_argument("--parallel-video-seconds", type=float, default=16.0)
+parser.add_argument("--parallel-video-fps", type=int, default=60)
+parser.add_argument(
+    "--parallel-video-view", choices=("overview", "closeup"), default="overview"
+)
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
@@ -191,6 +209,20 @@ if args.task == "rj45" and args.num_envs > 1 and args.parallel_contact_evidence 
     parser.error("parallel RJ45 training requires --parallel-contact-evidence")
 if args.zero_init_actor_output and args.task != "rj45":
     parser.error("--zero-init-actor-output is only supported for --task rj45")
+if args.parallel_video is not None:
+    if args.task != "rj45":
+        parser.error("--parallel-video is only supported for --task rj45")
+    if args.num_envs < 2:
+        parser.error("--parallel-video requires at least two simultaneous environments")
+    if not getattr(args, "enable_cameras", False):
+        parser.error("--parallel-video requires --enable_cameras")
+    if (
+        not math.isfinite(args.parallel_video_seconds)
+        or args.parallel_video_seconds <= 0.0
+    ):
+        parser.error("--parallel-video-seconds must be finite and positive")
+    if args.parallel_video_fps <= 0:
+        parser.error("--parallel-video-fps must be positive")
 try:
     task_path = PROJECT_ROOT / (
         "configs/tasks/rj45-v1.json" if args.task == "rj45" else "configs/task.json"
@@ -300,13 +332,17 @@ try:
         training_config = held_state = held_state_proof = parallel_contact_evidence = None
 except (OSError, ValueError, TypeError, KeyError, metadata.PackageNotFoundError) as error:
     parser.error(f"invalid training configuration: {error}")
-launcher = AppLauncher(args)
+launcher = AppLauncher(args, multi_gpu=False)
 simulation_app = launcher.app
 
 from rsl_rl.runners import OnPolicyRunner  # noqa: E402
 from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper  # noqa: E402
 import omni.kit.app  # noqa: E402
 from rby1_assembly.isaac_env import Rby1AssemblyEnv, Rby1AssemblyEnvCfg  # noqa: E402
+
+ActionTelemetryRslRlVecEnvWrapper = make_action_telemetry_wrapper_type(
+    RslRlVecEnvWrapper
+)
 
 
 def main() -> int:
@@ -316,6 +352,21 @@ def main() -> int:
     cfg.scene.num_envs = args.num_envs
     cfg.sim.device = args.device
     cfg.seed = runner_cfg["seed"]
+    if args.parallel_video is not None:
+        render_stride = round(1.0 / (cfg.sim.dt * args.parallel_video_fps))
+        if render_stride < 1 or not math.isclose(
+            render_stride * cfg.sim.dt * args.parallel_video_fps,
+            1.0,
+            rel_tol=0.0,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("parallel video FPS must divide the physics frequency")
+        cfg.sim.render_interval = render_stride
+        cfg.viewer.resolution = (
+            (1280, 720)
+            if args.parallel_video_view == "overview"
+            else (960, 720)
+        )
     if args.task == "rj45":
         validate_reward_horizon_contract(
             training_config, is_finite_horizon=cfg.is_finite_horizon
@@ -338,8 +389,26 @@ def main() -> int:
     _bootstrap_input_snapshot.assert_unchanged()
     input_snapshot.assert_unchanged()
     _bootstrap_input_snapshot.assert_preserved_in(input_snapshot)
-    env = env_type(cfg)
-    wrapped = RslRlVecEnvWrapper(env, clip_actions=runner_cfg.get("clip_actions", 1.0))
+    env = env_type(
+        cfg, render_mode="rgb_array" if args.parallel_video is not None else None
+    )
+    parallel_video = (
+        ParallelTrainingVideoRecorder(
+            env,
+            video_path=args.parallel_video,
+            seconds=args.parallel_video_seconds,
+            fps=args.parallel_video_fps,
+            view=args.parallel_video_view,
+            rollout_steps=runner_cfg["num_steps_per_env"],
+        )
+        if args.parallel_video is not None
+        else None
+    )
+    wrapped = ActionTelemetryRslRlVecEnvWrapper(
+        env,
+        clip_actions=runner_cfg.get("clip_actions", 1.0),
+        step_observer=parallel_video,
+    )
     selected_log_root = (
         args.log_root / "rj45-v1" if args.task == "rj45" else args.log_root
     )
@@ -375,6 +444,11 @@ def main() -> int:
             },
             "runtime_versions": runtime_versions,
             "seed": cfg.seed,
+            "selected_device": str(args.device),
+            "app_launcher_gpu_contract": {
+                "multi_gpu": False,
+                "cuda_visible_devices_modified": False,
+            },
             "num_envs": cfg.scene.num_envs,
             "task_id": "rj45-v1" if args.task == "rj45" else "toy",
             "collision_monitor_mode": (
@@ -392,10 +466,37 @@ def main() -> int:
             "physics_dt_s": cfg.sim.dt,
             "control_decimation": cfg.decimation,
             "control_dt_s": cfg.sim.dt * cfg.decimation,
-            "observation_noise": {
-                "distribution": "independent_zero_mean_gaussian_position_and_rotation_vector",
-                "position_std_m": cfg.observation_position_noise_std_m,
-                "rotation_vector_std_rad": cfg.observation_rotation_noise_std_rad,
+            "observation_noise": observation_noise_contract(
+                task=args.task,
+                configured_position_std_m=cfg.observation_position_noise_std_m,
+                configured_rotation_vector_std_rad=(
+                    cfg.observation_rotation_noise_std_rad
+                ),
+                calibration_bias=(
+                    training_config["calibration_bias"]
+                    if args.task == "rj45"
+                    else None
+                ),
+                bias_level=(
+                    training_config["calibration_bias"]["initial_level"]
+                    if args.task == "rj45"
+                    else None
+                ),
+                calibration_bias_enabled=True,
+            ),
+            "ppo_action_telemetry": {
+                "wrapper_clip_actions": runner_cfg.get("clip_actions", 1.0),
+                "scopes": ["all_rows", "policy_active_rows"],
+                "statistics": [
+                    "element_clip_fraction",
+                    "abs_max",
+                    "mean",
+                    "std",
+                ],
+                "environment_vector_norm_projection": (
+                    "separate_environment_action_application_telemetry"
+                ),
+                "full_action_time_series_recorded": False,
             },
             "baseline_controller_state_source": (
                 "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias"
@@ -405,6 +506,18 @@ def main() -> int:
             "checkpoint_scope": "checkpoints created in this run directory",
             "rj45_nominal_evidence": nominal_evidence,
         }
+        if parallel_video is not None:
+            lineage["parallel_training_video"] = {
+                "requested": True,
+                "video_path": str(parallel_video.video_path),
+                "frames_path": str(parallel_video.frames_path),
+                "metadata_path": str(parallel_video.metadata_path),
+                "evidence_path": str(parallel_video.evidence_path),
+                "view": args.parallel_video_view,
+                "capture_plan": parallel_video.plan,
+                "capture_scope": "real_vectorized_ppo_wrapped_step_only",
+                "postprocessing_in_training_process": False,
+            }
         if args.task == "rj45":
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
             observation_dimension = policy_observation_dimension(training_config)
@@ -455,10 +568,22 @@ def main() -> int:
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
         runner.add_git_repo_to_log(__file__)
-        runner.learn(
-            num_learning_iterations=runner_cfg["max_iterations"],
-            init_at_random_ep_len=False,
-        )
+        learning_completed = False
+        try:
+            if parallel_video is not None:
+                parallel_video.bind_runner(runner)
+                parallel_video.set_evidence_sources(
+                    lineage["source_and_config_sha256"]
+                )
+                parallel_video.initialize()
+            runner.learn(
+                num_learning_iterations=runner_cfg["max_iterations"],
+                init_at_random_ep_len=False,
+            )
+            learning_completed = True
+        finally:
+            if parallel_video is not None:
+                parallel_video.close(completed=learning_completed)
         if load_finite_json(provenance_path) != lineage:
             raise RuntimeError("training provenance changed during the experiment")
         for recorded_path, expected_sha256 in lineage["source_and_config_sha256"].items():
