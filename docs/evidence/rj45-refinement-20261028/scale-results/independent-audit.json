@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "audit_scope": "read-only independent verification of the recovered F three-seed 200-update campaign and closure of the 4B recovery-manifest gap",
+  "source_commit": "63f96e5951c7de4a4a5e804c0584c70721d05e8c",
+  "verdict": "approved_measurement_complete_promotion_false",
+  "retrieval": {
+    "archive_path": "artifacts/cloud/rj45-f-followup-retrieval-20261028.tar.gz",
+    "archive_sha256": "4b5b9ed8309ff62d57043d196fd40e1bc731abfb38179c790fcd4578cb90c9fc",
+    "archive_bytes": 95348450,
+    "extracted_path": "artifacts/cloud/retrieved-f-followup-20261028",
+    "archive_members": 115,
+    "regular_file_members": 115,
+    "unsafe_or_nonregular_members": 0,
+    "manifest_path": "artifacts/cloud/retrieved-f-followup-20261028/artifacts/cloud/rj45-f-followup-retrieval-20261028.tar.manifest.json",
+    "manifest_sha256": "178855c99103fbf9eedf09fc50e602500c18b47cae106dde4f37721c48346e04",
+    "manifest_listed_files": 114,
+    "manifest_files_rehashed": 114,
+    "missing_files": 0,
+    "hash_or_size_mismatches": 0,
+    "unlisted_extracted_files": [
+      "artifacts/cloud/rj45-f-followup-retrieval-20261028.tar.manifest.json"
+    ]
+  },
+  "campaign": {
+    "campaign_exit_code": 0,
+    "summary_path": "artifacts/cloud/retrieved-f-followup-20261028/artifacts/rj45-scale-runtime-20261028/f-followup-3seed-200-recovery-eula-v1/summary.json",
+    "summary_sha256": "777e7c4f74a7cceb6ce596c681643e7709dd28a66b8d2e2f5bfb5c95376c4a4f",
+    "training_seeds": [
+      20261141,
+      20261142,
+      20261143
+    ],
+    "selection_checkpoint_completed_updates": 200,
+    "diagnostic_checkpoint_completed_updates": [
+      20,
+      96
+    ],
+    "evaluation_reports_verified": 9,
+    "checkpoint_payloads_verified": 9,
+    "successes_at_200_updates": [
+      7,
+      10,
+      8
+    ],
+    "success_sum": 25,
+    "required_success_sum": 30,
+    "mean_successes_per_32": 8.333333333333334,
+    "required_mean_successes_per_32": 10.0,
+    "minimum_seed_successes_per_32": 7,
+    "required_minimum_seed_successes_per_32": 7,
+    "invalid_episodes_per_seed": [
+      0,
+      0,
+      0
+    ],
+    "forbidden_contact_load_peak_n_per_seed": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "promotion_boolean": false,
+    "training_transitions_total": 4915200,
+    "final_holdout_opened": false
+  },
+  "diagnostic_bootstrap": {
+    "replicates": 10000,
+    "seed": 20261144,
+    "paired_mean_success_rate_difference": 0.041666666666666664,
+    "percentile_95_interval": [
+      -0.0625,
+      0.14583333333333334
+    ],
+    "independently_recomputed": true,
+    "used_for_promotion_gate": false
+  },
+  "four_b_manifest_gap_closure": {
+    "manifest_path": "artifacts/cloud/retrieved-scale-4b-20261028/artifacts/rj45-scale-runtime-20261028/refinement/input-manifest-recovery-v1.json",
+    "manifest_sha256": "e8102b10d8d64bc19b82a41eb244a4479b2974f65471a65968f57453bdf9bcba",
+    "manifest_entries": 73,
+    "entries_rehashed": 73,
+    "missing_entries": 0,
+    "mismatched_entries": 0,
+    "supplement_files": {
+      "artifacts/cloud/rj45-prepare-refinement.py": "79766d65b7f6dd211ff5b4bbab64f43a3a122aafeb0cd00e2edadf538341bb93",
+      "artifacts/cloud/scale-refinement.exit": "4355a46b19d348dc2f57f046f8ef63d4538ebb936000f3c9ee954a27460dd865"
+    }
+  },
+  "claim_limits": [
+    "The campaign is a development-seed measurement and does not establish final-holdout or sim-to-real performance.",
+    "The promotion gate failed because the success sum and mean were below their frozen thresholds even though the per-seed minimum, invalid-attempt, and forbidden-contact gates passed.",
+    "The bootstrap interval is exploratory and was not used for promotion."
+  ]
+}

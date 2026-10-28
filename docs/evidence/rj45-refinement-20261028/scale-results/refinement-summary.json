@@ -1,0 +1,1386 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "execution": {
+    "mode": "parallel_profiles",
+    "profile_devices": {
+      "Z1": "cuda:0",
+      "F": "cuda:1",
+      "N": "cuda:2",
+      "R": "cuda:3"
+    },
+    "cpu_threads_per_profile": 8
+  },
+  "baseline": {
+    "device": "cuda:0",
+    "successes": 7,
+    "attempts": 32,
+    "report_sha256": "fe816a6e3dabc964b48497ebd5dbf44c0b7d03f82466e2cdd27285304a8693cf"
+  },
+  "profiles": {
+    "R": {
+      "20": {
+        "successes": 8,
+        "attempts": 32,
+        "report_sha256": "4bda3afa44c0e493a9003513ac732ca36f59cd5a7b2fd72474ef0b17924389f1",
+        "checkpoint_sha256": "c3d56b90d550af3b31b3ee9be253a26e06eec6f8bf76739e5c2430bd76db11a1",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-refinement-r.json",
+            "sha256": "fe359ffa3fbd0489c68e2659e2139bd2b5a23f7517fc0b6e3f1430446ab7d43e",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/model_19.pt",
+          "checkpoint_sha256": "c3d56b90d550af3b31b3ee9be253a26e06eec6f8bf76739e5c2430bd76db11a1",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "5fd3c99e5ec56dfd2b2a451c42af62697c60e887f2e02b5d72e6d9bc04e67f7f",
+            "checkpoint_manifest_sha256": "8c543923595a899ecd8ef991a627d35a31ac49fc140a4543ff9ede24e779c964",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-R.json",
+          "policy_config_sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 8,
+          "success_rate_all_attempts": 0.25,
+          "termination_counts": {
+            "episode_timeout": 24,
+            "independent_success": 8
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/model_19.pt",
+            "sha256": "c3d56b90d550af3b31b3ee9be253a26e06eec6f8bf76739e5c2430bd76db11a1"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/checkpoint_manifest.json",
+            "sha256": "8c543923595a899ecd8ef991a627d35a31ac49fc140a4543ff9ede24e779c964"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/training_provenance.json",
+            "sha256": "5fd3c99e5ec56dfd2b2a451c42af62697c60e887f2e02b5d72e6d9bc04e67f7f"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/runner_config.json",
+            "sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 20,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.02,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/R-iter-19.json",
+            "sha256": "30083dd23932bf305bd8317d139f12e66cd85b561edd07bb1784b4d11c104ec0",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      },
+      "96": {
+        "successes": 9,
+        "attempts": 32,
+        "report_sha256": "c1272861a7208d5746c92fe1af8062453fd4400c7fb83c4dd4b6395151d18eee",
+        "checkpoint_sha256": "a2e2256536c5247c4b40c7a075f5587e309ebca1d1935d433c56f43d43a7bf9e",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-refinement-r.json",
+            "sha256": "fe359ffa3fbd0489c68e2659e2139bd2b5a23f7517fc0b6e3f1430446ab7d43e",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/model_95.pt",
+          "checkpoint_sha256": "a2e2256536c5247c4b40c7a075f5587e309ebca1d1935d433c56f43d43a7bf9e",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "5fd3c99e5ec56dfd2b2a451c42af62697c60e887f2e02b5d72e6d9bc04e67f7f",
+            "checkpoint_manifest_sha256": "8c543923595a899ecd8ef991a627d35a31ac49fc140a4543ff9ede24e779c964",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-R.json",
+          "policy_config_sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 9,
+          "success_rate_all_attempts": 0.28125,
+          "termination_counts": {
+            "episode_timeout": 23,
+            "independent_success": 9
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/model_95.pt",
+            "sha256": "a2e2256536c5247c4b40c7a075f5587e309ebca1d1935d433c56f43d43a7bf9e"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/checkpoint_manifest.json",
+            "sha256": "8c543923595a899ecd8ef991a627d35a31ac49fc140a4543ff9ede24e779c964"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/training_provenance.json",
+            "sha256": "5fd3c99e5ec56dfd2b2a451c42af62697c60e887f2e02b5d72e6d9bc04e67f7f"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/R/rj45-v1/2026-10-28_05-26-05/runner_config.json",
+            "sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 96,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.02,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/R-iter-95.json",
+            "sha256": "9ffb7bea59545da270b1e5f7ed00a3fcebf5932a3cd872cd555d0e1b17bc4eaf",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      }
+    },
+    "N": {
+      "20": {
+        "successes": 8,
+        "attempts": 32,
+        "report_sha256": "de2eff226da1599dd47efba14788adcf773cefaeec63b0158a06a9753dd01678",
+        "checkpoint_sha256": "013fa0df470bc53416fce138119529bdc472e978881f3ef2edeafa04a8edb0e9",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/model_19.pt",
+          "checkpoint_sha256": "013fa0df470bc53416fce138119529bdc472e978881f3ef2edeafa04a8edb0e9",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "1e34b136df99a645ffb0d108fbc76764d702c9f42ca1ad96ea4be6d157581b77",
+            "checkpoint_manifest_sha256": "6641b6c7fe4f2e82197a0238c7dde89567c8d0291ce89124c2c868984dbc1db3",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-N.json",
+          "policy_config_sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 8,
+          "success_rate_all_attempts": 0.25,
+          "termination_counts": {
+            "episode_timeout": 24,
+            "independent_success": 8
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/model_19.pt",
+            "sha256": "013fa0df470bc53416fce138119529bdc472e978881f3ef2edeafa04a8edb0e9"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/checkpoint_manifest.json",
+            "sha256": "6641b6c7fe4f2e82197a0238c7dde89567c8d0291ce89124c2c868984dbc1db3"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/training_provenance.json",
+            "sha256": "1e34b136df99a645ffb0d108fbc76764d702c9f42ca1ad96ea4be6d157581b77"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/runner_config.json",
+            "sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 20,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.02,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/N-iter-19.json",
+            "sha256": "979e51b8c1b39f7b221977e122ad0447607b43c265b500129a4085c828253af0",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      },
+      "96": {
+        "successes": 10,
+        "attempts": 32,
+        "report_sha256": "1c9a093f94c171ac669abbb0dc081f87f348d0c8ad71822a4f18a9bade54c0bc",
+        "checkpoint_sha256": "26c30a64fc229e158f344180d3094fd5a79307ab608afe5e4ebf9eb469440a01",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/model_95.pt",
+          "checkpoint_sha256": "26c30a64fc229e158f344180d3094fd5a79307ab608afe5e4ebf9eb469440a01",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "1e34b136df99a645ffb0d108fbc76764d702c9f42ca1ad96ea4be6d157581b77",
+            "checkpoint_manifest_sha256": "6641b6c7fe4f2e82197a0238c7dde89567c8d0291ce89124c2c868984dbc1db3",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-N.json",
+          "policy_config_sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 10,
+          "success_rate_all_attempts": 0.3125,
+          "termination_counts": {
+            "episode_timeout": 22,
+            "independent_success": 10
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/model_95.pt",
+            "sha256": "26c30a64fc229e158f344180d3094fd5a79307ab608afe5e4ebf9eb469440a01"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/checkpoint_manifest.json",
+            "sha256": "6641b6c7fe4f2e82197a0238c7dde89567c8d0291ce89124c2c868984dbc1db3"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/training_provenance.json",
+            "sha256": "1e34b136df99a645ffb0d108fbc76764d702c9f42ca1ad96ea4be6d157581b77"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/N/rj45-v1/2026-10-28_05-26-05/runner_config.json",
+            "sha256": "91eec5f3027d95208feb386fb9975cd014bc4dc4abaf2b1f29552f13fc1e6a42"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 96,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.02,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/N-iter-95.json",
+            "sha256": "297318a5fcb87641546dea1520781af350cb578bb3864541138e394eb006f7af",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      }
+    },
+    "F": {
+      "20": {
+        "successes": 10,
+        "attempts": 32,
+        "report_sha256": "4902a2d7683227a1efd9a8d9d947a81e2f84c4d38df0b9b7266b78686f3aa976",
+        "checkpoint_sha256": "64c6369d65d505ebebf50805b71c69e33a4219deb4adf1490069280e4bcf4428",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/model_19.pt",
+          "checkpoint_sha256": "64c6369d65d505ebebf50805b71c69e33a4219deb4adf1490069280e4bcf4428",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "e9dc3b1ca1079b0b0891be5351e773451638676be551c879d9d346dfaafea5fc",
+            "checkpoint_manifest_sha256": "14da2c8737f7f12d91689cacc08a08a66e6e7d92b37c8caeb6b7812555a0cbb4",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-F.json",
+          "policy_config_sha256": "17df26cdef1e135a1026ad13ad053567b10e2ed6754869c860885f9ae6a76323",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 10,
+          "success_rate_all_attempts": 0.3125,
+          "termination_counts": {
+            "episode_timeout": 22,
+            "independent_success": 10
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/model_19.pt",
+            "sha256": "64c6369d65d505ebebf50805b71c69e33a4219deb4adf1490069280e4bcf4428"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/checkpoint_manifest.json",
+            "sha256": "14da2c8737f7f12d91689cacc08a08a66e6e7d92b37c8caeb6b7812555a0cbb4"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/training_provenance.json",
+            "sha256": "e9dc3b1ca1079b0b0891be5351e773451638676be551c879d9d346dfaafea5fc"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/runner_config.json",
+            "sha256": "17df26cdef1e135a1026ad13ad053567b10e2ed6754869c860885f9ae6a76323"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 20,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.1,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/F-iter-19.json",
+            "sha256": "1212e2602b09c2da7c5abd178c35915de83a9e25604f063ddf7deba7ff35c0b9",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      },
+      "96": {
+        "successes": 11,
+        "attempts": 32,
+        "report_sha256": "7f7781e388f0fa6954a10ca740a40ce7c4db91503aa2f07573427616c4c41c78",
+        "checkpoint_sha256": "d9631f700c52eea571bf50e46cb966c0df141e80047b5534a3590500721fc6d0",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/model_95.pt",
+          "checkpoint_sha256": "d9631f700c52eea571bf50e46cb966c0df141e80047b5534a3590500721fc6d0",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "e9dc3b1ca1079b0b0891be5351e773451638676be551c879d9d346dfaafea5fc",
+            "checkpoint_manifest_sha256": "14da2c8737f7f12d91689cacc08a08a66e6e7d92b37c8caeb6b7812555a0cbb4",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-F.json",
+          "policy_config_sha256": "17df26cdef1e135a1026ad13ad053567b10e2ed6754869c860885f9ae6a76323",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 11,
+          "success_rate_all_attempts": 0.34375,
+          "termination_counts": {
+            "episode_timeout": 21,
+            "independent_success": 11
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/model_95.pt",
+            "sha256": "d9631f700c52eea571bf50e46cb966c0df141e80047b5534a3590500721fc6d0"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/checkpoint_manifest.json",
+            "sha256": "14da2c8737f7f12d91689cacc08a08a66e6e7d92b37c8caeb6b7812555a0cbb4"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/training_provenance.json",
+            "sha256": "e9dc3b1ca1079b0b0891be5351e773451638676be551c879d9d346dfaafea5fc"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/F/rj45-v1/2026-10-28_05-26-06/runner_config.json",
+            "sha256": "17df26cdef1e135a1026ad13ad053567b10e2ed6754869c860885f9ae6a76323"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 96,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.1,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/F-iter-95.json",
+            "sha256": "2c6400eb4b464c480d3000e6a765a180396ff3861f57dd8b3f2221d89067eac0",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      }
+    },
+    "Z1": {
+      "20": {
+        "successes": 7,
+        "attempts": 32,
+        "report_sha256": "5f9ce0fe378d16e8c17e6d180feea96d3dcfa8919a8f982b62bb3519ad60e7ba",
+        "checkpoint_sha256": "da3892a38e11edb997e5db1b10fa09060f8e845c0cb1e1e2dbcc3c1de4c003c4",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/model_19.pt",
+          "checkpoint_sha256": "da3892a38e11edb997e5db1b10fa09060f8e845c0cb1e1e2dbcc3c1de4c003c4",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "02734040b4c3c6711519bec4dad125fdf74138ce83bb4e6842ba6fe04cbd1cf1",
+            "checkpoint_manifest_sha256": "95c448ab3d66ddf333a74368573e20b5a7dcc2bc2cf60173a8c61c9780b2f64b",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-Z1.json",
+          "policy_config_sha256": "e36549db50c60eddc6f47d0df75f86cab5b43c4506032cd297dc5d93d04c4477",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 7,
+          "success_rate_all_attempts": 0.21875,
+          "termination_counts": {
+            "episode_timeout": 25,
+            "independent_success": 7
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/model_19.pt",
+            "sha256": "da3892a38e11edb997e5db1b10fa09060f8e845c0cb1e1e2dbcc3c1de4c003c4"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/checkpoint_manifest.json",
+            "sha256": "95c448ab3d66ddf333a74368573e20b5a7dcc2bc2cf60173a8c61c9780b2f64b"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/training_provenance.json",
+            "sha256": "02734040b4c3c6711519bec4dad125fdf74138ce83bb4e6842ba6fe04cbd1cf1"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/runner_config.json",
+            "sha256": "e36549db50c60eddc6f47d0df75f86cab5b43c4506032cd297dc5d93d04c4477"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 20,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.1,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/Z1-iter-19.json",
+            "sha256": "fe296796ad857bbdf4aa7a4a012366dbdc96a15a81ac32bbcfed15631ab87e75",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      },
+      "96": {
+        "successes": 7,
+        "attempts": 32,
+        "report_sha256": "9a5da2a14eb1028ad81088186b917e099cf8e5ff2244827f78c5a1563fabf809",
+        "checkpoint_sha256": "c9a1ca76dbb398b62977fc96c32b7b2efd977c0669586b6818ee2cb5b419b64e",
+        "paired_result": {
+          "baseline_mode": "learned",
+          "training_config": {
+            "path": "configs/rj45-training-target-offset-v1.json",
+            "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+            "action_mode": "right_only_6d",
+            "observation_dimension": 79,
+            "calibration_bias_level": 0,
+            "action_application_mode": "absolute_tip_pose_target_insert_only",
+            "policy_active_phases": [
+              "insert"
+            ]
+          },
+          "checkpoint": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/model_95.pt",
+          "checkpoint_sha256": "c9a1ca76dbb398b62977fc96c32b7b2efd977c0669586b6818ee2cb5b419b64e",
+          "verified_checkpoint_evidence": {
+            "training_provenance_sha256": "02734040b4c3c6711519bec4dad125fdf74138ce83bb4e6842ba6fe04cbd1cf1",
+            "checkpoint_manifest_sha256": "95c448ab3d66ddf333a74368573e20b5a7dcc2bc2cf60173a8c61c9780b2f64b",
+            "runtime_contract_verified_at_start": true,
+            "rj45_nominal_evidence": {
+              "report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "trace_records": 1358
+            },
+            "held_grasp_reset_proof": {
+              "artifact_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+              "nominal_report_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+              "nominal_trace_sha256": "c9508b93f5de46e1d5d6c9bc4780c8cfc7d285caefeceb8aae39043323d2c856",
+              "selection_control_step": 979,
+              "stability_limits": {
+                "max_object_linear_speed_m_s": 0.005,
+                "max_object_angular_speed_rad_s": 0.05,
+                "max_revolute_joint_speed_rad_s": 0.05,
+                "max_prismatic_joint_speed_m_s": 0.005,
+                "max_revolute_tracking_error_rad": 0.05,
+                "max_prismatic_tracking_error_m": 0.005
+              }
+            },
+            "training_num_envs": 256,
+            "policy_initialization": {
+              "mode": "residual_actor_final_linear_zero",
+              "zero_actor_output_layer": true,
+              "actor_module_path": "runner.alg.policy.actor",
+              "final_layer_index": 4,
+              "final_layer_class": "torch.nn.Linear",
+              "input_dimension": 79,
+              "output_dimension": 6,
+              "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+              "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+              "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+              "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+              "weight_all_zero_after_initialization": true,
+              "bias_all_zero_after_initialization": true,
+              "deterministic_actor_test_input_count": 3,
+              "deterministic_actor_output_all_zero": true,
+              "deterministic_actor_output_max_abs": 0.0,
+              "stochastic_policy_noise_modified": false,
+              "method_reference": {
+                "title": "Residual Policy Learning",
+                "url": "https://arxiv.org/pdf/1812.06298",
+                "section": "IV-A",
+                "adaptation": "zero initialization of final residual actor mean layer only"
+              }
+            }
+          },
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "policy_config": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/configs/ppo-Z1.json",
+          "policy_config_sha256": "e36549db50c60eddc6f47d0df75f86cab5b43c4506032cd297dc5d93d04c4477",
+          "attempts": 32,
+          "valid_episodes": 32,
+          "invalid_episodes": 0,
+          "successes_all_attempts": 7,
+          "success_rate_all_attempts": 0.21875,
+          "termination_counts": {
+            "episode_timeout": 25,
+            "independent_success": 7
+          }
+        },
+        "training_bundle": {
+          "status": "checkpoint_manifest_provenance_runner_bytes_verified",
+          "unverified": [
+            "source and non-runner config bytes referenced by training provenance",
+            "preregistered experiment plan"
+          ],
+          "checkpoint": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/model_95.pt",
+            "sha256": "c9a1ca76dbb398b62977fc96c32b7b2efd977c0669586b6818ee2cb5b419b64e"
+          },
+          "checkpoint_manifest": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/checkpoint_manifest.json",
+            "sha256": "95c448ab3d66ddf333a74368573e20b5a7dcc2bc2cf60173a8c61c9780b2f64b"
+          },
+          "training_provenance": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/training_provenance.json",
+            "sha256": "02734040b4c3c6711519bec4dad125fdf74138ce83bb4e6842ba6fe04cbd1cf1"
+          },
+          "runner_config": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/runs/Z1/rj45-v1/2026-10-28_05-26-06/runner_config.json",
+            "sha256": "e36549db50c60eddc6f47d0df75f86cab5b43c4506032cd297dc5d93d04c4477"
+          },
+          "training_seed": 20261104,
+          "training_num_envs": 256,
+          "rollout_steps_per_env": 32,
+          "planned_training_updates": 96,
+          "checkpoint_completed_updates": 96,
+          "checkpoint_completed_updates_verification": "supplied_inspection_report_consistent_payload_not_rechecked",
+          "initial_action_noise_std": 0.1,
+          "policy_initialization_status": "evaluation_and_training_provenance_match",
+          "policy_initialization": {
+            "mode": "residual_actor_final_linear_zero",
+            "zero_actor_output_layer": true,
+            "actor_module_path": "runner.alg.policy.actor",
+            "final_layer_index": 4,
+            "final_layer_class": "torch.nn.Linear",
+            "input_dimension": 79,
+            "output_dimension": 6,
+            "pre_weight_sha256": "07abb87a8019bb1af16996b80b1a6cfbb874035ffa7a8160efe7c26dac76ac84",
+            "pre_bias_sha256": "25657705823bb303ae49acc30f0e57bc3510a4665b761cfb1951729ba6ddaa5a",
+            "post_weight_sha256": "e80232b4d18d0bb7e794be263ba937626f383f9917d4b8a737ba893a8f752293",
+            "post_bias_sha256": "9d908ecfb6b256def8b49a7c504e6c889c4b0e41fe6ce3e01863dd7b61a20aa0",
+            "weight_all_zero_after_initialization": true,
+            "bias_all_zero_after_initialization": true,
+            "deterministic_actor_test_input_count": 3,
+            "deterministic_actor_output_all_zero": true,
+            "deterministic_actor_output_max_abs": 0.0,
+            "stochastic_policy_noise_modified": false,
+            "method_reference": {
+              "title": "Residual Policy Learning",
+              "url": "https://arxiv.org/pdf/1812.06298",
+              "section": "IV-A",
+              "adaptation": "zero initialization of final residual actor mean layer only"
+            }
+          },
+          "checkpoint_inspection": {
+            "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-scale-runtime-20261028/refinement/output-recovery-v1/inspections/Z1-iter-95.json",
+            "sha256": "c820bb4a130c9f57c157535e7676c3c864f69247c31f53ff4f5b59e14617fa1d",
+            "status": "checkpoint_payload_and_lineage_verified"
+          }
+        }
+      }
+    }
+  },
+  "training_transitions_per_profile": 786432,
+  "training_transitions_total": 3145728,
+  "selection_performed": false,
+  "final_seed_opened": false
+}

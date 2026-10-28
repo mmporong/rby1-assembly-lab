@@ -1,0 +1,16 @@
+{
+  "source_commit": "63f96e5951c7de4a4a5e804c0584c70721d05e8c",
+  "inputs": {
+    "benchmark-summary.json": "08154550464b0e64eaf21f948db243b1eef32da45934ea15eac13e8511e71cd8",
+    "refinement-summary.json": "27c93eb18ee2b1733ead9ec6ff5f22d47d979c88863036c0e0c1f7adcb39caaf",
+    "f-followup-summary.json": "777e7c4f74a7cceb6ce596c681643e7709dd28a66b8d2e2f5bfb5c95376c4a4f",
+    "independent-audit.json": "e970de6de6e1c140c24400f6649841a27d2955d78969198bd44d844c4f2ce758"
+  },
+  "selection_note": "refinement summary selection_performed=false; F derived by applying the preregistered rule after measurement",
+  "promotion_passed": false,
+  "final_holdout_opened": false,
+  "outputs": {
+    "scale-and-learning.png": "8c775cbbb241b93512604eecb55c816eef0d85acaff0363ca22354da803189a4",
+    "scale-and-learning.svg": "80fc41ff2ffd0eb00e8db679f1af7f75477b1c96e9bb17b64d8b82c527bd13ec"
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "selection_basis": "throughput_and_correctness_only_no_success_or_reward_outcomes",
+  "protocol": {
+    "path": "docs/evidence/rj45-refinement-20261028/scale-refinement-protocol.json",
+    "sha256": "44d9c6ee35a992af20d79afa93d29443de59216bd7a5b719bd2cfb10e24534e4"
+  },
+  "benchmark_spec": {
+    "path": "artifacts/rj45-scale-runtime-20261028/benchmark/spec-path-normalized.json",
+    "sha256": "5ba697e0123b93c0c7b7e77205bd504fc447e4a3b64870c5a38714ab6ee0444d"
+  },
+  "candidates": {
+    "64": {
+      "status": "valid",
+      "num_envs": 64,
+      "num_steps_per_env": 128,
+      "gpu_device": "cuda:0",
+      "event_file_sha256": "76a153f5dd6d297106449b4035a688cbb173b5533db5ce39d0ec1c1e6bc19172",
+      "checkpoint_sha256": "1dadf84083d36535c44cdf52ffb5102d72b0c9b57371adb21b02d23a916ea619",
+      "inspection_sha256": "86e11dcc493fd24b1d4de27b8554ad29885844558b4286464ca700ca7590f089",
+      "runner_config_sha256": "ba07a955d91e1f4cbab74d7f3ec1c6360a1c6c3750fa35f6daeedd4d79b2b8c6",
+      "checkpoint_manifest_sha256": "16642c6fac22a5f519e2f650a7419c6f948a90c2b5fa5e4f932f0293359478f1",
+      "training_provenance_sha256": "6ae2342a98a05b5a62bcd521f0cd216cdf6b28250c84be297680dbd84a7e3f4e",
+      "training_script_sha256": "6df07471b10ad18fda01ba8ff9909396b4c524c3e8d67ff6b30df6a2056ef93f",
+      "nominal_evidence_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+      "held_state_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+      "parallel_contact_evidence_sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+      "raw_log_sha256": "a5a2ed3277ee476383c8affc5351b300bae3342f2d78f9c15cbb1ba7f497ed03",
+      "physical_proof_refs": [
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/nominal.json",
+          "sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf"
+        },
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/held.json",
+          "sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594"
+        },
+        {
+          "path": "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+          "sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383"
+        }
+      ],
+      "measured_timings": [
+        {
+          "step": 3,
+          "collection_time_s": 37.34455871582031,
+          "learning_time_s": 0.11634993553161621
+        },
+        {
+          "step": 4,
+          "collection_time_s": 36.08070755004883,
+          "learning_time_s": 0.11494016647338867
+        },
+        {
+          "step": 5,
+          "collection_time_s": 36.34408950805664,
+          "learning_time_s": 0.11262011528015137
+        },
+        {
+          "step": 6,
+          "collection_time_s": 36.36970520019531,
+          "learning_time_s": 0.1136171817779541
+        },
+        {
+          "step": 7,
+          "collection_time_s": 36.64938735961914,
+          "learning_time_s": 0.10686159133911133
+        }
+      ],
+      "measured_total_time_s": 183.35283732414246,
+      "throughput_transitions_per_s": 223.39441591290122
+    },
+    "128": {
+      "status": "valid",
+      "num_envs": 128,
+      "num_steps_per_env": 64,
+      "gpu_device": "cuda:0",
+      "event_file_sha256": "c68dacf6d3129975bcbcc974e8afac4dc5c3dcb755d24d4e3ab18f257cff5ae5",
+      "checkpoint_sha256": "f719e87589673b142e7e2fca5984a1a2849d799a09e45a2f1a353908b9e0b731",
+      "inspection_sha256": "45e809a0154ec6084a2cb15dcc0ec2c154f168e3f60b851af692492326e721f8",
+      "runner_config_sha256": "125614328f62d2008bb4e3f025e69a46d4c4071163d739a6c79966dda664410d",
+      "checkpoint_manifest_sha256": "0885f69231afc1e1904083185381a00b40774037d1b384e94e636563c637f577",
+      "training_provenance_sha256": "9fb823fb9cacab337c7c72ecf0f652082c92454dfda3e944b10230512cf8f9a3",
+      "training_script_sha256": "6df07471b10ad18fda01ba8ff9909396b4c524c3e8d67ff6b30df6a2056ef93f",
+      "nominal_evidence_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+      "held_state_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+      "parallel_contact_evidence_sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+      "raw_log_sha256": "d604592466e470141420b3e03f816ee8266a0bb136f2d566aae03c4f13608b8b",
+      "physical_proof_refs": [
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/nominal.json",
+          "sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf"
+        },
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/held.json",
+          "sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594"
+        },
+        {
+          "path": "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+          "sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383"
+        }
+      ],
+      "measured_timings": [
+        {
+          "step": 3,
+          "collection_time_s": 17.64621353149414,
+          "learning_time_s": 0.10168099403381348
+        },
+        {
+          "step": 4,
+          "collection_time_s": 17.618005752563477,
+          "learning_time_s": 0.1020662784576416
+        },
+        {
+          "step": 5,
+          "collection_time_s": 17.661434173583984,
+          "learning_time_s": 0.10371541976928711
+        },
+        {
+          "step": 6,
+          "collection_time_s": 17.76285171508789,
+          "learning_time_s": 0.09958720207214355
+        },
+        {
+          "step": 7,
+          "collection_time_s": 17.702392578125,
+          "learning_time_s": 0.09984326362609863
+        }
+      ],
+      "measured_total_time_s": 88.89779090881348,
+      "throughput_transitions_per_s": 460.75385654987247
+    },
+    "256": {
+      "status": "valid",
+      "num_envs": 256,
+      "num_steps_per_env": 32,
+      "gpu_device": "cuda:0",
+      "event_file_sha256": "ef2ad69df02e9ee85ff429608e325ac6a59bafa85f6b56b819519a22dc4f3894",
+      "checkpoint_sha256": "e0ecc6a7bc24981a428488d781137cf6cef06425b9505e065d28b71242e25720",
+      "inspection_sha256": "904279e07eca4e51f4178d1306e240e20e4f8f89663fb8aec143833936a069ce",
+      "runner_config_sha256": "16ddc575cd3523e68cca17026e98add270b149bac9c5ea0166ca52c9c9bc64a5",
+      "checkpoint_manifest_sha256": "abb85cc9350522c59824ed3f8057f0688482dff573180caa742e0ef47934d7a9",
+      "training_provenance_sha256": "d7250c5573214ae349b5a317ed1a4f15baf34aac08d7514aa3560752cf7d76bd",
+      "training_script_sha256": "6df07471b10ad18fda01ba8ff9909396b4c524c3e8d67ff6b30df6a2056ef93f",
+      "nominal_evidence_sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf",
+      "held_state_sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594",
+      "parallel_contact_evidence_sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+      "raw_log_sha256": "62b266d0fbcfe2529fe0e40bee889b849fdb9856f360cfde8ea58acec0344ba8",
+      "physical_proof_refs": [
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/nominal.json",
+          "sha256": "9e0cedd1ea68309dc3df289fc16f0b91e64da94bd681a16f0eb4c316afc1cedf"
+        },
+        {
+          "path": "artifacts/rj45-scale-runtime-20261028/held.json",
+          "sha256": "bf22941c04e4427e4ec6f9fbbdf114518dbe76c519cb4bb70590880307baa594"
+        },
+        {
+          "path": "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+          "sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383"
+        }
+      ],
+      "measured_timings": [
+        {
+          "step": 3,
+          "collection_time_s": 9.347599029541016,
+          "learning_time_s": 0.09306597709655762
+        },
+        {
+          "step": 4,
+          "collection_time_s": 9.338521003723145,
+          "learning_time_s": 0.09351873397827148
+        },
+        {
+          "step": 5,
+          "collection_time_s": 9.341794967651367,
+          "learning_time_s": 0.09308338165283203
+        },
+        {
+          "step": 6,
+          "collection_time_s": 9.341960906982422,
+          "learning_time_s": 0.0929563045501709
+        },
+        {
+          "step": 7,
+          "collection_time_s": 9.3300199508667,
+          "learning_time_s": 0.09290289878845215
+        }
+      ],
+      "measured_total_time_s": 47.16542315483093,
+      "throughput_transitions_per_s": 868.4327895360917
+    }
+  },
+  "selected_topology": {
+    "num_envs": 256,
+    "num_steps_per_env": 32,
+    "transitions_per_update": 8192,
+    "selection_rule": "smallest_valid_candidate_at_least_90_percent_of_highest_throughput"
+  },
+  "result_content_sha256": "6d00ad687a28d3604e2c36e51d4b468058bad1559e55513caf02dbfb508381bd"
+}
