@@ -67,8 +67,10 @@ class HeldGraspBankTests(unittest.TestCase):
         )
 
     @staticmethod
-    def _artifact(grasp_id: str, *, source: str = "e") -> JsonObject:
-        return {
+    def _artifact(
+        grasp_id: str, *, source: str = "e", catalog_sha: str | None = None
+    ) -> JsonObject:
+        artifact = {
             "schema_version": 1,
             "task_id": "rj45-v1",
             "provenance": {
@@ -77,6 +79,17 @@ class HeldGraspBankTests(unittest.TestCase):
             },
             "fixture_id": grasp_id,
         }
+        if catalog_sha is not None:
+            artifact["provenance"]["grasp_generation"] = {
+                "catalog_id": "rj45-grasp-generation-v2",
+                "catalog_path": "configs/rj45-grasp-generation-v2.json",
+                "catalog_sha256": catalog_sha,
+                "generation_seed": 1,
+                "catalog_entry_id": "grasp-00",
+                "assignment_group": "pilot",
+                "offset_method": "object_local_offset_rotated_to_world_by_object_quaternion",
+            }
+        return artifact
 
     def _loader(self, project: Path, task: dict, path: Path):
         del project, task
@@ -86,7 +99,9 @@ class HeldGraspBankTests(unittest.TestCase):
             "artifact_sha256": entry["artifact"]["sha256"]
         }
 
-    def _write_dependency_artifact(self, grasp_id: str = "train-a") -> tuple[Path, Path, Path]:
+    def _write_dependency_artifact(
+        self, grasp_id: str = "train-a", *, generated: bool = False
+    ) -> tuple[Path, Path, Path]:
         report = self.project / f"artifacts/evidence/{grasp_id}-report.json"
         trace = self.project / f"artifacts/evidence/{grasp_id}-trace.jsonl"
         report.parent.mkdir(parents=True, exist_ok=True)
@@ -104,6 +119,23 @@ class HeldGraspBankTests(unittest.TestCase):
                 "nominal_trace_sha256": hashlib.sha256(trace.read_bytes()).hexdigest(),
             },
         }
+        if generated:
+            source_catalog = (
+                Path(__file__).resolve().parents[1]
+                / "configs/rj45-grasp-generation-v2.json"
+            )
+            catalog = self.project / "configs/rj45-grasp-generation-v2.json"
+            catalog.parent.mkdir(parents=True, exist_ok=True)
+            catalog.write_bytes(source_catalog.read_bytes())
+            value["provenance"]["grasp_generation"] = {
+                "catalog_id": "rj45-grasp-generation-v2",
+                "catalog_path": str(catalog.relative_to(self.project)),
+                "catalog_sha256": hashlib.sha256(catalog.read_bytes()).hexdigest(),
+                "generation_seed": 20261301,
+                "catalog_entry_id": "grasp-00",
+                "assignment_group": "pilot",
+                "offset_method": "object_local_offset_rotated_to_world_by_object_quaternion",
+            }
         artifact.write_text(json.dumps(value) + "\n", encoding="utf-8")
         entry = next(item for item in self.entries if item["grasp_id"] == grasp_id)
         entry["artifact"]["sha256"] = hashlib.sha256(artifact.read_bytes()).hexdigest()
@@ -129,6 +161,22 @@ class HeldGraspBankTests(unittest.TestCase):
         )
         self.assertEqual(dependencies, (self.manifest_path, artifact, report, trace))
         self.assertNotIn(final_path, dependencies)
+
+    def test_dependency_paths_include_and_validate_generation_catalog(self) -> None:
+        artifact, report, trace = self._write_dependency_artifact(generated=True)
+        catalog = self.project / "configs/rj45-grasp-generation-v2.json"
+        dependencies = held_grasp_bank_dependency_paths(
+            self.project, self.manifest_path, "train"
+        )
+        self.assertEqual(
+            dependencies, (self.manifest_path, artifact, report, trace, catalog)
+        )
+
+        catalog.write_text("{}\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "grasp catalog SHA-256 mismatch"):
+            held_grasp_bank_dependency_paths(
+                self.project, self.manifest_path, "train"
+            )
 
     def test_dependency_paths_reject_manifest_escape_before_artifact_open(self) -> None:
         self._write_dependency_artifact()
@@ -286,6 +334,28 @@ class HeldGraspBankTests(unittest.TestCase):
             side_effect=mixed_loader,
         ):
             with self.assertRaisesRegex(ValueError, "mixed provenance contracts"):
+                load_verified_held_grasp_bank(
+                    self.project, self.task, self.manifest_path, "train"
+                )
+
+    def test_rejects_mixed_selected_generation_catalogs(self) -> None:
+        self.entries.insert(1, _entry("train-b", "train", "f"))
+        self._write_manifest(self.entries)
+
+        def mixed_loader(project: Path, task: dict, path: Path):
+            del project, task
+            grasp_id = path.stem
+            catalog_sha = "1" * 64 if grasp_id == "train-a" else "2" * 64
+            entry = next(item for item in self.entries if item["grasp_id"] == grasp_id)
+            return self._artifact(grasp_id, catalog_sha=catalog_sha), {
+                "artifact_sha256": entry["artifact"]["sha256"]
+            }
+
+        with mock.patch(
+            "rby1_assembly.held_grasp.load_verified_held_grasp_artifact",
+            side_effect=mixed_loader,
+        ):
+            with self.assertRaisesRegex(ValueError, "mixed generation catalogs"):
                 load_verified_held_grasp_bank(
                     self.project, self.task, self.manifest_path, "train"
                 )

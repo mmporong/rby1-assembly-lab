@@ -52,6 +52,8 @@ _bootstrap_input_snapshot = capture_run_inputs(
         PROJECT_ROOT / "configs/assets.json",
         PROJECT_ROOT / "configs/runtime.json",
         *((PROJECT_ROOT / "configs/rj45-assets.json",) if _bootstrap_task == "rj45" else ()),
+        *((Path(_preimport_option("--rj45-grasp-generation-catalog", "")),)
+          if _preimport_has_option("--rj45-grasp-generation-catalog") else ()),
         *((Path(_preimport_option("--command-fault-config", "configs/failure-scenarios.json")),)
           if _preimport_has_option("--command-fault") else ()),
     ),
@@ -75,6 +77,7 @@ parser.add_argument("--rj45-training-config", type=Path)
 parser.add_argument("--rj45-bias-level", type=int, default=0)
 parser.add_argument("--rj45-calibration-bias", action="store_true")
 parser.add_argument("--rj45-held-state-output", type=Path)
+parser.add_argument("--rj45-grasp-generation-catalog", type=Path)
 
 parser.add_argument(
     "--steps",
@@ -117,6 +120,23 @@ if args.command_fault is not None and (args.num_envs != 1 or args.trace is None 
     parser.error("--command-fault requires one environment and --trace at every control step")
 if args.task == "rj45" and args.command_fault is not None:
     parser.error("legacy command-fault demonstrations require --task toy")
+from rby1_assembly.rj45_grasp_generation import (  # noqa: E402
+    validate_grasp_generation_launch,
+)
+
+try:
+    validate_grasp_generation_launch(
+        catalog_path=args.rj45_grasp_generation_catalog,
+        task=args.task,
+        num_envs=args.num_envs,
+        seed=args.seed,
+        command_fault=args.command_fault,
+        training_config=args.rj45_training_config,
+        calibration_bias=args.rj45_calibration_bias,
+        bias_level=args.rj45_bias_level,
+    )
+except ValueError as error:
+    parser.error(str(error))
 trace_every = args.trace_every or (1 if args.command_fault or args.task == "rj45" else 10)
 launcher = AppLauncher(args)
 simulation_app = launcher.app
@@ -659,7 +679,15 @@ def main() -> int:
     assets_path = PROJECT_ROOT / "configs/assets.json"
     runtime_path = PROJECT_ROOT / "configs/runtime.json"
     connector_assets_path = PROJECT_ROOT / "configs/rj45-assets.json"
-    optional_configs = tuple(path for path in (args.parallel_contact_evidence, args.rj45_training_config) if path is not None)
+    optional_configs = tuple(
+        path
+        for path in (
+            args.parallel_contact_evidence,
+            args.rj45_training_config,
+            args.rj45_grasp_generation_catalog,
+        )
+        if path is not None
+    )
     parallel_specification = None
     parallel_paths = ()
     if args.parallel_contact_evidence is not None:
@@ -736,6 +764,18 @@ def main() -> int:
 
         task_config = load_rj45_task(task_path)
         env_type = configure_rj45_task(cfg, task_config, PROJECT_ROOT)
+    if args.rj45_grasp_generation_catalog is not None:
+        from rby1_assembly.rj45_grasp_generation import (
+            load_grasp_generation_catalog,
+            make_rj45_grasp_generation_env_type,
+        )
+
+        generation_catalog = load_grasp_generation_catalog(
+            args.rj45_grasp_generation_catalog
+        )
+        env_type = make_rj45_grasp_generation_env_type(
+            env_type, generation_catalog, seed=run_seed
+        )
     if args.command_fault == "hand_collision":
         from rby1_assembly.hand_collision import make_hand_collision_env_type
 
@@ -959,6 +999,11 @@ def main() -> int:
                 if hasattr(env, "rj45_training_report") else "simulator_ground_truth"
             ),
             "rj45_training": env.rj45_training_report() if hasattr(env, "rj45_training_report") else None,
+            "rj45_grasp_generation": (
+                env.rj45_grasp_generation_report()
+                if hasattr(env, "rj45_grasp_generation_report")
+                else None
+            ),
             "contact_force_source": "contact_force_proxy",
             "num_envs": env.num_envs,
             "steps_requested": effective_steps,
@@ -1044,6 +1089,16 @@ def main() -> int:
                 "build_report_sha256": input_snapshot.hash_for(build_report_path),
                 "source_sha256": input_snapshot.source_sha256,
                 "generated_asset_sha256": input_snapshot.generated_asset_sha256,
+                "grasp_generation_catalog_path": (
+                    None
+                    if args.rj45_grasp_generation_catalog is None
+                    else input_snapshot.key_for(args.rj45_grasp_generation_catalog)
+                ),
+                "grasp_generation_catalog_sha256": (
+                    None
+                    if args.rj45_grasp_generation_catalog is None
+                    else input_snapshot.hash_for(args.rj45_grasp_generation_catalog)
+                ),
                 "torch_version": torch.__version__,
             },
         }

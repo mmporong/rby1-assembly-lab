@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import hashlib
+import itertools
 import json
 import math
 from pathlib import Path
@@ -13,6 +14,9 @@ from rby1_assembly.rj45_training import validate_held_grasp_artifact
 
 
 SPLITS = ("train", "dev", "final")
+PILOT_SEEDS = (20261301, 20261302, 20261303, 20261304)
+PILOT_TRANSLATION_THRESHOLD_M = 0.00025
+PILOT_ROTATION_THRESHOLD_RAD = 0.004
 
 
 def canonical_sha256(value: Any) -> str:
@@ -120,6 +124,153 @@ def descriptor_distance(left: Mapping[str, Any], right: Mapping[str, Any]) -> di
     }
 
 
+def audit_grasp_generation_pilot(
+    attempts: list[Mapping[str, Any]],
+    catalog: Mapping[str, Any],
+    *,
+    catalog_path: str,
+    catalog_sha256: str,
+) -> dict[str, Any]:
+    """Audit all four predeclared physical pilot attempts without selecting outcomes."""
+
+    from rby1_assembly.rj45_grasp_generation import (
+        select_grasp_generation_entry,
+        validate_grasp_generation_catalog,
+    )
+
+    catalog = validate_grasp_generation_catalog(catalog)
+    if (
+        not isinstance(catalog_path, str)
+        or not catalog_path
+        or Path(catalog_path).is_absolute()
+        or ".." in Path(catalog_path).parts
+        or not isinstance(catalog_sha256, str)
+        or len(catalog_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in catalog_sha256)
+    ):
+        raise ValueError("pilot audit requires a project-relative catalog path and SHA-256")
+    if not isinstance(attempts, list) or len(attempts) != len(PILOT_SEEDS):
+        raise ValueError("pilot audit requires exactly four preserved attempts")
+    preserved: list[dict[str, Any]] = []
+    descriptors: dict[int, dict[str, Any]] = {}
+    for index, (attempt, expected_seed) in enumerate(
+        zip(attempts, PILOT_SEEDS, strict=True)
+    ):
+        if not isinstance(attempt, Mapping):
+            raise ValueError(f"pilot attempt {index} must be an object")
+        seed = attempt.get("seed")
+        status = attempt.get("status")
+        assignment_group, expected_entry = select_grasp_generation_entry(
+            catalog, expected_seed
+        )
+        if (
+            type(seed) is not int
+            or seed != expected_seed
+            or attempt.get("catalog_entry_id") != expected_entry["id"]
+        ):
+            raise ValueError("pilot attempts differ from the frozen seed/catalog order")
+        if status == "failed":
+            if set(attempt) != {
+                "seed",
+                "catalog_entry_id",
+                "status",
+                "failure_reason",
+            }:
+                raise ValueError("failed pilot attempt schema differs")
+            reason = attempt["failure_reason"]
+            if not isinstance(reason, str) or not reason:
+                raise ValueError("failed pilot attempt requires a failure reason")
+            preserved.append(
+                {
+                    "seed": seed,
+                    "catalog_entry_id": expected_entry["id"],
+                    "assignment_group": assignment_group,
+                    "status": status,
+                    "failure_reason": reason,
+                }
+            )
+            continue
+        if status != "success" or set(attempt) != {
+            "seed",
+            "catalog_entry_id",
+            "status",
+            "artifact",
+        }:
+            raise ValueError("successful pilot attempt schema differs")
+        artifact = validate_held_grasp_artifact(attempt["artifact"])
+        generation = artifact["provenance"].get("grasp_generation")
+        if not isinstance(generation, dict) or any(
+            generation.get(name) != expected
+            for name, expected in {
+                "catalog_id": catalog["catalog_id"],
+                "catalog_path": catalog_path,
+                "catalog_sha256": catalog_sha256,
+                "generation_seed": seed,
+                "catalog_entry_id": expected_entry["id"],
+                "assignment_group": assignment_group,
+                "offset_method": catalog["offset_method"],
+            }.items()
+        ):
+            raise ValueError("pilot artifact generation provenance differs from its seed mapping")
+        descriptor = held_grasp_descriptor(artifact)
+        descriptors[seed] = descriptor
+        preserved.append(
+            {
+                "seed": seed,
+                "catalog_entry_id": expected_entry["id"],
+                "assignment_group": assignment_group,
+                "status": status,
+                "descriptor_sha256": canonical_sha256(descriptor),
+            }
+        )
+
+    edges: list[dict[str, Any]] = []
+    separated_pairs: set[tuple[int, int]] = set()
+    successful_seeds = sorted(descriptors)
+    for left_seed, right_seed in itertools.combinations(successful_seeds, 2):
+        distance = descriptor_distance(descriptors[left_seed], descriptors[right_seed])
+        separated = (
+            distance["object_to_ee_translation_m"]
+            >= PILOT_TRANSLATION_THRESHOLD_M
+            or distance["object_to_ee_rotation_rad"]
+            >= PILOT_ROTATION_THRESHOLD_RAD
+        )
+        if separated:
+            separated_pairs.add((left_seed, right_seed))
+        edges.append(
+            {
+                "left_seed": left_seed,
+                "right_seed": right_seed,
+                **distance,
+                "separated": separated,
+            }
+        )
+    cliques: list[tuple[int, ...]] = []
+    for size in range(1, len(successful_seeds) + 1):
+        for seeds in itertools.combinations(successful_seeds, size):
+            if all(pair in separated_pairs for pair in itertools.combinations(seeds, 2)):
+                cliques.append(seeds)
+    maximum = max((len(clique) for clique in cliques), default=0)
+    representatives = [list(clique) for clique in cliques if len(clique) == maximum]
+    return {
+        "schema_version": 1,
+        "catalog_id": catalog["catalog_id"],
+        "catalog_path": catalog_path,
+        "catalog_sha256": catalog_sha256,
+        "attempts": preserved,
+        "all_four_attempts_preserved": len(preserved) == 4,
+        "policy_metric_selection_used": False,
+        "translation_threshold_m": PILOT_TRANSLATION_THRESHOLD_M,
+        "rotation_threshold_rad": PILOT_ROTATION_THRESHOLD_RAD,
+        "separation_rule": "translation_gte_threshold_or_rotation_gte_threshold",
+        "pairwise_edges": edges,
+        "maximum_pairwise_distinct_count": maximum,
+        "representative_sets": representatives,
+        "gate_required_count": 3,
+        "gate_pass": maximum >= 3,
+    }
+
+
 def _thresholds(value: Mapping[str, Any]) -> dict[str, float]:
     required = {
         "object_to_ee_translation_m",
@@ -189,10 +340,27 @@ def build_manifest(
         ):
             raise ValueError("artifact paths must be project-relative without traversal")
         provenance = artifact["provenance"]
+        generation = provenance.get("grasp_generation")
+        generation_contract = None
+        if generation is not None:
+            if generation["generation_seed"] != seed:
+                raise ValueError(
+                    "held-grasp generation seed differs from the frozen candidate seed"
+                )
+            generation_contract = {
+                name: generation[name]
+                for name in (
+                    "catalog_id",
+                    "catalog_path",
+                    "catalog_sha256",
+                    "offset_method",
+                )
+            }
         contract = {
             "task_config_sha256": provenance["task_config_sha256"],
             "runtime_config_sha256": provenance["runtime_config_sha256"],
             "source_and_config_sha256": provenance["source_and_config_sha256"],
+            "grasp_generation_catalog": generation_contract,
         }
         if common_contract is None:
             common_contract = contract

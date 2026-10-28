@@ -1,0 +1,190 @@
+{
+  "catalog": {
+    "excluded_sign_patterns": [
+      "----",
+      "++++",
+      "-+-+",
+      "+-+-"
+    ],
+    "left_and_right_offsets": "X=0; Y and Z each +/-0.15 mm",
+    "object_initial_pose_change": false,
+    "offset_method": "object_local_offset_rotated_to_world_by_object_quaternion",
+    "path": "configs/rj45-grasp-generation-v2.json",
+    "row_count": 12,
+    "selection": "seed-to-row mapping fixed in the catalog before execution",
+    "source_sign_corners": 16,
+    "training_or_evaluation_auto_wrapper": false
+  },
+  "fresh_nominal_gate": {
+    "method": "zero-offset baseline using the new frozen source before any generation pilot",
+    "must_pass_before": "catalog physical pilot",
+    "required": true
+  },
+  "legacy_protocol_immutable": true,
+  "motivation": {
+    "corrected_time_posthoc_diversity": {
+      "candidate_source": "CHECK_LIFT-to-ALIGN transition rows from seeds 20261201..20261204",
+      "gate_pass": false,
+      "interpretation": "qualifying edges form a star centered on seed 20261202 and contain no three-seed clique",
+      "maximum_pairwise_distinct_count": 2,
+      "qualifying_edges": [
+        [
+          20261201,
+          20261202
+        ],
+        [
+          20261202,
+          20261203
+        ],
+        [
+          20261202,
+          20261204
+        ]
+      ],
+      "required_pairwise_distinct_count": 3
+    },
+    "fallback": "use a predeclared object-local grasp-target catalog; do not select candidates from policy outcomes",
+    "v1_pilot_outcome": "four physical runs completed independently; three strict nominal artifacts were rejected by float32 timestamp subtraction at the exact 12-control-interval dwell boundary"
+  },
+  "physical_pilot": {
+    "bias_enabled": false,
+    "catalog_rows": [
+      "grasp-00",
+      "grasp-01",
+      "grasp-02",
+      "grasp-03"
+    ],
+    "command_fault": null,
+    "cpu_audit": {
+      "attempt_manifest_schema_version": 1,
+      "cli": "scripts/audit_rj45_grasp_generation_pilot.py",
+      "edge_rule": "object_to_ee_translation_m >= 0.00025 OR object_to_ee_rotation_rad >= 0.004",
+      "failure_preservation": "failed rows retain seed, catalog_entry_id, status, and failure_reason",
+      "gate_rule": "maximum clique size >= 3",
+      "policy_metric_selection_used": false,
+      "required_attempt_order": [
+        20261301,
+        20261302,
+        20261303,
+        20261304
+      ],
+      "success_binding": "artifact bytes SHA and held provenance must match catalog path/SHA, seed, entry, group, and offset method"
+    },
+    "diversity_gate": {
+      "joint_difference_alone_is_sufficient": false,
+      "object_to_ee_rotation_rad": 0.004,
+      "object_to_ee_translation_m": 0.00025,
+      "required_mutually_pairwise_separated_seed_count": 3
+    },
+    "num_envs": 1,
+    "preserve_every_attempt": true,
+    "seeds": [
+      20261301,
+      20261302,
+      20261303,
+      20261304
+    ],
+    "selection_by_outcome_forbidden": true
+  },
+  "production_generation": {
+    "attempt_policy": "every failed or duplicate attempt is preserved; a preassigned reserve seed may reuse a row and is recorded independently",
+    "blocked_until": [
+      "fresh zero-offset nominal passes",
+      "new-method physical pilot passes",
+      "source and inputs are frozen and reverified"
+    ],
+    "candidate_policy": "skip failures and duplicates after recording them; do not choose by downstream policy performance",
+    "dev": {
+      "reserve_rows": [
+        "grasp-08",
+        "grasp-09"
+      ],
+      "seeds": [
+        20261231,
+        20261232,
+        20261233,
+        20261234
+      ],
+      "target_rows": [
+        "grasp-08",
+        "grasp-09"
+      ]
+    },
+    "final": {
+      "reserve_rows": [
+        "grasp-10",
+        "grasp-11"
+      ],
+      "seeds": [
+        20261241,
+        20261242,
+        20261243,
+        20261244
+      ],
+      "target_rows": [
+        "grasp-10",
+        "grasp-11"
+      ]
+    },
+    "split_isolation": true,
+    "train": {
+      "reserve_rows": [
+        "grasp-00",
+        "grasp-01",
+        "grasp-02",
+        "grasp-03"
+      ],
+      "seeds": [
+        20261211,
+        20261212,
+        20261213,
+        20261214,
+        20261215,
+        20261216,
+        20261217,
+        20261218,
+        20261219,
+        20261220,
+        20261221,
+        20261222
+      ],
+      "target_rows": [
+        "grasp-00",
+        "grasp-01",
+        "grasp-02",
+        "grasp-03",
+        "grasp-04",
+        "grasp-05",
+        "grasp-06",
+        "grasp-07"
+      ]
+    }
+  },
+  "protocol_id": "rj45-grasp-generation-v2",
+  "schema_version": 2,
+  "stage_freeze_contract": {
+    "anti_cycle": "dataset SHA is not required before teacher collection because the dataset does not yet exist",
+    "before_bc_training": [
+      "teacher dataset SHA in addition to the teacher-stage inputs"
+    ],
+    "before_ppo_training": [
+      "BC artifact SHA and every paired seed/command manifest in addition to prior-stage inputs"
+    ],
+    "before_teacher_collection": [
+      "source SHA",
+      "verified held-grasp bank SHA",
+      "task config SHA",
+      "training config SHA"
+    ]
+  },
+  "static_cad_audit": {
+    "gripper_convex_hull_vs_locator_dynamic_collision_verified": false,
+    "physical_pilot_required": true,
+    "plug_insertion_corridor_baseline_m": 0.001136,
+    "plug_insertion_corridor_minimum_m": 0.000986,
+    "socket_port_baseline_m": 0.022,
+    "socket_port_minimum_m": 0.02185
+  },
+  "status": "local_implementation_only_gpu_execution_forbidden_until_review",
+  "supersedes_for_generation_only": "docs/evidence/rj45-demonstrations-20261028/protocol.json"
+}

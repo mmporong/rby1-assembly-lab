@@ -1,0 +1,218 @@
+{
+  "catalog_id": "rj45-grasp-generation-v2",
+  "coordinate_sign_order": [
+    "left_y",
+    "left_z",
+    "right_y",
+    "right_z"
+  ],
+  "entries": [
+    {
+      "id": "grasp-00",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-01",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ]
+    },
+    {
+      "id": "grasp-02",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-03",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ]
+    },
+    {
+      "id": "grasp-04",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ]
+    },
+    {
+      "id": "grasp-05",
+      "left_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-06",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ]
+    },
+    {
+      "id": "grasp-07",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-08",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-09",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        -0.00015
+      ]
+    },
+    {
+      "id": "grasp-10",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        -0.00015,
+        0.00015
+      ]
+    },
+    {
+      "id": "grasp-11",
+      "left_object_local_offset_m": [
+        0.0,
+        0.00015,
+        0.00015
+      ],
+      "right_object_local_offset_m": [
+        0.0,
+        0.00015,
+        -0.00015
+      ]
+    }
+  ],
+  "excluded_sign_patterns": [
+    "----",
+    "++++",
+    "-+-+",
+    "+-+-"
+  ],
+  "offset_magnitude_m": 0.00015,
+  "offset_method": "object_local_offset_rotated_to_world_by_object_quaternion",
+  "schema_version": 2,
+  "seed_assignments": {
+    "pilot": {
+      "20261301": "grasp-00",
+      "20261302": "grasp-01",
+      "20261303": "grasp-02",
+      "20261304": "grasp-03"
+    },
+    "production_dev": {
+      "20261231": "grasp-08",
+      "20261232": "grasp-09",
+      "20261233": "grasp-08",
+      "20261234": "grasp-09"
+    },
+    "production_final": {
+      "20261241": "grasp-10",
+      "20261242": "grasp-11",
+      "20261243": "grasp-10",
+      "20261244": "grasp-11"
+    },
+    "production_train": {
+      "20261211": "grasp-00",
+      "20261212": "grasp-01",
+      "20261213": "grasp-02",
+      "20261214": "grasp-03",
+      "20261215": "grasp-04",
+      "20261216": "grasp-05",
+      "20261217": "grasp-06",
+      "20261218": "grasp-07",
+      "20261219": "grasp-00",
+      "20261220": "grasp-01",
+      "20261221": "grasp-02",
+      "20261222": "grasp-03"
+    }
+  },
+  "static_cad_audit": {
+    "gripper_convex_hull_vs_locator_dynamic_collision_verified": false,
+    "physical_pilot_required": true,
+    "plug_insertion_corridor_baseline_m": 0.001136,
+    "plug_insertion_corridor_minimum_m": 0.000986,
+    "socket_port_baseline_m": 0.022,
+    "socket_port_minimum_m": 0.02185
+  }
+}

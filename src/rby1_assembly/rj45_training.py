@@ -1141,19 +1141,20 @@ def validate_held_grasp_artifact(artifact: Mapping[str, Any]) -> dict[str, Any]:
     if artifact["schema_version"] != 1 or artifact["task_id"] != "rj45-v1":
         raise ValueError("held-grasp artifact must use schema 1 for rj45-v1")
     provenance = _mapping(artifact["provenance"], "provenance")
-    _exact_keys(
-        provenance,
-        {
-            "nominal_report_sha256",
-            "nominal_report_path",
-            "nominal_trace_sha256",
-            "nominal_trace_path",
-            "runtime_config_sha256",
-            "task_config_sha256",
-            "source_and_config_sha256",
-        },
-        "provenance",
-    )
+    required_provenance = {
+        "nominal_report_sha256",
+        "nominal_report_path",
+        "nominal_trace_sha256",
+        "nominal_trace_path",
+        "runtime_config_sha256",
+        "task_config_sha256",
+        "source_and_config_sha256",
+    }
+    if set(provenance) not in (
+        required_provenance,
+        required_provenance | {"grasp_generation"},
+    ):
+        raise ValueError("provenance has unexpected or missing keys")
     for name in (
         "nominal_report_sha256",
         "nominal_trace_sha256",
@@ -1177,6 +1178,34 @@ def validate_held_grasp_artifact(artifact: Mapping[str, Any]) -> dict[str, Any]:
         if not isinstance(path, str) or not path or path.startswith("/") or ".." in Path(path).parts:
             raise ValueError("source_and_config_sha256 keys must be project-relative paths")
         _sha256(digest, f"provenance.source_and_config_sha256[{path}]")
+    if "grasp_generation" in provenance:
+        generation = _mapping(provenance["grasp_generation"], "provenance.grasp_generation")
+        _exact_keys(
+            generation,
+            {
+                "catalog_id",
+                "catalog_path",
+                "catalog_sha256",
+                "generation_seed",
+                "catalog_entry_id",
+                "assignment_group",
+                "offset_method",
+            },
+            "provenance.grasp_generation",
+        )
+        for name in ("catalog_id", "catalog_entry_id", "assignment_group", "offset_method"):
+            if not isinstance(generation[name], str) or not generation[name]:
+                raise ValueError(f"provenance.grasp_generation.{name} must be non-empty")
+        path = generation["catalog_path"]
+        if not isinstance(path, str) or not path or path.startswith("/") or ".." in Path(path).parts:
+            raise ValueError("provenance.grasp_generation.catalog_path must be project-relative")
+        _sha256(generation["catalog_sha256"], "provenance.grasp_generation.catalog_sha256")
+        if sources.get(path) != generation["catalog_sha256"]:
+            raise ValueError(
+                "provenance grasp catalog must be bound in source_and_config_sha256"
+            )
+        if type(generation["generation_seed"]) is not int or generation["generation_seed"] < 0:
+            raise ValueError("provenance.grasp_generation.generation_seed must be non-negative")
 
     selection = _mapping(artifact["selection"], "selection")
     _exact_keys(selection, {"control_step", "timestamp_s", "phase_name"}, "selection")

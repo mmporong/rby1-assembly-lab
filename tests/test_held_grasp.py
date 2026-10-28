@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import shutil
 import tempfile
 import unittest
 
@@ -14,6 +15,10 @@ from rby1_assembly.held_grasp import (
     load_verified_held_grasp_artifact,
 )
 from rby1_assembly.rj45_task import verify_recorded_mating_geometry
+from rby1_assembly.rj45_grasp_generation import (
+    load_grasp_generation_catalog,
+    select_grasp_generation_entry,
+)
 from tests.test_experiment_contracts import _synthetic_contract_fixture
 
 
@@ -141,6 +146,35 @@ class HeldGraspBuildTests(unittest.TestCase):
     def tearDown(self):
         self.temporary.cleanup()
 
+    def _enable_generation(self, seed: int = 20261301) -> Path:
+        source = (
+            Path(__file__).resolve().parents[1]
+            / "configs/rj45-grasp-generation-v2.json"
+        )
+        catalog_path = self.project / "configs/rj45-grasp-generation-v2.json"
+        shutil.copyfile(source, catalog_path)
+        catalog = load_grasp_generation_catalog(catalog_path)
+        group, entry = select_grasp_generation_entry(catalog, seed)
+        report = json.loads(self.report.read_text(encoding="utf-8"))
+        report["provenance"]["seed"] = seed
+        report["provenance"]["grasp_generation_catalog_path"] = str(
+            catalog_path.relative_to(self.project)
+        )
+        report["provenance"]["grasp_generation_catalog_sha256"] = _sha256(
+            catalog_path
+        )
+        report["rj45_grasp_generation"] = {
+            "catalog_id": catalog["catalog_id"],
+            "selected_catalog_entry_id": entry["id"],
+            "seed": seed,
+            "assignment_group": group,
+            "offset_method": catalog["offset_method"],
+            "left_object_local_offset_m": entry["left_object_local_offset_m"],
+            "right_object_local_offset_m": entry["right_object_local_offset_m"],
+        }
+        _write_json(self.report, report)
+        return catalog_path
+
     def test_builds_first_candidate_after_point_two_seconds_and_reloads(self):
         artifact = build_held_grasp_artifact(
             self.project, self.task, self.report, self.output
@@ -157,6 +191,42 @@ class HeldGraspBuildTests(unittest.TestCase):
         self.assertEqual(loaded, artifact)
         self.assertEqual(proof["artifact_sha256"], _sha256(self.output))
         self.assertEqual(proof["selection_control_step"], 7)
+
+    def test_generation_lineage_is_bound_and_reverified(self):
+        catalog_path = self._enable_generation()
+        artifact = build_held_grasp_artifact(
+            self.project, self.task, self.report, self.output
+        )
+        generation = artifact["provenance"]["grasp_generation"]
+        self.assertEqual(generation["generation_seed"], 20261301)
+        self.assertEqual(generation["catalog_entry_id"], "grasp-00")
+        self.assertEqual(generation["catalog_sha256"], _sha256(catalog_path))
+        self.assertIn(
+            "configs/rj45-grasp-generation-v2.json",
+            artifact["provenance"]["source_and_config_sha256"],
+        )
+        loaded, _proof = load_verified_held_grasp_artifact(
+            self.project, self.task, self.output
+        )
+        self.assertEqual(loaded, artifact)
+
+    def test_generation_loader_rejects_stale_catalog_bytes(self):
+        catalog_path = self._enable_generation()
+        build_held_grasp_artifact(self.project, self.task, self.report, self.output)
+        catalog_path.write_text("{}\n", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "source/config hash mismatch"):
+            load_verified_held_grasp_artifact(self.project, self.task, self.output)
+
+    def test_generation_build_rejects_wrong_catalog_entry(self):
+        self._enable_generation()
+        report = json.loads(self.report.read_text(encoding="utf-8"))
+        report["rj45_grasp_generation"]["selected_catalog_entry_id"] = "grasp-11"
+        _write_json(self.report, report)
+        with self.assertRaisesRegex(ValueError, "frozen seed mapping"):
+            build_held_grasp_artifact(
+                self.project, self.task, self.report, self.output
+            )
+        self.assertFalse(self.output.exists())
 
     def test_missing_stable_manifold_leaves_no_partial_output(self):
         records = copy.deepcopy(self.records)

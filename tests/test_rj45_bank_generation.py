@@ -10,9 +10,14 @@ from unittest import mock
 
 from rby1_assembly.held_grasp import _held_grasp_bank_manifest_selection
 from rby1_assembly.rj45_bank_generation import (
+    audit_grasp_generation_pilot,
     build_manifest,
     descriptor_distance,
     held_grasp_descriptor,
+)
+from rby1_assembly.rj45_grasp_generation import (
+    load_grasp_generation_catalog,
+    select_grasp_generation_entry,
 )
 
 
@@ -22,6 +27,8 @@ THRESHOLDS = {
     "joint_position_linf_si": 0.005,
 }
 MINIMUMS = {"train": 1, "dev": 1, "final": 1}
+CATALOG_PATH = Path(__file__).resolve().parents[1] / "configs/rj45-grasp-generation-v2.json"
+CATALOG_SHA256 = hashlib.sha256(CATALOG_PATH.read_bytes()).hexdigest()
 
 
 def artifact(offset: float = 0.0, quaternion_sign: float = 1.0, source: str = "a") -> dict:
@@ -56,6 +63,27 @@ def candidate(grasp_id: str, split: str, seed: int, value: dict, digest: str) ->
         "artifact": value,
         "artifact_sha256": digest,
     }
+
+
+def generated_artifact(
+    seed: int, offset: float = 0.0, *, catalog_sha: str = CATALOG_SHA256
+) -> dict:
+    catalog = load_grasp_generation_catalog(CATALOG_PATH)
+    group, entry = select_grasp_generation_entry(catalog, seed)
+    value = artifact(offset)
+    value["provenance"]["source_and_config_sha256"][
+        "configs/rj45-grasp-generation-v2.json"
+    ] = catalog_sha
+    value["provenance"]["grasp_generation"] = {
+        "catalog_id": catalog["catalog_id"],
+        "catalog_path": "configs/rj45-grasp-generation-v2.json",
+        "catalog_sha256": catalog_sha,
+        "generation_seed": seed,
+        "catalog_entry_id": entry["id"],
+        "assignment_group": group,
+        "offset_method": catalog["offset_method"],
+    }
+    return value
 
 
 class Rj45BankGenerationTests(unittest.TestCase):
@@ -114,6 +142,100 @@ class Rj45BankGenerationTests(unittest.TestCase):
         collision[1]["generation_seed"] = 10
         with self.assertRaisesRegex(ValueError, "disjoint across splits"):
             build_manifest(collision, separation_thresholds=THRESHOLDS, minimum_split_counts=MINIMUMS)
+
+    def test_mixed_generation_catalogs_and_wrong_candidate_seed_are_rejected(self) -> None:
+        values = [
+            candidate("train-a", "train", 20261211, generated_artifact(20261211, 0.00), "a" * 64),
+            candidate("dev-a", "dev", 20261231, generated_artifact(20261231, 0.01), "b" * 64),
+            candidate("final-a", "final", 20261241, generated_artifact(20261241, 0.02), "c" * 64),
+        ]
+        mixed = copy.deepcopy(values)
+        mixed[1]["artifact"]["provenance"]["grasp_generation"]["catalog_sha256"] = "9" * 64
+        with self.assertRaisesRegex(ValueError, "mixed source/task/runtime/assets"):
+            build_manifest(mixed, separation_thresholds=THRESHOLDS, minimum_split_counts=MINIMUMS)
+        wrong_seed = copy.deepcopy(values)
+        wrong_seed[1]["artifact"]["provenance"]["grasp_generation"]["generation_seed"] = 20261232
+        with self.assertRaisesRegex(ValueError, "generation seed differs"):
+            build_manifest(wrong_seed, separation_thresholds=THRESHOLDS, minimum_split_counts=MINIMUMS)
+
+    def test_pilot_audit_preserves_failures_and_computes_maximum_clique(self) -> None:
+        catalog = load_grasp_generation_catalog(CATALOG_PATH)
+        attempts = []
+        for index, seed in enumerate(range(20261301, 20261305)):
+            entry = select_grasp_generation_entry(catalog, seed)[1]
+            if seed == 20261304:
+                attempts.append(
+                    {
+                        "seed": seed,
+                        "catalog_entry_id": entry["id"],
+                        "status": "failed",
+                        "failure_reason": "physical pilot timeout",
+                    }
+                )
+            else:
+                attempts.append(
+                    {
+                        "seed": seed,
+                        "catalog_entry_id": entry["id"],
+                        "status": "success",
+                        "artifact": generated_artifact(seed, index * 0.0003),
+                    }
+                )
+        result = audit_grasp_generation_pilot(
+            attempts,
+            catalog,
+            catalog_path="configs/rj45-grasp-generation-v2.json",
+            catalog_sha256=CATALOG_SHA256,
+        )
+        self.assertTrue(result["all_four_attempts_preserved"])
+        self.assertFalse(result["policy_metric_selection_used"])
+        self.assertEqual(result["attempts"][-1]["status"], "failed")
+        self.assertEqual(result["maximum_pairwise_distinct_count"], 3)
+        self.assertTrue(result["gate_pass"])
+
+    def test_pilot_audit_rejects_wrong_entry_and_star_graph_fails_gate(self) -> None:
+        catalog = load_grasp_generation_catalog(CATALOG_PATH)
+        offsets = (0.0, 0.0003, 0.00001, -0.00001)
+        attempts = []
+        for seed, offset in zip(range(20261301, 20261305), offsets, strict=True):
+            entry = select_grasp_generation_entry(catalog, seed)[1]
+            attempts.append(
+                {
+                    "seed": seed,
+                    "catalog_entry_id": entry["id"],
+                    "status": "success",
+                    "artifact": generated_artifact(seed, offset),
+                }
+            )
+        result = audit_grasp_generation_pilot(
+            attempts,
+            catalog,
+            catalog_path="configs/rj45-grasp-generation-v2.json",
+            catalog_sha256=CATALOG_SHA256,
+        )
+        self.assertEqual(result["maximum_pairwise_distinct_count"], 2)
+        self.assertFalse(result["gate_pass"])
+        wrong = copy.deepcopy(attempts)
+        wrong[0]["catalog_entry_id"] = "grasp-11"
+        with self.assertRaisesRegex(ValueError, "frozen seed/catalog order"):
+            audit_grasp_generation_pilot(
+                wrong,
+                catalog,
+                catalog_path="configs/rj45-grasp-generation-v2.json",
+                catalog_sha256=CATALOG_SHA256,
+            )
+        for invalid_seed in (20261301.0, True):
+            malformed = copy.deepcopy(attempts)
+            malformed[0]["seed"] = invalid_seed
+            with self.subTest(invalid_seed=invalid_seed), self.assertRaisesRegex(
+                ValueError, "frozen seed/catalog order"
+            ):
+                audit_grasp_generation_pilot(
+                    malformed,
+                    catalog,
+                    catalog_path="configs/rj45-grasp-generation-v2.json",
+                    catalog_sha256=CATALOG_SHA256,
+                )
 
     def test_joint_posture_alone_cannot_claim_a_different_grasp(self) -> None:
         changed_joints = artifact()

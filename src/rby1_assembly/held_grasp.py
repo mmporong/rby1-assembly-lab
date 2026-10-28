@@ -307,12 +307,79 @@ def _source_and_config_hashes(
         "configs/rj45-assets.json": provenance.get("connector_assets_config_sha256"),
         str(Path(task["assets"]["build_report"])): provenance.get("build_report_sha256"),
     }
+    generation = report.get("rj45_grasp_generation")
+    if generation is not None:
+        catalog_path = provenance.get("grasp_generation_catalog_path")
+        if not isinstance(catalog_path, str) or not catalog_path:
+            raise ValueError("generated grasp report lacks its catalog path")
+        paths_and_hashes[catalog_path] = provenance.get(
+            "grasp_generation_catalog_sha256"
+        )
     result.update(paths_and_hashes)
     for relative_path, expected in result.items():
         path = _project_path(project, relative_path, f"source/config path {relative_path}")
         if not path.is_file() or not isinstance(expected, str) or _sha256(path) != expected:
             raise ValueError(f"current source/config hash mismatch: {relative_path}")
     return dict(sorted(result.items()))
+
+
+def _grasp_generation_provenance(
+    project: Path, report: Mapping[str, Any]
+) -> dict[str, Any] | None:
+    generation_value = report.get("rj45_grasp_generation")
+    report_provenance = _mapping(report.get("provenance"), "nominal report provenance")
+    catalog_path_value = report_provenance.get("grasp_generation_catalog_path")
+    catalog_sha256 = report_provenance.get("grasp_generation_catalog_sha256")
+    if generation_value is None:
+        if catalog_path_value is not None or catalog_sha256 is not None:
+            raise ValueError("non-generation report must not claim a grasp catalog")
+        return None
+
+    from rby1_assembly.rj45_grasp_generation import (
+        load_grasp_generation_catalog,
+        select_grasp_generation_entry,
+    )
+
+    generation = _mapping(generation_value, "rj45 grasp generation report")
+    required = {
+        "catalog_id",
+        "selected_catalog_entry_id",
+        "seed",
+        "assignment_group",
+        "offset_method",
+        "left_object_local_offset_m",
+        "right_object_local_offset_m",
+    }
+    if set(generation) != required:
+        raise ValueError(f"rj45 grasp generation report must contain exactly {sorted(required)}")
+    catalog_path = _project_path(project, catalog_path_value, "grasp catalog path")
+    if not isinstance(catalog_sha256, str) or _sha256(catalog_path) != catalog_sha256:
+        raise ValueError("grasp generation catalog SHA-256 is stale")
+    seed = report_provenance.get("seed")
+    if type(seed) is not int or generation.get("seed") != seed:
+        raise ValueError("grasp generation report seed differs from nominal provenance")
+    catalog = load_grasp_generation_catalog(catalog_path)
+    assignment_group, entry = select_grasp_generation_entry(catalog, seed)
+    expected = {
+        "catalog_id": catalog["catalog_id"],
+        "selected_catalog_entry_id": entry["id"],
+        "seed": seed,
+        "assignment_group": assignment_group,
+        "offset_method": catalog["offset_method"],
+        "left_object_local_offset_m": entry["left_object_local_offset_m"],
+        "right_object_local_offset_m": entry["right_object_local_offset_m"],
+    }
+    if generation != expected:
+        raise ValueError("grasp generation report differs from the frozen seed mapping")
+    return {
+        "catalog_id": catalog["catalog_id"],
+        "catalog_path": _relative_path(project, catalog_path, "grasp catalog path"),
+        "catalog_sha256": catalog_sha256,
+        "generation_seed": seed,
+        "catalog_entry_id": entry["id"],
+        "assignment_group": assignment_group,
+        "offset_method": catalog["offset_method"],
+    }
 
 
 def _state_from_entry(entry: Mapping[str, Any]) -> dict[str, Any]:
@@ -341,18 +408,22 @@ def _artifact_from_candidate(
     entry: Mapping[str, Any],
 ) -> dict[str, Any]:
     trace_path = _project_path(project, report["trace_path"], "nominal trace path")
+    generation_provenance = _grasp_generation_provenance(project, report)
+    provenance = {
+        "nominal_report_sha256": evidence["report_sha256"],
+        "nominal_report_path": _relative_path(project, report_path, "nominal report path"),
+        "nominal_trace_sha256": evidence["trace_sha256"],
+        "nominal_trace_path": _relative_path(project, trace_path, "nominal trace path"),
+        "runtime_config_sha256": report["provenance"]["runtime_config_sha256"],
+        "task_config_sha256": task["_config_sha256"],
+        "source_and_config_sha256": _source_and_config_hashes(project, task, report),
+    }
+    if generation_provenance is not None:
+        provenance["grasp_generation"] = generation_provenance
     return {
         "schema_version": 1,
         "task_id": "rj45-v1",
-        "provenance": {
-            "nominal_report_sha256": evidence["report_sha256"],
-            "nominal_report_path": _relative_path(project, report_path, "nominal report path"),
-            "nominal_trace_sha256": evidence["trace_sha256"],
-            "nominal_trace_path": _relative_path(project, trace_path, "nominal trace path"),
-            "runtime_config_sha256": report["provenance"]["runtime_config_sha256"],
-            "task_config_sha256": task["_config_sha256"],
-            "source_and_config_sha256": _source_and_config_hashes(project, task, report),
-        },
+        "provenance": provenance,
         "selection": {
             "control_step": record["control_step"],
             "timestamp_s": entry["timestamp_s"],
@@ -581,6 +652,66 @@ def held_grasp_bank_dependency_paths(
         provenance = _mapping(
             artifact.get("provenance"), f"held-grasp artifact {grasp_id} provenance"
         )
+        generation = provenance.get("grasp_generation")
+        catalog_path: Path | None = None
+        if generation is not None:
+            from rby1_assembly.rj45_grasp_generation import (
+                load_grasp_generation_catalog,
+                select_grasp_generation_entry,
+            )
+
+            generation = _mapping(
+                generation, f"held-grasp artifact {grasp_id} grasp generation"
+            )
+            required_generation = {
+                "catalog_id",
+                "catalog_path",
+                "catalog_sha256",
+                "generation_seed",
+                "catalog_entry_id",
+                "assignment_group",
+                "offset_method",
+            }
+            if set(generation) != required_generation:
+                raise ValueError(
+                    f"held-grasp artifact {grasp_id} grasp generation must contain "
+                    f"exactly {sorted(required_generation)}"
+                )
+            catalog_path = _project_path(
+                project,
+                generation.get("catalog_path"),
+                f"held-grasp artifact {grasp_id} grasp catalog path",
+            )
+            catalog_sha256 = _lowercase_sha256(
+                generation.get("catalog_sha256"),
+                f"held-grasp artifact {grasp_id} grasp catalog SHA-256",
+            )
+            if not catalog_path.is_file() or _sha256(catalog_path) != catalog_sha256:
+                raise ValueError(
+                    f"held-grasp artifact {grasp_id} grasp catalog SHA-256 mismatch"
+                )
+            catalog = load_grasp_generation_catalog(catalog_path)
+            seed = generation.get("generation_seed")
+            if type(seed) is not int or seed < 0:
+                raise ValueError(
+                    f"held-grasp artifact {grasp_id} generation seed must be "
+                    "a non-negative integer"
+                )
+            assignment_group, entry = select_grasp_generation_entry(catalog, seed)
+            expected_generation = {
+                "catalog_id": catalog["catalog_id"],
+                "catalog_path": str(catalog_path.relative_to(project)),
+                "catalog_sha256": catalog_sha256,
+                "generation_seed": seed,
+                "catalog_entry_id": entry["id"],
+                "assignment_group": assignment_group,
+                "offset_method": catalog["offset_method"],
+            }
+            if dict(generation) != expected_generation:
+                raise ValueError(
+                    f"held-grasp artifact {grasp_id} grasp generation differs "
+                    "from the current seed/catalog mapping"
+                )
         report_path = _project_path(
             project,
             provenance.get("nominal_report_path"),
@@ -604,7 +735,9 @@ def held_grasp_bank_dependency_paths(
                 raise ValueError(
                     f"held-grasp artifact {grasp_id} {name} path must reference a file"
                 )
-        for dependency in (artifact_path, report_path, trace_path):
+        for dependency in (artifact_path, report_path, trace_path, catalog_path):
+            if dependency is None:
+                continue
             if dependency not in dependencies:
                 dependencies.append(dependency)
     if _sha256(manifest_path) != manifest_sha256:
@@ -656,6 +789,8 @@ def load_verified_held_grasp_bank(
     selected_ids: list[str] = []
     selected_hashes: list[str] = []
     provenance_contract: dict[str, Any] | None = None
+    generation_catalog_contract: dict[str, Any] | None = None
+    generation_contract_initialized = False
     for grasp_id, artifact_path, expected_sha256 in selected:
         artifact, artifact_proof = load_verified_held_grasp_artifact(
             project, task, artifact_path
@@ -676,6 +811,27 @@ def load_verified_held_grasp_bank(
         elif contract != provenance_contract:
             raise ValueError(
                 "held-grasp bank selected artifacts have mixed provenance contracts"
+            )
+        generation = artifact_provenance.get("grasp_generation")
+        current_generation_contract = (
+            None
+            if generation is None
+            else {
+                name: generation[name]
+                for name in (
+                    "catalog_id",
+                    "catalog_path",
+                    "catalog_sha256",
+                    "offset_method",
+                )
+            }
+        )
+        if not generation_contract_initialized:
+            generation_catalog_contract = current_generation_contract
+            generation_contract_initialized = True
+        elif current_generation_contract != generation_catalog_contract:
+            raise ValueError(
+                "held-grasp bank selected artifacts use mixed generation catalogs"
             )
         artifacts.append(artifact)
         selected_ids.append(grasp_id)

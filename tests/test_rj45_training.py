@@ -327,6 +327,28 @@ class HeldGraspArtifactTests(unittest.TestCase):
         self.assertEqual(validated, artifact)
         self.assertIsNot(validated, artifact)
 
+    def test_accepts_generation_provenance_only_when_catalog_is_source_bound(self):
+        artifact = valid_artifact()
+        catalog_path = "configs/rj45-grasp-generation-v2.json"
+        catalog_sha256 = "1" * 64
+        artifact["provenance"]["source_and_config_sha256"][catalog_path] = (
+            catalog_sha256
+        )
+        artifact["provenance"]["grasp_generation"] = {
+            "catalog_id": "rj45-grasp-generation-v2",
+            "catalog_path": catalog_path,
+            "catalog_sha256": catalog_sha256,
+            "generation_seed": 20261301,
+            "catalog_entry_id": "grasp-00",
+            "assignment_group": "pilot",
+            "offset_method": "object_local_offset_rotated_to_world_by_object_quaternion",
+        }
+        self.assertEqual(validate_held_grasp_artifact(artifact), artifact)
+
+        artifact["provenance"]["grasp_generation"]["catalog_sha256"] = "2" * 64
+        with self.assertRaisesRegex(ValueError, "must be bound"):
+            validate_held_grasp_artifact(artifact)
+
     def test_rejects_missing_trace_provenance_or_bad_source_digest(self):
         artifact = valid_artifact()
         artifact["provenance"].pop("nominal_trace_sha256")
