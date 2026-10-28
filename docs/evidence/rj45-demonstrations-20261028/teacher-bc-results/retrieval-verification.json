@@ -1,0 +1,43 @@
+{
+  "archive": {
+    "archive_bytes": 31981163,
+    "archive_members": 21,
+    "archive_name": "rj45-4c-teacher-bc-collector-recovery-evidence-20261028.tar.gz",
+    "archive_sha256": "a5f6ce84a0534931302cc000b2d74ce87ea775398ed9b2f785b4f2f23953ad0c",
+    "dev_episodes": 64,
+    "final_policy_seed_opened": false,
+    "payload_bytes_verified": 62603882,
+    "payload_files_verified": 21,
+    "payload_manifest_sha256": "8781b2a804109a82c5a24ebf4361691dadd7d1c31f3ad20c7c2b8bb25ea17165",
+    "ppo_started": false,
+    "source_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "source_stability_during_archive": "pass_pre_and_post_hashes_equal",
+    "status": "pass",
+    "summary_status": "teacher_and_bc_complete",
+    "train_episodes": 256
+  },
+  "local_retrieval": {
+    "all_payload_file_sizes_and_sha256_verified": true,
+    "archive_sha256": "a5f6ce84a0534931302cc000b2d74ce87ea775398ed9b2f785b4f2f23953ad0c",
+    "payload_manifest_sha256": "8781b2a804109a82c5a24ebf4361691dadd7d1c31f3ad20c7c2b8bb25ea17165",
+    "root": "rby1-assembly-lab/artifacts/cloud/retrieved-4c-teacher-bc-collector-recovery-20261028",
+    "safe_extraction_verified": true
+  },
+  "schema_version": 1,
+  "scope_note": "Teacher rollout completion and supervised BC fit are verified. No closed-loop BC or PPO policy success claim is made.",
+  "semantic_verification": {
+    "all_terminal_independent_success": true,
+    "bc_actor_state_sha256": "c28cf06e444c9939c4449f00a1da28bdf69162264f050928aa12ee3b1ee22313",
+    "bc_artifact_schema": "rj45_bc_actor_init_v1",
+    "bc_artifact_sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5",
+    "bc_lineage_exact_match": true,
+    "dev_episodes": 64,
+    "final_policy_seed_opened": false,
+    "hdf5_contract": "rj45_teacher_episode_v1/standard79/6D action",
+    "ppo_started_in_this_stage": false,
+    "student_loader_exposed_privileged_keys": false,
+    "terminal_invalid_count": 0,
+    "train_episodes": 256
+  },
+  "status": "pass"
+}

@@ -1,0 +1,87 @@
+{
+  "bc_command": [
+    "/usr/bin/env",
+    "ACCEPT_EULA=Y",
+    "OMNI_KIT_ACCEPT_EULA=YES",
+    "OMP_NUM_THREADS=8",
+    "MKL_NUM_THREADS=8",
+    "/home/ubuntu/rby1-assembly-lab/.venv-isaac/bin/python",
+    "scripts/train_rj45_bc.py",
+    "--train-dataset",
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5",
+    "--train-sha256",
+    "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+    "--dev-dataset",
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.h5",
+    "--dev-sha256",
+    "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830",
+    "--recipe",
+    "configs/rj45-bc-v1.json",
+    "--output-dir",
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc",
+    "--observability-diagnostic"
+  ],
+  "bc_recipe": {
+    "path": "configs/rj45-bc-v1.json",
+    "sha256": "e71d806f572b5f9fdef5287be694dd358746cea5ce8ba268005ea4f68bae059c"
+  },
+  "created_utc": "2026-10-28T09:07:48.458224+00:00",
+  "datasets": {
+    "dev": {
+      "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.h5",
+      "sha256": "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830"
+    },
+    "train": {
+      "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5",
+      "sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc"
+    }
+  },
+  "schema_version": 1,
+  "teacher_stage_manifest_sha256": "264a0f1da6d8b830789c2a5492aaa42fc027d22ef9a59791ab822c25b4c2ebff",
+  "verification": {
+    "passed": true,
+    "schema_version": 1,
+    "splits": {
+      "dev": {
+        "eligible_episode_count": 64,
+        "episode_count": 64,
+        "grasp_ids": [
+          "rj45-dev-01",
+          "rj45-dev-02"
+        ],
+        "successful_valid_grasp_ids": [
+          "rj45-dev-01",
+          "rj45-dev-02"
+        ],
+        "terminal_invalid_count": 0
+      },
+      "train": {
+        "eligible_episode_count": 256,
+        "episode_count": 256,
+        "grasp_ids": [
+          "rj45-train-01",
+          "rj45-train-02",
+          "rj45-train-03",
+          "rj45-train-04",
+          "rj45-train-05",
+          "rj45-train-06",
+          "rj45-train-07",
+          "rj45-train-08"
+        ],
+        "successful_valid_grasp_ids": [
+          "rj45-train-01",
+          "rj45-train-02",
+          "rj45-train-03",
+          "rj45-train-04",
+          "rj45-train-05",
+          "rj45-train-06",
+          "rj45-train-07",
+          "rj45-train-08"
+        ],
+        "terminal_invalid_count": 0
+      }
+    },
+    "train_dev_bias_seed_overlap": [],
+    "train_dev_grasp_overlap": []
+  }
+}

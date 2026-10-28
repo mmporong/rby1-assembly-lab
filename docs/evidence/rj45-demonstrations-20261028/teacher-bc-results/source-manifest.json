@@ -1,0 +1,222 @@
+{
+  "files": [
+    {
+      "classification": "documentation",
+      "derived_from": [],
+      "path": "README.md",
+      "sha256": "f0b4100f8a622d571a16a70c4b80aa96fcfbc7e490d11894b02b1895717e90c5",
+      "size_bytes": 4284
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "bc-exit.json",
+      "sha256": "e0b9cfcef05715038a93987e0b83c204dec976e532f6842b11d834df5384f93c",
+      "size_bytes": 288,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc.exit.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "bc-training-report.json",
+      "sha256": "32aa18808dfb9ae2ccc6bb4019f24e9c5782005ee69c99889af7ee2816467bbf",
+      "size_bytes": 10639,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/training_report.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "collect-dev-exit.json",
+      "sha256": "ed1df449d5d34b6150eea7e9cb50d5dd031a5a521830e53aa983c4781c6b123d",
+      "size_bytes": 306,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-dev.exit.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "collect-train-exit.json",
+      "sha256": "7aa17add61e1ce3e9c32ea37d35a03ba820e187002146678027537f62af8ea23",
+      "size_bytes": 310,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-train.exit.json"
+    },
+    {
+      "classification": "derived_verification_summary",
+      "derived_from": [
+        "teacher-train.h5",
+        "teacher-dev.h5",
+        "bc/training_report.json",
+        "bc/bc_actor_init.pt"
+      ],
+      "path": "derived-summary.json",
+      "sha256": "c753d1488cf13b958f1fea933b487ab053d18fcb9e695180866fed611ae08bcc",
+      "size_bytes": 5087
+    },
+    {
+      "classification": "derived_learning_curve",
+      "derived_from": [
+        "bc/training_report.json"
+      ],
+      "path": "learning-curve.csv",
+      "sha256": "56cb8c53de83ce3c8509fc5a9671c54ad88efc867d017dd4e7995c4fc43d4d63",
+      "size_bytes": 3044
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "pre-bc-manifest.json",
+      "sha256": "7e50470ff933c885eb08cb6ade6014f65be8b4ba7e402226b493dd61a857967a",
+      "size_bytes": 2664,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/pre-bc-manifest.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "reset-check-exit.json",
+      "sha256": "a5c34985b498a7267da175b3dc5bc50fcb54de70fef3ad07af115715c0c317ef",
+      "size_bytes": 306,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.exit.json"
+    },
+    {
+      "classification": "derived_retrieval_verification",
+      "derived_from": [
+        "payload-manifest.json",
+        "archive-verification.json",
+        "teacher-train.h5",
+        "teacher-dev.h5",
+        "bc/bc_actor_init.pt"
+      ],
+      "path": "retrieval-verification.json",
+      "sha256": "bba6ff5969243dc5856b7e03e67bcfb76e6ffc986d867cea6ce918e3660d46bd",
+      "size_bytes": 1987
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "run-summary.json",
+      "sha256": "c666337c898c2142f1ffe452e5ec8602de74c2d1fb5fa155bebc3d6920e4ed6c",
+      "size_bytes": 2224,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/summary.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "teacher-dev-summary.json",
+      "sha256": "03bd9fd280a4e76339699905d45fff44c0411c45b625f8f2aaf37e4a94abfce2",
+      "size_bytes": 790,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.summary.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "teacher-stage-manifest.json",
+      "sha256": "264a0f1da6d8b830789c2a5492aaa42fc027d22ef9a59791ab822c25b4c2ebff",
+      "size_bytes": 4388,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-stage-manifest.json"
+    },
+    {
+      "classification": "byte_preserved_copy",
+      "path": "teacher-train-summary.json",
+      "sha256": "29e788273762e1154faaa792680bf3df9fdab3a1b421d53fac1306da464ec06d",
+      "size_bytes": 2141,
+      "source_path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.summary.json"
+    }
+  ],
+  "raw_sources": {
+    "artifacts/cloud/rj45-prepare-teacher-collector-recovery-plan.py": {
+      "sha256": "b33e4e907a799055cbeda4b1cd27416aeaa0d5124484a7f9b9faa5f557a4f045",
+      "size_bytes": 5188
+    },
+    "artifacts/cloud/rj45-run-teacher-bc-collector-recovery-v1.py": {
+      "sha256": "52be6435e6781d0b66c150d770f6ac0576da6f734294e7bccd576035ece9c347",
+      "size_bytes": 31844
+    },
+    "artifacts/cloud/rj45-teacher-bc-collector-recovery-v1-plan-20261028.json": {
+      "sha256": "0d3f9218b6c8c7e35fa788294bf360a9a789712caae644d9ecfe22f253dd8dcf",
+      "size_bytes": 18383
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc.exit.json": {
+      "sha256": "e0b9cfcef05715038a93987e0b83c204dec976e532f6842b11d834df5384f93c",
+      "size_bytes": 288
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size_bytes": 0
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/bc_actor_init.pt": {
+      "sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5",
+      "size_bytes": 484967
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/training_report.json": {
+      "sha256": "32aa18808dfb9ae2ccc6bb4019f24e9c5782005ee69c99889af7ee2816467bbf",
+      "size_bytes": 10639
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-dev.exit.json": {
+      "sha256": "ed1df449d5d34b6150eea7e9cb50d5dd031a5a521830e53aa983c4781c6b123d",
+      "size_bytes": 306
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-dev.log": {
+      "sha256": "f3caa83f3c1be6faf8dc9bfe2b2ca772b8560cf677d691ca2fc197b035978816",
+      "size_bytes": 4746
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-train.exit.json": {
+      "sha256": "7aa17add61e1ce3e9c32ea37d35a03ba820e187002146678027537f62af8ea23",
+      "size_bytes": 310
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-train.log": {
+      "sha256": "6bc1948bbfae97718d681390828d84103621f0397b8ab55487b274e950bccb2e",
+      "size_bytes": 4875
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/pre-bc-manifest.json": {
+      "sha256": "7e50470ff933c885eb08cb6ade6014f65be8b4ba7e402226b493dd61a857967a",
+      "size_bytes": 2664
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.exit.json": {
+      "sha256": "a5c34985b498a7267da175b3dc5bc50fcb54de70fef3ad07af115715c0c317ef",
+      "size_bytes": 306
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.json": {
+      "sha256": "13cf65bdbc2b1ac6864716f9600ac75b63662bb0eb3eaba0cf56938de146f701",
+      "size_bytes": 141073
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.log": {
+      "sha256": "72aa5d08c2f758fab9c4bcc494a6ccb45bc70b378c92b17713260978c0cb37ef",
+      "size_bytes": 146839
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/summary.json": {
+      "sha256": "c666337c898c2142f1ffe452e5ec8602de74c2d1fb5fa155bebc3d6920e4ed6c",
+      "size_bytes": 2224
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.h5": {
+      "sha256": "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830",
+      "size_bytes": 12191046
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.summary.json": {
+      "sha256": "03bd9fd280a4e76339699905d45fff44c0411c45b625f8f2aaf37e4a94abfce2",
+      "size_bytes": 790
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-stage-manifest.json": {
+      "sha256": "264a0f1da6d8b830789c2a5492aaa42fc027d22ef9a59791ab822c25b4c2ebff",
+      "size_bytes": 4388
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5": {
+      "sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+      "size_bytes": 49550865
+    },
+    "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.summary.json": {
+      "sha256": "29e788273762e1154faaa792680bf3df9fdab3a1b421d53fac1306da464ec06d",
+      "size_bytes": 2141
+    }
+  },
+  "retrieval": {
+    "archive_name": "rj45-4c-teacher-bc-collector-recovery-evidence-20261028.tar.gz",
+    "archive_sha256": "a5f6ce84a0534931302cc000b2d74ce87ea775398ed9b2f785b4f2f23953ad0c",
+    "archive_size_bytes": 31981163,
+    "before_after_stable": true,
+    "file_hashes_verified": true,
+    "local_package_root": "rby1-assembly-lab/artifacts/cloud/retrieved-4c-teacher-bc-collector-recovery-20261028",
+    "payload_file_count": 21,
+    "payload_manifest_sha256": "8781b2a804109a82c5a24ebf4361691dadd7d1c31f3ad20c7c2b8bb25ea17165",
+    "payload_size_bytes": 62603882,
+    "remote_package_root": "artifacts/cloud/rj45-4c-teacher-bc-collector-recovery-retrieval-package-20261028",
+    "safe_extraction_verified": true
+  },
+  "schema_version": 1,
+  "scope": {
+    "final_policy_seed_opened": false,
+    "large_hdf5_actor_and_logs_published_to_git": false,
+    "ppo_started_in_this_stage": false,
+    "teacher_success_is_policy_success": false
+  },
+  "source_head": "104721acf2222c1cfe8ec86cd030f5116a4fef93"
+}

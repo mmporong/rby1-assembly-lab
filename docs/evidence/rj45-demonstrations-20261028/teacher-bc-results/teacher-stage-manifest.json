@@ -1,0 +1,137 @@
+{
+  "bank_manifest": {
+    "path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+    "sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5"
+  },
+  "bc_recipe": {
+    "path": "configs/rj45-bc-v1.json",
+    "sha256": "e71d806f572b5f9fdef5287be694dd358746cea5ce8ba268005ea4f68bae059c"
+  },
+  "commands": {
+    "collect-dev": [
+      "/usr/bin/env",
+      "ACCEPT_EULA=Y",
+      "OMNI_KIT_ACCEPT_EULA=YES",
+      "OMP_NUM_THREADS=8",
+      "MKL_NUM_THREADS=8",
+      "/home/ubuntu/rby1-assembly-lab/.venv-isaac/bin/python",
+      "scripts/collect_rj45_teacher.py",
+      "--headless",
+      "--device",
+      "cuda:1",
+      "--output",
+      "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.h5",
+      "--summary",
+      "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.summary.json",
+      "--split",
+      "dev",
+      "--rj45-nominal-evidence",
+      "artifacts/rj45-4c-collector-recovery-20261028/nominal/report.json",
+      "--rj45-held-bank",
+      "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+      "--rj45-training-config",
+      "configs/rj45-training-target-offset-v1.json",
+      "--parallel-contact-evidence",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+      "--task-config",
+      "configs/tasks/rj45-v1.json",
+      "--num-envs",
+      "64",
+      "--episodes",
+      "64",
+      "--seed",
+      "20261121"
+    ],
+    "collect-train": [
+      "/usr/bin/env",
+      "ACCEPT_EULA=Y",
+      "OMNI_KIT_ACCEPT_EULA=YES",
+      "OMP_NUM_THREADS=8",
+      "MKL_NUM_THREADS=8",
+      "/home/ubuntu/rby1-assembly-lab/.venv-isaac/bin/python",
+      "scripts/collect_rj45_teacher.py",
+      "--headless",
+      "--device",
+      "cuda:0",
+      "--output",
+      "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5",
+      "--summary",
+      "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.summary.json",
+      "--split",
+      "train",
+      "--rj45-nominal-evidence",
+      "artifacts/rj45-4c-collector-recovery-20261028/nominal/report.json",
+      "--rj45-held-bank",
+      "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+      "--rj45-training-config",
+      "configs/rj45-training-target-offset-v1.json",
+      "--parallel-contact-evidence",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+      "--task-config",
+      "configs/tasks/rj45-v1.json",
+      "--num-envs",
+      "256",
+      "--episodes",
+      "256",
+      "--seed",
+      "20261120"
+    ],
+    "reset": [
+      "/usr/bin/env",
+      "ACCEPT_EULA=Y",
+      "OMNI_KIT_ACCEPT_EULA=YES",
+      "OMP_NUM_THREADS=8",
+      "MKL_NUM_THREADS=8",
+      "/home/ubuntu/rby1-assembly-lab/.venv-isaac/bin/python",
+      "scripts/check_rj45_reset.py",
+      "--headless",
+      "--device",
+      "cuda:0",
+      "--num-envs",
+      "256",
+      "--reset-cycles",
+      "4",
+      "--mode",
+      "physical-warmup-cycles",
+      "--nominal",
+      "artifacts/rj45-4c-collector-recovery-20261028/nominal/report.json",
+      "--bank",
+      "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+      "--parallel-contact-evidence",
+      "artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+      "--report",
+      "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.json"
+    ]
+  },
+  "created_utc": "2026-10-28T09:01:18.802351+00:00",
+  "final_policy_seed_opened": false,
+  "schema_version": 1,
+  "selected_profile": {
+    "name": "F",
+    "path": "configs/ppo-rj45-refinement-f.json",
+    "sha256": "c909830f5bce676b8372c272adad25796c9dee3a9c744546eba786eac3739519"
+  },
+  "source_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "task": {
+    "path": "configs/tasks/rj45-v1.json",
+    "sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  },
+  "teacher_jobs": {
+    "dev": {
+      "device": "cuda:1",
+      "episodes": 64,
+      "num_envs": 64,
+      "seed": 20261121
+    },
+    "train": {
+      "device": "cuda:0",
+      "episodes": 256,
+      "num_envs": 256,
+      "seed": 20261120
+    }
+  },
+  "training": {
+    "path": "configs/rj45-training-target-offset-v1.json",
+    "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+  }
+}

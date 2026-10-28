@@ -1,0 +1,135 @@
+{
+  "bc": {
+    "actor_state_sha256": "c28cf06e444c9939c4449f00a1da28bdf69162264f050928aa12ee3b1ee22313",
+    "artifact_kind": "bc_actor_initialization_not_ppo_checkpoint",
+    "artifact_provenance": {
+      "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+      "dataset_sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+      "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+      "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+      "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    "artifact_sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5",
+    "batch_size": 1024,
+    "best_dev_mse": 5.787899681308772e-06,
+    "best_epoch": 34,
+    "claims": {
+      "critic_or_std_trained": false,
+      "ppo_checkpoint": false,
+      "privileged_teacher_ground_truth_used_as_student_input": false
+    },
+    "epochs": 40,
+    "final_dev_mse": 6.574130566150416e-06,
+    "final_train_mse": 7.477642611775082e-06,
+    "initial_dev_mse": 0.0021678186021745205,
+    "learning_rate": 0.0003,
+    "lineage": {
+      "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+      "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+      "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+      "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    "observability_diagnostic": {
+      "evaluated_rows": 1024,
+      "interpretation": "label collision is an observability diagnostic, not a proof of impossibility",
+      "max_corresponding_label_rms": 0.04871470108628273,
+      "mean_corresponding_label_rms": 0.02086053745438221,
+      "mean_nearest_observation_rms": 0.009200995177820914,
+      "requested_rows": 1024,
+      "scope": "fixed-seed sample of at most 1024 eligible train rows; nearest row must be from another episode",
+      "seed": 20261120,
+      "skipped_without_other_episode": 0
+    },
+    "sample_visits": 3833040,
+    "student_observation": "standard79_without_additional_normalization",
+    "total_updates": 3760
+  },
+  "completed_utc": "2026-10-28T09:08:37.002357+00:00",
+  "interpretation": {
+    "bc_mse_is_closed_loop_policy_success": false,
+    "teacher_success_is_policy_success": false
+  },
+  "schema_version": 1,
+  "sealing": {
+    "final_evaluation_started": false,
+    "final_policy_seed_opened": false,
+    "ppo_started_in_this_stage": false
+  },
+  "source_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "teacher_collection": {
+    "all_attempts_successful_and_terminal_valid": true,
+    "splits": {
+      "dev": {
+        "bias_case_count": 64,
+        "dataset_sha256": "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830",
+        "eligible_episodes": 64,
+        "episodes": 64,
+        "grasp_episode_counts": {
+          "rj45-dev-01": 32,
+          "rj45-dev-02": 32
+        },
+        "grasp_row_counts": {
+          "rj45-dev-01": 12267,
+          "rj45-dev-02": 12126
+        },
+        "observation_max": 1.038710355758667,
+        "observation_min": -0.6284368634223938,
+        "phase_row_counts": {
+          "align": 642,
+          "done": 64,
+          "insert": 23687
+        },
+        "seed_count": 64,
+        "teacher_action_abs_max": 0.14623485505580902,
+        "teacher_action_rms": 0.04588110931380069,
+        "total_rows": 24393,
+        "valid_rows": 23687,
+        "warmup_invalid_rows": 706
+      },
+      "train": {
+        "bias_case_count": 256,
+        "dataset_sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+        "eligible_episodes": 256,
+        "episodes": 256,
+        "grasp_episode_counts": {
+          "rj45-train-01": 32,
+          "rj45-train-02": 32,
+          "rj45-train-03": 32,
+          "rj45-train-04": 32,
+          "rj45-train-05": 32,
+          "rj45-train-06": 32,
+          "rj45-train-07": 32,
+          "rj45-train-08": 32
+        },
+        "grasp_row_counts": {
+          "rj45-train-01": 12271,
+          "rj45-train-02": 12911,
+          "rj45-train-03": 12420,
+          "rj45-train-04": 12273,
+          "rj45-train-05": 12412,
+          "rj45-train-06": 12180,
+          "rj45-train-07": 12484,
+          "rj45-train-08": 12260
+        },
+        "observation_max": 1.0400216579437256,
+        "observation_min": -0.6299194097518921,
+        "phase_row_counts": {
+          "align": 3129,
+          "done": 256,
+          "insert": 95826
+        },
+        "seed_count": 256,
+        "teacher_action_abs_max": 0.15935847163200378,
+        "teacher_action_rms": 0.044816012292982356,
+        "total_rows": 99211,
+        "valid_rows": 95826,
+        "warmup_invalid_rows": 3385
+      }
+    },
+    "student_loader_privileged_key_exposure": false,
+    "train_dev_bias_seed_overlap": [],
+    "train_dev_bias_seed_overlap_confirmed": true,
+    "train_dev_grasp_overlap": []
+  },
+  "verification_status": "pass"
+}

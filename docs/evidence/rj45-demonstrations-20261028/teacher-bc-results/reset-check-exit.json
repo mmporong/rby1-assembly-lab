@@ -1,0 +1,10 @@
+{
+  "failure_reason": null,
+  "log": {
+    "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/reset-check.log",
+    "sha256": "72aa5d08c2f758fab9c4bcc494a6ccb45bc70b378c92b17713260978c0cb37ef"
+  },
+  "process_group_cleanup_confirmed": true,
+  "return_code": 0,
+  "stage": "reset-check"
+}

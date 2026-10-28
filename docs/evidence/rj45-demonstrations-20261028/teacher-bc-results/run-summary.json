@@ -1,0 +1,73 @@
+{
+  "bc_artifact": {
+    "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/bc_actor_init.pt",
+    "sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5"
+  },
+  "bc_report": {
+    "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/training_report.json",
+    "sha256": "32aa18808dfb9ae2ccc6bb4019f24e9c5782005ee69c99889af7ee2816467bbf"
+  },
+  "completed_utc": "2026-10-28T09:08:37.002357+00:00",
+  "dataset_verification": {
+    "passed": true,
+    "schema_version": 1,
+    "splits": {
+      "dev": {
+        "eligible_episode_count": 64,
+        "episode_count": 64,
+        "grasp_ids": [
+          "rj45-dev-01",
+          "rj45-dev-02"
+        ],
+        "successful_valid_grasp_ids": [
+          "rj45-dev-01",
+          "rj45-dev-02"
+        ],
+        "terminal_invalid_count": 0
+      },
+      "train": {
+        "eligible_episode_count": 256,
+        "episode_count": 256,
+        "grasp_ids": [
+          "rj45-train-01",
+          "rj45-train-02",
+          "rj45-train-03",
+          "rj45-train-04",
+          "rj45-train-05",
+          "rj45-train-06",
+          "rj45-train-07",
+          "rj45-train-08"
+        ],
+        "successful_valid_grasp_ids": [
+          "rj45-train-01",
+          "rj45-train-02",
+          "rj45-train-03",
+          "rj45-train-04",
+          "rj45-train-05",
+          "rj45-train-06",
+          "rj45-train-07",
+          "rj45-train-08"
+        ],
+        "terminal_invalid_count": 0
+      }
+    },
+    "train_dev_bias_seed_overlap": [],
+    "train_dev_grasp_overlap": []
+  },
+  "datasets": {
+    "dev": {
+      "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-dev.h5",
+      "sha256": "680d18be628c2eb9bb6adecf0ff719f48d99b6128ee80ca58af5485235f60830"
+    },
+    "train": {
+      "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5",
+      "sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc"
+    }
+  },
+  "final_evaluation_started": false,
+  "inputs_unchanged": true,
+  "ppo_started": false,
+  "reset_check_passed": true,
+  "source_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "status": "teacher_and_bc_complete"
+}

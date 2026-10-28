@@ -81,7 +81,7 @@ class FakeEnv:
         return self.position, self.quaternion
 
 
-def extras(*, success=True):
+def extras(*, success=True, episode_index=0):
     return {
         "success": torch.tensor([success, False]),
         "evaluation": {"valid": torch.tensor([True, True])},
@@ -89,7 +89,7 @@ def extras(*, success=True):
             "termination_reason": ["independent_success", "none"]
         },
         "terminal_snapshot": {
-            "episode_index": torch.tensor([0, 0]),
+            "episode_index": torch.tensor([episode_index, 0]),
             "timestamp_s": torch.tensor([1.0 / 30.0, 1.0 / 30.0]),
             "actual_depth_m": torch.tensor([0.01, 0.002]),
             "actual_lateral_error_m": torch.tensor([0.0, 0.001]),
@@ -182,9 +182,13 @@ def test_camera_uses_selected_environment_origin():
     assert camera["lookat_world_m"] == pytest.approx((5.36, 2.5, 0.87))
 
 
-def test_real_step_cadence_stops_at_episode_zero_terminal_without_reset_frame():
+@pytest.mark.parametrize("initial_episode", [0, 1])
+def test_real_step_cadence_stops_at_initial_episode_terminal_without_reset_frame(
+    initial_episode,
+):
     with tempfile.TemporaryDirectory() as directory:
         env = FakeEnv()
+        env._training_episode_index[0] = initial_episode
         writers = []
         video = recorder(directory, env, writers)
         state_before = {
@@ -203,8 +207,10 @@ def test_real_step_cadence_stops_at_episode_zero_terminal_without_reset_frame():
                 env.sim.step = physics_step
                 env.sim.render()
         # DirectRLEnv auto-reset has happened by the time wrapped.step returns.
-        env._training_episode_index[0] = 1
-        video.finalize_control_step(extras(), torch.tensor([True, False]))
+        env._training_episode_index[0] = initial_episode + 1
+        video.finalize_control_step(
+            extras(episode_index=initial_episode), torch.tensor([True, False])
+        )
         evidence = video.close(rollout_completed=True)
 
         assert evidence is not None
@@ -218,7 +224,7 @@ def test_real_step_cadence_stops_at_episode_zero_terminal_without_reset_frame():
         assert [row["simulation_time_s"] for row in rows] == pytest.approx(
             [4 / 240, 8 / 240]
         )
-        assert all(row["episode_index"] == 0 for row in rows)
+        assert all(row["episode_index"] == initial_episode for row in rows)
         assert all(row["frame_state_is_pre_autoreset_physics"] for row in rows)
         assert rows[0]["success_observed_after_control_step"] is False
         assert rows[1]["success_observed_after_control_step"] is True
@@ -234,12 +240,44 @@ def test_real_step_cadence_stops_at_episode_zero_terminal_without_reset_frame():
         torch.testing.assert_close(
             env._training_last_policy_observation_valid, state_before["valid"]
         )
-        assert env._training_episode_index[0].item() == 1
+        assert env._training_episode_index[0].item() == initial_episode + 1
         assert env.sim.settings["/isaaclab/render/rtx_sensors"] is False
         metadata = json.loads(video.metadata_path.read_text(encoding="utf-8"))
+        assert metadata["selected_episode_index"] == initial_episode
+        assert metadata["selected_terminal"]["episode_index"] == initial_episode
         assert metadata["selected_terminal"]["timestamp_s"] == pytest.approx(1 / 30)
         assert metadata["selected_terminal"]["actual_depth_m"] == pytest.approx(0.01)
         assert metadata["selected_terminal"]["last_pre_autoreset_physics_step"] == 8
+
+
+def test_capture_rejects_reset_before_initial_episode_terminal():
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        env._training_episode_index[0] = 1
+        video = recorder(directory, env, [])
+        video.initialize()
+        env._training_episode_index[0] = 2
+        with pytest.raises(
+            RuntimeError, match="reset before terminal capture was finalized"
+        ):
+            with video.control_step():
+                env._sim_step_counter = 4
+                env.sim.step = 4
+                env.sim.render()
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    "episode_index",
+    [torch.tensor([-1, 0]), torch.tensor([1.5, 0.0])],
+)
+def test_capture_rejects_invalid_initial_episode_index(episode_index):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        env._training_episode_index = episode_index
+        video = recorder(directory, env, [])
+        with pytest.raises(RuntimeError, match="non-negative integer"):
+            video.initialize()
 
 
 def test_policy_input_timestamp_must_be_finite_and_strictly_increasing():

@@ -122,7 +122,7 @@ def _scalar(value: Any, env_index: int) -> Any:
 
 
 class EvaluationVideoRecorder:
-    """Capture environment episode zero without changing evaluation state or actions."""
+    """Capture the initial evaluation episode without changing state or actions."""
 
     def __init__(
         self,
@@ -177,7 +177,7 @@ class EvaluationVideoRecorder:
         self._previous_policy_input_timestamp_s: float | None = None
         self._written_frames = 0
         self._written_records = 0
-        self._target_episode = 0
+        self._target_episode: int | None = None
         self._started = False
         self._capture_active = False
         self._closed = False
@@ -220,9 +220,12 @@ class EvaluationVideoRecorder:
         ):
             if path.exists():
                 raise FileExistsError(f"evaluation video output already exists: {path}")
-        episode = int(_scalar(self.env._training_episode_index, self.env_index))
-        if episode != self._target_episode:
-            raise RuntimeError("evaluation video must start from selected environment episode zero")
+        episode = _scalar(self.env._training_episode_index, self.env_index)
+        if type(episode) is not int or episode < 0:
+            raise RuntimeError(
+                "selected environment initial episode index must be a non-negative integer"
+            )
+        self._target_episode = episode
         self._started = True
         try:
             self.camera = selected_environment_camera(
@@ -260,8 +263,15 @@ class EvaluationVideoRecorder:
     def _write_frame(self, frame: Any) -> None:
         if self._written_frames >= int(self.plan["frame_limit"]):
             raise RuntimeError("evaluation video frame limit exceeded")
-        episode = int(_scalar(self.env._training_episode_index, self.env_index))
-        if episode != self._target_episode:
+        target_episode = self._target_episode
+        if target_episode is None:
+            raise RuntimeError("evaluation video initial episode was not frozen")
+        episode = _scalar(self.env._training_episode_index, self.env_index)
+        if type(episode) is not int or episode < 0:
+            raise RuntimeError(
+                "selected environment episode index must be a non-negative integer"
+            )
+        if episode != target_episode:
             raise RuntimeError("selected environment reset before terminal capture was finalized")
         relative_position, relative_quaternion = self.env._relative_object_pose()
         depth = float(_scalar(relative_position[:, 1], self.env_index))
@@ -419,9 +429,18 @@ class EvaluationVideoRecorder:
             self._written_records += 1
         self._pending_frames = []
         if terminal:
-            terminal_episode = int(_scalar(snapshot["episode_index"], self.env_index))
-            if terminal_episode != self._target_episode:
-                raise RuntimeError("selected terminal snapshot does not belong to episode zero")
+            target_episode = self._target_episode
+            if target_episode is None:
+                raise RuntimeError("evaluation video initial episode was not frozen")
+            terminal_episode = _scalar(snapshot["episode_index"], self.env_index)
+            if type(terminal_episode) is not int or terminal_episode < 0:
+                raise RuntimeError(
+                    "selected terminal episode index must be a non-negative integer"
+                )
+            if terminal_episode != target_episode:
+                raise RuntimeError(
+                    "selected terminal snapshot does not belong to the initial evaluation episode"
+                )
             self._selected_terminal = {
                 "episode_index": terminal_episode,
                 "success": bool(_scalar(extras["success"], self.env_index)),
@@ -462,7 +481,7 @@ class EvaluationVideoRecorder:
                 ),
                 "geometry_match_tolerance": 1.0e-6,
             }
-            self._stop_capture("selected_environment_episode_zero_terminal")
+            self._stop_capture("selected_environment_initial_episode_terminal")
         elif self._written_frames == int(self.plan["frame_limit"]):
             self._stop_capture("maximum_duration_reached_before_terminal")
 
@@ -541,7 +560,10 @@ class EvaluationVideoRecorder:
                 self._selected_terminal is not None and not self._cleanup_errors
             ),
             "rollout_completed": rollout_completed,
-            "scope": "selected environment episode zero during real vectorized evaluation env.step calls",
+            "scope": (
+                "selected environment initial evaluation episode during real vectorized "
+                "evaluation env.step calls"
+            ),
             "video_path": str(self.video_path),
             "frames_path": str(self.frames_path),
             "selected_environment_index": self.env_index,

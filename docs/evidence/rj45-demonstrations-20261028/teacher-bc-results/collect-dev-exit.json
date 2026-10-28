@@ -1,0 +1,10 @@
+{
+  "failure_reason": null,
+  "log": {
+    "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-dev.log",
+    "sha256": "f3caa83f3c1be6faf8dc9bfe2b2ca772b8560cf677d691ca2fc197b035978816"
+  },
+  "process_group_cleanup_confirmed": true,
+  "return_code": 0,
+  "stage": "collect-dev"
+}

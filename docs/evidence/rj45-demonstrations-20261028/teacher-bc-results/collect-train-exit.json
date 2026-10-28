@@ -1,0 +1,10 @@
+{
+  "failure_reason": null,
+  "log": {
+    "path": "artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/collect-train.log",
+    "sha256": "6bc1948bbfae97718d681390828d84103621f0397b8ab55487b274e950bccb2e"
+  },
+  "process_group_cleanup_confirmed": true,
+  "return_code": 0,
+  "stage": "collect-train"
+}
