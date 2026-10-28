@@ -99,6 +99,35 @@ def _load_verified_bc_evaluation_artifact(
     return artifact
 
 
+def _bc_student_policy_observation(observations, *, expected_dimension: int):
+    """Extract only the standard student policy tensor for a bare BC actor."""
+
+    if type(expected_dimension) is not int or expected_dimension <= 0:
+        raise ValueError("BC observation dimension must be a positive integer")
+    if isinstance(observations, torch.Tensor):
+        student_observation = observations
+    else:
+        try:
+            student_observation = observations["policy"]
+        except (KeyError, TypeError) as error:
+            raise TypeError(
+                "BC evaluation observations must be a tensor or contain a policy tensor"
+            ) from error
+    if not isinstance(student_observation, torch.Tensor):
+        raise TypeError("BC policy observation must be a torch.Tensor")
+    if (
+        student_observation.ndim != 2
+        or student_observation.shape[1] != expected_dimension
+    ):
+        raise ValueError(
+            "BC policy observation must have shape "
+            f"(N, {expected_dimension})"
+        )
+    if not bool(torch.isfinite(student_observation).all().item()):
+        raise ValueError("BC policy observation must contain only finite values")
+    return student_observation
+
+
 def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -> tuple[Path, ...]:
     if path_value is None:
         return ()
@@ -774,6 +803,7 @@ def main() -> int:
 
         task = load_rj45_task(task_path)
         training_config = load_training_config(args.rj45_training_config)
+        observation_dimension = policy_observation_dimension(training_config)
         validate_reward_profile_runner(training_config, runner_cfg)
         validate_reward_horizon_contract(
             training_config, is_finite_horizon=cfg.is_finite_horizon
@@ -882,7 +912,6 @@ def main() -> int:
             }
         if learned_mode:
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
-            observation_dimension = policy_observation_dimension(training_config)
             training_contract = {
                 "schema_version": 1,
                 "policy_observation_schema_version": policy_observation_schema_version(
@@ -1087,7 +1116,15 @@ def main() -> int:
         episode_outcomes = []
         while attempts < args.episodes:
             with torch.inference_mode():
-                actions = policy(observations)
+                policy_observations = (
+                    _bc_student_policy_observation(
+                        observations,
+                        expected_dimension=observation_dimension,
+                    )
+                    if bc_mode
+                    else observations
+                )
+                actions = policy(policy_observations)
                 if evaluation_video is None:
                     observations, _, dones, extras = wrapped.step(actions)
                 else:
