@@ -307,6 +307,7 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         work = torch.tensor([0.0, 0.9, -1.8, 0.9, 0.0, 0.0])
         environment = SimpleNamespace(
             _training_held_state={"selection": {"phase_name": "insert"}},
+            _training_held_bank=None,
             _training_held_reference=work.repeat(3, 1),
             _torso_joint_ids=list(range(6)),
             cfg=SimpleNamespace(rj45_task={"controller": {"torso_work_joint_positions_rad": work.tolist()}}),
@@ -338,7 +339,10 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
 
     def test_held_controller_phase_rejects_wrong_stage_or_torso_reference(self):
         initialize = _compiled_training_environment_method("_initialize_held_controller_phase")
-        environment = SimpleNamespace(_training_held_state={"selection": {"phase_name": "close"}})
+        environment = SimpleNamespace(
+            _training_held_state={"selection": {"phase_name": "close"}},
+            _training_held_bank=None,
+        )
         with self.assertRaises(ValueError):
             initialize(environment, torch.tensor([0]))
         environment._training_held_state["selection"]["phase_name"] = "insert"
@@ -940,6 +944,9 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                     "warmup_s": 0.2,
                 },
                 "validated_held_state": {"verified": True},
+                "validated_held_bank": None,
+                "validated_held_bank_proof": None,
+                "effective_held_state": {"verified": True},
                 "calibration_bias_enabled": True,
                 "bias_level": 0,
                 "action_dim": 6,

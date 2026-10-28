@@ -236,6 +236,7 @@ def verify_checkpoint_lineage(
     if lineage_num_envs > 1 and collision_monitor_mode != "passive_parallel_native_ordering_verified":
         raise ValueError("parallel checkpoint must use verified native contact ordering")
     expected_training_contract = runtime_contract.get("rj45_training_contract")
+    recorded_training_contract: dict[str, Any] | None = None
     if expected_training_contract is not None:
         _validate_rj45_training_contract(expected_training_contract)
         recorded_training_contract = _mapping(
@@ -256,6 +257,35 @@ def verify_checkpoint_lineage(
     expected_task_sha = _validate_sha256(task_config_sha256, "task_config_sha256")
     if lineage.get("task_config_sha256") != expected_task_sha:
         raise ValueError("checkpoint task configuration does not match the current task")
+    if (
+        policy_initialization is not None
+        and policy_initialization.get("mode") == "bc_actor_warm_start"
+    ):
+        if recorded_training_contract is None:
+            raise ValueError("BC actor initialization requires an RJ45 training contract")
+        bank_proof = _mapping(
+            recorded_training_contract["held_grasp_reset_proof"],
+            "checkpoint_provenance.rj45_training_contract.held_grasp_reset_proof",
+        )
+        if "manifest_sha256" not in bank_proof:
+            raise ValueError("BC actor initialization requires a verified held-grasp bank")
+        from rby1_assembly.held_grasp import bank_source_contract_sha256
+
+        bank_contract = bank_proof["provenance_contract"]
+        if bank_contract["task_config_sha256"] != expected_task_sha:
+            raise ValueError("held-grasp bank task lineage differs from the current task")
+        bc_provenance = policy_initialization["bc_provenance"]
+        expected_bc_lineage = {
+            "source_sha256": bank_source_contract_sha256(bank_proof),
+            "task_sha256": expected_task_sha,
+            "training_sha256": recorded_training_contract["training_config_sha256"],
+            "bank_sha256": bank_proof["manifest_sha256"],
+        }
+        if any(
+            bc_provenance[name] != expected
+            for name, expected in expected_bc_lineage.items()
+        ):
+            raise ValueError("BC actor initialization lineage differs from current bank/task/training inputs")
     recorded_sources = _mapping(
         lineage.get("source_and_config_sha256"), "source_and_config_sha256"
     )
@@ -298,6 +328,9 @@ def verify_checkpoint_lineage(
 
 def _validate_policy_initialization_metadata(value: Any) -> None:
     metadata = _mapping(value, "checkpoint_provenance.policy_initialization")
+    if metadata.get("mode") == "bc_actor_warm_start":
+        _validate_bc_policy_initialization_metadata(metadata)
+        return
     expected_keys = {
         "mode",
         "zero_actor_output_layer",
@@ -384,6 +417,137 @@ def _validate_policy_initialization_metadata(value: Any) -> None:
             raise ValueError("zero-init method reference is invalid")
     elif reference is not None:
         raise ValueError("default actor initialization must not claim the zero-init method")
+
+
+def _validate_bc_policy_initialization_metadata(metadata: dict[str, Any]) -> None:
+    expected_keys = {
+        "mode",
+        "output_dimension",
+        "artifact_file_sha256",
+        "artifact_actor_state_sha256",
+        "loaded_component",
+        "hashes_before",
+        "hashes_after",
+        "actor_changed",
+        "bc_provenance",
+        "bc_artifact_sha256",
+    }
+    if set(metadata) != expected_keys:
+        raise ValueError("BC policy initialization metadata fields are incomplete or unexpected")
+    if type(metadata["output_dimension"]) is not int or metadata["output_dimension"] != 6:
+        raise ValueError("BC policy initialization output dimension must be 6")
+    if metadata["loaded_component"] != "runner.alg.policy.actor":
+        raise ValueError("BC policy initialization must load only runner.alg.policy.actor")
+    artifact_sha = _validate_sha256(
+        metadata["artifact_file_sha256"], "policy_initialization.artifact_file_sha256"
+    )
+    actor_state_sha = _validate_sha256(
+        metadata["artifact_actor_state_sha256"],
+        "policy_initialization.artifact_actor_state_sha256",
+    )
+    if metadata["bc_artifact_sha256"] != artifact_sha:
+        raise ValueError("BC artifact SHA-256 must equal the loaded artifact file SHA-256")
+    hash_keys = {"actor", "critic", "noise", "optimizer"}
+    hashes: dict[str, dict[str, Any]] = {}
+    for stage in ("hashes_before", "hashes_after"):
+        values = _mapping(metadata[stage], f"policy_initialization.{stage}")
+        if set(values) != hash_keys:
+            raise ValueError(f"policy_initialization.{stage} fields are incomplete or unexpected")
+        for name in hash_keys:
+            _validate_sha256(values[name], f"policy_initialization.{stage}.{name}")
+        hashes[stage] = values
+    for name in ("critic", "noise", "optimizer"):
+        if hashes["hashes_before"][name] != hashes["hashes_after"][name]:
+            raise ValueError(f"BC actor initialization changed PPO {name}")
+    if hashes["hashes_after"]["actor"] != actor_state_sha:
+        raise ValueError("BC actor after hash must equal the artifact actor state SHA-256")
+    if type(metadata["actor_changed"]) is not bool or metadata["actor_changed"] != (
+        hashes["hashes_before"]["actor"] != hashes["hashes_after"]["actor"]
+    ):
+        raise ValueError("BC actor_changed must match the recorded actor hashes")
+    provenance = _mapping(metadata["bc_provenance"], "policy_initialization.bc_provenance")
+    provenance_keys = {
+        "source_sha256",
+        "task_sha256",
+        "training_sha256",
+        "bank_sha256",
+        "dataset_sha256",
+    }
+    if set(provenance) != provenance_keys:
+        raise ValueError("BC provenance fields are incomplete or unexpected")
+    for name in provenance_keys:
+        _validate_sha256(provenance[name], f"policy_initialization.bc_provenance.{name}")
+
+
+def _validate_held_grasp_bank_proof(held_proof: dict[str, Any]) -> None:
+    expected_keys = {
+        "manifest_sha256",
+        "selected_split",
+        "selected_count",
+        "selected_grasp_ids",
+        "selected_artifact_sha256",
+        "manifest_split_counts",
+        "provenance_contract",
+        "provenance_source_task_match",
+        "final_opened",
+        "no_final_opened",
+    }
+    if set(held_proof) != expected_keys:
+        raise ValueError("held-grasp bank proof fields are incomplete or unexpected")
+    _validate_sha256(held_proof["manifest_sha256"], "held_grasp_reset_proof.manifest_sha256")
+    if (
+        held_proof["selected_split"] != "train"
+        or held_proof["final_opened"] is not False
+        or held_proof["no_final_opened"] is not True
+        or held_proof["provenance_source_task_match"] is not True
+    ):
+        raise ValueError("held-grasp bank proof must use the sealed train split")
+    count = held_proof["selected_count"]
+    ids = held_proof["selected_grasp_ids"]
+    hashes = held_proof["selected_artifact_sha256"]
+    if (
+        type(count) is not int
+        or count <= 0
+        or not isinstance(ids, list)
+        or not isinstance(hashes, list)
+        or len(ids) != count
+        or len(hashes) != count
+        or any(not isinstance(value, str) or not value for value in ids)
+        or len(set(ids)) != count
+        or len(set(hashes)) != count
+    ):
+        raise ValueError("held-grasp bank selected count, IDs, or hashes are invalid")
+    for index, digest in enumerate(hashes):
+        _validate_sha256(digest, f"held_grasp_reset_proof.selected_artifact_sha256[{index}]")
+    split_counts = _mapping(
+        held_proof["manifest_split_counts"], "held_grasp_reset_proof.manifest_split_counts"
+    )
+    if set(split_counts) != {"train", "dev", "final"} or any(
+        type(split_counts[name]) is not int or split_counts[name] < 0
+        for name in ("train", "dev", "final")
+    ):
+        raise ValueError("held-grasp bank manifest split counts are invalid")
+    if split_counts["train"] != count:
+        raise ValueError("held-grasp bank train split count must match selected count")
+    contract = _mapping(
+        held_proof["provenance_contract"], "held_grasp_reset_proof.provenance_contract"
+    )
+    if set(contract) != {"task_config_sha256", "source_and_config_sha256"}:
+        raise ValueError("held-grasp bank provenance contract fields are invalid")
+    _validate_sha256(
+        contract["task_config_sha256"],
+        "held_grasp_reset_proof.provenance_contract.task_config_sha256",
+    )
+    source_hashes = _mapping(
+        contract["source_and_config_sha256"],
+        "held_grasp_reset_proof.provenance_contract.source_and_config_sha256",
+    )
+    if not source_hashes:
+        raise ValueError("held-grasp bank source contract must not be empty")
+    for path, digest in source_hashes.items():
+        if not isinstance(path, str) or not path:
+            raise ValueError("held-grasp bank source contract paths must be non-empty strings")
+        _validate_sha256(digest, f"held-grasp bank source contract {path}")
 
 
 def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
@@ -511,29 +675,33 @@ def _validate_rj45_training_contract(contract: dict[str, Any]) -> None:
             raise ValueError("RJ45 reward discount factor must be at most one")
     _validate_sha256(contract["training_config_sha256"], "training_config_sha256")
     held_proof = _mapping(contract["held_grasp_reset_proof"], "held_grasp_reset_proof")
-    if set(held_proof) != {
+    single_held_keys = {
         "artifact_sha256",
         "nominal_report_sha256",
         "nominal_trace_sha256",
         "selection_control_step",
         "stability_limits",
-    }:
+    }
+    if "manifest_sha256" in held_proof:
+        _validate_held_grasp_bank_proof(held_proof)
+    elif set(held_proof) != single_held_keys:
         raise ValueError("held-grasp reset proof fields are incomplete or unexpected")
-    for name in ("artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256"):
-        _validate_sha256(held_proof[name], f"held_grasp_reset_proof.{name}")
-    if type(held_proof["selection_control_step"]) is not int or held_proof["selection_control_step"] <= 0:
-        raise ValueError("held-grasp selection control step must be positive")
-    stability_limits = _mapping(
-        held_proof["stability_limits"], "held_grasp_reset_proof.stability_limits"
-    )
-    if set(stability_limits) != set(_HELD_GRASP_STABILITY_LIMIT_NAMES):
-        raise ValueError("held-grasp stability limit fields are incomplete or unexpected")
-    for name in _HELD_GRASP_STABILITY_LIMIT_NAMES:
-        _number(
-            stability_limits[name],
-            f"held_grasp_reset_proof.stability_limits.{name}",
-            positive=True,
+    else:
+        for name in ("artifact_sha256", "nominal_report_sha256", "nominal_trace_sha256"):
+            _validate_sha256(held_proof[name], f"held_grasp_reset_proof.{name}")
+        if type(held_proof["selection_control_step"]) is not int or held_proof["selection_control_step"] <= 0:
+            raise ValueError("held-grasp selection control step must be positive")
+        stability_limits = _mapping(
+            held_proof["stability_limits"], "held_grasp_reset_proof.stability_limits"
         )
+        if set(stability_limits) != set(_HELD_GRASP_STABILITY_LIMIT_NAMES):
+            raise ValueError("held-grasp stability limit fields are incomplete or unexpected")
+        for name in _HELD_GRASP_STABILITY_LIMIT_NAMES:
+            _number(
+                stability_limits[name],
+                f"held_grasp_reset_proof.stability_limits.{name}",
+                positive=True,
+            )
     parallel = contract["parallel_contact_evidence"]
     if parallel is not None:
         parallel = _mapping(parallel, "parallel_contact_evidence")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 from pathlib import Path
 from typing import Any, Mapping
@@ -459,4 +460,247 @@ def load_verified_held_grasp_artifact(
     }
 
 
-__all__ = ["build_held_grasp_artifact", "load_verified_held_grasp_artifact"]
+def _canonical_sha256(value: Any) -> str:
+    payload = json.dumps(
+        value, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _lowercase_sha256(value: Any, name: str) -> str:
+    if (
+        not isinstance(value, str)
+        or len(value) != 64
+        or any(character not in "0123456789abcdef" for character in value)
+    ):
+        raise ValueError(f"{name} must be a lowercase SHA-256 digest")
+    return value
+
+
+def _held_grasp_bank_manifest_selection(
+    project: Path,
+    manifest_path: Path,
+    allowed_split: str,
+    allow_final: bool,
+) -> tuple[str, list[tuple[str, Path, str]], dict[str, int]]:
+    """Validate all manifest metadata without opening any referenced artifact."""
+
+    if allowed_split not in {"train", "dev", "final"}:
+        raise ValueError("allowed_split must be train, dev, or final")
+    if allowed_split == "final" and not allow_final:
+        raise ValueError("final held-grasp split requires allow_final=True")
+    manifest = _mapping(load_finite_json(manifest_path), "held-grasp bank manifest")
+    manifest_sha256 = _sha256(manifest_path)
+    if manifest.get("schema_version") != 1 or manifest.get("task_id") != "rj45-v1":
+        raise ValueError("held-grasp bank must use schema_version 1 and task_id rj45-v1")
+    entries = manifest.get("entries")
+    if not isinstance(entries, list) or not entries:
+        raise ValueError("held-grasp bank entries must be a non-empty array")
+
+    seen_ids: set[str] = set()
+    seen_artifact_hashes: set[str] = set()
+    selected: list[tuple[str, Path, str]] = []
+    split_counts = {"train": 0, "dev": 0, "final": 0}
+    for index, raw_entry in enumerate(entries):
+        name = f"entries[{index}]"
+        entry = _mapping(raw_entry, name)
+        required = {
+            "grasp_id",
+            "split",
+            "generation_seed",
+            "artifact",
+            "descriptor",
+            "descriptor_sha256",
+        }
+        if set(entry) != required:
+            raise ValueError(f"{name} must contain exactly {sorted(required)}")
+        grasp_id = entry["grasp_id"]
+        if not isinstance(grasp_id, str) or not grasp_id:
+            raise ValueError(f"{name}.grasp_id must be a non-empty string")
+        if grasp_id in seen_ids:
+            raise ValueError(f"duplicate held-grasp grasp_id: {grasp_id}")
+        seen_ids.add(grasp_id)
+        split = entry["split"]
+        if split not in split_counts:
+            raise ValueError(f"{name}.split must be train, dev, or final")
+        split_counts[split] += 1
+        seed = entry["generation_seed"]
+        if type(seed) is not int or seed < 0:
+            raise ValueError(f"{name}.generation_seed must be a non-negative integer")
+        artifact_ref = _mapping(entry["artifact"], f"{name}.artifact")
+        if set(artifact_ref) != {"path", "sha256"}:
+            raise ValueError(f"{name}.artifact must contain exactly path and sha256")
+        artifact_path = _project_path(
+            project, artifact_ref.get("path"), f"{name}.artifact.path"
+        )
+        artifact_sha256 = _lowercase_sha256(
+            artifact_ref.get("sha256"), f"{name}.artifact.sha256"
+        )
+        if artifact_sha256 in seen_artifact_hashes:
+            raise ValueError(f"duplicate held-grasp artifact SHA-256: {artifact_sha256}")
+        seen_artifact_hashes.add(artifact_sha256)
+        descriptor = _mapping(entry["descriptor"], f"{name}.descriptor")
+        descriptor_sha256 = _lowercase_sha256(
+            entry["descriptor_sha256"], f"{name}.descriptor_sha256"
+        )
+        if _canonical_sha256(descriptor) != descriptor_sha256:
+            raise ValueError(f"{name}.descriptor SHA-256 mismatch")
+        if split == allowed_split:
+            selected.append((grasp_id, artifact_path, artifact_sha256))
+    if not selected:
+        raise ValueError(f"held-grasp bank contains no {allowed_split} entries")
+    return manifest_sha256, selected, split_counts
+
+
+def held_grasp_bank_dependency_paths(
+    project_root: Path,
+    manifest_path: Path,
+    allowed_split: str,
+    allow_final: bool = False,
+) -> tuple[Path, ...]:
+    """Return frozen bootstrap inputs while opening artifacts from one split only."""
+
+    project = Path(project_root).resolve()
+    manifest_path = _project_path(
+        project, str(manifest_path), "held-grasp bank manifest path"
+    )
+    manifest_sha256, selected, _split_counts = _held_grasp_bank_manifest_selection(
+        project, manifest_path, allowed_split, allow_final
+    )
+    dependencies: list[Path] = [manifest_path]
+    for grasp_id, artifact_path, expected_sha256 in selected:
+        if not artifact_path.is_file() or _sha256(artifact_path) != expected_sha256:
+            raise ValueError(f"held-grasp artifact SHA-256 mismatch for {grasp_id}")
+        artifact = _mapping(
+            load_finite_json(artifact_path), f"held-grasp artifact {grasp_id}"
+        )
+        if artifact.get("schema_version") != 1 or artifact.get("task_id") != "rj45-v1":
+            raise ValueError(
+                f"held-grasp artifact {grasp_id} must use schema_version 1 and task_id rj45-v1"
+            )
+        provenance = _mapping(
+            artifact.get("provenance"), f"held-grasp artifact {grasp_id} provenance"
+        )
+        report_path = _project_path(
+            project,
+            provenance.get("nominal_report_path"),
+            f"held-grasp artifact {grasp_id} nominal report path",
+        )
+        trace_path = _project_path(
+            project,
+            provenance.get("nominal_trace_path"),
+            f"held-grasp artifact {grasp_id} nominal trace path",
+        )
+        _lowercase_sha256(
+            provenance.get("nominal_report_sha256"),
+            f"held-grasp artifact {grasp_id} nominal report SHA-256",
+        )
+        _lowercase_sha256(
+            provenance.get("nominal_trace_sha256"),
+            f"held-grasp artifact {grasp_id} nominal trace SHA-256",
+        )
+        for name, referenced_path in (("nominal report", report_path), ("nominal trace", trace_path)):
+            if not referenced_path.is_file():
+                raise ValueError(
+                    f"held-grasp artifact {grasp_id} {name} path must reference a file"
+                )
+        for dependency in (artifact_path, report_path, trace_path):
+            if dependency not in dependencies:
+                dependencies.append(dependency)
+    if _sha256(manifest_path) != manifest_sha256:
+        raise ValueError("held-grasp bank manifest changed during dependency resolution")
+    return tuple(dependencies)
+
+
+def bank_source_contract_sha256(proof: Mapping[str, Any]) -> str:
+    """Hash the bank's sorted source/config map, not its manifest or training config.
+
+    The source/config map binds source, runtime, task, asset, and build-report hashes
+    shared by every selected held-grasp artifact.
+    """
+
+    proof_mapping = _mapping(proof, "held-grasp bank proof")
+    contract = _mapping(
+        proof_mapping.get("provenance_contract"),
+        "held-grasp bank proof provenance_contract",
+    )
+    source_hashes = _mapping(
+        contract.get("source_and_config_sha256"),
+        "held-grasp bank source_and_config_sha256",
+    )
+    if not source_hashes:
+        raise ValueError("held-grasp bank source_and_config_sha256 must not be empty")
+    for name, digest in source_hashes.items():
+        if not isinstance(name, str) or not name:
+            raise ValueError("held-grasp bank source/config names must be non-empty strings")
+        _lowercase_sha256(digest, f"held-grasp bank source/config hash {name}")
+    return _canonical_sha256(dict(sorted(source_hashes.items())))
+
+
+def load_verified_held_grasp_bank(
+    project_root: Path,
+    task: dict[str, Any],
+    manifest_path: Path,
+    allowed_split: str,
+    allow_final: bool = False,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Load one verified bank split while keeping every other split sealed."""
+
+    project = Path(project_root).resolve()
+    manifest_path = _project_path(project, str(manifest_path), "held-grasp bank manifest path")
+    manifest_sha256, selected, split_counts = _held_grasp_bank_manifest_selection(
+        project, manifest_path, allowed_split, allow_final
+    )
+
+    artifacts: list[dict[str, Any]] = []
+    selected_ids: list[str] = []
+    selected_hashes: list[str] = []
+    provenance_contract: dict[str, Any] | None = None
+    for grasp_id, artifact_path, expected_sha256 in selected:
+        artifact, artifact_proof = load_verified_held_grasp_artifact(
+            project, task, artifact_path
+        )
+        if artifact_proof.get("artifact_sha256") != expected_sha256:
+            raise ValueError(f"held-grasp artifact SHA-256 mismatch for {grasp_id}")
+        artifact_provenance = _mapping(
+            artifact.get("provenance"), f"held-grasp artifact {grasp_id} provenance"
+        )
+        contract = {
+            "task_config_sha256": artifact_provenance.get("task_config_sha256"),
+            "source_and_config_sha256": artifact_provenance.get(
+                "source_and_config_sha256"
+            ),
+        }
+        if provenance_contract is None:
+            provenance_contract = contract
+        elif contract != provenance_contract:
+            raise ValueError(
+                "held-grasp bank selected artifacts have mixed provenance contracts"
+            )
+        artifacts.append(artifact)
+        selected_ids.append(grasp_id)
+        selected_hashes.append(expected_sha256)
+
+    if _sha256(manifest_path) != manifest_sha256:
+        raise ValueError("held-grasp bank manifest changed during verification")
+    return artifacts, {
+        "manifest_sha256": manifest_sha256,
+        "selected_split": allowed_split,
+        "selected_count": len(artifacts),
+        "selected_grasp_ids": selected_ids,
+        "selected_artifact_sha256": selected_hashes,
+        "manifest_split_counts": split_counts,
+        "provenance_contract": provenance_contract,
+        "provenance_source_task_match": True,
+        "final_opened": allowed_split == "final",
+        "no_final_opened": allowed_split != "final",
+    }
+
+
+__all__ = [
+    "bank_source_contract_sha256",
+    "build_held_grasp_artifact",
+    "held_grasp_bank_dependency_paths",
+    "load_verified_held_grasp_artifact",
+    "load_verified_held_grasp_bank",
+]

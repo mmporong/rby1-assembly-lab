@@ -19,6 +19,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
 from rby1_assembly.run_provenance import InputMutationError, capture_run_inputs  # noqa: E402
+from rby1_assembly.held_grasp import (  # noqa: E402
+    bank_source_contract_sha256,
+    held_grasp_bank_dependency_paths,
+    load_verified_held_grasp_bank,
+)
 from rby1_assembly.training_telemetry import (  # noqa: E402
     make_action_telemetry_wrapper_type,
     observation_noise_contract,
@@ -60,6 +65,38 @@ def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -
     return tuple(dependencies)
 
 
+def _initialize_verified_bc_actor(
+    runner, artifact_path, expected_sha256, input_snapshot,
+    task_path, training_config, bank_proof,
+):
+    """Bind actor bytes and their lineage to the frozen training inputs."""
+    from rby1_assembly.rj45_bc import initialize_runner_actor, load_bc_actor_artifact
+
+    snapshot_sha = input_snapshot.hash_for(artifact_path)
+    if snapshot_sha != expected_sha256:
+        raise ValueError("BC expected SHA-256 differs from the frozen input")
+    artifact = load_bc_actor_artifact(artifact_path, expected_sha256=snapshot_sha)
+    provenance = artifact["provenance"].as_dict()
+    expected = {
+        "source_sha256": bank_source_contract_sha256(bank_proof),
+        "task_sha256": input_snapshot.hash_for(task_path),
+        "training_sha256": training_config["_config_sha256"],
+        "bank_sha256": bank_proof["manifest_sha256"],
+    }
+    if any(provenance.get(key) != value for key, value in expected.items()):
+        raise ValueError("BC initialization source/task/training/bank lineage differs")
+    result = initialize_runner_actor(runner, artifact_path, expected_sha256=snapshot_sha)
+    if result["artifact_file_sha256"] != snapshot_sha or artifact["file_sha256"] != snapshot_sha:
+        raise ValueError("loaded BC actor bytes differ from the frozen input")
+    input_snapshot.assert_unchanged()
+    result.update({
+        "mode": "bc_actor_warm_start", "output_dimension": 6,
+        "bc_provenance": provenance,
+        "bc_artifact_sha256": result["artifact_file_sha256"],
+    })
+    return result
+
+
 _bootstrap_task = _preimport_option("--task", "toy")
 _bootstrap_config_default = (
     "configs/ppo-rj45-v1.json" if _bootstrap_task == "rj45" else "configs/ppo.json"
@@ -83,6 +120,9 @@ _bootstrap_training_config = _preimport_option(
     "--rj45-training-config", "configs/rj45-training-v1.json"
 )
 _bootstrap_held_state = _preimport_option("--rj45-held-state", None)
+_bootstrap_held_bank = _preimport_option("--rj45-held-bank", None)
+if _bootstrap_held_bank is not None and _bootstrap_held_state is not None:
+    raise ValueError("select exactly one held state or held bank")
 _bootstrap_held_paths: tuple[Path, ...] = ()
 if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
     held_path = _project_path(_bootstrap_held_state)
@@ -95,6 +135,11 @@ if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
         _project_path(held_provenance["nominal_report_path"]),
         _project_path(held_provenance["nominal_trace_path"]),
     )
+if _bootstrap_task == "rj45" and _bootstrap_held_bank is not None:
+    _bootstrap_held_paths = held_grasp_bank_dependency_paths(
+        PROJECT_ROOT, Path(_bootstrap_held_bank), "train"
+    )
+_bootstrap_bc_actor = _preimport_option("--bc-actor-init", None)
 _bootstrap_parallel_spec = _preimport_option("--parallel-contact-evidence", None)
 _bootstrap_parallel_paths = (
     _json_dependency_paths(
@@ -120,6 +165,7 @@ _bootstrap_input_snapshot = capture_run_inputs(
         *_bootstrap_nominal_paths,
         *_bootstrap_held_paths,
         *_bootstrap_parallel_paths,
+        *((_project_path(_bootstrap_bc_actor),) if _bootstrap_bc_actor is not None else ()),
     ),
 )
 
@@ -172,6 +218,9 @@ parser.add_argument(
     type=Path,
     help="verified held-grasp state generated from the current nominal run",
 )
+parser.add_argument("--rj45-held-bank", type=Path, help="verified bank; training opens only its train split")
+parser.add_argument("--bc-actor-init", type=Path, help="verified actor-only BC initialization artifact")
+parser.add_argument("--bc-actor-init-sha256", help="expected SHA-256 of the BC initialization artifact")
 parser.add_argument(
     "--parallel-contact-evidence",
     type=Path,
@@ -203,8 +252,14 @@ if args.num_envs <= 0:
     parser.error("--num-envs must be positive")
 if args.task == "rj45" and args.rj45_nominal_evidence is None:
     parser.error("--rj45-nominal-evidence is required for --task rj45")
-if args.task == "rj45" and args.rj45_held_state is None:
-    parser.error("--rj45-held-state is required for --task rj45")
+if args.task == "rj45" and (args.rj45_held_state is None) == (args.rj45_held_bank is None):
+    parser.error("RJ45 requires exactly one of --rj45-held-state or --rj45-held-bank")
+if args.task != "rj45" and args.rj45_held_bank is not None:
+    parser.error("--rj45-held-bank requires --task rj45")
+if (args.bc_actor_init is None) != (args.bc_actor_init_sha256 is None):
+    parser.error("BC initialization requires both artifact path and SHA-256")
+if args.bc_actor_init is not None and (args.task != "rj45" or args.rj45_held_bank is None or args.zero_init_actor_output):
+    parser.error("BC initialization requires an RJ45 train bank and cannot be combined with zero initialization")
 if args.task == "rj45" and args.num_envs > 1 and args.parallel_contact_evidence is None:
     parser.error("parallel RJ45 training requires --parallel-contact-evidence")
 if args.zero_init_actor_output and args.task != "rj45":
@@ -237,17 +292,24 @@ try:
         if not nominal_trace_path.is_absolute():
             nominal_trace_path = PROJECT_ROOT / nominal_trace_path
         extra_input_paths.extend((args.rj45_nominal_evidence, nominal_trace_path))
-        held_payload = load_finite_json(args.rj45_held_state)
-        held_provenance = held_payload.get("provenance")
-        if not isinstance(held_provenance, dict):
-            raise ValueError("RJ45 held state must contain provenance")
-        extra_input_paths.extend(
-            (
-                args.rj45_held_state,
-                _project_path(held_provenance["nominal_report_path"]),
-                _project_path(held_provenance["nominal_trace_path"]),
+        if args.rj45_held_bank is not None:
+            extra_input_paths.extend(held_grasp_bank_dependency_paths(
+                PROJECT_ROOT, args.rj45_held_bank, "train"
+            ))
+        else:
+            held_payload = load_finite_json(args.rj45_held_state)
+            held_provenance = held_payload.get("provenance")
+            if not isinstance(held_provenance, dict):
+                raise ValueError("RJ45 held state must contain provenance")
+            extra_input_paths.extend(
+                (
+                    args.rj45_held_state,
+                    _project_path(held_provenance["nominal_report_path"]),
+                    _project_path(held_provenance["nominal_trace_path"]),
+                )
             )
-        )
+        if args.bc_actor_init is not None:
+            extra_input_paths.append(args.bc_actor_init)
         if args.parallel_contact_evidence is not None:
             parallel_spec_payload = load_finite_json(args.parallel_contact_evidence)
             extra_input_paths.extend(
@@ -316,9 +378,16 @@ try:
     if args.task == "rj45":
         training_config = load_training_config(args.rj45_training_config)
         validate_reward_profile_runner(training_config, runner_cfg)
-        held_state, held_state_proof = load_verified_held_grasp_artifact(
-            PROJECT_ROOT, selected_task, args.rj45_held_state
-        )
+        held_bank = held_bank_proof = None
+        if args.rj45_held_bank is not None:
+            held_bank, held_bank_proof = load_verified_held_grasp_bank(
+                PROJECT_ROOT, selected_task, args.rj45_held_bank, "train"
+            )
+            held_state, held_state_proof = None, held_bank_proof
+        else:
+            held_state, held_state_proof = load_verified_held_grasp_artifact(
+                PROJECT_ROOT, selected_task, args.rj45_held_state
+            )
         parallel_contact_evidence = (
             load_parallel_contact_evidence(
                 parallel_spec_payload, project_root=PROJECT_ROOT
@@ -330,6 +399,7 @@ try:
             raise ValueError("parallel RJ45 training requires verified contact evidence")
     else:
         training_config = held_state = held_state_proof = parallel_contact_evidence = None
+        held_bank = held_bank_proof = None
 except (OSError, ValueError, TypeError, KeyError, metadata.PackageNotFoundError) as error:
     parser.error(f"invalid training configuration: {error}")
 launcher = AppLauncher(args, multi_gpu=False)
@@ -383,6 +453,8 @@ def main() -> int:
             env_type,
             training_config,
             held_state=held_state,
+            held_bank=held_bank,
+            held_bank_proof=held_bank_proof,
             calibration_bias_enabled=True,
             bias_level=training_config["calibration_bias"]["initial_level"],
         )
@@ -565,6 +637,13 @@ def main() -> int:
                 expected_output_dim=action_dimension,
                 zero_initialize=args.zero_init_actor_output,
             )
+        if args.bc_actor_init is not None:
+            if observation_dimension != 79 or action_dimension != 6:
+                raise ValueError("BC initialization requires standard79 and right-only 6D")
+            lineage["policy_initialization"] = _initialize_verified_bc_actor(
+                runner, args.bc_actor_init, args.bc_actor_init_sha256, input_snapshot,
+                task_path, training_config, held_bank_proof,
+            )
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
         runner.add_git_repo_to_log(__file__)
@@ -576,6 +655,7 @@ def main() -> int:
                     lineage["source_and_config_sha256"]
                 )
                 parallel_video.initialize()
+            input_snapshot.assert_unchanged()
             runner.learn(
                 num_learning_iterations=runner_cfg["max_iterations"],
                 init_at_random_ep_len=False,

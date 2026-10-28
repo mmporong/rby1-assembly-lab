@@ -22,6 +22,10 @@ from rby1_assembly.run_provenance import (  # noqa: E402
     capture_run_inputs,
 )
 from rby1_assembly.training_telemetry import observation_noise_contract  # noqa: E402
+from rby1_assembly.held_grasp import (  # noqa: E402
+    bank_source_contract_sha256,
+    held_grasp_bank_dependency_paths,
+)
 
 
 def _preimport_option(name: str, default: str | None) -> str | None:
@@ -38,6 +42,48 @@ def _preimport_option(name: str, default: str | None) -> str | None:
 def _project_path(value: str) -> Path:
     path = Path(value)
     return (path if path.is_absolute() else PROJECT_ROOT / path).resolve()
+
+
+def _rj45_bank_terminal_identity(snapshot, env_id: int, proof: dict[str, object]):
+    """Map a terminal bank row to its verified ordered grasp identity."""
+
+    indices = snapshot.get("held_grasp_index")
+    ids = proof.get("selected_grasp_ids")
+    if indices is None or not isinstance(ids, list):
+        raise ValueError("held bank terminal identity requires index and verified IDs")
+    value = indices[env_id]
+    if value.numel() != 1 or type(value.item()) is not int:
+        raise ValueError("terminal held_grasp_index must be a scalar integer")
+    index = value.item()
+    if index < 0 or index >= len(ids) or not isinstance(ids[index], str):
+        raise ValueError("terminal held_grasp_index is outside the verified bank")
+    return {
+        "grasp_index": index,
+        "grasp_id": ids[index],
+        "bank_manifest_sha256": proof["manifest_sha256"],
+        "bank_split": proof["selected_split"],
+    }
+
+
+def _load_verified_bc_evaluation_artifact(
+    path,
+    *,
+    cli_expected_sha256: str,
+    snapshot_sha256: str,
+    loader=None,
+):
+    """Load one BC artifact from bytes bound to the captured input snapshot."""
+
+    if cli_expected_sha256 != snapshot_sha256:
+        raise ValueError("BC actor CLI SHA-256 differs from the input snapshot")
+    if loader is None:
+        from rby1_assembly.rj45_bc import load_bc_actor_artifact
+
+        loader = load_bc_actor_artifact
+    artifact = loader(path, expected_sha256=snapshot_sha256)
+    if not isinstance(artifact, dict) or artifact.get("file_sha256") != snapshot_sha256:
+        raise RuntimeError("BC actor loader result differs from the input snapshot")
+    return artifact
 
 
 def _json_dependency_paths(path_value: str | None, path_keys: tuple[str, ...]) -> tuple[Path, ...]:
@@ -314,6 +360,8 @@ _bootstrap_training_config = _preimport_option(
     "--rj45-training-config", "configs/rj45-training-v1.json"
 )
 _bootstrap_held_state = _preimport_option("--rj45-held-state", None)
+_bootstrap_held_bank = _preimport_option("--rj45-held-bank", None)
+_bootstrap_bank_split = _preimport_option("--rj45-bank-split", "dev")
 _bootstrap_held_paths: tuple[Path, ...] = ()
 if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
     held_path = _project_path(_bootstrap_held_state)
@@ -326,6 +374,14 @@ if _bootstrap_task == "rj45" and _bootstrap_held_state is not None:
         _project_path(held_provenance["nominal_report_path"]),
         _project_path(held_provenance["nominal_trace_path"]),
     )
+if _bootstrap_task == "rj45" and _bootstrap_held_bank is not None:
+    _bootstrap_held_paths = held_grasp_bank_dependency_paths(
+        PROJECT_ROOT, _project_path(_bootstrap_held_bank), _bootstrap_bank_split
+    )
+    if _preimport_option("--baseline-mode", "learned") in {"learned", "bc"}:
+        _bootstrap_held_paths += held_grasp_bank_dependency_paths(
+            PROJECT_ROOT, _project_path(_bootstrap_held_bank), "train"
+        )
 _bootstrap_parallel_spec = _preimport_option("--parallel-contact-evidence", None)
 _bootstrap_parallel_paths = (
     _json_dependency_paths(
@@ -378,6 +434,8 @@ parser.add_argument(
     default=Path("configs/rj45-training-v1.json"),
 )
 parser.add_argument("--rj45-held-state", type=Path)
+parser.add_argument("--rj45-held-bank", type=Path)
+parser.add_argument("--rj45-bank-split", choices=("train", "dev"), default="dev")
 parser.add_argument(
     "--evaluation-start",
     choices=("table", "held"),
@@ -387,9 +445,11 @@ parser.add_argument(
 parser.add_argument("--parallel-contact-evidence", type=Path)
 parser.add_argument(
     "--baseline-mode",
-    choices=("learned", "biased_zero", "oracle"),
+    choices=("learned", "bc", "biased_zero", "oracle"),
     default="learned",
 )
+parser.add_argument("--bc-actor-init", type=Path)
+parser.add_argument("--bc-actor-init-sha256")
 AppLauncher.add_app_launcher_args(parser)
 args = parser.parse_args()
 if args.task == "rj45" and args.config == Path("configs/ppo.json"):
@@ -411,14 +471,30 @@ if args.seed is not None and args.seed < 0:
 if args.task == "toy" and args.checkpoint is None:
     parser.error("toy evaluation requires a checkpoint")
 evaluation_start_error = _evaluation_start_configuration_error(
-    args.task, args.evaluation_start, args.rj45_held_state is not None
+    args.task,
+    args.evaluation_start,
+    args.rj45_held_state is not None or args.rj45_held_bank is not None,
 )
 if evaluation_start_error is not None:
     parser.error(evaluation_start_error)
 if args.task == "rj45" and args.baseline_mode == "learned" and args.checkpoint is None:
     parser.error("learned RJ45 evaluation requires a checkpoint")
 if args.task == "rj45" and args.baseline_mode == "learned" and args.rj45_held_state is None:
-    parser.error("learned RJ45 evaluation requires --rj45-held-state")
+    if args.rj45_held_bank is None:
+        parser.error("learned RJ45 evaluation requires held state or held bank")
+if args.rj45_held_state is not None and args.rj45_held_bank is not None:
+    parser.error("--rj45-held-state and --rj45-held-bank are mutually exclusive")
+if args.rj45_held_bank is not None and args.evaluation_start != "held":
+    parser.error("--rj45-held-bank requires --evaluation-start held")
+if args.baseline_mode == "bc":
+    if args.task != "rj45" or args.checkpoint is not None:
+        parser.error("BC-only evaluation is RJ45-only and cannot use a PPO checkpoint")
+    if args.bc_actor_init is None or args.bc_actor_init_sha256 is None:
+        parser.error("BC-only evaluation requires the actor artifact and SHA-256")
+    if args.rj45_held_bank is None:
+        parser.error("BC-only evaluation requires --rj45-held-bank")
+elif args.bc_actor_init is not None or args.bc_actor_init_sha256 is not None:
+    parser.error("BC actor arguments require --baseline-mode bc")
 if args.checkpoint is not None and not args.checkpoint.is_file():
     parser.error(f"checkpoint does not exist: {args.checkpoint}")
 if not args.config.is_file():
@@ -485,6 +561,7 @@ def main() -> int:
     runtime_path = PROJECT_ROOT / "configs/runtime.json"
     connector_assets_path = PROJECT_ROOT / "configs/rj45-assets.json"
     learned_mode = args.task == "toy" or args.baseline_mode == "learned"
+    bc_mode = args.task == "rj45" and args.baseline_mode == "bc"
     lineage_path = (
         args.checkpoint.parent / "training_provenance.json"
         if args.task == "rj45" and learned_mode
@@ -518,6 +595,18 @@ def main() -> int:
                     _project_path(held_provenance["nominal_trace_path"]),
                 )
             )
+        if args.rj45_held_bank is not None:
+            extra_input_paths.extend(
+                held_grasp_bank_dependency_paths(
+                    PROJECT_ROOT, args.rj45_held_bank, args.rj45_bank_split
+                )
+            )
+            if learned_mode or bc_mode:
+                extra_input_paths.extend(
+                    held_grasp_bank_dependency_paths(
+                        PROJECT_ROOT, args.rj45_held_bank, "train"
+                    )
+                )
         if args.parallel_contact_evidence is not None:
             parallel_spec_payload = load_finite_json(args.parallel_contact_evidence)
             extra_input_paths.extend(
@@ -530,6 +619,8 @@ def main() -> int:
             parallel_spec_payload = None
     if learned_mode:
         extra_input_paths.append(args.checkpoint)
+    if bc_mode:
+        extra_input_paths.append(args.bc_actor_init)
     if args.task == "rj45" and learned_mode:
         extra_input_paths.extend((lineage_path, manifest_path))
     input_snapshot = capture_run_inputs(
@@ -579,6 +670,10 @@ def main() -> int:
     verified_checkpoint_evidence = None
     held_state = None
     held_state_proof = None
+    held_bank = None
+    held_bank_proof = None
+    training_bank_proof = None
+    bc_artifact_evidence = None
     parallel_contact_evidence = None
     cfg.seed = (
         args.seed
@@ -603,7 +698,10 @@ def main() -> int:
             _calibration_bias_case_seed,
             make_rj45_training_env_type,
         )
-        from rby1_assembly.held_grasp import load_verified_held_grasp_artifact
+        from rby1_assembly.held_grasp import (
+            load_verified_held_grasp_artifact,
+            load_verified_held_grasp_bank,
+        )
         from rby1_assembly.parallel_contact_evidence import load_parallel_contact_evidence
         from rby1_assembly.rj45_task import (
             verify_checkpoint_lineage,
@@ -625,6 +723,17 @@ def main() -> int:
             held_state, held_state_proof = load_verified_held_grasp_artifact(
                 PROJECT_ROOT, task, args.rj45_held_state
             )
+        if args.rj45_held_bank is not None:
+            held_bank, held_bank_proof = load_verified_held_grasp_bank(
+                PROJECT_ROOT,
+                task,
+                args.rj45_held_bank,
+                args.rj45_bank_split,
+            )
+            if learned_mode or bc_mode:
+                _, training_bank_proof = load_verified_held_grasp_bank(
+                    PROJECT_ROOT, task, args.rj45_held_bank, "train"
+                )
         if parallel_spec_payload is not None:
             parallel_contact_evidence = load_parallel_contact_evidence(
                 parallel_spec_payload, project_root=PROJECT_ROOT
@@ -680,6 +789,35 @@ def main() -> int:
         current_nominal_evidence = verify_rj45_nominal_evidence(
             PROJECT_ROOT, task, args.rj45_nominal_evidence
         )
+        if bc_mode:
+            if training_config["diagnostic_observation_mode"] != "standard":
+                raise ValueError("BC-only evaluation requires standard 79D observation")
+            if training_config["action_mode"] != "right_only_6d":
+                raise ValueError("BC-only evaluation requires right_only_6d action mode")
+            bc_snapshot_sha256 = input_snapshot.hash_for(args.bc_actor_init)
+            bc_artifact = _load_verified_bc_evaluation_artifact(
+                args.bc_actor_init,
+                cli_expected_sha256=args.bc_actor_init_sha256,
+                snapshot_sha256=bc_snapshot_sha256,
+            )
+            expected_bc_provenance = {
+                "source_sha256": bank_source_contract_sha256(training_bank_proof),
+                "task_sha256": task["_config_sha256"],
+                "training_sha256": training_config["_config_sha256"],
+                "bank_sha256": training_bank_proof["manifest_sha256"],
+            }
+            actual_bc_provenance = bc_artifact["provenance"].as_dict()
+            if any(
+                actual_bc_provenance[name] != value
+                for name, value in expected_bc_provenance.items()
+            ):
+                raise ValueError("BC actor provenance differs from evaluation contract")
+            bc_artifact_evidence = {
+                "path": str(args.bc_actor_init.resolve()),
+                "sha256": bc_artifact["file_sha256"],
+                "actor_state_sha256": bc_artifact["actor_state_sha256"],
+                "provenance": actual_bc_provenance,
+            }
         if learned_mode:
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
             observation_dimension = policy_observation_dimension(training_config)
@@ -699,7 +837,11 @@ def main() -> int:
                 "calibration_bias_level": training_config["calibration_bias"]["initial_level"],
                 "policy_pose_source": "joint_encoder_and_frozen_grasp_transform",
                 "ground_truth_usage": policy_ground_truth_usage(training_config),
-                "held_grasp_reset_proof": held_state_proof,
+                "held_grasp_reset_proof": (
+                    training_bank_proof
+                    if args.rj45_held_bank is not None
+                    else held_state_proof
+                ),
                 "training_config_sha256": training_config["_config_sha256"],
                 "parallel_contact_evidence": (
                     parallel_contact_evidence if lineage["num_envs"] > 1 else None
@@ -755,7 +897,11 @@ def main() -> int:
                 "checkpoint_manifest_sha256": input_snapshot.hash_for(manifest_path),
                 "runtime_contract_verified_at_start": True,
                 "rj45_nominal_evidence": current_nominal_evidence,
-                "held_grasp_reset_proof": held_state_proof,
+                "held_grasp_reset_proof": (
+                    training_bank_proof
+                    if args.rj45_held_bank is not None
+                    else held_state_proof
+                ),
                 "training_num_envs": lineage["num_envs"],
                 "policy_initialization": lineage.get("policy_initialization"),
             }
@@ -773,6 +919,10 @@ def main() -> int:
             held_state=(held_state if args.evaluation_start == "held" else None),
             calibration_bias_enabled=args.baseline_mode != "oracle",
             bias_level=training_config["calibration_bias"]["initial_level"],
+            held_bank=(held_bank if args.evaluation_start == "held" else None),
+            held_bank_proof=(
+                held_bank_proof if args.evaluation_start == "held" else None
+            ),
         )
     input_snapshot.assert_unchanged()
     env = env_type(cfg)
@@ -799,6 +949,13 @@ def main() -> int:
             runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=None, device=env.device)
             runner.load(str(args.checkpoint))
             policy = runner.get_inference_policy(device=env.device)
+        elif bc_mode:
+            from rby1_assembly.rj45_bc import build_bc_actor
+
+            actor = build_bc_actor().to(env.device)
+            actor.load_state_dict(bc_artifact["actor_state_dict"], strict=True)
+            actor.eval()
+            policy = actor
         else:
             action_dimension = 6 if training_config["action_mode"] == "right_only_6d" else 12
             policy = lambda observation: torch.zeros(  # noqa: E731
@@ -910,6 +1067,13 @@ def main() -> int:
                     force_peaks.append(force_peak)
                 if args.task == "rj45":
                     episode_index = int(snapshot["episode_index"][env_id].item())
+                    bank_identity = (
+                        _rj45_bank_terminal_identity(
+                            snapshot, env_id, held_bank_proof
+                        )
+                        if held_bank_proof is not None
+                        else None
+                    )
                     reward_component_episode_sums = {
                         name: float(values[env_id].item())
                         for name, values in snapshot[
@@ -950,12 +1114,19 @@ def main() -> int:
                             "base_seed + stream_offset + episode_index * "
                             "episode_stride + env_id"
                         ),
+                        **(bank_identity or {}),
                     }
                     paired_condition_id = json.dumps(
                         paired_condition, sort_keys=True, separators=(",", ":"), allow_nan=False
                     )
                     outcome = {
                         "attempt_index": attempts - 1,
+                        "policy_mode": args.baseline_mode,
+                        "bc_actor_sha256": (
+                            bc_artifact_evidence["sha256"]
+                            if bc_artifact_evidence is not None
+                            else None
+                        ),
                         "environment_index": env_id,
                         "episode_index": episode_index,
                         "paired_condition": paired_condition,
@@ -1013,6 +1184,8 @@ def main() -> int:
                                 "event": "rj45_evaluation_episode_accepted",
                                 "paired_condition_id": paired_condition_id,
                                 "paired_condition": paired_condition,
+                                "policy_mode": args.baseline_mode,
+                                "bc_actor": bc_artifact_evidence,
                                 "valid": valid,
                                 "success": succeeded,
                                 "termination_reason": outcome["termination_reason"],
@@ -1038,11 +1211,27 @@ def main() -> int:
                 raise RuntimeError("RJ45 nominal evidence changed during evaluation")
             nominal_evidence_reverified = True
             if args.evaluation_start == "held":
-                _, final_held_state_proof = load_verified_held_grasp_artifact(
-                    PROJECT_ROOT, task, args.rj45_held_state
-                )
-                if final_held_state_proof != held_state_proof:
-                    raise RuntimeError("RJ45 held-grasp proof changed during evaluation")
+                if args.rj45_held_bank is not None:
+                    _, final_held_bank_proof = load_verified_held_grasp_bank(
+                        PROJECT_ROOT,
+                        task,
+                        args.rj45_held_bank,
+                        args.rj45_bank_split,
+                    )
+                    if final_held_bank_proof != held_bank_proof:
+                        raise RuntimeError("RJ45 held-grasp bank proof changed during evaluation")
+                    if learned_mode or bc_mode:
+                        _, final_training_bank_proof = load_verified_held_grasp_bank(
+                            PROJECT_ROOT, task, args.rj45_held_bank, "train"
+                        )
+                        if final_training_bank_proof != training_bank_proof:
+                            raise RuntimeError("RJ45 training bank proof changed during evaluation")
+                else:
+                    _, final_held_state_proof = load_verified_held_grasp_artifact(
+                        PROJECT_ROOT, task, args.rj45_held_state
+                    )
+                    if final_held_state_proof != held_state_proof:
+                        raise RuntimeError("RJ45 held-grasp proof changed during evaluation")
                 held_evidence_reverified = True
         report = {
             "requested_attempts": args.episodes,
@@ -1089,6 +1278,7 @@ def main() -> int:
             "provenance": {
                 "checkpoint": str(args.checkpoint.resolve()) if learned_mode else None,
                 "checkpoint_sha256": input_snapshot.hash_for(args.checkpoint) if learned_mode else None,
+                "bc_actor": bc_artifact_evidence,
                 "verified_checkpoint_evidence": verified_checkpoint_evidence,
                 "policy_config": str(args.config.resolve()),
                 "policy_config_sha256": input_snapshot.hash_for(args.config),
@@ -1150,10 +1340,16 @@ def main() -> int:
                 report,
                 evaluation_start=args.evaluation_start,
                 nominal_evidence=current_nominal_evidence,
-                held_grasp_reset_proof=held_state_proof,
+                held_grasp_reset_proof=(
+                    held_bank_proof
+                    if held_bank_proof is not None
+                    else held_state_proof
+                ),
                 inputs_reverified_at_end=evaluation_inputs_reverified,
             )
             report["baseline_mode"] = args.baseline_mode
+            report["evaluation_held_grasp_bank_proof"] = held_bank_proof
+            report["training_held_grasp_bank_proof"] = training_bank_proof
             report["evaluation_start"] = args.evaluation_start
             report["evaluation_horizon_s"] = evaluation_horizon_s
             report["per_environment_episode_quota"] = list(episode_quotas)
@@ -1182,6 +1378,7 @@ def main() -> int:
                 "environment_index,episode_index,"
                 "calibration_bias_level,calibration_latent_case_seed,"
                 "calibration_latent_case_seed_formula"
+                ",grasp_index,grasp_id,bank_manifest_sha256,bank_split"
             )
             report["learned_recovery"] = False
         if hasattr(env, "rj45_task_report"):

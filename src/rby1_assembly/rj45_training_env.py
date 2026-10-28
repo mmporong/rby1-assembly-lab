@@ -13,6 +13,99 @@ _CALIBRATION_BIAS_STREAM_OFFSET = 45_123_017
 _CALIBRATION_BIAS_EPISODE_STRIDE = 1_000_003
 
 
+def _validate_held_bank_proof(
+    held_bank: list[Mapping[str, Any]], proof: Mapping[str, Any] | None
+) -> dict[str, Any]:
+    """Validate the loader proof needed to associate bank rows with stable IDs."""
+
+    if not held_bank:
+        raise ValueError("held_bank must contain at least one verified artifact")
+    if not isinstance(proof, Mapping):
+        raise ValueError("held_bank_proof is required with held_bank")
+    selected_count = proof.get("selected_count")
+    selected_ids = proof.get("selected_grasp_ids")
+    selected_hashes = proof.get("selected_artifact_sha256")
+    selected_split = proof.get("selected_split")
+    manifest_sha256 = proof.get("manifest_sha256")
+    if selected_count != len(held_bank):
+        raise ValueError("held_bank_proof selected_count does not match held_bank")
+    if (
+        not isinstance(selected_ids, list)
+        or len(selected_ids) != len(held_bank)
+        or any(not isinstance(value, str) or not value for value in selected_ids)
+        or len(set(selected_ids)) != len(selected_ids)
+    ):
+        raise ValueError("held_bank_proof selected_grasp_ids must uniquely match held_bank")
+    if (
+        not isinstance(selected_hashes, list)
+        or len(selected_hashes) != len(held_bank)
+        or any(
+            not isinstance(value, str)
+            or len(value) != 64
+            or any(character not in "0123456789abcdef" for character in value)
+            for value in selected_hashes
+        )
+    ):
+        raise ValueError("held_bank_proof selected artifact SHA-256 values are invalid")
+    if selected_split not in {"train", "dev", "final"}:
+        raise ValueError("held_bank_proof selected_split must be train, dev, or final")
+    if (
+        not isinstance(manifest_sha256, str)
+        or len(manifest_sha256) != 64
+        or any(character not in "0123456789abcdef" for character in manifest_sha256)
+    ):
+        raise ValueError("held_bank_proof manifest_sha256 must be lowercase SHA-256")
+    return dict(proof)
+
+
+def _held_bank_selection_indices(env_ids, episode_indices, *, seed: int, bank_size: int):
+    """Return a subset-order-independent balanced bank row for each episode."""
+
+    if type(seed) is not int or seed < 0 or type(bank_size) is not int or bank_size <= 0:
+        raise ValueError("held bank selection requires non-negative seed and positive bank_size")
+    if env_ids.shape != episode_indices.shape:
+        raise ValueError("held bank env and episode index shapes must match")
+    if bool((env_ids < 0).any()) or bool((episode_indices < 0).any()):
+        raise ValueError("held bank env and episode indices must be non-negative")
+    return (env_ids + episode_indices + seed) % bank_size
+
+
+def _stack_held_bank_states(artifacts, robot_joint_names, *, device):
+    """Stack verified artifacts in robot joint order for indexed reset gathers."""
+
+    import torch
+
+    result = {
+        "joint_position": [],
+        "joint_velocity": [],
+        "joint_reference": [],
+        "object_pose": [],
+        "object_velocity": [],
+    }
+    for artifact in artifacts:
+        names = artifact["joint_names"]
+        if set(names) != set(robot_joint_names):
+            raise RuntimeError("held-grasp joint names do not match the loaded robot")
+        order = [names.index(name) for name in robot_joint_names]
+        state = artifact["state"]
+        result["joint_position"].append(
+            torch.tensor(state["joint_positions_si"], device=device)[order]
+        )
+        result["joint_velocity"].append(
+            torch.tensor(state["joint_velocities_si"], device=device)[order]
+        )
+        result["joint_reference"].append(
+            torch.tensor(state["joint_reference_si"], device=device)[order]
+        )
+        result["object_pose"].append(
+            torch.tensor(state["object_poses_world_wxyz"], device=device)
+        )
+        result["object_velocity"].append(
+            torch.tensor(state["object_com_velocities_world"], device=device)
+        )
+    return {name: torch.stack(rows) for name, rows in result.items()}
+
+
 def _reset_applied_tip_offset_telemetry(env_ids, applied_tip_offset_entry_6d) -> None:
     """Clear selected episode rows without disturbing parallel environments."""
 
@@ -647,6 +740,8 @@ def make_rj45_training_env_type(
     held_state: Mapping[str, Any] | None = None,
     calibration_bias_enabled: bool = True,
     bias_level: int = 0,
+    held_bank: list[Mapping[str, Any]] | None = None,
+    held_bank_proof: Mapping[str, Any] | None = None,
 ) -> type:
     """Wrap a configured RJ45 environment with the 79D residual-RL contract.
 
@@ -723,8 +818,27 @@ def make_rj45_training_env_type(
     levels = config["calibration_bias"]
     if type(bias_level) is not int or not 0 <= bias_level < len(levels["translation_levels_m"]):
         raise ValueError("bias_level must select a configured calibration level")
+    if held_state is not None and held_bank is not None:
+        raise ValueError("held_state and held_bank are mutually exclusive")
+    if held_bank is None and held_bank_proof is not None:
+        raise ValueError("held_bank_proof requires held_bank")
     validated_held_state = (
         None if held_state is None else validate_held_grasp_artifact(held_state)
+    )
+    validated_held_bank = (
+        None
+        if held_bank is None
+        else [validate_held_grasp_artifact(artifact) for artifact in held_bank]
+    )
+    validated_held_bank_proof = (
+        None
+        if validated_held_bank is None
+        else _validate_held_bank_proof(validated_held_bank, held_bank_proof)
+    )
+    effective_held_state = (
+        validated_held_state
+        if validated_held_state is not None
+        else (validated_held_bank[0] if validated_held_bank else None)
     )
 
     class Rby1Rj45TrainingEnv(base_cls):
@@ -735,7 +849,11 @@ def make_rj45_training_env_type(
                 config, is_finite_horizon=cfg.is_finite_horizon
             )
             self._training_config = config
-            self._training_held_state = validated_held_state
+            self._training_held_state = effective_held_state
+            self._training_held_bank = validated_held_bank
+            self._training_held_bank_proof = validated_held_bank_proof
+            self._training_held_bank_tensors_ready = False
+            self._training_grasp_index = None
             self._training_bias_enabled = bool(calibration_bias_enabled)
             self._training_bias_level = bias_level
             self._training_initialized = False
@@ -744,7 +862,7 @@ def make_rj45_training_env_type(
             self._training_bias_base_seed = int(cfg.seed)
             cfg.action_space = action_dim
             cfg.observation_space = observation_dim
-            if validated_held_state is not None:
+            if effective_held_state is not None:
                 cfg.episode_length_s = float(config["active_horizon_s"])
             super().__init__(cfg, render_mode, **kwargs)
             self._initialize_training_state()
@@ -849,6 +967,15 @@ def make_rj45_training_env_type(
             self._training_episode_index = torch.full(
                 (self.num_envs,), -1, dtype=torch.long, device=self.device
             )
+            if self._training_held_bank is not None:
+                if self._training_grasp_index is None:
+                    self._training_grasp_index = torch.zeros(
+                        self.num_envs, dtype=torch.long, device=self.device
+                    )
+                else:
+                    self._training_grasp_index = self._training_grasp_index.to(
+                        device=self.device, dtype=torch.long
+                    )
             self._training_previous_action = torch.zeros(
                 (self.num_envs, 12), device=self.device
             )
@@ -919,13 +1046,20 @@ def make_rj45_training_env_type(
                     )
                     self._torso_progress = torch.zeros(self.num_envs, device=self.device)
                     self._approach_progress = torch.zeros((self.num_envs, 2), device=self.device)
+                artifacts = self._training_held_bank or [self._training_held_state]
                 units_by_name = dict(
                     zip(
-                        self._training_held_state["joint_names"],
-                        self._training_held_state["joint_units"],
+                        artifacts[0]["joint_names"],
+                        artifacts[0]["joint_units"],
                         strict=True,
                     )
                 )
+                for artifact in artifacts[1:]:
+                    other_units = dict(
+                        zip(artifact["joint_names"], artifact["joint_units"], strict=True)
+                    )
+                    if other_units != units_by_name:
+                        raise ValueError("held bank artifacts have inconsistent joint units")
                 self._training_prismatic_joint_mask[:] = torch.tensor(
                     [units_by_name[name] == "m" for name in self.robot.joint_names],
                     dtype=torch.bool,
@@ -2004,6 +2138,8 @@ def make_rj45_training_env_type(
                     self._training_applied_tip_offset_entry.clone()
                 ),
             }
+            if self._training_grasp_index is not None:
+                training_episode["held_grasp_index"] = self._training_grasp_index.clone()
             self.extras["rj45_training_episode"] = training_episode
             terminal_snapshot = self.extras.get("terminal_snapshot")
             if isinstance(terminal_snapshot, dict):
@@ -2011,25 +2147,69 @@ def make_rj45_training_env_type(
                 terminal_snapshot.update(self._training_step_snapshot())
             return terminated, truncated
 
+        def _ensure_held_bank_tensors(self) -> None:
+            if self._training_held_bank is None or self._training_held_bank_tensors_ready:
+                return
+            stacked = _stack_held_bank_states(
+                self._training_held_bank, self.robot.joint_names, device=self.device
+            )
+            self._training_held_bank_joint_position = stacked["joint_position"]
+            self._training_held_bank_joint_velocity = stacked["joint_velocity"]
+            self._training_held_bank_joint_reference = stacked["joint_reference"]
+            self._training_held_bank_object_pose = stacked["object_pose"]
+            self._training_held_bank_object_velocity = stacked["object_velocity"]
+            if self._training_grasp_index is None:
+                self._training_grasp_index = torch.zeros(
+                    self.num_envs, dtype=torch.long, device=self.device
+                )
+                env_ids = torch.arange(self.num_envs, device=self.device)
+                episode_indices = torch.zeros_like(env_ids)
+                self._training_grasp_index[:] = _held_bank_selection_indices(
+                    env_ids,
+                    episode_indices,
+                    seed=self._training_bias_base_seed,
+                    bank_size=len(self._training_held_bank),
+                )
+            self._training_held_bank_tensors_ready = True
+
+        def _select_held_bank_rows(self, env_ids, episode_indices) -> None:
+            if self._training_held_bank is None:
+                return
+            self._ensure_held_bank_tensors()
+            self._training_grasp_index[env_ids] = _held_bank_selection_indices(
+                env_ids,
+                episode_indices,
+                seed=self._training_bias_base_seed,
+                bank_size=len(self._training_held_bank),
+            )
+
         def _held_artifact_joint_state(self, env_ids):
+            if self._training_held_bank is not None:
+                self._ensure_held_bank_tensors()
+                selected = self._training_grasp_index[env_ids]
+                return (
+                    self._training_held_bank_joint_position[selected],
+                    self._training_held_bank_joint_velocity[selected],
+                    self._training_held_bank_joint_reference[selected],
+                )
             artifact = self._training_held_state
             names = artifact["joint_names"]
             if set(names) != set(self.robot.joint_names):
                 raise RuntimeError("held-grasp joint names do not match the loaded robot")
             order = [names.index(name) for name in self.robot.joint_names]
             state = artifact["state"]
-            joint_pos = torch.tensor(
-                state["joint_positions_si"], device=self.device
-            )[order].repeat(len(env_ids), 1)
-            joint_vel = torch.tensor(
-                state["joint_velocities_si"], device=self.device
-            )[order].repeat(len(env_ids), 1)
-            joint_ref = torch.tensor(
-                state["joint_reference_si"], device=self.device
-            )[order].repeat(len(env_ids), 1)
+            joint_pos = torch.tensor(state["joint_positions_si"], device=self.device)[order].repeat(len(env_ids), 1)
+            joint_vel = torch.tensor(state["joint_velocities_si"], device=self.device)[order].repeat(len(env_ids), 1)
+            joint_ref = torch.tensor(state["joint_reference_si"], device=self.device)[order].repeat(len(env_ids), 1)
             return joint_pos, joint_vel, joint_ref
 
         def _held_artifact_object_state(self, env_ids):
+            if self._training_held_bank is not None:
+                self._ensure_held_bank_tensors()
+                selected = self._training_grasp_index[env_ids]
+                object_poses = self._training_held_bank_object_pose[selected].clone()
+                object_poses[:, :, :3] += self.scene.env_origins[env_ids, None, :]
+                return object_poses, self._training_held_bank_object_velocity[selected]
             state = self._training_held_state["state"]
             object_poses = torch.tensor(
                 state["object_poses_world_wxyz"], device=self.device
@@ -2110,6 +2290,9 @@ def make_rj45_training_env_type(
                         env_ids, dtype=torch.long, device=self.device
                     )
                 self._training_policy_activated[env_ids] = False
+                self._select_held_bank_rows(
+                    env_ids, self._training_episode_index[env_ids] + 1
+                )
             super()._reset_idx(env_ids)
             if not self._training_initialized:
                 return
@@ -2158,6 +2341,9 @@ def make_rj45_training_env_type(
             self._training_action_clip_boundary_step_count[env_ids] = 0
             self._training_action_norm_projection_step_count[env_ids] = 0
             self._training_episode_index[env_ids] += 1
+            self._select_held_bank_rows(
+                env_ids, self._training_episode_index[env_ids]
+            )
             self._sample_episode_bias(env_ids)
             if self._training_held_state is None:
                 gt_pos, gt_quat = self._relative_object_pose()
@@ -2200,7 +2386,11 @@ def make_rj45_training_env_type(
         def _initialize_held_controller_phase(self, env_ids):
             """Start a new ALIGN episode beyond the verified INSERT setup path."""
 
-            if self._training_held_state["selection"]["phase_name"] != "insert":
+            artifacts = self._training_held_bank or [self._training_held_state]
+            if any(
+                artifact["selection"]["phase_name"] != "insert"
+                for artifact in artifacts
+            ):
                 raise ValueError("held controller initialization requires a verified INSERT state")
             expected_torso = torch.tensor(
                 self.cfg.rj45_task["controller"]["torso_work_joint_positions_rad"],
@@ -2270,6 +2460,21 @@ def make_rj45_training_env_type(
                     ),
                 },
                 "held_grasp_reset": self._training_held_state is not None,
+                "held_grasp_bank": (
+                    None
+                    if self._training_held_bank is None
+                    else {
+                        "manifest_sha256": self._training_held_bank_proof["manifest_sha256"],
+                        "split": self._training_held_bank_proof["selected_split"],
+                        "grasp_ids": list(self._training_held_bank_proof["selected_grasp_ids"]),
+                        "artifact_sha256": list(
+                            self._training_held_bank_proof["selected_artifact_sha256"]
+                        ),
+                        "selected_index_by_environment": self._training_grasp_index.detach()
+                        .cpu()
+                        .tolist(),
+                    }
+                ),
                 "held_controller_initialization": (
                     "reconstruct_completed_setup_path_for_new_alignment_episode"
                     if self._training_held_state is not None else "normal_table_setup"
