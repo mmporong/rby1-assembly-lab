@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import os
+import struct
 import subprocess
 import sys
 import tempfile
@@ -28,6 +29,46 @@ def _sha256(path: Path) -> str:
 def _write_json(path: Path, value) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, allow_nan=False) + "\n", encoding="utf-8")
+
+
+def _float32(value: float) -> float:
+    return struct.unpack("!f", struct.pack("!f", value))[0]
+
+
+def _rewrite_nominal_trace(
+    report_path: Path, trace_path: Path, records: list[dict]
+) -> None:
+    trace_path.write_text(
+        "".join(json.dumps(record, allow_nan=False) + "\n" for record in records),
+        encoding="utf-8",
+    )
+    report = load_finite_json(report_path)
+    report["trace_sha256"] = _sha256(trace_path)
+    report["trace_record_count"] = len(records)
+    report["actual_steps"] = len(records) - 1
+    report["terminal_outcomes"] = [records[-1]["environments"][0]]
+    _write_json(report_path, report)
+
+
+def _float32_boundary_trace(records: list[dict], final_step: int) -> list[dict]:
+    first_eligible_step = final_step - 12
+    expanded = [
+        {
+            "schema_version": 1,
+            "control_step": step,
+            "environments": [
+                {"env_index": 0, "timestamp_s": _float32(step / 30)}
+            ],
+        }
+        for step in range(first_eligible_step)
+    ]
+    for step in range(first_eligible_step, final_step + 1):
+        source = records[-1] if step == final_step else records[1]
+        record = copy.deepcopy(source)
+        record["control_step"] = step
+        record["environments"][0]["timestamp_s"] = _float32(step / 30)
+        expanded.append(record)
+    return expanded
 
 
 def _load_evaluation_quota_helpers(root: Path):
@@ -327,6 +368,40 @@ class NominalEvidenceTests(unittest.TestCase):
             self.assertEqual(result["trace_sha256"], _sha256(trace_path))
             self.assertEqual(result["trace_records"], 14)
 
+    def test_dwell_uses_twelve_control_intervals_despite_float32_rounding(self) -> None:
+        for final_step, timestamp_rounding in ((1345, "down"), (1348, "up")):
+            with (
+                self.subTest(timestamp_rounding=timestamp_rounding),
+                tempfile.TemporaryDirectory() as directory,
+            ):
+                project = Path(directory)
+                task, report_path, trace_path = _synthetic_contract_fixture(project)
+                baseline = [
+                    json.loads(line) for line in trace_path.read_text().splitlines()
+                ]
+                records = _float32_boundary_trace(baseline, final_step)
+                observed_duration = (
+                    records[-1]["environments"][0]["timestamp_s"]
+                    - records[-13]["environments"][0]["timestamp_s"]
+                )
+                if timestamp_rounding == "down":
+                    self.assertLess(observed_duration, 0.4)
+                else:
+                    self.assertGreater(observed_duration, 0.4)
+                _rewrite_nominal_trace(report_path, trace_path, records)
+                result = verify_rj45_nominal_evidence(project, task, report_path)
+                self.assertEqual(result["trace_records"], final_step + 1)
+
+    def test_twelve_eligible_rows_are_not_a_point_four_second_dwell(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            task, report_path, trace_path = _synthetic_contract_fixture(project)
+            records = [json.loads(line) for line in trace_path.read_text().splitlines()]
+            records[1]["environments"][0]["independent_eval_valid"] = False
+            _rewrite_nominal_trace(report_path, trace_path, records)
+            with self.assertRaisesRegex(ValueError, "continuous independent"):
+                verify_rj45_nominal_evidence(project, task, report_path)
+
     def test_fake_completed_report_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
@@ -512,17 +587,10 @@ class NominalEvidenceTests(unittest.TestCase):
             project = Path(directory)
             task, report_path, trace_path = _synthetic_contract_fixture(project)
             records = [json.loads(line) for line in trace_path.read_text().splitlines()]
-            for record in records[1:6]:
-                entry = record["environments"][0]
-                entry["grip_live"] = [False, False]
-                entry["independent_eval_criteria"]["grasp_live_and_proven"] = False
-            trace_path.write_text(
-                "".join(json.dumps(record) + "\n" for record in records), encoding="utf-8"
-            )
-            report = load_finite_json(report_path)
-            report["trace_sha256"] = _sha256(trace_path)
-            report["terminal_outcomes"] = [records[-1]["environments"][0]]
-            _write_json(report_path, report)
+            entry = records[7]["environments"][0]
+            entry["grip_live"] = [False, False]
+            entry["independent_eval_criteria"]["grasp_live_and_proven"] = False
+            _rewrite_nominal_trace(report_path, trace_path, records)
             with self.assertRaisesRegex(ValueError, "continuous independent"):
                 verify_rj45_nominal_evidence(project, task, report_path)
 

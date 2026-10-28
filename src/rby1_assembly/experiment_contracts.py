@@ -339,7 +339,8 @@ def verify_rj45_nominal_evidence(project: Path, task: dict, report_path: Path) -
             and grip_peak <= limits["max_contact_force_n"]
             and insertion_peak <= limits["max_contact_force_n"]
         )
-    candidate_since = None
+    candidate_start_control_step: int | None = None
+    previous_control_step = -1
     previous_time = -1.0
     final = None
     count = 0
@@ -349,9 +350,11 @@ def verify_rj45_nominal_evidence(project: Path, task: dict, report_path: Path) -
             "nominal trace record",
         )
         environments = record.get("environments")
+        control_step = record.get("control_step")
         if (
             record.get("schema_version") != 1
-            or record.get("control_step") != index
+            or type(control_step) is not int
+            or control_step != index
             or not isinstance(environments, list)
             or len(environments) != 1
         ):
@@ -370,10 +373,15 @@ def verify_rj45_nominal_evidence(project: Path, task: dict, report_path: Path) -
         if now <= previous_time:
             raise ValueError("nominal trace time must increase")
         previous_time = now
+        previous_control_step = control_step
         if eligible(final):
-            candidate_since = now if candidate_since is None else candidate_since
+            candidate_start_control_step = (
+                control_step
+                if candidate_start_control_step is None
+                else candidate_start_control_step
+            )
         else:
-            candidate_since = None
+            candidate_start_control_step = None
         count += 1
     terminal = report.get("terminal_outcomes")
     terminal_entry = (
@@ -414,8 +422,9 @@ def verify_rj45_nominal_evidence(project: Path, task: dict, report_path: Path) -
         or not all(value is True for value in final_criteria.values())
         or terminal_entry.get("pregrasp_clearance_reached") is not True
         or terminal_entry.get("pregrasp_above_reached") is not True
-        or candidate_since is None
-        or previous_time - candidate_since + 1e-6 < limits["dwell_s"]
+        or candidate_start_control_step is None
+        or (previous_control_step - candidate_start_control_step) * control_dt_s
+        < limits["dwell_s"]
         or type(report.get("trace_record_count")) is not int
         or type(report.get("actual_steps")) is not int
         or count != report["trace_record_count"]
