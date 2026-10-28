@@ -30,6 +30,9 @@ TARGET_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-v1.json"
 TARGET_DIAGNOSTIC_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-bias-observability.json"
 A1_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a1-discounted-pose-v2.json"
 A2_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
+WARMUP_RESTAGE_CONFIG_PATH = (
+    ROOT / "configs/rj45-training-target-offset-warmup-restage-retry1-v3.json"
+)
 HASH = "a" * 64
 
 
@@ -101,6 +104,29 @@ def valid_artifact():
 
 
 class TrainingConfigurationTests(unittest.TestCase):
+    def test_legacy_configs_disable_restage_and_v3_requires_zero_or_one(self):
+        legacy = load_training_config(TARGET_CONFIG_PATH)
+        self.assertEqual(legacy["held_warmup_restage_retry_limit"], 0)
+        retry = load_training_config(WARMUP_RESTAGE_CONFIG_PATH)
+        self.assertEqual(retry["schema_version"], 3)
+        self.assertEqual(retry["held_warmup_restage_retry_limit"], 1)
+        self.assertNotEqual(legacy["_config_sha256"], retry["_config_sha256"])
+        baseline_contract = json.loads(TARGET_CONFIG_PATH.read_text())
+        retry_contract = json.loads(WARMUP_RESTAGE_CONFIG_PATH.read_text())
+        self.assertEqual(retry_contract.pop("held_warmup_restage_retry_limit"), 1)
+        retry_contract["schema_version"] = 1
+        self.assertEqual(retry_contract, baseline_contract)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "retry.json"
+            for value in (-1, 2, True):
+                damaged = json.loads(WARMUP_RESTAGE_CONFIG_PATH.read_text())
+                damaged["held_warmup_restage_retry_limit"] = value
+                path.write_text(json.dumps(damaged))
+                with self.subTest(value=value):
+                    with self.assertRaisesRegex(ValueError, "must be 0 or 1"):
+                        load_training_config(path)
+
     def test_repository_configuration_is_strict_and_hashed(self):
         config = load_training_config(CONFIG_PATH)
         self.assertEqual(config["_config_sha256"], hashlib.sha256(CONFIG_PATH.read_bytes()).hexdigest())

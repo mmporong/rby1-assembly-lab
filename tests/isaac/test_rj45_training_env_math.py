@@ -17,6 +17,7 @@ from rby1_assembly.rj45_training_env import (
     _held_reset_contact_free_status,
     _held_reset_stage_transition,
     _held_warmup_timeout_diagnostics,
+    _held_warmup_trace_payloads,
     _mask_inactive_policy_observation,
     _reset_policy_input_telemetry,
     _reset_applied_tip_offset_telemetry,
@@ -24,8 +25,10 @@ from rby1_assembly.rj45_training_env import (
     _reward_policy_active_mask,
     _store_policy_input_telemetry,
     _warmup_motion_status,
+    _warmup_restage_retry_mask,
     _warmup_sensor_status,
     _warmup_timeout_mask,
+    _retain_warmup_retry_event,
 )
 from rby1_assembly.rj45_training import (
     ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
@@ -61,6 +64,7 @@ def _compiled_training_environment_method(name):
         ),
         "_held_reset_contact_free_status": _held_reset_contact_free_status,
         "_held_reset_stage_transition": _held_reset_stage_transition,
+        "_reset_policy_input_telemetry": _reset_policy_input_telemetry,
         "_calibration_bias_case_seed": _calibration_bias_case_seed,
         "ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
         "POST_INTEGRAL_STEP_ACTION_APPLICATION": POST_INTEGRAL_STEP_ACTION_APPLICATION,
@@ -306,6 +310,54 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         torch.testing.assert_close(
             _reward_policy_active_mask({"schema_version": 2}, current, executed),
             executed,
+        )
+
+    def test_retry_only_schema_matches_v1_phase_and_transition_gates(self):
+        current = torch.tensor([True, False, True, False])
+        pending = torch.tensor([False, True, False, False])
+        observation_valid = torch.tensor([True, True, False, True])
+        counts = torch.tensor([0, 2, 3, 0])
+        baseline = {
+            "schema_version": 1,
+            "action_application_mode": ABSOLUTE_TIP_POSE_TARGET_INSERT_ONLY,
+        }
+        retry = {**baseline, "schema_version": 3}
+        baseline_transition = _executed_policy_transition_mask(
+            baseline, current, pending, observation_valid, counts
+        )
+        retry_transition = _executed_policy_transition_mask(
+            retry, current, pending, observation_valid, counts
+        )
+        self.assertTrue(torch.equal(baseline_transition, retry_transition))
+        self.assertTrue(
+            torch.equal(
+                _reward_policy_active_mask(
+                    baseline, current, baseline_transition
+                ),
+                _reward_policy_active_mask(retry, current, retry_transition),
+            )
+        )
+
+        policy_active = _compiled_training_environment_method(
+            "_policy_active_mask"
+        )
+        policy_activated = torch.tensor([True, True, True, False])
+        phase = torch.tensor([4, 5, 3, 5])
+        baseline_environment = SimpleNamespace(
+            _training_config=baseline,
+            _training_policy_activated=policy_activated,
+            _phase=phase,
+        )
+        retry_environment = SimpleNamespace(
+            _training_config=retry,
+            _training_policy_activated=policy_activated,
+            _phase=phase,
+        )
+        self.assertTrue(
+            torch.equal(
+                policy_active(baseline_environment),
+                policy_active(retry_environment),
+            )
         )
 
     def test_action_saturation_distinguishes_clip_boundary_and_norm_projection(self):
@@ -694,6 +746,12 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             _training_last_policy_observation_valid=torch.tensor([False, True]),
             _training_estimator_valid=torch.tensor([False, True]),
             _training_policy_activated=torch.tensor([False, True]),
+            _training_warmup_restage_retry_count=torch.tensor([0, 1]),
+            _training_warmup_first_failure_seen=torch.tensor([False, True]),
+            _training_warmup_retry_succeeded=torch.tensor([False, True]),
+            _training_warmup_steps=torch.tensor([3, 7]),
+            _training_episode_warmup_total_steps=torch.tensor([3, 37]),
+            _training_episode_warmup_retry_added_steps=torch.tensor([0, 7]),
             _training_previous_action=torch.arange(
                 24, dtype=torch.float32
             ).reshape(2, 12),
@@ -720,6 +778,12 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
                 "policy_input_valid",
                 "training_estimator_valid",
                 "training_policy_activated",
+                "held_warmup_restage_retry_count",
+                "held_warmup_first_failure_seen",
+                "held_warmup_retry_succeeded",
+                "held_warmup_control_steps",
+                "held_warmup_episode_total_control_steps",
+                "held_warmup_episode_retry_added_control_steps",
                 "requested_expanded_residual_action",
                 "applied_bounded_residual_action",
                 "applied_tip_target_offset_entry_6d",
@@ -728,6 +792,13 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
         self.assertEqual(snapshot["policy_input_observation"][1, 78].item(), 157.0)
         self.assertEqual(snapshot["held_initialization_passed"].tolist(), [False, True])
         self.assertEqual(snapshot["valid_policy_input_step_count"].tolist(), [0, 10])
+        self.assertEqual(
+            snapshot["held_warmup_episode_total_control_steps"].tolist(), [3, 37]
+        )
+        self.assertEqual(
+            snapshot["held_warmup_episode_retry_added_control_steps"].tolist(),
+            [0, 7],
+        )
         self.assertEqual(
             snapshot["requested_expanded_residual_action"][1, 11].item(),
             23.0,
@@ -745,11 +816,13 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             _training_last_policy_observation_valid=torch.tensor([True, False, True]),
             _training_held_initialization_passed=torch.tensor([True, True, True]),
             _training_valid_policy_input_step_count=torch.tensor([4, 9, 12]),
+            _training_total_valid_policy_input_transitions=20,
             _grip_proven=torch.zeros((3, 2), dtype=torch.bool),
         )
         count_step = _compiled_training_environment_method("_count_policy_input_step")
         count_step(environment)
         self.assertEqual(environment._training_valid_policy_input_step_count.tolist(), [5, 9, 13])
+        self.assertEqual(environment._training_total_valid_policy_input_transitions, 22)
         self.assertEqual(environment._training_held_initialization_passed.tolist(), [True] * 3)
         reset = _compiled_training_environment_method("_reset_policy_attribution")
         reset(environment, torch.tensor([1]))
@@ -1117,6 +1190,141 @@ class Rj45TrainingEnvironmentMathTests(unittest.TestCase):
             timeout_steps=50,
         )
         self.assertEqual(timed_out.tolist(), [False, True, False])
+
+    def test_warmup_restage_allows_one_inactive_retry_then_stops(self):
+        timed_out = torch.tensor([True, True, False])
+        retry_count = torch.tensor([0, 1, 0])
+        policy_activated = torch.tensor([False, False, False])
+
+        retry = _warmup_restage_retry_mask(
+            timed_out, retry_count, 1, policy_activated
+        )
+
+        self.assertEqual(retry.tolist(), [True, False, False])
+        self.assertFalse(
+            _warmup_restage_retry_mask(
+                timed_out, retry_count, 0, policy_activated
+            ).any()
+        )
+
+    def test_warmup_restage_rejects_active_policy_row(self):
+        with self.assertRaisesRegex(AssertionError, "after policy activation"):
+            _warmup_restage_retry_mask(
+                torch.tensor([True]),
+                torch.tensor([0]),
+                1,
+                torch.tensor([True]),
+            )
+
+    def test_warmup_trace_payloads_batch_selected_rows(self):
+        trace_float = torch.arange(2 * 2 * 3 * 12, dtype=torch.float32).reshape(
+            2, 2, 3, 12
+        )
+        trace_gates = torch.ones((2, 2, 3, 9), dtype=torch.bool)
+
+        payloads = _held_warmup_trace_payloads(
+            trace_float,
+            trace_gates,
+            retry_counts=torch.tensor([0, 1]),
+            warmup_steps=torch.tensor([2, 1]),
+        )
+
+        self.assertEqual([len(payload) for payload in payloads], [1, 2])
+        self.assertEqual(len(payloads[0][0]["steps"]), 2)
+        self.assertEqual(len(payloads[1][0]["steps"]), 3)
+        self.assertEqual(len(payloads[1][1]["steps"]), 1)
+        self.assertEqual(
+            payloads[1][1]["steps"][0]["measurements"][
+                "socket_angular_speed_rad_s"
+            ],
+            {"value": 108.0, "nonfinite": False},
+        )
+        self.assertTrue(
+            payloads[1][1]["steps"][0]["gates"]["motion_settled"]
+        )
+
+    def test_warmup_retry_event_retention_keeps_first_recent_and_omission_counts(self):
+        first = []
+        recent = []
+        aggregate = {}
+        omitted = 0
+        for index in range(7):
+            omitted = _retain_warmup_retry_event(
+                first,
+                recent,
+                aggregate,
+                {
+                    "event": "timeout" if index % 2 == 0 else "passed",
+                    "index": index,
+                },
+                omitted_count=omitted,
+                first_limit=2,
+                recent_limit=2,
+            )
+
+        self.assertEqual([event["index"] for event in first], [0, 1])
+        self.assertEqual([event["index"] for event in recent], [5, 6])
+        self.assertEqual(omitted, 3)
+        self.assertEqual(aggregate, {"timeout": 4, "passed": 3})
+
+    def test_retry_held_warmup_preserves_identity_and_other_rows(self):
+        calls = []
+        environment = SimpleNamespace(
+            _training_episode_index=torch.tensor([7, 8]),
+            _training_translation_bias_entry=torch.tensor(
+                [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
+            ),
+            _training_rotation_bias_entry=torch.tensor(
+                [[0.01, 0.02, 0.03], [0.04, 0.05, 0.06]]
+            ),
+            _training_grasp_index=torch.tensor([1, 3]),
+            _training_warmup_restage_retry_count=torch.tensor([0, 0]),
+            _training_warmup_steps=torch.tensor([30, 12]),
+            _training_warmup_stable_steps=torch.tensor([0, 4]),
+            _training_estimator_valid=torch.tensor([True, True]),
+            _training_held_initialization_passed=torch.tensor([False, True]),
+            _training_valid_policy_input_step_count=torch.tensor([0, 9]),
+            _training_previous_action=torch.ones((2, 12)),
+            _training_applied_tip_offset_entry=torch.ones((2, 6)),
+            _training_last_policy_observation=torch.ones((2, 79)),
+            _training_last_policy_observation_valid=torch.tensor([True, True]),
+            _training_last_policy_observation_timestamp_s=torch.tensor([1.0, 2.0]),
+            _restore_held_physical_state=lambda env_ids: calls.append(
+                ("restore", env_ids.clone())
+            ),
+            _queue_held_reset_stage=lambda env_ids: calls.append(
+                ("queue", env_ids.clone())
+            ),
+        )
+        identity = (
+            environment._training_episode_index.clone(),
+            environment._training_grasp_index.clone(),
+            environment._training_translation_bias_entry.clone(),
+            environment._training_rotation_bias_entry.clone(),
+        )
+
+        _compiled_training_environment_method("_retry_held_warmup")(
+            environment, torch.tensor([True, False])
+        )
+
+        self.assertEqual([call[0] for call in calls], ["restore", "queue"])
+        self.assertEqual(
+            environment._training_warmup_restage_retry_count.tolist(), [1, 0]
+        )
+        self.assertEqual(environment._training_warmup_steps.tolist(), [0, 12])
+        self.assertEqual(
+            environment._training_valid_policy_input_step_count.tolist(), [0, 9]
+        )
+        self.assertFalse(environment._training_last_policy_observation_valid[0])
+        self.assertTrue(environment._training_last_policy_observation_valid[1])
+        self.assertTrue(torch.equal(identity[0], environment._training_episode_index))
+        self.assertTrue(torch.equal(identity[1], environment._training_grasp_index))
+        self.assertTrue(
+            torch.equal(identity[2], environment._training_translation_bias_entry)
+        )
+        self.assertTrue(
+            torch.equal(identity[3], environment._training_rotation_bias_entry)
+        )
 
     def test_timeout_error_preserves_complete_json_safe_diagnostics(self):
         diagnostics = _held_warmup_timeout_diagnostics(

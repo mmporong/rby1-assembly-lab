@@ -53,6 +53,7 @@ _TOP_LEVEL_KEYS = {
     "held_reset_staging",
 }
 _V2_TOP_LEVEL_KEYS = _TOP_LEVEL_KEYS | {"reward_profile"}
+_V3_TOP_LEVEL_KEYS = _TOP_LEVEL_KEYS | {"held_warmup_restage_retry_limit"}
 _BIAS_KEYS = {"translation_levels_m", "rotation_max_levels_rad", "initial_level"}
 _REWARD_KEYS = {
     "depth_scale_m",
@@ -179,8 +180,16 @@ def load_training_config(path: Path) -> dict[str, Any]:
         _exact_keys(config, _TOP_LEVEL_KEYS, "training configuration")
     elif schema_version == 2:
         _exact_keys(config, _V2_TOP_LEVEL_KEYS, "training configuration")
+    elif schema_version == 3:
+        _exact_keys(config, _V3_TOP_LEVEL_KEYS, "training configuration")
     else:
-        raise ValueError("schema_version must be 1 or 2")
+        raise ValueError("schema_version must be 1, 2, or 3")
+    if schema_version == 3:
+        retry_limit = config["held_warmup_restage_retry_limit"]
+        if type(retry_limit) is not int or retry_limit not in (0, 1):
+            raise ValueError("held_warmup_restage_retry_limit must be 0 or 1")
+    else:
+        config["held_warmup_restage_retry_limit"] = 0
     if config["task_id"] != "rj45-v1":
         raise ValueError("task_id must be rj45-v1")
     if config["episode_scope"] != "held_grasp_alignment_insertion":
@@ -387,6 +396,12 @@ def reward_profile_metadata(config: Mapping[str, Any]) -> dict[str, Any]:
         "reward_horizon_semantics": profile["horizon_semantics"],
         "reward_discount_factor": float(profile["discount_factor"]),
     }
+
+
+def uses_legacy_reward_arithmetic(config: Mapping[str, Any]) -> bool:
+    """Keep schema 1 and retry-only schema 3 on the exact legacy sum order."""
+
+    return config.get("schema_version") != 2
 
 
 def validate_reward_profile_runner(config: Mapping[str, Any], runner_config: Mapping[str, Any]) -> None:

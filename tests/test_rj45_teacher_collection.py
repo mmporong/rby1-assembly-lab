@@ -75,7 +75,9 @@ class Rj45TeacherCollectionTests(unittest.TestCase):
             node
             for node in tree.body
             if isinstance(node, ast.FunctionDef)
-            and node.name in {"_runtime_versions", "_close_simulation_app"}
+            and node.name in {
+                "_runtime_versions", "_close_simulation_app", "_runtime_training_report"
+            }
         ]
         calls: list[str] = []
         namespace: dict[str, Any] = {
@@ -86,6 +88,22 @@ class Rj45TeacherCollectionTests(unittest.TestCase):
         }
         exec(compile(ast.Module(body=selected, type_ignores=[]), script, "exec"), namespace)
         return namespace, calls
+
+    def test_runtime_report_preserves_counters_and_does_not_mask_collection_failure(self) -> None:
+        helpers, _ = self._script_helpers()
+        capture = helpers["_runtime_training_report"]
+        counters = {"held_warmup_restage": {"first_failure_count": 3}}
+        env = types.SimpleNamespace(rj45_training_report=lambda: counters)
+        self.assertEqual(capture(env), counters)
+        self.assertIsNone(capture(None))
+
+        def broken_report():
+            raise RuntimeError("report unavailable after initialization failure")
+
+        result = capture(types.SimpleNamespace(rj45_training_report=broken_report))
+        self.assertFalse(result["report_available"])
+        self.assertEqual(result["error_type"], "RuntimeError")
+        self.assertNotIn("held_warmup_restage", result)
 
     def test_collector_runtime_versions_include_exact_required_distributions(self) -> None:
         helpers, calls = self._script_helpers()

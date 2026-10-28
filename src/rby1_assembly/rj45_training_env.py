@@ -309,6 +309,33 @@ def _warmup_timeout_mask(pending, passed, warmup_steps, timeout_steps: int):
     return pending & ~passed & (warmup_steps >= timeout_steps)
 
 
+def _warmup_restage_retry_mask(
+    timed_out, retry_count, retry_limit: int, policy_activated
+):
+    """Select timed-out inactive rows that may repeat held initialization once."""
+
+    import torch
+
+    if type(retry_limit) is not int or retry_limit not in (0, 1):
+        raise ValueError("held warmup restage retry limit must be 0 or 1")
+    if not (
+        timed_out.shape == retry_count.shape == policy_activated.shape
+        and timed_out.dtype == torch.bool
+        and policy_activated.dtype == torch.bool
+    ):
+        raise ValueError("warmup retry tensors must be aligned boolean/count rows")
+    if torch.any(retry_count < 0):
+        raise ValueError("warmup retry count must be non-negative")
+    active_timeout = timed_out & policy_activated
+    if torch.any(active_timeout):
+        ids = torch.nonzero(active_timeout, as_tuple=False).squeeze(1).tolist()
+        raise AssertionError(
+            "held warmup restage is forbidden after policy activation; "
+            f"activated environments={ids}"
+        )
+    return timed_out & (retry_count < retry_limit)
+
+
 def _held_reset_stage_transition(queued, waited_control_steps, control_steps: int):
     """Return restore-ready rows and the next per-row staging counters."""
 
@@ -452,6 +479,117 @@ def _diagnostic_abs_max(values) -> dict[str, Any] | None:
     if values.numel() == 0:
         return None
     return _diagnostic_number(values.abs().amax().detach().cpu().item())
+
+
+def _held_warmup_trace_payloads(
+    trace_float,
+    trace_gates,
+    *,
+    retry_counts,
+    warmup_steps,
+) -> list[list[dict[str, Any]]]:
+    """Serialize selected timeout traces after batched device-to-host copies."""
+
+    import torch
+
+    if trace_float.ndim != 4 or trace_float.shape[1] != 2 or trace_float.shape[3] != 12:
+        raise ValueError("warmup float trace must have shape (rows, 2, steps, 12)")
+    if trace_gates.shape != (*trace_float.shape[:3], 9):
+        raise ValueError("warmup gate trace must align as (rows, 2, steps, 9)")
+    if retry_counts.shape != (trace_float.shape[0],) or warmup_steps.shape != (
+        trace_float.shape[0],
+    ):
+        raise ValueError("warmup trace counts must align with selected rows")
+    if torch.any((retry_counts < 0) | (retry_counts > 1)):
+        raise ValueError("warmup trace retry counts must be zero or one")
+    if torch.any((warmup_steps < 0) | (warmup_steps > trace_float.shape[2])):
+        raise ValueError("warmup trace step counts are outside the trace capacity")
+
+    float_names = (
+        "socket_angular_speed_rad_s",
+        "plug_angular_speed_rad_s",
+        "relative_linear_speed_m_s",
+        "relative_angular_speed_rad_s",
+        "revolute_joint_speed_abs_max_rad_s",
+        "prismatic_joint_speed_abs_max_m_s",
+        "revolute_joint_reference_error_abs_max_rad",
+        "prismatic_joint_reference_error_abs_max_m",
+        "grip_force_min_n",
+        "grip_force_max_n",
+        "insertion_load_n",
+        "forbidden_load_n",
+    )
+    gate_names = (
+        "state_finite",
+        "motion_finite",
+        "motion_settled",
+        "sensor_finite",
+        "within_limits",
+        "grip_live",
+        "lift_left_ok",
+        "lift_right_ok",
+        "stable",
+    )
+    float_rows = trace_float.detach().cpu().tolist()
+    gate_rows = trace_gates.detach().cpu().tolist()
+    metadata_rows = torch.stack((retry_counts, warmup_steps), dim=1).detach().cpu().tolist()
+    payloads: list[list[dict[str, Any]]] = []
+    trace_capacity = trace_float.shape[2]
+    for row_index, (last_attempt, current_steps) in enumerate(metadata_rows):
+        attempts = []
+        for attempt in range(last_attempt + 1):
+            step_count = trace_capacity if attempt < last_attempt else current_steps
+            rows = []
+            for step in range(step_count):
+                rows.append(
+                    {
+                        "control_step": step + 1,
+                        "measurements": {
+                            name: _diagnostic_number(
+                                float_rows[row_index][attempt][step][index]
+                            )
+                            for index, name in enumerate(float_names)
+                        },
+                        "gates": {
+                            name: bool(gate_rows[row_index][attempt][step][index])
+                            for index, name in enumerate(gate_names)
+                        },
+                    }
+                )
+            attempts.append({"attempt": attempt, "steps": rows})
+        payloads.append(attempts)
+    return payloads
+
+
+def _retain_warmup_retry_event(
+    first_events: list[dict[str, Any]],
+    recent_events: list[dict[str, Any]],
+    aggregate_counts: dict[str, int],
+    event: dict[str, Any],
+    *,
+    omitted_count: int,
+    first_limit: int = 32,
+    recent_limit: int = 32,
+) -> int:
+    """Retain bounded full first/recent events and count omitted middle events."""
+
+    event_name = event.get("event")
+    if not isinstance(event_name, str) or not event_name:
+        raise ValueError("warmup retry event requires a nonempty event name")
+    if any(
+        type(value) is not int or value < 0
+        for value in (omitted_count, first_limit, recent_limit)
+    ) or first_limit < 1 or recent_limit < 1:
+        raise ValueError("warmup retry event retention limits must be positive integers")
+    aggregate_counts[event_name] = aggregate_counts.get(event_name, 0) + 1
+    if len(first_events) < first_limit:
+        first_events.append(event)
+        return omitted_count
+    if len(recent_events) >= recent_limit:
+        recent_events.pop(0)
+        omitted_count += 1
+    recent_events.append(event)
+    return omitted_count
 
 
 def _diagnostic_nonfinite_readings(
@@ -778,6 +916,7 @@ def make_rj45_training_env_type(
         residual_reward,
         residual_reward_components,
         reward_profile_metadata,
+        uses_legacy_reward_arithmetic,
         validate_reward_horizon_contract,
         validate_held_grasp_artifact,
     )
@@ -906,6 +1045,43 @@ def make_rj45_training_env_type(
             )
             self._training_warmup_forbidden_load_peak_n = torch.zeros(
                 self.num_envs, device=self.device
+            )
+            self._training_warmup_restage_retry_count = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_warmup_first_failure_seen = torch.zeros(
+                self.num_envs, dtype=torch.bool, device=self.device
+            )
+            self._training_warmup_retry_succeeded = torch.zeros_like(
+                self._training_warmup_first_failure_seen
+            )
+            self._training_warmup_total_steps = 0
+            self._training_warmup_retry_added_steps = 0
+            self._training_warmup_first_failure_count = 0
+            self._training_warmup_retry_success_count = 0
+            self._training_warmup_second_failure_count = 0
+            self._training_warmup_initialized_episode_count = 0
+            self._training_warmup_retry_first_events: list[dict[str, Any]] = []
+            self._training_warmup_retry_recent_events: list[dict[str, Any]] = []
+            self._training_warmup_retry_event_counts: dict[str, int] = {}
+            self._training_warmup_retry_omitted_event_count = 0
+            self._training_total_valid_policy_input_transitions = 0
+            self._training_episode_warmup_total_steps = torch.zeros(
+                self.num_envs, dtype=torch.long, device=self.device
+            )
+            self._training_episode_warmup_retry_added_steps = torch.zeros_like(
+                self._training_episode_warmup_total_steps
+            )
+            trace_steps = max(1, math.ceil(1.0 / self.step_dt))
+            self._training_warmup_trace_float = torch.full(
+                (self.num_envs, 2, trace_steps, 12),
+                float("nan"),
+                device=self.device,
+            )
+            self._training_warmup_trace_gates = torch.zeros(
+                (self.num_envs, 2, trace_steps, 9),
+                dtype=torch.bool,
+                device=self.device,
             )
             self._training_held_reset_stage_queued = torch.zeros(
                 self.num_envs, dtype=torch.bool, device=self.device
@@ -1806,7 +1982,7 @@ def make_rj45_training_env_type(
                 truncated,
                 self._training_config,
             )
-            if self._training_config.get("schema_version") == 1:
+            if uses_legacy_reward_arithmetic(self._training_config):
                 components["total"] = residual_reward(
                     self._training_previous_potential,
                     potential,
@@ -1886,6 +2062,146 @@ def make_rj45_training_env_type(
             self._training_previous_potential[:] = potential
             self._training_terminal_reward_emitted |= success | failed
             return components["total"]
+
+        def _record_held_warmup_trace(
+            self,
+            pending,
+            *,
+            finger_force_n,
+            joint_velocity_si,
+            joint_reference_error_si,
+            socket_com_velocity_world,
+            plug_com_velocity_world,
+            relative_linear_velocity_m_s,
+            relative_angular_velocity_rad_s,
+            insertion_load_n,
+            forbidden_load_n,
+            state_finite,
+            motion_finite,
+            motion_settled,
+            sensor_finite,
+            within_limits,
+            grip_live,
+            lift_left_ok,
+            lift_right_ok,
+            stable,
+        ) -> None:
+            env_ids = torch.nonzero(pending, as_tuple=False).squeeze(1)
+            if len(env_ids) == 0:
+                return
+            attempts = self._training_warmup_restage_retry_count[env_ids]
+            step_indices = self._training_warmup_steps[env_ids]
+            if torch.any(attempts > 1) or torch.any(
+                step_indices >= self._training_warmup_trace_float.shape[2]
+            ):
+                raise RuntimeError("held warmup trace index exceeds reviewed retry contract")
+            revolute = ~self._training_prismatic_joint_mask
+            prismatic = self._training_prismatic_joint_mask
+            values = torch.stack(
+                (
+                    torch.linalg.vector_norm(
+                        socket_com_velocity_world[:, 3:], dim=1
+                    ),
+                    torch.linalg.vector_norm(
+                        plug_com_velocity_world[:, 3:], dim=1
+                    ),
+                    torch.linalg.vector_norm(relative_linear_velocity_m_s, dim=1),
+                    torch.linalg.vector_norm(relative_angular_velocity_rad_s, dim=1),
+                    joint_velocity_si[:, revolute].abs().amax(dim=1),
+                    joint_velocity_si[:, prismatic].abs().amax(dim=1),
+                    joint_reference_error_si[:, revolute].abs().amax(dim=1),
+                    joint_reference_error_si[:, prismatic].abs().amax(dim=1),
+                    finger_force_n.amin(dim=1),
+                    finger_force_n.amax(dim=1),
+                    insertion_load_n,
+                    forbidden_load_n,
+                ),
+                dim=1,
+            )
+            gates = torch.stack(
+                (
+                    state_finite,
+                    motion_finite,
+                    motion_settled,
+                    sensor_finite,
+                    within_limits,
+                    grip_live,
+                    lift_left_ok,
+                    lift_right_ok,
+                    stable,
+                ),
+                dim=1,
+            )
+            self._training_warmup_trace_float[env_ids, attempts, step_indices] = (
+                values[env_ids]
+            )
+            self._training_warmup_trace_gates[env_ids, attempts, step_indices] = (
+                gates[env_ids]
+            )
+
+        def _held_warmup_trace_payloads_for(self, env_ids):
+            return _held_warmup_trace_payloads(
+                self._training_warmup_trace_float[env_ids],
+                self._training_warmup_trace_gates[env_ids],
+                retry_counts=self._training_warmup_restage_retry_count[env_ids],
+                warmup_steps=self._training_warmup_steps[env_ids],
+            )
+
+        def _retain_warmup_retry_event(self, event: dict[str, Any]) -> None:
+            self._training_warmup_retry_omitted_event_count = (
+                _retain_warmup_retry_event(
+                    self._training_warmup_retry_first_events,
+                    self._training_warmup_retry_recent_events,
+                    self._training_warmup_retry_event_counts,
+                    event,
+                    omitted_count=(
+                        self._training_warmup_retry_omitted_event_count
+                    ),
+                )
+            )
+
+        def _retry_held_warmup(self, retry_rows) -> None:
+            env_ids = torch.nonzero(retry_rows, as_tuple=False).squeeze(1)
+            if len(env_ids) == 0:
+                return
+            episode_index = self._training_episode_index[env_ids].clone()
+            translation_bias = self._training_translation_bias_entry[env_ids].clone()
+            rotation_bias = self._training_rotation_bias_entry[env_ids].clone()
+            grasp_indices = self._training_grasp_index
+            grasp_index = (
+                None
+                if grasp_indices is None
+                else grasp_indices[env_ids].clone()
+            )
+            self._restore_held_physical_state(env_ids)
+            self._queue_held_reset_stage(env_ids)
+            self._training_warmup_restage_retry_count[env_ids] += 1
+            self._training_warmup_steps[env_ids] = 0
+            self._training_warmup_stable_steps[env_ids] = 0
+            self._training_estimator_valid[env_ids] = False
+            self._training_held_initialization_passed[env_ids] = False
+            self._training_valid_policy_input_step_count[env_ids] = 0
+            self._training_previous_action[env_ids] = 0.0
+            self._training_applied_tip_offset_entry[env_ids] = 0.0
+            _reset_policy_input_telemetry(
+                env_ids,
+                self._training_last_policy_observation,
+                self._training_last_policy_observation_valid,
+                self._training_last_policy_observation_timestamp_s,
+            )
+            if not torch.equal(self._training_episode_index[env_ids], episode_index):
+                raise AssertionError("warmup retry changed episode identity")
+            if not torch.equal(
+                self._training_translation_bias_entry[env_ids], translation_bias
+            ) or not torch.equal(
+                self._training_rotation_bias_entry[env_ids], rotation_bias
+            ):
+                raise AssertionError("warmup retry changed calibration latent")
+            if grasp_index is not None and (
+                grasp_indices is None
+                or not torch.equal(grasp_indices[env_ids], grasp_index)
+            ):
+                raise AssertionError("warmup retry changed held grasp selection")
 
         def _held_warmup_check(self, pending) -> None:
             pending = pending & self._training_held_reset_stage_restored
@@ -1976,6 +2292,44 @@ def make_rj45_training_env_type(
                 & (lift_left >= self.cfg.grip_lift_proof_m)
                 & (lift_right >= self.cfg.grip_lift_proof_m)
             )
+            lift_left_ok = lift_left >= self.cfg.grip_lift_proof_m
+            lift_right_ok = lift_right >= self.cfg.grip_lift_proof_m
+            self._record_held_warmup_trace(
+                pending,
+                finger_force_n=finger_force_n,
+                joint_velocity_si=self.robot.data.joint_vel,
+                joint_reference_error_si=(
+                    self.robot.data.joint_pos - self._training_held_reference
+                ),
+                socket_com_velocity_world=self.socket.data.root_com_vel_w,
+                plug_com_velocity_world=self.plug.data.root_com_vel_w,
+                relative_linear_velocity_m_s=linear,
+                relative_angular_velocity_rad_s=angular,
+                insertion_load_n=self._last_insertion_contact_load_n,
+                forbidden_load_n=self._last_forbidden_contact_load_n,
+                state_finite=state_finite,
+                motion_finite=motion_finite,
+                motion_settled=motion_settled,
+                sensor_finite=sensor_finite,
+                within_limits=within_limits,
+                grip_live=grip_live,
+                lift_left_ok=lift_left_ok,
+                lift_right_ok=lift_right_ok,
+                stable=stable,
+            )
+            pending_count = int(pending.sum().item())
+            retry_pending_count = int(
+                (pending & (self._training_warmup_restage_retry_count > 0))
+                .sum()
+                .item()
+            )
+            self._training_warmup_total_steps += pending_count
+            self._training_warmup_retry_added_steps += retry_pending_count
+            self._training_episode_warmup_total_steps[pending] += 1
+            retry_pending = pending & (
+                self._training_warmup_restage_retry_count > 0
+            )
+            self._training_episode_warmup_retry_added_steps[retry_pending] += 1
             self._training_warmup_steps[pending] += 1
             self._training_warmup_stable_steps[pending] = torch.where(
                 stable[pending],
@@ -1991,6 +2345,43 @@ def make_rj45_training_env_type(
                 & (self._training_warmup_stable_steps >= required)
             )
             if torch.any(passed):
+                retry_passed = passed & (
+                    self._training_warmup_restage_retry_count > 0
+                )
+                self._training_warmup_retry_succeeded[retry_passed] = True
+                self._training_warmup_retry_success_count += int(
+                    retry_passed.sum().item()
+                )
+                self._training_warmup_initialized_episode_count += int(
+                    passed.sum().item()
+                )
+                for env_id in torch.nonzero(
+                    retry_passed, as_tuple=False
+                ).squeeze(1).detach().cpu().tolist():
+                    self._retain_warmup_retry_event(
+                        {
+                            "event": "retry_warmup_passed",
+                            "env_id": int(env_id),
+                            "episode_index": int(
+                                self._training_episode_index[env_id].item()
+                            ),
+                            "grasp_index": (
+                                None
+                                if self._training_grasp_index is None
+                                else int(
+                                    self._training_grasp_index[env_id].item()
+                                )
+                            ),
+                            "retry_count": int(
+                                self._training_warmup_restage_retry_count[
+                                    env_id
+                                ].item()
+                            ),
+                            "retry_attempt_warmup_control_steps": int(
+                                self._training_warmup_steps[env_id].item()
+                            ),
+                        }
+                    )
                 self._evaluation_success[passed] = False
                 self._evaluation_dwell_s[passed] = 0.0
                 self._success_since_step[passed] = -1
@@ -2068,9 +2459,107 @@ def make_rj45_training_env_type(
                         ),
                     },
                 )
-                raise HeldGraspWarmupTimeoutError(diagnostics)
+                timeout_env_ids = torch.nonzero(
+                    timed_out, as_tuple=False
+                ).squeeze(1)
+                timeout_trace_payloads = self._held_warmup_trace_payloads_for(
+                    timeout_env_ids
+                )
+                for environment, warmup_attempts in zip(
+                    diagnostics["environments"],
+                    timeout_trace_payloads,
+                    strict=True,
+                ):
+                    env_id = environment["env_id"]
+                    environment["identity"] = {
+                        "episode_index": int(
+                            self._training_episode_index[env_id].item()
+                        ),
+                        "grasp_index": (
+                            None
+                            if self._training_grasp_index is None
+                            else int(self._training_grasp_index[env_id].item())
+                        ),
+                        "calibration_bias_translation_entry_m": (
+                            self._training_translation_bias_entry[env_id]
+                            .detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                        "calibration_bias_rotation_vector_entry_rad": (
+                            self._training_rotation_bias_entry[env_id]
+                            .detach()
+                            .cpu()
+                            .tolist()
+                        ),
+                    }
+                    environment["warmup_attempts"] = warmup_attempts
+                retry_rows = _warmup_restage_retry_mask(
+                    timed_out,
+                    self._training_warmup_restage_retry_count,
+                    int(
+                        self._training_config[
+                            "held_warmup_restage_retry_limit"
+                        ]
+                    ),
+                    self._training_policy_activated,
+                )
+                for environment in diagnostics["environments"]:
+                    env_id = environment["env_id"]
+                    self._retain_warmup_retry_event(
+                        {
+                            "event": (
+                                "first_warmup_timeout_retry_scheduled"
+                                if bool(retry_rows[env_id].item())
+                                else "warmup_timeout_unrecoverable"
+                            ),
+                            **environment,
+                        }
+                    )
+                self._training_warmup_first_failure_seen[timed_out] = True
+                first_failures = timed_out & (
+                    self._training_warmup_restage_retry_count == 0
+                )
+                self._training_warmup_first_failure_count += int(
+                    first_failures.sum().item()
+                )
+                second_failures = timed_out & ~retry_rows & (
+                    self._training_warmup_restage_retry_count > 0
+                )
+                self._training_warmup_second_failure_count += int(
+                    second_failures.sum().item()
+                )
+                self.extras["rj45_held_warmup_failure"] = diagnostics
+                if torch.any(retry_rows):
+                    retry_environment_ids = (
+                        torch.nonzero(retry_rows, as_tuple=False)
+                        .squeeze(1)
+                        .detach()
+                        .cpu()
+                        .tolist()
+                    )
+                    diagnostics["retry_scheduled_environment_ids"] = [
+                        int(env_id) for env_id in retry_environment_ids
+                    ]
+                    self._retry_held_warmup(retry_rows)
+                unrecoverable = timed_out & ~retry_rows
+                if torch.any(unrecoverable):
+                    diagnostics["unrecoverable_environment_ids"] = [
+                        int(env_id)
+                        for env_id in torch.nonzero(
+                            unrecoverable, as_tuple=False
+                        )
+                        .squeeze(1)
+                        .detach()
+                        .cpu()
+                        .tolist()
+                    ]
+                    raise HeldGraspWarmupTimeoutError(diagnostics)
 
         def _count_policy_input_step(self):
+            self._training_total_valid_policy_input_transitions += int(
+                self._training_last_policy_observation_valid.sum().item()
+            )
             self._training_valid_policy_input_step_count.add_(
                 self._training_last_policy_observation_valid.to(dtype=torch.long)
             )
@@ -2106,6 +2595,22 @@ def make_rj45_training_env_type(
                 "training_estimator_valid": self._training_estimator_valid.clone(),
                 "training_policy_activated": (
                     self._training_policy_activated.clone()
+                ),
+                "held_warmup_restage_retry_count": (
+                    self._training_warmup_restage_retry_count.clone()
+                ),
+                "held_warmup_first_failure_seen": (
+                    self._training_warmup_first_failure_seen.clone()
+                ),
+                "held_warmup_retry_succeeded": (
+                    self._training_warmup_retry_succeeded.clone()
+                ),
+                "held_warmup_control_steps": self._training_warmup_steps.clone(),
+                "held_warmup_episode_total_control_steps": (
+                    self._training_episode_warmup_total_steps.clone()
+                ),
+                "held_warmup_episode_retry_added_control_steps": (
+                    self._training_episode_warmup_retry_added_steps.clone()
                 ),
                 "requested_expanded_residual_action": (
                     self._training_previous_action.clone()
@@ -2309,6 +2814,13 @@ def make_rj45_training_env_type(
             self._training_warmup_grip_force_peak_n[env_ids] = 0.0
             self._training_warmup_insertion_load_peak_n[env_ids] = 0.0
             self._training_warmup_forbidden_load_peak_n[env_ids] = 0.0
+            self._training_warmup_restage_retry_count[env_ids] = 0
+            self._training_warmup_first_failure_seen[env_ids] = False
+            self._training_warmup_retry_succeeded[env_ids] = False
+            self._training_episode_warmup_total_steps[env_ids] = 0
+            self._training_episode_warmup_retry_added_steps[env_ids] = 0
+            self._training_warmup_trace_float[env_ids] = float("nan")
+            self._training_warmup_trace_gates[env_ids] = False
             self._training_held_reset_validation_passed[env_ids] = False
             self._training_held_reset_validation_finger_force_n[env_ids] = 0.0
             self._training_held_reset_validation_raw_contact_count[env_ids] = 0
@@ -2460,6 +2972,103 @@ def make_rj45_training_env_type(
                     ),
                 },
                 "held_grasp_reset": self._training_held_state is not None,
+                "held_warmup_restage": {
+                    "retry_limit": int(
+                        self._training_config[
+                            "held_warmup_restage_retry_limit"
+                        ]
+                    ),
+                    "method": (
+                        "restore_recorded_state_then_contact_free_stage_then_"
+                        "validated_exact_recorded_state_restore"
+                    ),
+                    "normal_episode_reset_used_for_retry": False,
+                    "identity_preserved": [
+                        "episode_index",
+                        "held_grasp_index",
+                        "calibration_bias_translation_entry_m",
+                        "calibration_bias_rotation_vector_entry_rad",
+                    ],
+                    "total_warmup_control_steps": int(
+                        self._training_warmup_total_steps
+                    ),
+                    "retry_added_warmup_control_steps": int(
+                        self._training_warmup_retry_added_steps
+                    ),
+                    "initialization_passed_episodes": int(
+                        self._training_warmup_initialized_episode_count
+                    ),
+                    "first_failure_count": int(
+                        self._training_warmup_first_failure_count
+                    ),
+                    "retry_success_count": int(
+                        self._training_warmup_retry_success_count
+                    ),
+                    "second_failure_count": int(
+                        self._training_warmup_second_failure_count
+                    ),
+                    "current_retry_count_by_environment": (
+                        self._training_warmup_restage_retry_count.detach()
+                        .cpu()
+                        .tolist()
+                    ),
+                    "current_first_failure_seen_by_environment": (
+                        self._training_warmup_first_failure_seen.detach()
+                        .cpu()
+                        .tolist()
+                    ),
+                    "current_retry_succeeded_by_environment": (
+                        self._training_warmup_retry_succeeded.detach()
+                        .cpu()
+                        .tolist()
+                    ),
+                    "event_retention": {
+                        "policy": "full_first_32_and_full_recent_32",
+                        "first_limit": 32,
+                        "recent_limit": 32,
+                        "full_events_retained": (
+                            len(self._training_warmup_retry_first_events)
+                            + len(self._training_warmup_retry_recent_events)
+                        ),
+                        "middle_events_omitted": int(
+                            self._training_warmup_retry_omitted_event_count
+                        ),
+                        "total_events": int(
+                            sum(self._training_warmup_retry_event_counts.values())
+                        ),
+                        "aggregate_counts": dict(
+                            self._training_warmup_retry_event_counts
+                        ),
+                    },
+                    "events": [
+                        *self._training_warmup_retry_first_events,
+                        *self._training_warmup_retry_recent_events,
+                    ],
+                },
+                "policy_transition_exposure": {
+                    "valid_policy_input_transitions": int(
+                        self._training_total_valid_policy_input_transitions
+                    ),
+                    "warmup_control_steps": int(
+                        self._training_warmup_total_steps
+                    ),
+                    "valid_policy_transition_ratio_over_valid_plus_warmup": (
+                        int(self._training_total_valid_policy_input_transitions)
+                        /
+                        (
+                            int(self._training_total_valid_policy_input_transitions)
+                            + int(self._training_warmup_total_steps)
+                        )
+                        if (
+                            int(self._training_total_valid_policy_input_transitions)
+                            + int(self._training_warmup_total_steps)
+                        )
+                        else 0.0
+                    ),
+                    "ratio_denominator_definition": (
+                        "valid_policy_input_transitions_plus_held_warmup_control_steps"
+                    ),
+                },
                 "held_grasp_bank": (
                     None
                     if self._training_held_bank is None

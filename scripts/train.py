@@ -603,6 +603,9 @@ def main() -> int:
                 "action_mode": training_config["action_mode"],
                 "episode_scope": training_config["episode_scope"],
                 "warmup_s": training_config["warmup_s"],
+                "held_warmup_restage_retry_limit": training_config[
+                    "held_warmup_restage_retry_limit"
+                ],
                 "active_horizon_s": training_config["active_horizon_s"],
                 "estimator": "frozen_kinematic_grasp_estimator",
                 "calibration_bias": "episode_fixed_one_shot_se3",
@@ -666,6 +669,11 @@ def main() -> int:
                 parallel_video.close(completed=learning_completed)
         if load_finite_json(provenance_path) != lineage:
             raise RuntimeError("training provenance changed during the experiment")
+        if args.task == "rj45":
+            atomic_write_json(
+                log_dir / "training_runtime_report.json",
+                env.rj45_training_report(),
+            )
         for recorded_path, expected_sha256 in lineage["source_and_config_sha256"].items():
             evidence_path = Path(recorded_path)
             if not evidence_path.is_absolute():

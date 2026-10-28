@@ -85,6 +85,21 @@ def _close_simulation_app(simulation_app, exit_code: int) -> int:
     return exit_code
 
 
+def _runtime_training_report(env) -> dict[str, object] | None:
+    """Preserve runtime counters without masking the original collection error."""
+
+    if env is None:
+        return None
+    try:
+        return env.rj45_training_report()
+    except Exception as error:
+        return {
+            "report_available": False,
+            "error_type": type(error).__name__,
+            "error": str(error),
+        }
+
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--output", type=Path, required=True)
 parser.add_argument("--summary", type=Path)
@@ -288,6 +303,8 @@ def main() -> int:
                 ),
                 "terminal_valid": sum(episode.terminal_valid for episode in collector.episodes),
                 "inputs_reverified_at_end": True,
+                "rj45_training_report_scope": "all_environment_runtime_including_unaccepted_episodes",
+                "rj45_training_report": _runtime_training_report(env),
             },
         )
         return 0
@@ -304,6 +321,8 @@ def main() -> int:
                 ),
                 "error_type": type(error).__name__,
                 "error": str(error),
+                "rj45_training_report_scope": "all_environment_runtime_including_unaccepted_episodes",
+                "rj45_training_report": _runtime_training_report(env),
             },
         )
         raise

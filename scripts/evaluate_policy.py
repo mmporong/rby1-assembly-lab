@@ -189,6 +189,100 @@ def _environment_episode_is_within_quota(
     return accepted_counts[env_id] < quotas[env_id]
 
 
+def _accepted_held_initialization_summary(
+    episode_outcomes: list[dict[str, object]],
+) -> dict[str, object]:
+    """Summarize held initialization only across quota-accepted outcomes."""
+
+    initialization_passed = 0
+    first_timeout_episodes = 0
+    retry_episodes = 0
+    successful_retry_episodes = 0
+    warmup_steps = 0
+    retry_added_steps = 0
+    for outcome in episode_outcomes:
+        held_passed = outcome.get("held_initialization_passed")
+        first_timeout = outcome.get("held_warmup_first_failure_seen")
+        retry_succeeded = outcome.get("held_warmup_retry_succeeded")
+        if (
+            type(held_passed) is not bool
+            or type(first_timeout) is not bool
+            or type(retry_succeeded) is not bool
+        ):
+            raise ValueError("accepted held initialization flags must be booleans")
+        retry_count = outcome.get("held_warmup_restage_retry_count")
+        total_steps = outcome.get("held_warmup_episode_total_control_steps")
+        retry_steps = outcome.get(
+            "held_warmup_episode_retry_added_control_steps"
+        )
+        if type(retry_count) is not int or retry_count not in (0, 1):
+            raise ValueError("accepted held warmup retry count must be zero or one")
+        if (
+            type(total_steps) is not int
+            or total_steps < 0
+            or type(retry_steps) is not int
+            or retry_steps < 0
+            or retry_steps > total_steps
+        ):
+            raise ValueError("accepted held warmup step costs are invalid")
+        if retry_succeeded and retry_count != 1:
+            raise ValueError("successful held warmup retry requires retry count one")
+        initialization_passed += int(held_passed)
+        first_timeout_episodes += int(first_timeout)
+        retry_episodes += int(retry_count > 0)
+        successful_retry_episodes += int(retry_succeeded)
+        warmup_steps += total_steps
+        retry_added_steps += retry_steps
+    return {
+        "scope": "accepted_episode_outcomes_only",
+        "episode_denominator": len(episode_outcomes),
+        "initialization_passed": initialization_passed,
+        "episodes_with_first_warmup_timeout": first_timeout_episodes,
+        "episodes_with_retry": retry_episodes,
+        "episodes_with_successful_retry": successful_retry_episodes,
+        "warmup_control_steps": warmup_steps,
+        "retry_added_warmup_control_steps": retry_added_steps,
+    }
+
+
+def _held_initialization_report(
+    episode_outcomes: list[dict[str, object]],
+    runtime_warmup: dict[str, object],
+) -> dict[str, object]:
+    """Keep accepted task attempts separate from all executed environment work."""
+
+    accepted = _accepted_held_initialization_summary(episode_outcomes)
+    runtime_keys = (
+        "initialization_passed_episodes",
+        "first_failure_count",
+        "retry_success_count",
+        "second_failure_count",
+        "total_warmup_control_steps",
+        "retry_added_warmup_control_steps",
+    )
+    runtime_counts: dict[str, int] = {}
+    for key in runtime_keys:
+        value = runtime_warmup.get(key)
+        if type(value) is not int or value < 0:
+            raise ValueError(f"runtime held initialization {key} must be non-negative")
+        runtime_counts[key] = value
+    return {
+        **accepted,
+        "first_failure_count": accepted["episodes_with_first_warmup_timeout"],
+        "retry_success_count": accepted["episodes_with_successful_retry"],
+        "second_failure_count": 0,
+        "all_environment_runtime": {
+            "scope": "all_environment_runtime_until_evaluation_stop",
+            **runtime_counts,
+            "denominator_note": (
+                "includes every environment episode and warmup step executed, "
+                "including completions excluded by per-environment quota"
+            ),
+        },
+        "task_attempt_denominator_unchanged_by_initialization_retry": True,
+    }
+
+
 def _rj45_evaluation_inputs_reverified(
     evaluation_start: str,
     *,
@@ -271,11 +365,14 @@ def _rj45_terminal_attempt_evidence(snapshot, env_id: int) -> dict[str, object]:
     """Extract mandatory terminal state evidence for one environment."""
 
     evidence: dict[str, object] = {}
+    extracted_counts: dict[str, int] = {}
     for output_name, snapshot_key in (
         ("training_policy_activated", "training_policy_activated"),
         ("training_estimator_valid", "training_estimator_valid"),
         ("policy_input_valid", "policy_input_valid"),
         ("held_initialization_passed", "held_initialization_passed"),
+        ("held_warmup_first_failure_seen", "held_warmup_first_failure_seen"),
+        ("held_warmup_retry_succeeded", "held_warmup_retry_succeeded"),
     ):
         row_value = snapshot[snapshot_key][env_id]
         if row_value.numel() != 1 or type(row_value.item()) is not bool:
@@ -303,6 +400,34 @@ def _rj45_terminal_attempt_evidence(snapshot, env_id: int) -> dict[str, object]:
             "terminal evidence valid_policy_input_step_count must be a non-negative integer"
         )
     evidence["valid_policy_input_step_count"] = count_value.item()
+    for output_name, snapshot_key in (
+        ("held_warmup_restage_retry_count", "held_warmup_restage_retry_count"),
+        ("held_warmup_control_steps", "held_warmup_control_steps"),
+        (
+            "held_warmup_episode_total_control_steps",
+            "held_warmup_episode_total_control_steps",
+        ),
+        (
+            "held_warmup_episode_retry_added_control_steps",
+            "held_warmup_episode_retry_added_control_steps",
+        ),
+    ):
+        count_value = snapshot[snapshot_key][env_id]
+        if (
+            count_value.numel() != 1
+            or type(count_value.item()) is not int
+            or count_value.item() < 0
+        ):
+            raise ValueError(
+                f"terminal evidence {snapshot_key} must be a non-negative integer"
+            )
+        extracted_counts[output_name] = count_value.item()
+    evidence.update(extracted_counts)
+    if (
+        extracted_counts["held_warmup_episode_retry_added_control_steps"]
+        > extracted_counts["held_warmup_episode_total_control_steps"]
+    ):
+        raise ValueError("terminal held warmup retry cost exceeds total warmup cost")
     return evidence
 
 
@@ -922,6 +1047,9 @@ def main() -> int:
                 "action_mode": training_config["action_mode"],
                 "episode_scope": training_config["episode_scope"],
                 "warmup_s": training_config["warmup_s"],
+                "held_warmup_restage_retry_limit": training_config[
+                    "held_warmup_restage_retry_limit"
+                ],
                 "active_horizon_s": training_config["active_horizon_s"],
                 "estimator": "frozen_kinematic_grasp_estimator",
                 "calibration_bias": "episode_fixed_one_shot_se3",
@@ -1546,7 +1674,12 @@ def main() -> int:
         if hasattr(env, "rj45_task_report"):
             report["task_model"] = env.rj45_task_report()
         if hasattr(env, "rj45_training_report"):
-            report["training_environment"] = env.rj45_training_report()
+            training_environment = env.rj45_training_report()
+            report["training_environment"] = training_environment
+            warmup_report = training_environment["held_warmup_restage"]
+            report["held_initialization"] = _held_initialization_report(
+                episode_outcomes, warmup_report
+            )
         if hasattr(env, "rj45_support_ablation_report"):
             report["support_arm_ablation"] = env.rj45_support_ablation_report()
         if evaluation_video_evidence is not None:

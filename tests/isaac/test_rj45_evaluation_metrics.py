@@ -171,6 +171,12 @@ class Rj45TerminalEvidenceTests(unittest.TestCase):
             "training_estimator_valid": torch.tensor([True, True, False]),
             "policy_input_valid": torch.tensor([False, True, False]),
             "held_initialization_passed": torch.tensor([False, True, True]),
+            "held_warmup_first_failure_seen": torch.tensor([False, True, False]),
+            "held_warmup_retry_succeeded": torch.tensor([False, True, False]),
+            "held_warmup_restage_retry_count": torch.tensor([0, 1, 0]),
+            "held_warmup_control_steps": torch.tensor([0, 6, 6]),
+            "held_warmup_episode_total_control_steps": torch.tensor([0, 36, 6]),
+            "held_warmup_episode_retry_added_control_steps": torch.tensor([0, 6, 0]),
             "valid_policy_input_step_count": torch.tensor([0, 7, 3]),
             "controller_grip_proven": torch.tensor(
                 [[False, False], [True, False], [False, True]]
@@ -189,9 +195,15 @@ class Rj45TerminalEvidenceTests(unittest.TestCase):
                 "training_estimator_valid": True,
                 "policy_input_valid": True,
                 "held_initialization_passed": True,
+                "held_warmup_first_failure_seen": True,
+                "held_warmup_retry_succeeded": True,
                 "controller_grip_proven": [True, False],
                 "evaluation_grip_proven": [True, True],
                 "valid_policy_input_step_count": 7,
+                "held_warmup_restage_retry_count": 1,
+                "held_warmup_control_steps": 6,
+                "held_warmup_episode_total_control_steps": 36,
+                "held_warmup_episode_retry_added_control_steps": 6,
             },
         )
 
@@ -202,6 +214,12 @@ class Rj45TerminalEvidenceTests(unittest.TestCase):
             "training_estimator_valid": torch.tensor([True]),
             "policy_input_valid": torch.tensor([False]),
             "held_initialization_passed": torch.tensor([True]),
+            "held_warmup_first_failure_seen": torch.tensor([False]),
+            "held_warmup_retry_succeeded": torch.tensor([False]),
+            "held_warmup_restage_retry_count": torch.tensor([0]),
+            "held_warmup_control_steps": torch.tensor([6]),
+            "held_warmup_episode_total_control_steps": torch.tensor([6]),
+            "held_warmup_episode_retry_added_control_steps": torch.tensor([0]),
             "valid_policy_input_step_count": torch.tensor([1]),
             "controller_grip_proven": torch.tensor([[True, False]]),
             "grip_proven": torch.tensor([[True, True]]),
@@ -232,6 +250,12 @@ class Rj45TerminalEvidenceTests(unittest.TestCase):
             "training_estimator_valid": torch.tensor([False, True, True]),
             "policy_input_valid": torch.tensor([False, False, True]),
             "held_initialization_passed": torch.tensor([False, True, True]),
+            "held_warmup_first_failure_seen": torch.tensor([False, False, True]),
+            "held_warmup_retry_succeeded": torch.tensor([False, False, True]),
+            "held_warmup_restage_retry_count": torch.tensor([0, 0, 1]),
+            "held_warmup_control_steps": torch.tensor([0, 6, 6]),
+            "held_warmup_episode_total_control_steps": torch.tensor([0, 6, 36]),
+            "held_warmup_episode_retry_added_control_steps": torch.tensor([0, 0, 6]),
             "valid_policy_input_step_count": torch.tensor([0, 9, 2]),
             "controller_grip_proven": torch.tensor(
                 [[False, False], [False, True], [True, True]]
@@ -248,6 +272,110 @@ class Rj45TerminalEvidenceTests(unittest.TestCase):
         self.assertFalse(evidence["policy_input_valid"])
         self.assertEqual(evidence["controller_grip_proven"], [False, True])
         self.assertEqual(evidence["evaluation_grip_proven"], [False, False])
+
+
+class Rj45AcceptedInitializationSummaryTests(unittest.TestCase):
+    @staticmethod
+    def _accepted_outcomes():
+        return [
+            {
+                "held_initialization_passed": True,
+                "held_warmup_first_failure_seen": False,
+                "held_warmup_retry_succeeded": False,
+                "held_warmup_restage_retry_count": 0,
+                "held_warmup_episode_total_control_steps": 6,
+                "held_warmup_episode_retry_added_control_steps": 0,
+            },
+            {
+                "held_initialization_passed": True,
+                "held_warmup_first_failure_seen": True,
+                "held_warmup_retry_succeeded": True,
+                "held_warmup_restage_retry_count": 1,
+                "held_warmup_episode_total_control_steps": 37,
+                "held_warmup_episode_retry_added_control_steps": 7,
+            },
+        ]
+
+    def test_summarizes_only_accepted_episode_outcomes(self):
+        summarize = _compiled_function("_accepted_held_initialization_summary")
+
+        self.assertEqual(
+            summarize(self._accepted_outcomes()),
+            {
+                "scope": "accepted_episode_outcomes_only",
+                "episode_denominator": 2,
+                "initialization_passed": 2,
+                "episodes_with_first_warmup_timeout": 1,
+                "episodes_with_retry": 1,
+                "episodes_with_successful_retry": 1,
+                "warmup_control_steps": 43,
+                "retry_added_warmup_control_steps": 7,
+            },
+        )
+
+    def test_report_separates_accepted_counts_from_runtime_quota_excess(self):
+        summarize = _compiled_function("_accepted_held_initialization_summary")
+        tree = ast.parse(EVALUATE_POLICY_PATH.read_text(encoding="utf-8"))
+        function = next(
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef)
+            and node.name == "_held_initialization_report"
+        )
+        namespace = {"_accepted_held_initialization_summary": summarize}
+        exec(
+            compile(
+                ast.fix_missing_locations(ast.Module(body=[function], type_ignores=[])),
+                EVALUATE_POLICY_PATH,
+                "exec",
+            ),
+            namespace,
+        )
+        report = namespace["_held_initialization_report"](
+            self._accepted_outcomes(),
+            {
+                "initialization_passed_episodes": 5,
+                "first_failure_count": 3,
+                "retry_success_count": 2,
+                "second_failure_count": 1,
+                "total_warmup_control_steps": 120,
+                "retry_added_warmup_control_steps": 28,
+            },
+        )
+
+        self.assertEqual(report["episode_denominator"], 2)
+        self.assertEqual(report["first_failure_count"], 1)
+        self.assertEqual(report["retry_success_count"], 1)
+        self.assertEqual(report["second_failure_count"], 0)
+        self.assertEqual(report["warmup_control_steps"], 43)
+        self.assertEqual(
+            report["all_environment_runtime"]["initialization_passed_episodes"],
+            5,
+        )
+        self.assertEqual(
+            report["all_environment_runtime"]["total_warmup_control_steps"],
+            120,
+        )
+
+    def test_rejects_missing_or_malformed_accepted_cost_fields(self):
+        summarize = _compiled_function("_accepted_held_initialization_summary")
+        base = {
+            "held_initialization_passed": True,
+            "held_warmup_first_failure_seen": False,
+            "held_warmup_retry_succeeded": False,
+            "held_warmup_restage_retry_count": 0,
+            "held_warmup_episode_total_control_steps": 6,
+            "held_warmup_episode_retry_added_control_steps": 0,
+        }
+        for key, value in (
+            ("held_warmup_episode_total_control_steps", -1),
+            ("held_warmup_episode_retry_added_control_steps", True),
+            ("held_warmup_restage_retry_count", 2),
+        ):
+            damaged = dict(base)
+            damaged[key] = value
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                summarize([damaged])
 
 
 class Rj45StartContractTests(unittest.TestCase):

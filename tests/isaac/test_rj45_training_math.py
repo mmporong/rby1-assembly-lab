@@ -16,15 +16,24 @@ from rby1_assembly.rj45_training import (
     configure_actor_output_initialization,
     expand_residual_actions,
     keypoint_insertion_potential,
+    insertion_potential,
     load_training_config,
     normalized_insertion_potential,
     residual_reward,
     residual_reward_components,
+    policy_observation_dimension,
+    reward_profile_metadata,
+    uses_legacy_reward_arithmetic,
+    validate_reward_horizon_contract,
 )
 
 
 ROOT = Path(__file__).resolve().parents[2]
 A2_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-a2-keypoint-shape-v2.json"
+BASELINE_CONFIG_PATH = ROOT / "configs/rj45-training-target-offset-v1.json"
+RESTAGE_CONFIG_PATH = (
+    ROOT / "configs/rj45-training-target-offset-warmup-restage-retry1-v3.json"
+)
 
 
 def load_a2_with_current_task_pin():
@@ -55,6 +64,95 @@ def config():
 
 
 class Rj45TrainingMathTests(unittest.TestCase):
+    def test_retry_only_schema_matches_v1_observation_reward_and_horizon_outputs(self):
+        baseline = load_training_config(BASELINE_CONFIG_PATH)
+        retry = load_training_config(RESTAGE_CONFIG_PATH)
+        self.assertTrue(uses_legacy_reward_arithmetic(baseline))
+        self.assertTrue(uses_legacy_reward_arithmetic(retry))
+        self.assertEqual(
+            policy_observation_dimension(baseline),
+            policy_observation_dimension(retry),
+        )
+        self.assertEqual(
+            reward_profile_metadata(baseline), reward_profile_metadata(retry)
+        )
+        for finite_horizon in (False, True):
+            validate_reward_horizon_contract(
+                baseline, is_finite_horizon=finite_horizon
+            )
+            validate_reward_horizon_contract(
+                retry, is_finite_horizon=finite_horizon
+            )
+
+        torch.manual_seed(20261028)
+        observation = torch.randn((7, 79), dtype=torch.float64)
+        translation_bias = torch.randn((7, 3), dtype=torch.float64) * 1.0e-4
+        rotation_bias = torch.randn((7, 3), dtype=torch.float64) * 1.0e-3
+        baseline_observation = append_persistent_calibration_bias_diagnostic(
+            observation,
+            translation_bias,
+            rotation_bias,
+            translation_max_m=baseline["calibration_bias"][
+                "translation_levels_m"
+            ][0],
+            rotation_max_rad=baseline["calibration_bias"][
+                "rotation_max_levels_rad"
+            ][0],
+            mode=baseline["diagnostic_observation_mode"],
+        )
+        retry_observation = append_persistent_calibration_bias_diagnostic(
+            observation,
+            translation_bias,
+            rotation_bias,
+            translation_max_m=retry["calibration_bias"][
+                "translation_levels_m"
+            ][0],
+            rotation_max_rad=retry["calibration_bias"][
+                "rotation_max_levels_rad"
+            ][0],
+            mode=retry["diagnostic_observation_mode"],
+        )
+        self.assertTrue(torch.equal(baseline_observation, retry_observation))
+
+        previous = torch.randn(7, dtype=torch.float64)
+        following = torch.randn(7, dtype=torch.float64)
+        force = torch.randn((7, 3), dtype=torch.float64)
+        delta = torch.randn((7, 6), dtype=torch.float64)
+        active = torch.tensor([True, False, True, True, False, True, False])
+        success = torch.tensor([False, False, True, False, False, False, False])
+        failed = torch.tensor([False, True, False, False, False, True, False])
+        baseline_reward = residual_reward(
+            previous,
+            following,
+            force,
+            delta,
+            active,
+            success,
+            failed,
+            baseline,
+        )
+        retry_reward = residual_reward(
+            previous,
+            following,
+            force,
+            delta,
+            active,
+            success,
+            failed,
+            retry,
+        )
+        self.assertTrue(torch.equal(baseline_reward, retry_reward))
+
+        position = torch.randn((7, 3), dtype=torch.float64) * 1.0e-3
+        quaternion = torch.zeros((7, 4), dtype=torch.float64)
+        quaternion[:, 0] = 1.0
+        self.assertTrue(
+            torch.equal(
+                insertion_potential(position, quaternion, baseline),
+                insertion_potential(position, quaternion, retry),
+            )
+        )
+
     def test_zero_actor_output_initialization_is_explicit_and_mean_only(self):
         torch.manual_seed(20261027)
         actor = torch.nn.Sequential(
