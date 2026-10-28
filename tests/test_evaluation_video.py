@@ -1,6 +1,7 @@
 import ast
 import json
 from pathlib import Path
+import sys
 import tempfile
 import types
 
@@ -9,10 +10,45 @@ import torch
 
 from scripts.rj45_evaluation_video import (
     EvaluationVideoRecorder,
+    _evaluator_orientation_error,
     evaluation_video_capture_plan,
     selected_environment_camera,
     validate_evaluation_video_request,
 )
+
+
+@pytest.fixture(autouse=True)
+def fake_isaaclab_quat_error(monkeypatch):
+    calls = []
+
+    def quat_error_magnitude(q1, q2):
+        calls.append((q1.clone(), q2.clone()))
+        q1 = torch.nn.functional.normalize(q1, dim=-1)
+        q2 = torch.nn.functional.normalize(q2, dim=-1)
+        q2_conjugate = q2.clone()
+        q2_conjugate[..., 1:] *= -1.0
+        w1, xyz1 = q1[..., :1], q1[..., 1:]
+        w2, xyz2 = q2_conjugate[..., :1], q2_conjugate[..., 1:]
+        relative_w = w1 * w2 - (xyz1 * xyz2).sum(dim=-1, keepdim=True)
+        relative_xyz = w1 * xyz2 + w2 * xyz1 + torch.linalg.cross(xyz1, xyz2)
+        sign = torch.where(relative_w < 0.0, -1.0, 1.0)
+        relative_w = relative_w * sign
+        relative_xyz = relative_xyz * sign
+        return 2.0 * torch.atan2(
+            torch.linalg.vector_norm(relative_xyz, dim=-1),
+            relative_w.squeeze(-1),
+        )
+
+    isaaclab_module = types.ModuleType("isaaclab")
+    utils_module = types.ModuleType("isaaclab.utils")
+    math_module = types.ModuleType("isaaclab.utils.math")
+    setattr(math_module, "quat_error_magnitude", quat_error_magnitude)
+    setattr(isaaclab_module, "utils", utils_module)
+    setattr(utils_module, "math", math_module)
+    monkeypatch.setitem(sys.modules, "isaaclab", isaaclab_module)
+    monkeypatch.setitem(sys.modules, "isaaclab.utils", utils_module)
+    monkeypatch.setitem(sys.modules, "isaaclab.utils.math", math_module)
+    return calls
 
 
 class FakeSim:
@@ -80,6 +116,34 @@ class FakeEnv:
     def _relative_object_pose(self):
         return self.position, self.quaternion
 
+    def _identity_quat(self):
+        identity = torch.zeros_like(self.quaternion)
+        identity[:, 0] = 1.0
+        return identity
+
+
+@pytest.mark.parametrize(
+    ("quaternion", "expected"),
+    (
+        ([1.0, 0.0, 0.0, 0.0], 0.0),
+        ([-1.0, 0.0, 0.0, 0.0], 0.0),
+        ([0.999999875, 0.0005, 0.0, 0.0], 0.001),
+        ([-0.999999875, -0.0005, 0.0, 0.0], 0.001),
+        ([0.9238795325, 0.0, 0.3826834324, 0.0], torch.pi / 4.0),
+    ),
+)
+def test_orientation_error_reuses_evaluator_quaternion_api(
+    fake_isaaclab_quat_error, quaternion, expected
+):
+    relative = torch.tensor([quaternion], dtype=torch.float64)
+    identity = torch.tensor([[1.0, 0.0, 0.0, 0.0]], dtype=torch.float64)
+    result = _evaluator_orientation_error(relative, identity)
+
+    assert result.item() == pytest.approx(float(expected), abs=1.0e-9)
+    assert len(fake_isaaclab_quat_error) == 1
+    torch.testing.assert_close(fake_isaaclab_quat_error[0][0], relative)
+    torch.testing.assert_close(fake_isaaclab_quat_error[0][1], identity)
+
 
 def extras(*, success=True, episode_index=0):
     return {
@@ -91,6 +155,24 @@ def extras(*, success=True, episode_index=0):
         "terminal_snapshot": {
             "episode_index": torch.tensor([episode_index, 0]),
             "timestamp_s": torch.tensor([1.0 / 30.0, 1.0 / 30.0]),
+            "policy_input_observation": torch.arange(
+                158, dtype=torch.float64
+            ).reshape(2, 79),
+            "policy_input_timestamp_s": torch.tensor(
+                [0.0, 0.0], dtype=torch.float64
+            ),
+            "policy_input_valid": torch.tensor([True, False]),
+            "requested_expanded_residual_action": torch.arange(
+                24, dtype=torch.float64
+            ).reshape(2, 12),
+            "applied_bounded_residual_action": torch.arange(
+                24, dtype=torch.float64
+            ).reshape(2, 12)
+            / 10.0,
+            "applied_tip_target_offset_entry_6d": torch.arange(
+                12, dtype=torch.float64
+            ).reshape(2, 6)
+            / 100.0,
             "actual_depth_m": torch.tensor([0.01, 0.002]),
             "actual_lateral_error_m": torch.tensor([0.0, 0.001]),
             "actual_orientation_error_rad": torch.tensor([0.0, 0.02]),
@@ -235,6 +317,16 @@ def test_real_step_cadence_stops_at_initial_episode_terminal_without_reset_frame
         assert rows[1]["time_since_policy_input_s"] == pytest.approx(1.0 / 30.0)
         assert rows[1]["policy_input_valid"] is True
         assert rows[1]["policy_lineage_sha256"] == evidence["policy_lineage_sha256"]
+        assert rows[0]["control_step_snapshot"] == rows[1]["control_step_snapshot"]
+        step_snapshot = rows[1]["control_step_snapshot"]
+        assert len(step_snapshot["policy_input_observation"]) == 79
+        assert len(step_snapshot["requested_expanded_residual_action"]) == 12
+        assert len(step_snapshot["applied_bounded_residual_action"]) == 12
+        assert len(step_snapshot["applied_tip_target_offset_entry_6d"]) == 6
+        assert step_snapshot["policy_input_timestamp_s"] == 0.0
+        assert step_snapshot["policy_input_valid"] is True
+        assert "control-step start" in step_snapshot["timing_contract"]
+        assert "control-step end" in step_snapshot["timing_contract"]
         torch.testing.assert_close(env._phase, state_before["phase"])
         torch.testing.assert_close(env.position, state_before["position"])
         torch.testing.assert_close(
@@ -329,6 +421,114 @@ def test_terminal_snapshot_must_match_last_pre_autoreset_frame(mismatch):
         else:
             terminal["terminal_snapshot"]["timestamp_s"][0] = 0.1
             message = "terminal timestamp"
+        with pytest.raises(RuntimeError, match=message):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("policy_input_observation", torch.zeros((2, 78)), "shape \\(79,\\)"),
+        ("requested_expanded_residual_action", torch.zeros((2, 11)), "shape \\(12,\\)"),
+        ("applied_bounded_residual_action", torch.zeros((2, 13)), "shape \\(12,\\)"),
+        ("applied_tip_target_offset_entry_6d", torch.zeros((2, 5)), "shape \\(6,\\)"),
+    ),
+)
+def test_control_step_snapshot_rejects_wrong_vector_shape(field, value, message):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        terminal["terminal_snapshot"][field] = value
+        with pytest.raises(RuntimeError, match=message):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "policy_input_observation",
+        "requested_expanded_residual_action",
+        "applied_bounded_residual_action",
+        "applied_tip_target_offset_entry_6d",
+    ),
+)
+def test_control_step_snapshot_rejects_nonfinite_vector(field):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        terminal["terminal_snapshot"][field][0, 0] = float("nan")
+        with pytest.raises(RuntimeError, match=f"{field} must be finite"):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    "field",
+    (
+        "policy_input_observation",
+        "policy_input_timestamp_s",
+        "policy_input_valid",
+        "requested_expanded_residual_action",
+        "applied_bounded_residual_action",
+        "applied_tip_target_offset_entry_6d",
+    ),
+)
+def test_control_step_snapshot_rejects_missing_field(field):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        del terminal["terminal_snapshot"][field]
+        with pytest.raises(RuntimeError, match=field):
+            video.finalize_control_step(terminal, torch.tensor([True, False]))
+        video.close(rollout_completed=False)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    (
+        ("policy_input_timestamp_s", float("nan"), "does not match"),
+        ("policy_input_timestamp_s", 1.0, "does not match"),
+        ("policy_input_valid", 1, "must be boolean"),
+    ),
+)
+def test_control_step_snapshot_rejects_invalid_scalar(field, value, message):
+    with tempfile.TemporaryDirectory() as directory:
+        env = FakeEnv()
+        video = recorder(directory, env, [])
+        video.initialize()
+        with video.control_step():
+            for physics_step in (4, 8):
+                env._sim_step_counter = physics_step
+                env.sim.step = physics_step
+                env.sim.render()
+        terminal = extras()
+        if field == "policy_input_valid":
+            terminal["terminal_snapshot"][field] = torch.tensor([value, 0])
+        else:
+            terminal["terminal_snapshot"][field][0] = value
         with pytest.raises(RuntimeError, match=message):
             video.finalize_control_step(terminal, torch.tensor([True, False]))
         video.close(rollout_completed=False)

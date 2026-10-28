@@ -121,6 +121,14 @@ def _scalar(value: Any, env_index: int) -> Any:
     return selected.item()
 
 
+def _evaluator_orientation_error(relative_quaternion: Any, identity_quaternion: Any) -> Any:
+    from isaaclab.utils.math import (  # pyright: ignore[reportMissingImports]
+        quat_error_magnitude,
+    )
+
+    return quat_error_magnitude(relative_quaternion, identity_quaternion)
+
+
 class EvaluationVideoRecorder:
     """Capture the initial evaluation episode without changing state or actions."""
 
@@ -278,18 +286,10 @@ class EvaluationVideoRecorder:
         lateral = float(
             relative_position[self.env_index, (0, 2)].norm().detach().cpu().item()
         )
-        angle = float(
-            (
-                2.0
-                * relative_quaternion[self.env_index, 0]
-                .abs()
-                .clamp(max=1.0)
-                .acos()
-            )
-            .detach()
-            .cpu()
-            .item()
+        orientation_error = _evaluator_orientation_error(
+            relative_quaternion, self.env._identity_quat()
         )
+        angle = float(_scalar(orientation_error, self.env_index))
         physics_step = int(self.env._sim_step_counter)
         phase = int(_scalar(self.env._phase, self.env_index))
         if physics_step <= self._step_entry_physics_step:
@@ -411,12 +411,14 @@ class EvaluationVideoRecorder:
         phase_names = snapshot.get("phase_name_by_code")
         if not isinstance(phase_names, dict):
             raise RuntimeError("evaluation video requires phase names")
+        control_step_snapshot = self._control_step_snapshot(snapshot)
         if terminal:
             self._validate_terminal_snapshot(snapshot)
         last_pre_autoreset_frame = dict(self._pending_frames[-1])
         assert self._frames_file is not None
         for index, pending in enumerate(self._pending_frames):
             pending["phase_name"] = phase_names.get(pending["phase"], "unknown")
+            pending["control_step_snapshot"] = control_step_snapshot
             pending["terminal_observed_after_control_step"] = bool(
                 terminal and index == len(self._pending_frames) - 1
             )
@@ -484,6 +486,73 @@ class EvaluationVideoRecorder:
             self._stop_capture("selected_environment_initial_episode_terminal")
         elif self._written_frames == int(self.plan["frame_limit"]):
             self._stop_capture("maximum_duration_reached_before_terminal")
+
+    def _control_step_snapshot(self, snapshot: dict[str, Any]) -> dict[str, Any]:
+        def vector(name: str, size: int) -> list[float]:
+            value = snapshot.get(name)
+            if value is None:
+                raise RuntimeError(f"evaluation video requires terminal_snapshot.{name}")
+            selected = value[self.env_index]
+            if hasattr(selected, "detach"):
+                selected = selected.detach().clone().cpu()
+            if getattr(selected, "shape", None) != (size,):
+                raise RuntimeError(
+                    f"terminal_snapshot.{name} must have selected shape ({size},)"
+                )
+            result = [float(item) for item in selected.tolist()]
+            if not all(math.isfinite(item) for item in result):
+                raise RuntimeError(f"terminal_snapshot.{name} must be finite")
+            return result
+
+        timestamp_value = snapshot.get("policy_input_timestamp_s")
+        if timestamp_value is None:
+            raise RuntimeError(
+                "evaluation video requires terminal_snapshot.policy_input_timestamp_s"
+            )
+        timestamp = float(_scalar(timestamp_value, self.env_index))
+        timestamp_tolerance_s = max(
+            1.0e-8, abs(self._step_policy_input_timestamp_s) * 2.0**-23
+        )
+        if (
+            not math.isfinite(timestamp)
+            or timestamp < 0.0
+            or not math.isclose(
+                timestamp,
+                self._step_policy_input_timestamp_s,
+                rel_tol=0.0,
+                abs_tol=timestamp_tolerance_s,
+            )
+        ):
+            raise RuntimeError(
+                "terminal_snapshot.policy_input_timestamp_s does not match the control-step input"
+            )
+        policy_input_valid_value = snapshot.get("policy_input_valid")
+        if policy_input_valid_value is None:
+            raise RuntimeError(
+                "evaluation video requires terminal_snapshot.policy_input_valid"
+            )
+        policy_input_valid = _scalar(policy_input_valid_value, self.env_index)
+        if type(policy_input_valid) is not bool:
+            raise RuntimeError("terminal_snapshot.policy_input_valid must be boolean")
+        return {
+            "policy_input_observation": vector("policy_input_observation", 79),
+            "policy_input_timestamp_s": timestamp,
+            "policy_input_valid": policy_input_valid,
+            "requested_expanded_residual_action": vector(
+                "requested_expanded_residual_action", 12
+            ),
+            "applied_bounded_residual_action": vector(
+                "applied_bounded_residual_action", 12
+            ),
+            "applied_tip_target_offset_entry_6d": vector(
+                "applied_tip_target_offset_entry_6d", 6
+            ),
+            "timing_contract": (
+                "policy input is cached at control-step start; requested and bounded "
+                "actions apply during that control step; applied target is recorded at "
+                "control-step end"
+            ),
+        }
 
     def _validate_terminal_snapshot(self, snapshot: dict[str, Any]) -> None:
         last = self._pending_frames[-1]
