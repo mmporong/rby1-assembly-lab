@@ -297,13 +297,15 @@ def test_plan_is_native_240hz_stride4_and_two_frames_per_control_step():
             fps=60,
             max_seconds=40.1,
         )
-    with pytest.raises(ValueError, match="terminal margin"):
-        evaluation_video_capture_plan(
-            physics_dt_s=1.0 / 240.0,
-            control_decimation=8,
-            fps=60,
-            max_seconds=40.0,
-        )
+    cadence_preflight_plan = evaluation_video_capture_plan(
+        physics_dt_s=1.0 / 240.0,
+        control_decimation=8,
+        fps=60,
+        max_seconds=40.0,
+    )
+    assert cadence_preflight_plan["frame_limit"] == 2400
+    assert cadence_preflight_plan["terminal_margin_control_steps"] == 0
+    assert cadence_preflight_plan["terminal_margin_frames"] == 0
 
 
 def test_held_initialization_budget_uses_warmup_and_staging_contract():

@@ -72,14 +72,13 @@ def evaluation_video_capture_plan(
         raise ValueError("evaluation video duration is shorter than one control step")
     hard_frame_limit = math.floor(40.0 * fps)
     hard_frame_limit -= hard_frame_limit % frames_per_control
-    terminal_margin_frames = frames_per_control
-    if requested_frame_limit + terminal_margin_frames > hard_frame_limit:
-        raise ValueError(
-            "evaluation video requested duration leaves no terminal margin under "
-            "the 40-second hard cap"
-        )
+    terminal_margin_frames = min(
+        frames_per_control, hard_frame_limit - requested_frame_limit
+    )
     if warmup_budget_control_steps is None:
-        warmup_budget_frames = hard_frame_limit - requested_frame_limit - frames_per_control
+        warmup_budget_frames = (
+            hard_frame_limit - requested_frame_limit - terminal_margin_frames
+        )
         if warmup_budget_frames < 0:
             raise ValueError("evaluation video requested duration exceeds the hard cap")
     else:
@@ -110,7 +109,9 @@ def evaluation_video_capture_plan(
         ),
         "warmup_budget_frames": applied_warmup_budget_frames,
         "warmup_budget_seconds": applied_warmup_budget_frames / fps,
-        "terminal_margin_control_steps": 1,
+        "terminal_margin_control_steps": (
+            terminal_margin_frames // frames_per_control
+        ),
         "terminal_margin_frames": terminal_margin_frames,
         "terminal_margin_seconds": terminal_margin_frames / fps,
         "frame_limit": frame_limit,
