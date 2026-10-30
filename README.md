@@ -16,13 +16,15 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 | 4개 설정의 96-update 개발 비교 | 기준 제어 7/32, Z1 7/32, F 11/32, N 10/32, R 9/32 | 완료. 사전 규칙으로 F를 후속 후보로 골랐다. [요약](docs/evidence/rj45-refinement-20261028/scale-results/refinement-summary.json) |
 | F의 새 seed 3개, 200 update | 7/32, 10/32, 8/32 | 완료. 평균 8.33/32로 승격 기준 10/32에 못 미쳤다. 최종 조건은 열지 않고 봉인했다. [결과](docs/evidence/rj45-refinement-20261028/scale-results/f-followup-summary.json) · [독립 검증](docs/evidence/rj45-refinement-20261028/scale-results/independent-audit.json) |
 | generation v2 물리 파지 | 후보 20개를 평가해 train 8개·dev 2개·final 2개 선정 | 완료. 선정된 12개 사이의 66쌍이 최소 병진 거리 0.25 mm를 통과했다. 정책 성능은 선정에 쓰지 않았다. [선정 결과](docs/evidence/rj45-demonstrations-20261028/generation-v2-bank-results/README.md) |
-| 교사 시연과 BC 초기화 | train 256회·dev 64회 독립 성공, BC dev MSE `5.7879e-6` | 완료. 교사는 정답 상태를 쓰며 학생 입력은 79D로 제한한다. 교사 성공과 BC의 예측 오차는 정책의 물리 성공률과 구분한다. [데이터·학습 결과](docs/evidence/rj45-demonstrations-20261028/teacher-bc-results/README.md) |
+| 참조 제어기 시연과 BC 초기화 | train 256회·dev 64회 독립 성공, BC dev MSE `5.7879e-6` | 완료. 참조 제어기는 정답 상태를 쓰며 학습 정책 입력은 79D로 제한한다. 참조 제어기 성공과 BC의 예측 오차는 정책의 물리 성공률과 구분한다. [데이터·학습 결과](docs/evidence/rj45-demonstrations-20261028/teacher-bc-results/README.md) |
 | BC-only 물리 평가 | 기본 평가 12/64, 앞선 같은 계약 평가 8/64; 기준 제어 38/64 | 완료. BC가 기준 제어보다 낮았고 실행 간 차이도 관찰됐다. [폐루프 진단](docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md) |
 | 첫 PPO와 BC 초기화 PPO 비교 | PPO 200 update는 32/64·27/64·31/64, BC 초기화 PPO는 중단 | BC 학습 중 파지 초기화 검사가 실패했다. 비교를 완료한 결과로 사용하지 않으며 복구 검증을 진행한다. [중단 기록](docs/evidence/rj45-demonstrations-20261028/paired-first-attempt/README.md) |
 | BC 안정화 실패 분석 | 선택된 BC 두 실행에서 자세 조건을 통과한 141개·31개 제어 시점 모두 속도 조건 위반 | 완료. 기준 제어의 같은 env54 사례는 0.4초 안정 유지 후 성공했다. 프레임 중복을 제거한 진단이며 전체 실패율이나 원인 확정으로 해석하지 않는다. [재현 분석](docs/evidence/rj45-stability-diagnosis-20261030/README.md) · [성공 1편·실패 2편과 동기 측정값](docs/evidence/rj45-demonstrations-20261028/policy-media/README.md) |
 | 고정 train 조건의 CPU 회귀 진단 | 유효 395행·2,000 step, 평균 행동 기준 대비 MSE 비율 `0.9929` | 완료. zero 행동 대비 오차 감소만으로는 상태에 따른 행동 학습을 입증할 수 없었다. 폐루프·강화학습·일반화 검증은 남아 있다. [입력 계보](docs/evidence/rj45-train-condition-probe-20261030/input-manifest.json) · [축별 오차와 평균 행동 대조](docs/evidence/rj45-train-condition-probe-20261030/fit-result.json) |
-| 전체 train 시연의 행동 예측 대조 | 95,826행에서 직전 교사 행동 복사 대비 BC의 MSE 감소 약 2.34% | 완료. BC는 전체 평균 행동보다 오차가 작았다. 교사가 실행한 이력의 사후 분석이므로 학생의 폐루프 성능이나 실패 원인의 증명은 아니다. [기준선·계보·재현](docs/evidence/rj45-teacher-forced-baselines-20261030/README.md) |
+| 전체 train 시연의 행동 예측 대조 | 95,826행에서 직전 참조 제어기 행동 복사 대비 BC의 MSE 감소 약 2.34% | 완료. BC는 전체 평균 행동보다 오차가 작았다. 참조 제어기가 실행한 이력의 사후 분석이므로 학습 정책의 폐루프 성능이나 실패 원인의 증명은 아니다. [기준선·계보·재현](docs/evidence/rj45-teacher-forced-baselines-20261030/README.md) |
 | 고정 train 조건의 학습률 비교 | 학습률 `1e-3`·`1e-4` 모두 평균 행동 기준과 오차가 비슷했다. | 완료. 같은 런타임·초기 actor·입력에서 학습률만 바꿨다. 낮춘 학습률은 사전 진단 기준에 미달했다. [프로토콜·수치·해석](docs/evidence/rj45-g2-optimizer-probe-20261030/README.md) |
+| 고정 train 조건의 축별 손실 비교 | 축별 손실 조정으로 같은 조건의 비가중 손실 대비 MSE 약 6.9% 감소 | 완료. 상수 평균 대비 MSE 비율 `0.9180`, 축 균형 MSE `0.9298`로 사전 기준 `0.90`에 못 미쳤다. 동일 궤적의 회귀 결과이며 물리 성공률·PPO 개선은 미입증이다. [기준 재현·축별 수치·실행 기록](docs/evidence/rj45-g2-axis-scaling-20261030/README.md) |
+| 고정 train 조건의 입력 표준화 | 축별 가중 손실을 유지하고 입력만 표준화했을 때 같은 궤적의 MSE 약 84.1% 감소 | 오프라인 진단 기준 통과. 이전 명령 입력 제거 시 MSE가 2.18배로 증가했고, 상대 자세 입력의 기여는 판단을 보류했다. 폐루프 삽입과 PPO 기여 검증은 남아 있다. [입력 통계·대조 실험·체크포인트 검증](docs/evidence/rj45-g2-input-normalization-20261030/README.md) |
 
 현재 PPO의 추가 개선 효과는 입증하지 못했다. 다음 실험은 기준 제어·BC-only·PPO-only·같은 BC에서 시작한 PPO를 비교해 시연과 강화학습의 효과를 구분한다. 정책은 삽입 단계의 오른손 6차원 목표 보정을 결정하며, 지지팔과 삽입 진행·중단·복구는 스크립트가 담당한다. 작은 train 조건의 폐루프 진단을 통과한 뒤 다중 seed 비교를 수행한다. 데이터 분리와 판정 기준은 [강화학습 기여 검증 계획](docs/rj45-rl-contribution-plan.md)에 있다.
 
@@ -122,6 +124,6 @@ RJ45 잔차 학습 환경은 검증된 파지 상태를 초기화 때 복원하�
 
 초기 79D·85D 단일 seed 실험과 논문 기반 예비 비교는 현재 결과를 만들기 전의 개발 기록이다. 수치와 원본 해시는 [강화학습 연구·실험 문서](docs/rj45-rl-research.md), [관측 방식 비교 자료](docs/media/rj45/target-offset42-observation-comparison-data.json), [과거 장기 결과](docs/evidence/rj45-paper-ablation/long-results/manifest.json)에 보존했다. 현재 판단에는 위의 `현재 결과` 표와 [규모 확대 결과](docs/evidence/rj45-refinement-20261028/scale-results/README.md)를 사용한다.
 
-다중 파지 생성과 교사 시연, BC 학습·물리 평가 및 선택된 BC 실패의 영상·안정성 분석은 완료했다. PPO와 BC 초기화 PPO의 비교는 초기화 검사 실패로 중단돼 복구를 검증하고 있다. 지지팔 제어 비교와 최종 정책 검증은 남아 있다. 개발 평가에 사용하는 파지는 2개이며 최종 파지와 평가 seed는 봉인했다. 개발 기준을 넘은 후보가 생길 때만 최종 평가를 연다.
+다중 파지 생성과 참조 제어기 시연, BC 학습·물리 평가 및 선택된 BC 실패의 영상·안정성 분석은 완료했다. PPO와 BC 초기화 PPO의 비교는 초기화 검사 실패로 중단돼 복구를 검증하고 있다. 지지팔 제어 비교와 최종 정책 검증은 남아 있다. 개발 평가에 사용하는 파지는 2개이며 최종 파지와 평가 seed는 봉인했다. 개발 기준을 넘은 후보가 생길 때만 최종 평가를 연다.
 
 [실험 계약](docs/experiment-design.md)은 기준 제어 비교, 데이터 분리, 성공 판정과 남은 검증을 정의한다.

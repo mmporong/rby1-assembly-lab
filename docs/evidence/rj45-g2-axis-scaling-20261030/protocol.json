@@ -1,0 +1,147 @@
+{
+  "artifact_contract": "diagnostic_not_main_bc; must not be injected into the main experiment",
+  "claims": {
+    "closed_loop_physics_proven": false,
+    "heldout_generalization_proven": false,
+    "reinforcement_learning_proven": false,
+    "same_trajectory_fit_diagnostic": true,
+    "state_feedback_proven": false
+  },
+  "frozen_at_utc": "2026-10-30T14:22:08.869502Z",
+  "historical_reproduction_gate": {
+    "absolute_mse_tolerance": 1e-12,
+    "final_actor_state_sha256": "9658ba4c3e220c0e5a6c6287c33815ce041089a5fc999d59510cbf860b79ead0",
+    "final_original_coordinate_mse": 2.3204543819962887e-06,
+    "initial_actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+    "required_before_r1": true,
+    "source": "SHA-256-verified historical_result JSON"
+  },
+  "loss_contract": {
+    "axis_std_derivation": "395 train rows, float64, ddof=0; retain float64 for evaluation and cast to float32 only for the training loss tensor",
+    "centering": "omitted because subtracting the same axis mean from both sides cancels",
+    "r0_raw_mse": "mean((prediction - target)^2)",
+    "r1_axis_scaled_mse": "mean(((prediction - target) / effective_axis_std)^2)"
+  },
+  "model_contract": {
+    "action_dim": 6,
+    "architecture": "79->256->256->128->6 ELU MLP from build_bc_actor",
+    "final_layer_initialization": "zero weight and bias",
+    "inference_output": "original normalized 6D command coordinates",
+    "inference_rescaling_or_clipping": false,
+    "observation_dim": 79
+  },
+  "pass_criterion": {
+    "all_conditions_required": true,
+    "all_values_finite": true,
+    "each_axis_mse_to_constant_axis_mse_at_most": 1.1,
+    "r1_axis_balanced_mse_at_most": 0.9,
+    "r1_original_mse_at_most_90_percent_of_constant_mean": true,
+    "r1_original_mse_lower_than_r0": true
+  },
+  "purpose": "Compare raw MSE and per-axis population-standard-deviation-scaled MSE.",
+  "runs": [
+    {
+      "id": "r0_raw_mse",
+      "loss": "raw_mse"
+    },
+    {
+      "id": "r1_axis_scaled_mse",
+      "loss": "axis_scaled_mse"
+    }
+  ],
+  "runtime": {
+    "numpy": "1.26.0",
+    "python": "3.11.15",
+    "torch": "2.7.0+cpu"
+  },
+  "schema_name": "rj45_g2_axis_scaling_probe_v1",
+  "shared_recipe": {
+    "device": "cpu",
+    "full_batch_optimizer_steps": 2000,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "report_interval_steps": 200,
+    "rows": 395,
+    "seed": 20261030,
+    "selection": "final checkpoint only",
+    "threads": 2
+  },
+  "source_identity": {
+    "axis_statistics": {
+      "any_floor_applied": false,
+      "axis_order": [
+        "tx",
+        "ty",
+        "tz",
+        "rx",
+        "ry",
+        "rz"
+      ],
+      "effective_std": {
+        "rx": 0.0004973628072186023,
+        "ry": 0.0008244857224442843,
+        "rz": 0.002407198943609102,
+        "tx": 0.002080633614876644,
+        "ty": 0.0017137527331047167,
+        "tz": 0.0003713456895193063
+      },
+      "estimator": "numpy_float64_population_std_ddof_0",
+      "floor_applied": {
+        "rx": false,
+        "ry": false,
+        "rz": false,
+        "tx": false,
+        "ty": false,
+        "tz": false
+      },
+      "mean": {
+        "rx": -0.01090811479105791,
+        "ry": -0.049664167352492294,
+        "rz": -0.010903005583706913,
+        "tx": 0.0007500624856883976,
+        "ty": -0.004899548479289184,
+        "tz": -0.011419242257370224
+      },
+      "raw_std": {
+        "rx": 0.0004973628072186023,
+        "ry": 0.0008244857224442843,
+        "rz": 0.002407198943609102,
+        "tx": 0.002080633614876644,
+        "ty": 0.0017137527331047167,
+        "tz": 0.0003713456895193063
+      },
+      "row_count": 395,
+      "std_floor": 1e-08
+    },
+    "bc_source": {
+      "path": "/home/lim/rby1-assembly-lab/src/rby1_assembly/rj45_bc.py",
+      "sha256": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4"
+    },
+    "historical_result": {
+      "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-optimizer-probe-20261030/result.json",
+      "sha256": "49fd48f379d77c3ff6bafc955a35a40b48584ae3550941d8f9809a72ffcaaf03"
+    },
+    "input_helper": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "manifest": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+      "sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578"
+    },
+    "npz": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+      "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+    },
+    "prior_optimizer_runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_optimizer_probe.py",
+      "sha256": "9b751ee4fd6f684eb6c76829ef108c73e76fa92e0c25e7dbac1ba4718ce36543"
+    },
+    "runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_axis_scaling_probe.py",
+      "sha256": "729d81a0da7643c32361b559d6f1548aba9f7d60502e7096f4ba65902b6f750d"
+    }
+  },
+  "status": "frozen_before_execution",
+  "stop_rule": "Run R0 and R1 once; no 20k-step extension or hyperparameter search."
+}

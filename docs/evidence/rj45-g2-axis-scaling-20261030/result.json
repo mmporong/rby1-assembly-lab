@@ -1,0 +1,424 @@
+{
+  "claims": {
+    "closed_loop_physics_proven": false,
+    "heldout_generalization_proven": false,
+    "reinforcement_learning_proven": false,
+    "same_trajectory_fit_diagnostic": true,
+    "state_feedback_proven": false
+  },
+  "completed_at_utc": "2026-10-30T14:22:21.344180Z",
+  "constant_train_mean_baseline": {
+    "axis_balanced_mse": 1.0,
+    "axis_correlation": {
+      "rx": null,
+      "ry": null,
+      "rz": null,
+      "tx": null,
+      "ty": null,
+      "tz": null
+    },
+    "axis_original_coordinate_mse": {
+      "rx": 2.473697620043686e-07,
+      "ry": 6.797767065144734e-07,
+      "rz": 5.794606754112776e-06,
+      "tx": 4.329036239354651e-06,
+      "ty": 2.9369484302238864e-06,
+      "tz": 1.3789762112456904e-07
+    },
+    "output_std_to_target_std": {
+      "rx": 2.371733363539913e-13,
+      "ry": 3.618891507101552e-13,
+      "rz": 4.035583137513881e-14,
+      "tx": 5.210923080033887e-16,
+      "ty": 2.5305918445336317e-14,
+      "tz": 1.1211484231131447e-13
+    },
+    "overall_original_coordinate_mse": 2.3542725855557875e-06
+  },
+  "historical_reproduction_gate": {
+    "actual_mse": 2.320454384371229e-06,
+    "checks": {
+      "final_actor_state_sha256": true,
+      "final_original_coordinate_mse": true,
+      "initial_actor_state_sha256": true
+    },
+    "met": true
+  },
+  "initial_identity": {
+    "actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+    "rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e",
+    "same_actor_state": true,
+    "same_rng_state": true
+  },
+  "interpretation_limit": "Same-trajectory offline fit diagnostic only; it does not establish state feedback, closed-loop physics success, reinforcement-learning contribution, or held-out generalization.",
+  "pass_criterion": {
+    "checks": {
+      "all_axis_ratios_at_most_1_10": true,
+      "all_values_finite": true,
+      "r1_at_most_90_percent_of_constant_mean": false,
+      "r1_axis_balanced_mse_at_most_0_90": false,
+      "r1_lower_than_r0": true
+    },
+    "met": false,
+    "values": {
+      "constant_train_mean_original_coordinate_mse": 2.3542725855557875e-06,
+      "r0_original_coordinate_mse": 2.320454384371229e-06,
+      "r1_axis_balanced_mse": 0.9298235109243324,
+      "r1_axis_mse_to_constant_axis_mse": {
+        "rx": 0.9888294607343178,
+        "ry": 0.9861478906824264,
+        "rz": 0.9813616497955115,
+        "tx": 0.7883694485846234,
+        "ty": 0.9645305271397426,
+        "tz": 0.8697020886093693
+      },
+      "r1_original_coordinate_mse": 2.1611929828961087e-06,
+      "r1_to_constant_mean_mse_ratio": 0.9179875755066411
+    }
+  },
+  "protocol": {
+    "frozen_at_utc": "2026-10-30T14:22:08.869502Z",
+    "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-axis-scaling-20261030/protocol.json",
+    "sha256": "b5f58913b240efc0379b6f0a877cce2d6447c2072f7629dde656c23ed7a55035"
+  },
+  "runs": {
+    "r0_raw_mse": {
+      "artifact": {
+        "actor_state_sha256": "9658ba4c3e220c0e5a6c6287c33815ce041089a5fc999d59510cbf860b79ead0",
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-axis-scaling/r0_raw_mse/final-diagnostic-actor.pt",
+        "sha256": "757d141f00ae741af8646b4ec5610d8d96b549ca3c1a807c77be503c6fda6c7c"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.9971295595169067,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 2.345956318094977e-06,
+          "training_loss": 2.345956318094977e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9959339499473572,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 2.341385425097542e-06,
+          "training_loss": 2.341385425097542e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9936995506286621,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 2.332817075512139e-06,
+          "training_loss": 2.332817075512139e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9880084991455078,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 2.3132681690185564e-06,
+          "training_loss": 2.3132681690185564e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9934155941009521,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 2.3344275632553035e-06,
+          "training_loss": 2.3344275632553035e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9840690493583679,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 2.300247842867975e-06,
+          "training_loss": 2.300247842867975e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9879553914070129,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 2.3248310299095465e-06,
+          "training_loss": 2.3248310299095465e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9751027226448059,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 2.265497869302635e-06,
+          "training_loss": 2.265497869302635e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9848314523696899,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 2.3062946183927124e-06,
+          "training_loss": 2.3062946183927124e-06,
+          "training_loss_coordinate": "raw_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9895045161247253,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 2.320454541404615e-06,
+          "training_loss": 2.320454541404615e-06,
+          "training_loss_coordinate": "raw_mse"
+        }
+      ],
+      "inference_output_sample_original_coordinates": [
+        [
+          0.0010217891540378332,
+          -0.00561634823679924,
+          -0.011373622342944145,
+          -0.010841868817806244,
+          -0.04934621602296829,
+          -0.010825378820300102
+        ],
+        [
+          0.0010619917884469032,
+          -0.005363297648727894,
+          -0.011411543004214764,
+          -0.010862642899155617,
+          -0.049505800008773804,
+          -0.011187264695763588
+        ]
+      ],
+      "loss": "raw_mse",
+      "metrics": {
+        "axis_balanced_mse": 0.9895044199405736,
+        "axis_correlation": {
+          "rx": 0.0927990610820516,
+          "ry": 0.0380211368953633,
+          "rz": 0.1304916462082197,
+          "tx": 0.17158295825337927,
+          "ty": 0.18742233137341996,
+          "tz": 0.1220819192440393
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 2.4634705770525583e-07,
+          "ry": 6.79427832844206e-07,
+          "rz": 5.722562683088736e-06,
+          "tx": 4.248857331493649e-06,
+          "ty": 2.889164712743955e-06,
+          "tz": 1.3636668835156714e-07
+        },
+        "output_std_to_target_std": {
+          "rx": 0.026823442511560533,
+          "ry": 0.06826444819977953,
+          "rz": 0.06281722291788701,
+          "tx": 0.06714131059373755,
+          "ty": 0.050156000429477106,
+          "tz": 0.06307880114877816
+        },
+        "overall_original_coordinate_mse": 2.320454384371229e-06
+      },
+      "parameters_finite": true
+    },
+    "r1_axis_scaled_mse": {
+      "artifact": {
+        "actor_state_sha256": "d901b02c36654df9cf83474fe66036582f54b9347abc5db505f16833788795a3",
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-axis-scaling/r1_axis_scaled_mse/final-diagnostic-actor.pt",
+        "sha256": "e19bb7ceef81c1df723f0954b542d836c0c1cd4f2d43b3bbbb1d2ba4c5ad441f"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.9959968328475952,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 2.3469153802579967e-06,
+          "training_loss": 0.9959968328475952,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.993996798992157,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 2.3442621568392497e-06,
+          "training_loss": 0.993996798992157,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9914236664772034,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 2.3395057269226527e-06,
+          "training_loss": 0.9914236664772034,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9870533347129822,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 2.328247774130432e-06,
+          "training_loss": 0.9870533347129822,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 3.4140117168426514,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 3.6546712181007024e-06,
+          "training_loss": 3.4140117168426514,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9614949822425842,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 2.2251390419114614e-06,
+          "training_loss": 0.9614949822425842,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9505529999732971,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 2.190030272686272e-06,
+          "training_loss": 0.9505529999732971,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9456030130386353,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 2.18257559936319e-06,
+          "training_loss": 0.9456030130386353,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.938011646270752,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 2.1707544419768965e-06,
+          "training_loss": 0.938011646270752,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9298234581947327,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 2.1611926968034822e-06,
+          "training_loss": 0.9298234581947327,
+          "training_loss_coordinate": "axis_scaled_mse"
+        }
+      ],
+      "inference_output_sample_original_coordinates": [
+        [
+          0.002168478677049279,
+          -0.007648984901607037,
+          -0.01093197613954544,
+          -0.010676429606974125,
+          -0.050012726336717606,
+          -0.011207845993340015
+        ],
+        [
+          0.0034815380349755287,
+          -0.006782345473766327,
+          -0.011072974652051926,
+          -0.01073113176971674,
+          -0.04986182600259781,
+          -0.011578124016523361
+        ]
+      ],
+      "loss": "axis_scaled_mse",
+      "metrics": {
+        "axis_balanced_mse": 0.9298235109243324,
+        "axis_correlation": {
+          "rx": 0.1064386901226281,
+          "ry": 0.12728351090154033,
+          "rz": 0.1571276808386932,
+          "tx": 0.46098642550197455,
+          "ty": 0.1937503775176214,
+          "tz": 0.41094479239758636
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 2.446065083647563e-07,
+          "ry": 6.703603652642948e-07,
+          "rz": 5.686604844132328e-06,
+          "tx": 3.4128799129228783e-06,
+          "ty": 2.8327764175860847e-06,
+          "tz": 1.1992984910630118e-07
+        },
+        "output_std_to_target_std": {
+          "rx": 0.09384982908888835,
+          "ry": 0.0788200321796392,
+          "rz": 0.07934136556906103,
+          "tx": 0.43135781488836816,
+          "ty": 0.1482565488060778,
+          "tz": 0.21453728929958513
+        },
+        "overall_original_coordinate_mse": 2.1611929828961087e-06
+      },
+      "parameters_finite": true
+    }
+  },
+  "runtime": {
+    "numpy": "1.26.0",
+    "python": "3.11.15",
+    "torch": "2.7.0+cpu"
+  },
+  "schema_name": "rj45_g2_axis_scaling_probe_v1",
+  "source_identity": {
+    "axis_statistics": {
+      "any_floor_applied": false,
+      "axis_order": [
+        "tx",
+        "ty",
+        "tz",
+        "rx",
+        "ry",
+        "rz"
+      ],
+      "effective_std": {
+        "rx": 0.0004973628072186023,
+        "ry": 0.0008244857224442843,
+        "rz": 0.002407198943609102,
+        "tx": 0.002080633614876644,
+        "ty": 0.0017137527331047167,
+        "tz": 0.0003713456895193063
+      },
+      "estimator": "numpy_float64_population_std_ddof_0",
+      "floor_applied": {
+        "rx": false,
+        "ry": false,
+        "rz": false,
+        "tx": false,
+        "ty": false,
+        "tz": false
+      },
+      "mean": {
+        "rx": -0.01090811479105791,
+        "ry": -0.049664167352492294,
+        "rz": -0.010903005583706913,
+        "tx": 0.0007500624856883976,
+        "ty": -0.004899548479289184,
+        "tz": -0.011419242257370224
+      },
+      "raw_std": {
+        "rx": 0.0004973628072186023,
+        "ry": 0.0008244857224442843,
+        "rz": 0.002407198943609102,
+        "tx": 0.002080633614876644,
+        "ty": 0.0017137527331047167,
+        "tz": 0.0003713456895193063
+      },
+      "row_count": 395,
+      "std_floor": 1e-08
+    },
+    "bc_source": {
+      "path": "/home/lim/rby1-assembly-lab/src/rby1_assembly/rj45_bc.py",
+      "sha256": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4"
+    },
+    "historical_result": {
+      "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-optimizer-probe-20261030/result.json",
+      "sha256": "49fd48f379d77c3ff6bafc955a35a40b48584ae3550941d8f9809a72ffcaaf03"
+    },
+    "input_helper": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "manifest": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+      "sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578"
+    },
+    "npz": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+      "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+    },
+    "prior_optimizer_runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_optimizer_probe.py",
+      "sha256": "9b751ee4fd6f684eb6c76829ef108c73e76fa92e0c25e7dbac1ba4718ce36543"
+    },
+    "runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_axis_scaling_probe.py",
+      "sha256": "729d81a0da7643c32361b559d6f1548aba9f7d60502e7096f4ba65902b6f750d"
+    }
+  },
+  "status": "completed",
+  "stop_rule_observed": true
+}

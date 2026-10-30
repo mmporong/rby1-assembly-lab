@@ -1,0 +1,625 @@
+{
+  "a_reproduction_gate": {
+    "actual_mse": 2.1611929828961087e-06,
+    "checks": {
+      "final_actor_state_sha256": true,
+      "final_original_coordinate_mse": true,
+      "initial_actor_state_sha256": true,
+      "initial_rng_state_sha256": true
+    },
+    "met": true
+  },
+  "b_pass_criterion": {
+    "checks": {
+      "all_axis_ratios_at_most_1_10": true,
+      "all_values_finite": true,
+      "b_at_most_90_percent_of_constant_mean": true,
+      "b_axis_balanced_mse_at_most_0_90": true,
+      "b_lower_than_a": true,
+      "b_to_a_raw_mse_at_most_0_95": true
+    },
+    "met": true,
+    "reported_only": {
+      "last_five_reports_monotonic_nonincreasing": false
+    },
+    "values": {
+      "a_raw_mse": 2.1611929828961087e-06,
+      "b_axis_balanced_mse": 0.15392725564603,
+      "b_axis_mse_to_constant_axis_mse": {
+        "rx": 0.10493513928237563,
+        "ry": 0.312203708894853,
+        "rz": 0.1499561236143771,
+        "tx": 0.1074143351728585,
+        "ty": 0.16134733338489401,
+        "tz": 0.08770689352682147
+      },
+      "b_raw_mse": 3.4301454586823394e-07,
+      "b_to_a_raw_mse_ratio": 0.1587153709006481,
+      "b_to_constant_mean_raw_mse_ratio": 0.14569873852872325,
+      "constant_mean_raw_mse": 2.3542725855557875e-06
+    }
+  },
+  "claims": {
+    "causal_failure_reason_proven": false,
+    "closed_loop_physics_proven": false,
+    "heldout_generalization_proven": false,
+    "reinforcement_learning_proven": false,
+    "same_trajectory_regression_only": true,
+    "state_feedback_proven": false
+  },
+  "completed_at_utc": "2026-10-30T14:28:52.830570Z",
+  "conditional_feature_contrasts": {
+    "c_interpretation": "possibly_useful_fit_information",
+    "c_to_b_raw_mse_ratio": 2.1763582351753423,
+    "d_interpretation": "inconclusive",
+    "d_to_b_raw_mse_ratio": 1.0590886485209716,
+    "executed": true
+  },
+  "constant_train_mean_baseline": {
+    "axis_balanced_mse": 1.0,
+    "axis_correlation": {
+      "rx": null,
+      "ry": null,
+      "rz": null,
+      "tx": null,
+      "ty": null,
+      "tz": null
+    },
+    "axis_original_coordinate_mse": {
+      "rx": 2.473697620043686e-07,
+      "ry": 6.797767065144734e-07,
+      "rz": 5.794606754112776e-06,
+      "tx": 4.329036239354651e-06,
+      "ty": 2.9369484302238864e-06,
+      "tz": 1.3789762112456904e-07
+    },
+    "output_std_to_target_std": {
+      "rx": 2.371733363539913e-13,
+      "ry": 3.618891507101552e-13,
+      "rz": 4.035583137513881e-14,
+      "tx": 5.210923080033887e-16,
+      "ty": 2.5305918445336317e-14,
+      "tz": 1.1211484231131447e-13
+    },
+    "overall_original_coordinate_mse": 2.3542725855557875e-06
+  },
+  "initial_identity": {
+    "actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+    "all_executed_runs_match": true,
+    "rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e"
+  },
+  "interpretation_limit": "Same-train-trajectory regression only; no state-feedback, causal, physics, RL, or held-out-generalization claim.",
+  "protocol": {
+    "frozen_at_utc": "2026-10-30T14:28:24.880078Z",
+    "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-input-normalization-20261030/protocol.json",
+    "sha256": "42d17ab7f9dafcf437a3b29bd75d96cc7d611808b2cc5231b460ef62076b9a62"
+  },
+  "runs": {
+    "a_axis_scaled_standard_input": {
+      "artifact": {
+        "actor_state_sha256": "d901b02c36654df9cf83474fe66036582f54b9347abc5db505f16833788795a3",
+        "input_transform_array_sha256": {
+          "constant_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "feature_zero_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "mean32": "7802c95d2f1ade746d97350a18ddbfdb9f5bee2803436917a3cf3d6a685a3a67",
+          "mean64": "a8fe888f287d6d55df301aca05239c44f27e29d1ea4023657a641984de969026",
+          "scale32": "a3ec5791638d1269770934d5792421b7beaabba1808414aed6889b6a2984e701",
+          "scale64": "df5334697f0d2bf5ad5f1fd80583134229fd0d3a9545a36ceca26bff6ef8e78c",
+          "std64": "df5334697f0d2bf5ad5f1fd80583134229fd0d3a9545a36ceca26bff6ef8e78c"
+        },
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-input-normalization/a_axis_scaled_standard_input/final-diagnostic-actor.pt",
+        "sha256": "b36c7e0e9ec09389286d1d6c6f61bc60b97f6f5d8ccc81effa7a28a47d1329be"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.9959968328475952,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 2.3469153802579967e-06,
+          "training_loss": 0.9959968328475952,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.993996798992157,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 2.3442621568392497e-06,
+          "training_loss": 0.993996798992157,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9914236664772034,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 2.3395057269226527e-06,
+          "training_loss": 0.9914236664772034,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9870533347129822,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 2.328247774130432e-06,
+          "training_loss": 0.9870533347129822,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 3.4140117168426514,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 3.6546712181007024e-06,
+          "training_loss": 3.4140117168426514,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9614949822425842,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 2.2251390419114614e-06,
+          "training_loss": 0.9614949822425842,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9505529999732971,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 2.190030272686272e-06,
+          "training_loss": 0.9505529999732971,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9456030130386353,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 2.18257559936319e-06,
+          "training_loss": 0.9456030130386353,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.938011646270752,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 2.1707544419768965e-06,
+          "training_loss": 0.938011646270752,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.9298234581947327,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 2.1611926968034822e-06,
+          "training_loss": 0.9298234581947327,
+          "training_loss_coordinate": "axis_scaled_mse"
+        }
+      ],
+      "initial_actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+      "initial_rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e",
+      "input_transform": "identity",
+      "metrics": {
+        "axis_balanced_mse": 0.9298235109243324,
+        "axis_correlation": {
+          "rx": 0.1064386901226281,
+          "ry": 0.12728351090154033,
+          "rz": 0.1571276808386932,
+          "tx": 0.46098642550197455,
+          "ty": 0.1937503775176214,
+          "tz": 0.41094479239758636
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 2.446065083647563e-07,
+          "ry": 6.703603652642948e-07,
+          "rz": 5.686604844132328e-06,
+          "tx": 3.4128799129228783e-06,
+          "ty": 2.8327764175860847e-06,
+          "tz": 1.1992984910630118e-07
+        },
+        "output_std_to_target_std": {
+          "rx": 0.09384982908888835,
+          "ry": 0.0788200321796392,
+          "rz": 0.07934136556906103,
+          "tx": 0.43135781488836816,
+          "ty": 0.1482565488060778,
+          "tz": 0.21453728929958513
+        },
+        "overall_original_coordinate_mse": 2.1611929828961087e-06
+      },
+      "parameters_finite": true
+    },
+    "b_axis_scaled_train_normalized_input": {
+      "artifact": {
+        "actor_state_sha256": "d3bf262d7033772828ce53c2e4b4d6a583db830b99a0f47b9e1d6643bed3f0c5",
+        "input_transform_array_sha256": {
+          "constant_mask": "9712cab74a2c850bd8a508dae60a88177964048af1903416aaeb569ec12b9581",
+          "feature_zero_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "mean32": "5ec534ccfa1326ab60e75dc233d12974c651c32c3812aa07f39f0bae523c06a6",
+          "mean64": "b6877b9da3ca7b2eaa3726e979f4c03686e21f86234f2efa6e8a46b835ee76a4",
+          "scale32": "0ee52764ceda212d7b5ca3ad535166e7e08110c009a5a43806058146c33c6c47",
+          "scale64": "b82e2d7363268d3083ca0152e1a0f4b40c7f6a14e8e2292b12e8154609703f7b",
+          "std64": "69c29449d673f62d9b48ab9cdeddff35e4c82db7e0300f8daf74bc427be35663"
+        },
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-input-normalization/b_axis_scaled_train_normalized_input/final-diagnostic-actor.pt",
+        "sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.6716246008872986,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 1.7200316051457776e-06,
+          "training_loss": 0.6716246008872986,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.5893325209617615,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 1.4711603171235765e-06,
+          "training_loss": 0.5893325209617615,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.4742949306964874,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 1.1827555681520607e-06,
+          "training_loss": 0.4742949306964874,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.36113253235816956,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 9.726242069518776e-07,
+          "training_loss": 0.36113253235816956,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.34695592522621155,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 8.463784979539923e-07,
+          "training_loss": 0.34695592522621155,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.24357274174690247,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 6.757709911653365e-07,
+          "training_loss": 0.24357274174690247,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.17041948437690735,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 4.4824977862845117e-07,
+          "training_loss": 0.17041948437690735,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.5224629044532776,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 7.493315479223384e-07,
+          "training_loss": 0.5224629044532776,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.2699294686317444,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 6.383172035384632e-07,
+          "training_loss": 0.2699294686317444,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.1539272516965866,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 3.430145625316072e-07,
+          "training_loss": 0.1539272516965866,
+          "training_loss_coordinate": "axis_scaled_mse"
+        }
+      ],
+      "initial_actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+      "initial_rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e",
+      "input_transform": "train_standardize",
+      "metrics": {
+        "axis_balanced_mse": 0.15392725564603,
+        "axis_correlation": {
+          "rx": 0.9464769701921835,
+          "ry": 0.8365157356361688,
+          "rz": 0.9228846905709714,
+          "tx": 0.9497173631083801,
+          "ty": 0.9223692268037148,
+          "tz": 0.9551602217133538
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 2.5957780430176528e-08,
+          "ry": 2.122288089941466e-07,
+          "rz": 8.689367667164399e-07,
+          "tx": 4.6500054958949144e-07,
+          "ty": 4.738687975055745e-07,
+          "tz": 1.2094571973574545e-08
+        },
+        "output_std_to_target_std": {
+          "rx": 0.9190748370157619,
+          "ry": 0.9413330827082175,
+          "rz": 0.883579289637542,
+          "tx": 0.8530397164326848,
+          "ty": 0.8124723493364028,
+          "tz": 0.9526831924724081
+        },
+        "overall_original_coordinate_mse": 3.4301454586823394e-07
+      },
+      "parameters_finite": true
+    },
+    "c_zero_previous_command": {
+      "artifact": {
+        "actor_state_sha256": "3e9ea50d36c22ac0346cc32f06ce09a2dc3e46ee453ba7df052ae8a1d66c40c3",
+        "input_transform_array_sha256": {
+          "constant_mask": "9712cab74a2c850bd8a508dae60a88177964048af1903416aaeb569ec12b9581",
+          "feature_zero_mask": "0d732a2089de8f4630708bf6a83e02a89267a612efb03d7935a689d8ca69e86f",
+          "mean32": "5ec534ccfa1326ab60e75dc233d12974c651c32c3812aa07f39f0bae523c06a6",
+          "mean64": "b6877b9da3ca7b2eaa3726e979f4c03686e21f86234f2efa6e8a46b835ee76a4",
+          "scale32": "0ee52764ceda212d7b5ca3ad535166e7e08110c009a5a43806058146c33c6c47",
+          "scale64": "b82e2d7363268d3083ca0152e1a0f4b40c7f6a14e8e2292b12e8154609703f7b",
+          "std64": "69c29449d673f62d9b48ab9cdeddff35e4c82db7e0300f8daf74bc427be35663"
+        },
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-input-normalization/c_zero_previous_command/final-diagnostic-actor.pt",
+        "sha256": "7e66601eff695a9c117aaf3e31e9cc540c38a6758a292d0ed1e447a2fa794553"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.7126538157463074,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 1.8326463759876788e-06,
+          "training_loss": 0.7126538157463074,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.6297610402107239,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 1.6149031125678448e-06,
+          "training_loss": 0.6297610402107239,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.5622876286506653,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 1.4290851595433196e-06,
+          "training_loss": 0.5622876286506653,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.5096196532249451,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 1.332887904936797e-06,
+          "training_loss": 0.5096196532249451,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.42177310585975647,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 1.0847954854398267e-06,
+          "training_loss": 0.42177310585975647,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.39291051030158997,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 1.0050782748294296e-06,
+          "training_loss": 0.39291051030158997,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.4661983847618103,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 1.1352694855304435e-06,
+          "training_loss": 0.4661983847618103,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.4128056466579437,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 9.113613259614795e-07,
+          "training_loss": 0.4128056466579437,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.3538968563079834,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 9.30776764107577e-07,
+          "training_loss": 0.3538968563079834,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.28656354546546936,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 7.46522459849075e-07,
+          "training_loss": 0.28656354546546936,
+          "training_loss_coordinate": "axis_scaled_mse"
+        }
+      ],
+      "initial_actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+      "initial_rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e",
+      "input_transform": "train_standardize_zero_previous_command_50_62",
+      "metrics": {
+        "axis_balanced_mse": 0.28656355545738077,
+        "axis_correlation": {
+          "rx": 0.853255157512616,
+          "ry": 0.8501346438310822,
+          "rz": 0.8279082248083386,
+          "tx": 0.8659236170687309,
+          "ty": 0.7864322949575641,
+          "tz": 0.9171208266123476
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 6.811315682654325e-08,
+          "ry": 1.9655991651981625e-07,
+          "rz": 1.8412474543579356e-06,
+          "tx": 1.164101091457354e-06,
+          "ty": 1.18646499136597e-06,
+          "tz": 2.2648579583946613e-08
+        },
+        "output_std_to_target_std": {
+          "rx": 0.7982702423001601,
+          "ry": 0.742951658499032,
+          "rz": 0.7714857647056567,
+          "tx": 0.7432324465905402,
+          "ty": 0.6997129939783051,
+          "tz": 0.8447251890440387
+        },
+        "overall_original_coordinate_mse": 7.465225316852612e-07
+      },
+      "parameters_finite": true
+    },
+    "d_zero_estimated_relative_pose": {
+      "artifact": {
+        "actor_state_sha256": "4e862117a8a622e5f40c2555823737ca7c4afe8d18975fda714b738550dabbe3",
+        "input_transform_array_sha256": {
+          "constant_mask": "9712cab74a2c850bd8a508dae60a88177964048af1903416aaeb569ec12b9581",
+          "feature_zero_mask": "97b701d15e403a068cc72db018cc6cdb301246d57e18f9fa83196dab7192c14a",
+          "mean32": "5ec534ccfa1326ab60e75dc233d12974c651c32c3812aa07f39f0bae523c06a6",
+          "mean64": "b6877b9da3ca7b2eaa3726e979f4c03686e21f86234f2efa6e8a46b835ee76a4",
+          "scale32": "0ee52764ceda212d7b5ca3ad535166e7e08110c009a5a43806058146c33c6c47",
+          "scale64": "b82e2d7363268d3083ca0152e1a0f4b40c7f6a14e8e2292b12e8154609703f7b",
+          "std64": "69c29449d673f62d9b48ab9cdeddff35e4c82db7e0300f8daf74bc427be35663"
+        },
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-input-normalization/d_zero_estimated_relative_pose/final-diagnostic-actor.pt",
+        "sha256": "aea22bc272dbfc65dcf2085c29f20471428699d047e8ec0dba3da92183219f27"
+      },
+      "diagnostics": [
+        {
+          "axis_balanced_mse": 0.7058074474334717,
+          "optimizer_step": 200,
+          "original_coordinate_mse": 1.8357845874561463e-06,
+          "training_loss": 0.7058074474334717,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.612174928188324,
+          "optimizer_step": 400,
+          "original_coordinate_mse": 1.6084137541838572e-06,
+          "training_loss": 0.612174928188324,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.49564188718795776,
+          "optimizer_step": 600,
+          "original_coordinate_mse": 1.3226962209955673e-06,
+          "training_loss": 0.49564188718795776,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.3971809446811676,
+          "optimizer_step": 800,
+          "original_coordinate_mse": 1.080824290511373e-06,
+          "training_loss": 0.3971809446811676,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.8459203839302063,
+          "optimizer_step": 1000,
+          "original_coordinate_mse": 2.614123786770506e-06,
+          "training_loss": 0.8459203839302063,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.29525747895240784,
+          "optimizer_step": 1200,
+          "original_coordinate_mse": 7.533778898505261e-07,
+          "training_loss": 0.29525747895240784,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.24876900017261505,
+          "optimizer_step": 1400,
+          "original_coordinate_mse": 6.325016101982328e-07,
+          "training_loss": 0.24876900017261505,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.1941026747226715,
+          "optimizer_step": 1600,
+          "original_coordinate_mse": 4.982433665645658e-07,
+          "training_loss": 0.1941026747226715,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 1.0229357481002808,
+          "optimizer_step": 1800,
+          "original_coordinate_mse": 1.0916239716607379e-06,
+          "training_loss": 1.0229357481002808,
+          "training_loss_coordinate": "axis_scaled_mse"
+        },
+        {
+          "axis_balanced_mse": 0.1469724476337433,
+          "optimizer_step": 2000,
+          "original_coordinate_mse": 3.632827940691641e-07,
+          "training_loss": 0.1469724476337433,
+          "training_loss_coordinate": "axis_scaled_mse"
+        }
+      ],
+      "initial_actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+      "initial_rng_state_sha256": "9f43685096768b370fac3b58b3c9cd9e317da0b9297e567a1bc3191371ac055e",
+      "input_transform": "train_standardize_zero_estimated_relative_pose_0_7",
+      "metrics": {
+        "axis_balanced_mse": 0.14697244533209228,
+        "axis_correlation": {
+          "rx": 0.9283776469324296,
+          "ry": 0.9075959162868784,
+          "rz": 0.920289584240651,
+          "tx": 0.9299731174660562,
+          "ty": 0.917820494703937,
+          "tz": 0.952777575964113
+        },
+        "axis_original_coordinate_mse": {
+          "rx": 3.543645605160866e-08,
+          "ry": 1.251421802615975e-07,
+          "rz": 9.286915418024597e-07,
+          "tx": 6.046823971540548e-07,
+          "ty": 4.728452224827884e-07,
+          "tz": 1.2899073087227046e-08
+        },
+        "output_std_to_target_std": {
+          "rx": 0.8567219021858747,
+          "ry": 0.8191838410693978,
+          "rz": 0.8358328040385979,
+          "tx": 0.8630767241098058,
+          "ty": 0.8618792095482236,
+          "tz": 0.916364566358009
+        },
+        "overall_original_coordinate_mse": 3.632828118066227e-07
+      },
+      "parameters_finite": true
+    }
+  },
+  "runtime": {
+    "numpy": "1.26.0",
+    "python": "3.11.15",
+    "torch": "2.7.0+cpu"
+  },
+  "schema_name": "rj45_g2_input_normalization_probe_v1",
+  "source_identity": {
+    "action_shape": [
+      395,
+      6
+    ],
+    "axis_scaling_result": {
+      "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-axis-scaling-20261030/result.json",
+      "sha256": "e0b588869c9bb7ec8df1b69d92457e1aa3729016dc1e53239d3bb000c99b32f0"
+    },
+    "axis_scaling_runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_axis_scaling_probe.py",
+      "sha256": "729d81a0da7643c32361b559d6f1548aba9f7d60502e7096f4ba65902b6f750d"
+    },
+    "bc_source": {
+      "path": "/home/lim/rby1-assembly-lab/src/rby1_assembly/rj45_bc.py",
+      "sha256": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4"
+    },
+    "input_helper": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "manifest": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+      "sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578"
+    },
+    "npz": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+      "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+    },
+    "observation_shape": [
+      395,
+      79
+    ],
+    "runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_input_normalization_probe.py",
+      "sha256": "26b631cfc873ba87de011fa32f71af1868bafe1885d255b4d11d346652f1f928"
+    }
+  },
+  "status": "completed",
+  "stop_rule_observed": true
+}
