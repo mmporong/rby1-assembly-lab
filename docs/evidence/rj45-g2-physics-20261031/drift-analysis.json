@@ -1,0 +1,239 @@
+{
+  "schema_version": 2,
+  "scope": "single_fixed_condition_paired_run_diagnostic",
+  "run_count": 1,
+  "claims_excluded": [
+    "reinforcement_learning_effect",
+    "normalization_causality",
+    "generalization"
+  ],
+  "inputs": {
+    "a_report_sha256": "dee48a333bd7f994b31b77b2e17e1eebd6ffae4721eb84adeaffdbc331b683a7",
+    "a_trace_sha256": "aaf691d357736b002814e2771d3428a1fbd2e9e9eaa32f27f6e2059cc7f9f947",
+    "b_report_sha256": "c03400722b3e5f1409305a4f8f2eb00169a7dfdf10dc299eae69497b9b55620a",
+    "b_trace_sha256": "172de672eadc7fec2794ded703b48f02e31ce2ef6715c463a377ab8f9103d919",
+    "b_run4_diagnostic_trace_sha256": "172de672eadc7fec2794ded703b48f02e31ce2ef6715c463a377ab8f9103d919",
+    "train_npz_sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633",
+    "b_checkpoint_sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65"
+  },
+  "validity": {
+    "a": {
+      "rows": 405,
+      "trace_completion": "valid_success",
+      "report_status": "valid_success",
+      "run_valid": true,
+      "independent_terminal_timestamp_s": 13.266667366027832,
+      "trace_done_row_timestamp_s": 13.5
+    },
+    "b": {
+      "rows": 727,
+      "trace_completion": "valid_failure",
+      "report_status": "valid_failure",
+      "process_exit": 0,
+      "report_present": true,
+      "run_valid": true,
+      "independent_terminal_timestamp_s": 24.000001907348633,
+      "termination_reason": "episode_timeout",
+      "run5_trace_byte_identical_to_run4_diagnostic_trace": true
+    }
+  },
+  "training_distribution": {
+    "valid_rows": 395,
+    "observation_dimension": 79,
+    "previous_action_slice_python": [50, 62],
+    "b_transform": {
+      "formula": "(float32_observation - mean32) / scale32, then constant_mask | feature_zero_mask set to zero",
+      "std_floor": 0.0001,
+      "constant_mask_indices": [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 63, 78],
+      "feature_zero_mask_indices": [],
+      "active_dimensions": 58
+    },
+    "comparison_rule": "Each runtime policy input is compared with the min/max of the same policy's transformed training input. B masked dimensions are excluded. A uses identity input; B uses the frozen train-only normalizer, so their input magnitudes are not commensurate."
+  },
+  "phase_summary": {
+    "a": {
+      "align": {
+        "steps": [1, 17],
+        "time_s": [0.03333333333333333, 0.5666666666666667],
+        "depth_m_min_max_last": [-0.006099767180632024, 0.04441439862040375, -0.006099767180632024],
+        "lateral_m_min_max_last": [5.144108822503461e-05, 0.20000454692877123, 5.144108822503461e-05],
+        "orientation_rad_min_max_last": [0.00034958791700633046, 0.00498008448599937, 0.0015556272404820648],
+        "applied_action_l2_mean_max_unitless": [0.0, 0.0]
+      },
+      "insert": {
+        "steps": [18, 404],
+        "time_s": [0.6, 13.466666666666667],
+        "depth_m_min_max_last": [-0.00615563291447121, 0.012344588093549401, 0.01229682273731882],
+        "lateral_m_min_max_last": [3.968353418979098e-07, 5.408340288945452e-05, 3.2849747209853726e-06],
+        "orientation_rad_min_max_last": [3.2574963427291673e-06, 0.0016562435825977111, 1.0970318439828424e-05],
+        "applied_action_l2_mean_max_unitless": [0.053332161282027786, 0.05405168954386881],
+        "tip_target_translation_norm_m_mean_max_last": [1.861807614925368e-05, 2.0220030054068568e-05, 1.8913489285954692e-05],
+        "tip_target_rotation_vector_norm_rad_mean_max_last": [0.001357890761796013, 0.0013708817142440326, 0.0013587929289885726],
+        "tip_target_rotation_vector_norm_deg_max": 0.07854573643784242
+      },
+      "done": {
+        "step": 405,
+        "trace_row_time_s": 13.5,
+        "independent_terminal_time_s": 13.266667366027832,
+        "depth_m": 0.012295475343689449,
+        "lateral_m": 2.5058750777837995e-06,
+        "orientation_rad": 1.3305924497427355e-05,
+        "force_peak_n": 3.777757406234741,
+        "applied_action_l2_unitless": 0.05340762498488011,
+        "tip_target_translation_norm_m": 1.8882291505462286e-05,
+        "tip_target_rotation_vector_norm_rad": 0.0013588150060410064,
+        "tip_target_rotation_vector_norm_deg": 0.07785436498519313
+      }
+    },
+    "b": {
+      "align": {
+        "steps": [1, 17],
+        "time_s": [0.03333333333333333, 0.5666666666666667],
+        "depth_m_min_max_last": [-0.006099767180632024, 0.04441439862040375, -0.006099767180632024],
+        "lateral_m_min_max_last": [5.144108822503461e-05, 0.20000454692877123, 5.144108822503461e-05],
+        "orientation_rad_min_max_last": [0.00034958791700633046, 0.00498008448599937, 0.0015556272404820648],
+        "applied_action_l2_mean_max_unitless": [0.0, 0.0]
+      },
+      "insert": {
+        "steps": [18, 727],
+        "time_s": [0.6, 24.233333333333334],
+        "depth_m_min_max_last": [-0.0061546887317136985, 0.005757704276655156, -0.0010258751442875497],
+        "lateral_m_min_max_last": [1.9954919118600215e-06, 0.0024675438325310736, 0.0005038914468321272],
+        "orientation_rad_min_max_last": [6.323220549731698e-05, 0.6390485401341754, 0.6390485401341754],
+        "applied_action_l2_mean_max_unitless": [0.6679203820502548, 1.4142136582147014],
+        "tip_target_translation_norm_m_mean_max_last": [0.0007054218293464349, 0.0015000001403943633, 0.001041034433699134],
+        "tip_target_rotation_vector_norm_rad_mean_max_last": [0.011802929807684598, 0.02617994255273287, 0.022420203308519123],
+        "tip_target_rotation_vector_norm_deg_max": 1.5000002161665442
+      },
+      "terminal": {
+        "independent_terminal_time_s": 24.000001907348633,
+        "termination_reason": "episode_timeout",
+        "depth_m": -0.0010258751442875497,
+        "lateral_m": 0.0005038914468321272,
+        "orientation_rad": 0.6390485401341754,
+        "force_peak_n": 7.11679744720459
+      }
+    }
+  },
+  "policy_input_domain_diagnostic": {
+    "meaning": "Actual input delivered to each policy, compared with that policy's transformed 395-row training input domain. Counts exclude B's 21 masked constant dimensions.",
+    "a_identity_79d": {
+      "valid_rows": 387,
+      "all_active": {
+        "active_dimensions": 79,
+        "rows_any_outside": 28,
+        "row_fraction": 0.07235142118863049,
+        "feature_value_fraction": 0.0028129395218002813,
+        "max_outside_features_per_row": 8,
+        "input_max_abs": 1.0280131,
+        "input_l2_mean_max": [3.0836942, 3.3200288]
+      },
+      "previous_action": {
+        "active_indices": [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61],
+        "rows_any_outside": 0,
+        "row_fraction": 0.0,
+        "feature_value_fraction": 0.0,
+        "input_max_abs": 0.050007124,
+        "input_l2_mean_max": [0.053332157, 0.05405169]
+      },
+      "physical_feedback": {
+        "active_indices": [62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78],
+        "rows_any_outside": 11,
+        "row_fraction": 0.028423772609819122,
+        "feature_value_fraction": 0.0027359781121751026,
+        "input_max_abs": 1.025,
+        "input_l2_mean_max": [1.5174013, 1.7497032]
+      }
+    },
+    "b_train_normalized_58d": {
+      "valid_rows": 709,
+      "all_active": {
+        "active_dimensions": 58,
+        "rows_any_outside": 709,
+        "row_fraction": 1.0,
+        "feature_value_fraction": 0.6379553523661301,
+        "max_outside_features_per_row": 53,
+        "input_max_abs": 1352.2657,
+        "input_l2_mean_max": [488.0498, 1971.7883]
+      },
+      "previous_action": {
+        "active_indices": [56, 57, 58, 59, 60, 61],
+        "rows_any_outside": 704,
+        "row_fraction": 0.9929478138222849,
+        "feature_value_fraction": 0.9320639398213446,
+        "input_max_abs": 1352.2657,
+        "input_l2_mean_max": [411.81247, 1914.947],
+        "worst_feature_index": 59,
+        "worst_step": 392,
+        "worst_raw_value": 0.990015,
+        "worst_transformed_value": 1352.2657,
+        "transformed_train_range": [-1.8202785, 14.700152]
+      },
+      "physical_feedback": {
+        "active_indices": [62, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77],
+        "rows_any_outside": 706,
+        "row_fraction": 0.995768688293371,
+        "feature_value_fraction": 0.6152327221438646,
+        "input_max_abs": 124.6198,
+        "input_l2_mean_max": [82.32565, 226.94513],
+        "worst_feature_index": 76,
+        "worst_step": 333,
+        "worst_raw_value": -0.28616986,
+        "worst_transformed_value": -124.6198,
+        "transformed_train_range": [-3.7210, 13.4522]
+      },
+      "pose_0_7": {
+        "active_indices": [0, 1, 2, 3, 4, 5, 6],
+        "rows_any_outside": 705,
+        "row_fraction": 0.9943582510578279,
+        "feature_value_fraction": 0.7487406810396937,
+        "input_max_abs": 505.7395,
+        "input_l2_mean_max": [204.6399, 704.4504],
+        "worst_feature_index": 6,
+        "worst_step": 434,
+        "worst_raw_value": 1.2230867,
+        "worst_transformed_value": 505.7395,
+        "transformed_train_range": [-6.10194, 2.149391]
+      }
+    }
+  },
+  "divergence_timeline": {
+    "thresholds_are_diagnostic_not_success_criteria": true,
+    "first_policy_action_active_both": {"step": 19, "time_s": 0.6333333333333333},
+    "first_applied_action_l2_difference_gt_0p01": {"step": 21, "time_s": 0.7, "difference_unitless": 0.015569884503190766},
+    "first_b_previous_action_outside_own_transformed_train_range": {
+      "step": 22,
+      "time_s": 0.7333333333333333,
+      "feature_index": 61,
+      "raw_value": -0.026842078,
+      "raw_train_range": [-0.017248351126909256, 0.0],
+      "transformed_value": -6.4675956,
+      "transformed_train_range": [-2.5815394, 4.405116]
+    },
+    "first_b_minus_a_outside_feature_count_gt_10": {
+      "step": 27,
+      "time_s": 0.9,
+      "a_outside_count_of_79": 5,
+      "b_outside_count_of_58": 17,
+      "a_actual_policy_input_max_abs_identity": 1.0,
+      "b_actual_policy_input_max_abs_normalized": 39.057148,
+      "input_magnitudes_not_commensurate": true
+    },
+    "first_orientation_difference_gt_0p01_rad": {"step": 140, "time_s": 4.666666666666667, "difference_rad": 0.010590315052663262},
+    "first_depth_difference_gt_0p001_m": {"step": 146, "time_s": 4.866666666666666, "difference_m": 0.001053775477473564},
+    "first_lateral_difference_gt_0p001_m": {"step": 150, "time_s": 5.0, "difference_m": 0.00102592918494182}
+  },
+  "observations": [
+    "A and B have identical align-phase physical geometry and zero applied action.",
+    "The first action difference precedes the first B previous-action domain departure and the later physical pose divergence.",
+    "B's 21 constant-mask dimensions are zero at policy input; raw zero-variance departures are therefore not policy-input amplification evidence.",
+    "A also has some own-domain departures, so any departure alone is not sufficient to explain failure.",
+    "B repeatedly supplies active previous-action and physical-feedback inputs outside its own transformed training domain while its unitless applied-action norm grows to 1.41421366.",
+    "A is a valid_success and B is a valid_failure under the same fixed condition; N=1 does not support a causal or generalization claim."
+  ],
+  "hypotheses_not_claims": [
+    "The B closed-loop action-history feedback may amplify an early action difference into observation drift.",
+    "The B policy may be sensitive to states not represented by the single training trajectory.",
+    "The current pair does not isolate input normalization from learned weight differences or prove either hypothesis."
+  ]
+}

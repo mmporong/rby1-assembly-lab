@@ -1,0 +1,213 @@
+{
+  "bank_provenance": {
+    "selected_artifact_sha256": [
+      "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+      "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+      "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+      "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+      "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+      "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+      "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+      "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea"
+    ],
+    "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0"
+  },
+  "claims": {
+    "closed_loop_physics": true,
+    "heldout_generalization": false,
+    "reinforcement_learning": false,
+    "single_fixed_condition_diagnostic": true
+  },
+  "contact_source_proof": {
+    "collision_filter": {
+      "allowed_cross_hand_pair_count": 9,
+      "allowed_cross_hand_pairs": [
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_left",
+          "/World/envs/env_0/Robot/right_gripper/ee_right"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_left",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_left",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+          "/World/envs/env_0/Robot/right_gripper/ee_right"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l1",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+          "/World/envs/env_0/Robot/right_gripper/ee_right"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r1"
+        ],
+        [
+          "/World/envs/env_0/Robot/left_gripper/ee_finger_l2",
+          "/World/envs/env_0/Robot/right_gripper/ee_finger_r2"
+        ]
+      ],
+      "external_collision_relationships_modified": false,
+      "filtered_internal_pair_count": 2136,
+      "filtered_pair_authoring": "one_direction_per_unordered_rigid_body_pair",
+      "rigid_body_count": 66,
+      "robot_root_path": "/World/envs/env_0/Robot",
+      "self_collision_enabled": true
+    },
+    "forbidden_contact_load_definition": "max(external_forbidden_contact_load_n, cross_hand_contact_load_n)",
+    "forbidden_contact_load_source": "max_of_external_forbidden_and_cross_hand_physx_contact_loads"
+  },
+  "fixed_condition": {
+    "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "bank_split": "train",
+    "base_seed": 20261120,
+    "calibration_case_seed": 66384140,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1
+  },
+  "frozen_input_sha256": {
+    "/home/ubuntu/workspace/rby1-g2-20261031/current/scripts/run_rj45_g2_input_normalization_probe.py": "26b631cfc873ba87de011fa32f71af1868bafe1885d255b4d11d346652f1f928",
+    "/home/ubuntu/workspace/rby1-g2-20261031/current/scripts/run_rj45_g2_physics_probe.py": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "/home/ubuntu/workspace/rby1-g2-20261031/inputs/b_axis_scaled_train_normalized_input.pt": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65",
+    "/home/ubuntu/workspace/rby1-g2-20261031/inputs/manifest.json": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578",
+    "/home/ubuntu/workspace/rby1-g2-20261031/inputs/train-condition.npz": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633",
+    "/home/ubuntu/workspace/rby1-g2-20261031/protocol-v4.json": "13c2566237ab3a0437036860696f5b05d6b44e97eda13228095b96e76ed5da41",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  },
+  "frozen_protocol": {
+    "file_sha256": "13c2566237ab3a0437036860696f5b05d6b44e97eda13228095b96e76ed5da41",
+    "path": "/home/ubuntu/workspace/rby1-g2-20261031/protocol-v4.json",
+    "payload": {
+      "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+      "fixed_condition": {
+        "base_seed": 20261120,
+        "calibration_case_seed": 66384140,
+        "environment_index": 0,
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1
+      },
+      "input_normalization_runner_sha256": "26b631cfc873ba87de011fa32f71af1868bafe1885d255b4d11d346652f1f928",
+      "offline_npz_sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633",
+      "policies": {
+        "a_standard_input": {
+          "actor_state_sha256": "d901b02c36654df9cf83474fe66036582f54b9347abc5db505f16833788795a3",
+          "checkpoint_file_sha256": "b36c7e0e9ec09389286d1d6c6f61bc60b97f6f5d8ccc81effa7a28a47d1329be",
+          "input_transform_kind": "identity",
+          "offline_mse": 2.1611929828961087e-06,
+          "prediction_sha256": "d57ed256237a6bfa85eef92af49048e0cefeb0f6f9b34f2a9d09fa3ae0d105ff"
+        },
+        "b_normalized_input": {
+          "actor_state_sha256": "d3bf262d7033772828ce53c2e4b4d6a583db830b99a0f47b9e1d6643bed3f0c5",
+          "checkpoint_file_sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65",
+          "input_transform_kind": "train_standardize",
+          "offline_mse": 3.4301454586823394e-07,
+          "prediction_sha256": "6d8eb037b95653c0095e2b684bf39b2b69c280dede230800623b88053e2cb9b6"
+        }
+      },
+      "runner_sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+      "schema_name": "rj45_g2_physics_probe_v1",
+      "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+      "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+      "timing": {
+        "control_decimation": 8,
+        "control_hz": 30,
+        "horizon_s": 24.0,
+        "physics_hz": 240
+      },
+      "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    "sha256": "9b6018bc25520e4419773d47c966770228d646e05219174ecd75ef77ff70ded8"
+  },
+  "inputs_unchanged": true,
+  "offline_preflight": {
+    "all_finite": true,
+    "maximum_absolute_error": 0.00318998284637928,
+    "mse": 3.4301430928116926e-07,
+    "prediction_sha256": "6d8eb037b95653c0095e2b684bf39b2b69c280dede230800623b88053e2cb9b6",
+    "rows": 395,
+    "target_sha256": "345572ba284f08029d9375b9446546c87c828d4a5c61a5c74b16a42c241970dc"
+  },
+  "physics": {
+    "control_decimation": 8,
+    "control_hz": 30,
+    "horizon_s": 24.0,
+    "physics_hz": 240
+  },
+  "policy": {
+    "actor_state_sha256": "d3bf262d7033772828ce53c2e4b4d6a583db830b99a0f47b9e1d6643bed3f0c5",
+    "file_sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65",
+    "input_transform_kind": "train_standardize",
+    "normalizer_array_sha256": {
+      "constant_mask": "9712cab74a2c850bd8a508dae60a88177964048af1903416aaeb569ec12b9581",
+      "feature_zero_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+      "mean32": "5ec534ccfa1326ab60e75dc233d12974c651c32c3812aa07f39f0bae523c06a6",
+      "mean64": "b6877b9da3ca7b2eaa3726e979f4c03686e21f86234f2efa6e8a46b835ee76a4",
+      "scale32": "0ee52764ceda212d7b5ca3ad535166e7e08110c009a5a43806058146c33c6c47",
+      "scale64": "b82e2d7363268d3083ca0152e1a0f4b40c7f6a14e8e2292b12e8154609703f7b",
+      "std64": "69c29449d673f62d9b48ab9cdeddff35e4c82db7e0300f8daf74bc427be35663"
+    },
+    "path": "/home/ubuntu/workspace/rby1-g2-20261031/inputs/b_axis_scaled_train_normalized_input.pt"
+  },
+  "policy_label": "b_normalized_input",
+  "runtime_root": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a",
+  "runtime_versions": {
+    "h5py": "3.14.0",
+    "isaaclab": "0.47.2",
+    "isaaclab-rl": "0.4.4",
+    "isaacsim": "5.1.0.0",
+    "numpy": "1.26.0",
+    "rsl-rl-lib": "3.0.1",
+    "torch": "2.7.0+cu128"
+  },
+  "schema_name": "rj45_g2_physics_probe_v1",
+  "status": "valid_failure",
+  "terminal_evaluation": {
+    "criteria": {
+      "depth": false,
+      "dwell": false,
+      "forbidden_contact": true,
+      "force": true,
+      "grasp_live_and_proven": true,
+      "independent_evaluator_terminal": false,
+      "lateral": false,
+      "orientation": false
+    },
+    "evaluator_source": "simulator_ground_truth_independent",
+    "evaluator_version": "task-evaluator-v1+environment-cross-check",
+    "metrics": {
+      "actual_depth_m": -0.0010258751442875497,
+      "forbidden_contact": false,
+      "force_peak_n": 7.11679744720459,
+      "grasp_both": true,
+      "lateral_error_m": 0.0005038914468321272,
+      "orientation_error_rad": 0.6390485401341754
+    },
+    "success": false,
+    "terminal_timestamp_s": 24.000001907348633,
+    "termination_reason": "episode_timeout",
+    "valid": true
+  },
+  "terminal_phase": "insert",
+  "trace": {
+    "path": "/home/ubuntu/workspace/rby1-g2-20261031/run5/b_normalized_input.trace.jsonl",
+    "sha256": "172de672eadc7fec2794ded703b48f02e31ce2ef6715c463a377ab8f9103d919"
+  }
+}

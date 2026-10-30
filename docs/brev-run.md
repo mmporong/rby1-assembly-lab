@@ -41,7 +41,7 @@ cd "$HOME/rby1-assembly-lab"
 python3.11 -m venv .venv-isaac
 source .venv-isaac/bin/activate
 sudo apt-get update
-sudo apt-get install -y libglu1-mesa
+sudo apt-get install -y libglu1-mesa libxt6
 python -m pip install --upgrade pip
 python -m pip install -c configs/isaac-compat-constraints.txt setuptools wheel
 python -m pip install 'torch==2.7.0' 'torchvision==0.22.0' --index-url https://download.pytorch.org/whl/cu128
@@ -63,7 +63,7 @@ python -m pip check
 
 Crusoe 기본 이미지에서 확인한 565.57.01 드라이버는 프로젝트 전용 VM에서 R580.196.07로 갱신하고 재부팅했다. 드라이버 패키지 hold와 남은 `libnvidia-extra-565` 파일 충돌을 해결한 뒤 GPU 조회를 확인했다. 공유 서버에 이 변경을 적용하지 않는다. R580 갱신과 CUDA 연산 통과만으로 Isaac Sim의 RTX·PhysX 호환성이 입증되는 것은 아니다. 근거: [Isaac Sim 요구사항](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/requirements.html), [Crusoe 드라이버 안내](https://docs.crusoecloud.com/resources/troubleshooting/index.html).
 
-Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 `libglu1-mesa`를 설치했다. 사용자가 NVIDIA Omniverse EULA를 승인한 뒤 각 런타임 명령에 `OMNI_KIT_ACCEPT_EULA=YES`를 명시한다. 프로젝트 스크립트는 이 값을 자동으로 설정하지 않는다. Isaac Sim 런타임에 포함된 USD를 사용하며 이 환경에 standalone `usd-core`를 추가로 설치하지 않는다.
+Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 `libglu1-mesa`를 설치했다. 새 AWS Ubuntu 22.04 이미지에서는 MaterialX의 `libXt.so.6` 의존성이 빠져 있어 `libxt6`도 설치한다. 사용자가 NVIDIA Omniverse EULA를 승인한 뒤 각 런타임 명령에 `OMNI_KIT_ACCEPT_EULA=YES`를 명시한다. 프로젝트 스크립트는 이 값을 자동으로 설정하지 않는다. Isaac Sim 런타임에 포함된 USD를 사용하며 이 환경에 standalone `usd-core`를 추가로 설치하지 않는다.
 
 근거: [Isaac Sim Python 설치](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html), [Isaac Lab 2.3 설치](https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/installation/pip_installation.html). Lab의 RSL-RL 버전은 고정 source revision의 `source/isaaclab_rl/setup.py`를 기준으로 한다.
 

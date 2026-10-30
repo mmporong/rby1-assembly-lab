@@ -1,0 +1,40 @@
+{
+  "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+  "fixed_condition": {
+    "base_seed": 20261120,
+    "calibration_case_seed": 66384140,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1
+  },
+  "input_normalization_runner_sha256": "26b631cfc873ba87de011fa32f71af1868bafe1885d255b4d11d346652f1f928",
+  "offline_npz_sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633",
+  "policies": {
+    "a_standard_input": {
+      "actor_state_sha256": "d901b02c36654df9cf83474fe66036582f54b9347abc5db505f16833788795a3",
+      "checkpoint_file_sha256": "b36c7e0e9ec09389286d1d6c6f61bc60b97f6f5d8ccc81effa7a28a47d1329be",
+      "input_transform_kind": "identity",
+      "offline_mse": 2.1611929828961087e-06,
+      "prediction_sha256": "d57ed256237a6bfa85eef92af49048e0cefeb0f6f9b34f2a9d09fa3ae0d105ff"
+    },
+    "b_normalized_input": {
+      "actor_state_sha256": "d3bf262d7033772828ce53c2e4b4d6a583db830b99a0f47b9e1d6643bed3f0c5",
+      "checkpoint_file_sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65",
+      "input_transform_kind": "train_standardize",
+      "offline_mse": 3.4301454586823394e-07,
+      "prediction_sha256": "6d8eb037b95653c0095e2b684bf39b2b69c280dede230800623b88053e2cb9b6"
+    }
+  },
+  "runner_sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+  "schema_name": "rj45_g2_physics_probe_v1",
+  "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+  "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+  "timing": {
+    "control_decimation": 8,
+    "control_hz": 30,
+    "horizon_s": 24.0,
+    "physics_hz": 240
+  },
+  "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+}

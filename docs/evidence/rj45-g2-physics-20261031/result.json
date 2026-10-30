@@ -1,0 +1,345 @@
+{
+  "cloud_closure": {
+    "artifact_transfer_verified": true,
+    "billing_estimate_is_invoice": false,
+    "guard_cleanup": [
+      {
+        "command": [
+          "systemctl",
+          "--user",
+          "stop",
+          "rby1-g2-new-cloud-stop-20261031.timer",
+          "rby1-g2-new-cloud-stop-20261031.service"
+        ],
+        "returncode": 5,
+        "stderr": "Failed to stop rby1-g2-new-cloud-stop-20261031.timer: Unit rby1-g2-new-cloud-stop-20261031.timer not loaded."
+      },
+      {
+        "command": [
+          "systemctl",
+          "--user",
+          "reset-failed",
+          "rby1-g2-new-cloud-stop-20261031.service"
+        ],
+        "returncode": 0,
+        "stderr": ""
+      }
+    ],
+    "guard_deadline_utc": "2026-10-30T16:06:44.616130+00:00",
+    "guard_service_status": "inactive",
+    "guard_timer_status": "inactive",
+    "new_instance_id": "g4xfquxz3",
+    "new_instance_name": "rby1-g2-l40s-20261031",
+    "new_instance_status": "STOPPED",
+    "observed_at_utc": "2026-10-30T16:13:02.020222+00:00",
+    "old_instance_id": "ndntytgdv",
+    "old_instance_preserved": true,
+    "old_instance_status": "STOPPED",
+    "stop_helper_log": "{\"ok\": false, \"polls\": 8, \"status\": \"stop_not_confirmed\"}"
+  },
+  "comparison": {
+    "bank_provenance_equal": true,
+    "first_observation_equal": true,
+    "first_valid_observation_equal": true,
+    "heldout_generalization_demonstrated": false,
+    "normalization_improved_closed_loop_demonstrated": false,
+    "one_condition_one_completed_episode_per_policy": true,
+    "reinforcement_learning_improvement_demonstrated": false,
+    "shared_protocol_equal": true
+  },
+  "compute_budget": {
+    "catalog_compute_rate_usd_per_hour": 3.605088,
+    "combined_reserve_usd": 696.31822,
+    "prior_conservative_reserve_usd": 688.31822,
+    "project_cap_usd": 700,
+    "provider_invoice_verified": false,
+    "this_run_reserve_usd": 8
+  },
+  "derived_artifact_sha256": {
+    "README.md": "7e1169c0fc58a40ad215c0d784cc8d34a69264b9bb95e6557a929563471b2f3e",
+    "drift-analysis.json": "956254a52829b0f05e3bdbc1021ac2517ce439aa9074153b55d29379171916d4",
+    "physics-comparison.png": "3dc0140167abde903c868438e7d7821365519753e383cd98590d70810db89a4d",
+    "physics-comparison.svg": "005113d364a4a9b337ba02375f0eb694dcfe92f3e6c219b6f51f41874b073d53",
+    "plot_traces.py": "51dd8af0e83f3976defbae4644670d62cfc472f788bc5c67ef737c78548462f2"
+  },
+  "evidence_archives": {
+    "final-evidence.tar.gz": "ad3a818da9c0735229ea7e2e99750f025e2bfe28bc85ee1a5bc0130ac7f6935b",
+    "run1-evidence.tar.gz": "5077295a0064f5b831d0f9dd2dbd240974155e40ac1edd40fc612b582c391aa8",
+    "run2-evidence.tar.gz": "d51416bbfd34a790dfe6864cb4b4ab63e60eb1414ec60144b38da71e11ddf00f",
+    "run3-evidence.tar.gz": "4cb319c87a08dd9ec903c104a47592f8917ea6ecf807a5077c0be1aa43846eff",
+    "run4-evidence.tar.gz": "5018c6ae899de72cddcf9577471dfab3682aa0b2a593736ced4db8b0ac3fe343"
+  },
+  "fixed_condition": {
+    "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "bank_split": "train",
+    "base_seed": 20261120,
+    "calibration_case_seed": 66384140,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1
+  },
+  "frozen_protocol": {
+    "path": "protocol-v4.json",
+    "sha256": "13c2566237ab3a0437036860696f5b05d6b44e97eda13228095b96e76ed5da41"
+  },
+  "infrastructure_retry": {
+    "accepted_attempt": "run5/b_normalized_input",
+    "completed_physics_trace_sha256_identical": true,
+    "exit_code": 124,
+    "incomplete_attempt": "run4/b_normalized_input",
+    "not_counted_as_an_independent_second_episode": true,
+    "reason": "240 second wall-clock timeout after complete event while post-run verification was pending",
+    "same_runner_checkpoint_protocol": true,
+    "wall_clock_limit_s": 420
+  },
+  "invalid_attempts": [
+    {
+      "attempt": "run1",
+      "error": {
+        "message": "live forbidden contact-load source is missing or unsupported",
+        "type": "RecordingContractError"
+      },
+      "policy_label": "a_standard_input",
+      "report_sha256": "141280b4a5633c393b817eaa142af121fa73bf01b56f765200bcb920e610cacf",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run1/a_standard_input.trace.jsonl",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": "run1",
+      "error": {
+        "message": "live forbidden contact-load source is missing or unsupported",
+        "type": "RecordingContractError"
+      },
+      "policy_label": "b_normalized_input",
+      "report_sha256": "56266eacbf57730dc8fc16504ef686d9a717f0009e3c10a99db6f2bb5a741dfc",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run1/b_normalized_input.trace.jsonl",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "attempt": "run2",
+      "error": {
+        "message": "evaluation contact field differs from measurement: grip_contact_force_peak_n",
+        "type": "PhysicsProbeError"
+      },
+      "policy_label": "a_standard_input",
+      "report_sha256": "100b65c673a659dcea068e13a7785ff85a146388082bd8a6a1f436f2736cc7e7",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run2/a_standard_input.trace.jsonl",
+        "sha256": "0c52640093f5a27118f88977c27d9a5797fba4b119bcae51761172647ed0ea89"
+      }
+    },
+    {
+      "attempt": "run2",
+      "error": {
+        "message": "evaluation contact field differs from measurement: grip_contact_force_peak_n",
+        "type": "PhysicsProbeError"
+      },
+      "policy_label": "b_normalized_input",
+      "report_sha256": "7235eaac66ca2794020e59acbd20911d1c5d507e18c69c772566948d656be397",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run2/b_normalized_input.trace.jsonl",
+        "sha256": "5a8044e640f594a843d0b493b91d4a765dcf58d445f8ee942240758f9d232f0d"
+      }
+    },
+    {
+      "attempt": "run3",
+      "error": {
+        "message": "RJ45 substep endpoint differs from object-pose metrics",
+        "type": "PhysicsProbeError"
+      },
+      "policy_label": "a_standard_input",
+      "report_sha256": "7dfcfa72222a99cd9f770b4daa303a31b77c400a28d6ea11d0179e72be4a5cf5",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run3/a_standard_input.trace.jsonl",
+        "sha256": "f2cfa7b2e212f73bd52ebf71ec921eef01e9896e0b15df0f67097eef623d17d9"
+      }
+    },
+    {
+      "attempt": "run3",
+      "error": {
+        "message": "RJ45 substep endpoint differs from object-pose metrics",
+        "type": "PhysicsProbeError"
+      },
+      "policy_label": "b_normalized_input",
+      "report_sha256": "a829da53f64265ba975cf62586506cf29f0467fda8638710f9a56689c946491b",
+      "status": "invalid",
+      "trace": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/run3/b_normalized_input.trace.jsonl",
+        "sha256": "ee3c59bed435800a6a7571ec7e3cc4505e826133a430bb25cea878f65acab9b0"
+      }
+    }
+  ],
+  "limitations": [
+    "One training condition and one completed episode per policy; no success-rate or causal estimate.",
+    "Diagnostic checkpoints fit one 395-row trajectory and are not the main BC policy.",
+    "Trace stores policy observations, commands and endpoint metrics; nine-substep stability was checked at runtime, but its full arrays are not retained in the trace.",
+    "Brev compute rates and reserves are estimates; provider invoices and account balance were not verified."
+  ],
+  "policies": {
+    "a_standard_input": {
+      "control_elapsed_s": 13.5,
+      "control_rows": 405,
+      "first_observation_sha256": "7802c95d2f1ade746d97350a18ddbfdb9f5bee2803436917a3cf3d6a685a3a67",
+      "first_valid_observation_sha256": "fc779c831d284fd83e22d87f65911c2726ba496c845d536e4c23279f14f1a218",
+      "first_valid_policy_input_step": 19,
+      "policy": {
+        "actor_state_sha256": "d901b02c36654df9cf83474fe66036582f54b9347abc5db505f16833788795a3",
+        "file_sha256": "b36c7e0e9ec09389286d1d6c6f61bc60b97f6f5d8ccc81effa7a28a47d1329be",
+        "input_transform_kind": "identity",
+        "normalizer_array_sha256": {
+          "constant_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "feature_zero_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "mean32": "7802c95d2f1ade746d97350a18ddbfdb9f5bee2803436917a3cf3d6a685a3a67",
+          "mean64": "a8fe888f287d6d55df301aca05239c44f27e29d1ea4023657a641984de969026",
+          "scale32": "a3ec5791638d1269770934d5792421b7beaabba1808414aed6889b6a2984e701",
+          "scale64": "df5334697f0d2bf5ad5f1fd80583134229fd0d3a9545a36ceca26bff6ef8e78c",
+          "std64": "df5334697f0d2bf5ad5f1fd80583134229fd0d3a9545a36ceca26bff6ef8e78c"
+        },
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/inputs/a_axis_scaled_standard_input.pt"
+      },
+      "report": {
+        "path": "a_standard_input.report.json",
+        "sha256": "dee48a333bd7f994b31b77b2e17e1eebd6ffae4721eb84adeaffdbc331b683a7"
+      },
+      "source_attempt": "run4",
+      "status": "valid_success",
+      "terminal_evaluation": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012295475343689449,
+          "forbidden_contact": false,
+          "force_peak_n": 3.777757406234741,
+          "grasp_both": true,
+          "lateral_error_m": 2.5058750777837995e-06,
+          "orientation_error_rad": 1.3305924497427355e-05
+        },
+        "success": true,
+        "terminal_timestamp_s": 13.266667366027832,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "trace": {
+        "gzip_sha256": "46023056f24680cb6f0f819b469d3fc44d8ef6c570b3ccc23138f22506e60cb8",
+        "path": "a_standard_input.trace.jsonl.gz",
+        "uncompressed_sha256": "aaf691d357736b002814e2771d3428a1fbd2e9e9eaa32f27f6e2059cc7f9f947"
+      },
+      "valid_policy_input_rows": 387
+    },
+    "b_normalized_input": {
+      "control_elapsed_s": 24.233333333333334,
+      "control_rows": 727,
+      "first_observation_sha256": "7802c95d2f1ade746d97350a18ddbfdb9f5bee2803436917a3cf3d6a685a3a67",
+      "first_valid_observation_sha256": "fc779c831d284fd83e22d87f65911c2726ba496c845d536e4c23279f14f1a218",
+      "first_valid_policy_input_step": 19,
+      "policy": {
+        "actor_state_sha256": "d3bf262d7033772828ce53c2e4b4d6a583db830b99a0f47b9e1d6643bed3f0c5",
+        "file_sha256": "a4bd4eb498e27c09899608591480287a45016beb466a2f8d0a74879ef400ee65",
+        "input_transform_kind": "train_standardize",
+        "normalizer_array_sha256": {
+          "constant_mask": "9712cab74a2c850bd8a508dae60a88177964048af1903416aaeb569ec12b9581",
+          "feature_zero_mask": "41681f90ae14d87dee5d37d19500fc21d85c2b3e7b0dd697a27c36d03e3606ba",
+          "mean32": "5ec534ccfa1326ab60e75dc233d12974c651c32c3812aa07f39f0bae523c06a6",
+          "mean64": "b6877b9da3ca7b2eaa3726e979f4c03686e21f86234f2efa6e8a46b835ee76a4",
+          "scale32": "0ee52764ceda212d7b5ca3ad535166e7e08110c009a5a43806058146c33c6c47",
+          "scale64": "b82e2d7363268d3083ca0152e1a0f4b40c7f6a14e8e2292b12e8154609703f7b",
+          "std64": "69c29449d673f62d9b48ab9cdeddff35e4c82db7e0300f8daf74bc427be35663"
+        },
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/inputs/b_axis_scaled_train_normalized_input.pt"
+      },
+      "report": {
+        "path": "b_normalized_input.report.json",
+        "sha256": "c03400722b3e5f1409305a4f8f2eb00169a7dfdf10dc299eae69497b9b55620a"
+      },
+      "source_attempt": "run5",
+      "status": "valid_failure",
+      "terminal_evaluation": {
+        "criteria": {
+          "depth": false,
+          "dwell": false,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": false,
+          "lateral": false,
+          "orientation": false
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": -0.0010258751442875497,
+          "forbidden_contact": false,
+          "force_peak_n": 7.11679744720459,
+          "grasp_both": true,
+          "lateral_error_m": 0.0005038914468321272,
+          "orientation_error_rad": 0.6390485401341754
+        },
+        "success": false,
+        "terminal_timestamp_s": 24.000001907348633,
+        "termination_reason": "episode_timeout",
+        "valid": true
+      },
+      "trace": {
+        "gzip_sha256": "ba3c488b20e8fc026c7a26eb9a8dea8cf1210af09c7deaa321031ebd4864567f",
+        "path": "b_normalized_input.trace.jsonl.gz",
+        "uncompressed_sha256": "172de672eadc7fec2794ded703b48f02e31ce2ef6715c463a377ab8f9103d919"
+      },
+      "valid_policy_input_rows": 709
+    }
+  },
+  "runtime": {
+    "driver": "595.112.07",
+    "gpu": "L40S 48 GB",
+    "gpu_count": 1,
+    "instance_id": "g4xfquxz3",
+    "instance_name": "rby1-g2-l40s-20261031",
+    "physics": {
+      "control_decimation": 8,
+      "control_hz": 30,
+      "horizon_s": 24.0,
+      "physics_hz": 240
+    },
+    "physics_source_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "provider": "aws",
+    "runtime_versions": {
+      "h5py": "3.14.0",
+      "isaaclab": "0.47.2",
+      "isaaclab-rl": "0.4.4",
+      "isaacsim": "5.1.0.0",
+      "numpy": "1.26.0",
+      "rsl-rl-lib": "3.0.1",
+      "torch": "2.7.0+cu128"
+    },
+    "type": "g6e.4xlarge"
+  },
+  "schema_name": "rj45_g2_fixed_condition_physics_result_v1",
+  "validation": {
+    "independent_code_review": "APPROVE; final code and retrieved runtime artifacts independently reviewed",
+    "local_pytest_command": "PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+    "log_sha256": "903595eb3b60bb5e8659160cdcb100daf1f546ece583d904c378380c102d51a8",
+    "passed": 709,
+    "runner_sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "subtests_passed": 292,
+    "test_sha256": "e0502e1d666d06699031fdb70119c886ea904176aa460d9a9a5dcf84af113c3b"
+  }
+}
