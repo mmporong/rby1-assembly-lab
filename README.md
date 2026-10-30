@@ -57,10 +57,12 @@ Python 3.11 환경에서 실행한다. 이 단계는 GPU 없이 가능하다.
 cd "$HOME/rby1-assembly-lab"
 uv venv --python 3.11 .venv
 uv pip install --python .venv/bin/python -e '.[assets]'
+uv pip install --python .venv/bin/python pytest==9.2.0
+uv pip install --python .venv/bin/python --index-url https://download.pytorch.org/whl/cpu 'torch==2.7.0+cpu'
 .venv/bin/python scripts/fetch_assets.py
 .venv/bin/python scripts/build_scene.py
 .venv/bin/python scripts/audit_assets.py --generated --output artifacts/asset-audit.json
-PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+PYTHONPATH=src .venv/bin/python -m pytest -q tests
 ```
 
 `assets/generated/scene.usda`는 정적 장면이다. USD 생성이나 단위 테스트 통과는 물리 과제 성공을 뜻하지 않는다.
