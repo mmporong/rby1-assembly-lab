@@ -1,0 +1,18 @@
+{
+  "status": "completed",
+  "ledger_before_sha256": "a114d79e7d6f927d71bf79ee65fe1d4e15e1c6ed72aa161345d81529c199fb66",
+  "verified_regular_files": 896,
+  "archived_directory_count": 8,
+  "archived_logical_bytes": 1473407219,
+  "dedup_group_count": 0,
+  "dedup_path_count": 0,
+  "logical_duplicate_bytes_saved": 0,
+  "allocated_bytes_saved": 0,
+  "df_available_before_bytes": 3749552128,
+  "df_available_after_bytes": 3749515264,
+  "all_original_paths_readable": true,
+  "all_original_byte_hashes_match": true,
+  "all_original_file_inodes_modes_mtimes_match": true,
+  "training_data_and_checkpoints_deleted": false,
+  "progress_sha256": "6dd87c9cb10e5aad632030af222811cf872cc5daa4906a97e0a2218d17a672eb"
+}

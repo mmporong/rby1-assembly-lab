@@ -1,0 +1,83 @@
+{
+  "schema": "rj45_storage_archive_summary_v1",
+  "status": "completed",
+  "ledger_before_sha256": "a114d79e7d6f927d71bf79ee65fe1d4e15e1c6ed72aa161345d81529c199fb66",
+  "verified_regular_files": 896,
+  "archived_directory_count": 8,
+  "archived_logical_bytes": 1473407219,
+  "dedup_group_count": 0,
+  "dedup_path_count": 0,
+  "logical_duplicate_bytes_saved": 0,
+  "allocated_bytes_saved": 0,
+  "df_available_before_bytes": 3749552128,
+  "df_available_after_bytes": 3749515264,
+  "all_original_paths_readable": true,
+  "all_original_byte_hashes_match": true,
+  "all_original_file_inodes_modes_mtimes_match": true,
+  "training_data_and_checkpoints_deleted": false,
+  "progress_sha256": "6dd87c9cb10e5aad632030af222811cf872cc5daa4906a97e0a2218d17a672eb",
+  "moved_regular_files": 888,
+  "moves": [
+    {
+      "old_path": "artifacts/cloud/ppo-smoke",
+      "new_path": "artifacts/archive/20261031/cloud/ppo-smoke",
+      "files": 5,
+      "logical_bytes": 3028851,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/previous-early-failures",
+      "new_path": "artifacts/archive/20261031/cloud/previous-early-failures",
+      "files": 3,
+      "logical_bytes": 983655,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/rj45-paired-audit-sample-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/rj45-paired-audit-sample-20261028",
+      "files": 69,
+      "logical_bytes": 37450252,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/rj45-paired-failed-snapshot-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/rj45-paired-failed-snapshot-20261028",
+      "files": 214,
+      "logical_bytes": 154084311,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-rj45-parallel-media-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-rj45-parallel-media-20261028",
+      "files": 230,
+      "logical_bytes": 165230795,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-generation-v2-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-generation-v2-20261028",
+      "files": 94,
+      "logical_bytes": 174008222,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-recovery-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-recovery-20261028",
+      "files": 51,
+      "logical_bytes": 69603510,
+      "symlinks": []
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "files": 222,
+      "logical_bytes": 869017623,
+      "symlinks": []
+    }
+  ],
+  "operation": "same-device archival with old relative directory symlinks; no file-content change or deletion",
+  "ledger_compressed_sha256": "847fe8f7556f430b1e18291536bb50688ebd4b153853017ffce1f3729493d742",
+  "cleanup_source_sha256": "0dd3781bc92aa809587374c166ad6444278ea325bd5622125a845e1f931533aa",
+  "duplicate_content_merging": "deferred; no complete open-writer proof for all processes",
+  "current_cloud_execution_artifacts_preserved": true
+}

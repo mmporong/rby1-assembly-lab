@@ -1,0 +1,319 @@
+{
+  "schema": "rj45_storage_cleanup_independent_verification_v1",
+  "verified_at_utc": "2026-10-30T23:28:46.155558+00:00",
+  "status": "passed",
+  "scope": "post-execution verification of eight same-device directory moves and old-path relative symlinks; no deduplication or deletion",
+  "sources": {
+    "plan": {
+      "path": "artifacts/maintenance/cleanup-20261031/plan.json",
+      "sha256": "0d0bfaac5f4505a72ba3ec20521def8d391fb38f60a200c443c58c8b61f7b0df"
+    },
+    "receipt": {
+      "path": "artifacts/maintenance/cleanup-20261031/receipt.json",
+      "sha256": "e7412e5288c83a1e8ffdb092014d6f1ee19e6ea21afb50b155abf1f13483230b"
+    },
+    "progress": {
+      "path": "artifacts/maintenance/cleanup-20261031/progress.jsonl",
+      "sha256": "6dd87c9cb10e5aad632030af222811cf872cc5daa4906a97e0a2218d17a672eb"
+    },
+    "ledger_gzip": {
+      "path": "docs/evidence/rj45-storage-cleanup-20261031/ledger-before.json.gz",
+      "sha256": "847fe8f7556f430b1e18291536bb50688ebd4b153853017ffce1f3729493d742",
+      "decompressed_sha256": "a114d79e7d6f927d71bf79ee65fe1d4e15e1c6ed72aa161345d81529c199fb66"
+    },
+    "summary": {
+      "path": "docs/evidence/rj45-storage-cleanup-20261031/summary.json",
+      "sha256": "ff4252885353b7683471b6f1edc4c3833a6f7ac4598372d774284a5c7c49084f"
+    }
+  },
+  "verified": {
+    "archived_directories": 8,
+    "moved_regular_files": 888,
+    "all_ledger_regular_files": 896,
+    "directory_entries": 199,
+    "membership_entries": 1087,
+    "archived_logical_bytes": 1473407219,
+    "outside_regular_files": [
+      "artifacts/rj45/rj45-pickup-29.jsonl",
+      "artifacts/rj45/rj45-pickup-30.jsonl",
+      "artifacts/rj45/rj45-pickup-32.jsonl",
+      "artifacts/rj45/rj45-pickup-34.jsonl",
+      "artifacts/rj45/rj45-pickup-38.jsonl",
+      "artifacts/rj45/rj45-pickup-40.jsonl",
+      "artifacts/rj45/rj45-pickup-42.jsonl",
+      "artifacts/rj45-paper-ablation/nominal.jsonl"
+    ],
+    "duplicate_content_merging": false,
+    "files_deleted": false,
+    "allocated_bytes_saved": 0
+  },
+  "moves": [
+    {
+      "old_path": "artifacts/cloud/ppo-smoke",
+      "new_path": "artifacts/archive/20261031/cloud/ppo-smoke",
+      "relative_symlink_target": "../archive/20261031/cloud/ppo-smoke",
+      "membership_entries": 8,
+      "regular_files": 5,
+      "logical_bytes": 3028851,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/previous-early-failures",
+      "new_path": "artifacts/archive/20261031/cloud/previous-early-failures",
+      "relative_symlink_target": "../archive/20261031/cloud/previous-early-failures",
+      "membership_entries": 4,
+      "regular_files": 3,
+      "logical_bytes": 983655,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/rj45-paired-audit-sample-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/rj45-paired-audit-sample-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/rj45-paired-audit-sample-20261028",
+      "membership_entries": 90,
+      "regular_files": 69,
+      "logical_bytes": 37450252,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/rj45-paired-failed-snapshot-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/rj45-paired-failed-snapshot-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/rj45-paired-failed-snapshot-20261028",
+      "membership_entries": 260,
+      "regular_files": 214,
+      "logical_bytes": 154084311,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-rj45-parallel-media-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-rj45-parallel-media-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/retrieved-rj45-parallel-media-20261028",
+      "membership_entries": 276,
+      "regular_files": 230,
+      "logical_bytes": 165230795,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-generation-v2-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-generation-v2-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/retrieved-4c-generation-v2-20261028",
+      "membership_entries": 117,
+      "regular_files": 94,
+      "logical_bytes": 174008222,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-recovery-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-recovery-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/retrieved-4c-recovery-20261028",
+      "membership_entries": 62,
+      "regular_files": 51,
+      "logical_bytes": 69603510,
+      "passed": true
+    },
+    {
+      "old_path": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "new_path": "artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "relative_symlink_target": "../archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "membership_entries": 270,
+      "regular_files": 222,
+      "logical_bytes": 869017623,
+      "passed": true
+    }
+  ],
+  "checks": [
+    {
+      "name": "ledger_decompressed_sha256",
+      "passed": true,
+      "details": {
+        "actual": "a114d79e7d6f927d71bf79ee65fe1d4e15e1c6ed72aa161345d81529c199fb66"
+      }
+    },
+    {
+      "name": "move_count",
+      "passed": true,
+      "details": {
+        "actual": 8
+      }
+    },
+    {
+      "name": "dedup_and_deletion_absent",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "progress_sha256",
+      "passed": true,
+      "details": {
+        "actual": "6dd87c9cb10e5aad632030af222811cf872cc5daa4906a97e0a2218d17a672eb"
+      }
+    },
+    {
+      "name": "progress_event_count_and_order",
+      "passed": true,
+      "details": {
+        "events": [
+          "validated",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved",
+          "move_intent",
+          "moved"
+        ]
+      }
+    },
+    {
+      "name": "symlink:artifacts/cloud/ppo-smoke",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/ppo-smoke",
+        "expected": "../archive/20261031/cloud/ppo-smoke"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/ppo-smoke",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/previous-early-failures",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/previous-early-failures",
+        "expected": "../archive/20261031/cloud/previous-early-failures"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/previous-early-failures",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/rj45-paired-audit-sample-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/rj45-paired-audit-sample-20261028",
+        "expected": "../archive/20261031/cloud/rj45-paired-audit-sample-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/rj45-paired-audit-sample-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/rj45-paired-failed-snapshot-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/rj45-paired-failed-snapshot-20261028",
+        "expected": "../archive/20261031/cloud/rj45-paired-failed-snapshot-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/rj45-paired-failed-snapshot-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/retrieved-rj45-parallel-media-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/retrieved-rj45-parallel-media-20261028",
+        "expected": "../archive/20261031/cloud/retrieved-rj45-parallel-media-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/retrieved-rj45-parallel-media-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/retrieved-4c-generation-v2-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/retrieved-4c-generation-v2-20261028",
+        "expected": "../archive/20261031/cloud/retrieved-4c-generation-v2-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/retrieved-4c-generation-v2-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/retrieved-4c-recovery-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/retrieved-4c-recovery-20261028",
+        "expected": "../archive/20261031/cloud/retrieved-4c-recovery-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/retrieved-4c-recovery-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "symlink:artifacts/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "passed": true,
+      "details": {
+        "actual": "../archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028",
+        "expected": "../archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028"
+      }
+    },
+    {
+      "name": "archive_directory:artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "exact_subtree_membership",
+      "passed": true,
+      "details": {
+        "entries": 1087
+      }
+    },
+    {
+      "name": "regular_file_metadata_and_sha256",
+      "passed": true,
+      "details": {
+        "verified": 896
+      }
+    },
+    {
+      "name": "directory_metadata",
+      "passed": true,
+      "details": {
+        "verified": 199
+      }
+    },
+    {
+      "name": "receipt_counts",
+      "passed": true,
+      "details": {
+        "regular_verified": 896,
+        "moved_regular": 888,
+        "archived_logical_bytes": 1473407219,
+        "outside_regular_verified": 8
+      }
+    },
+    {
+      "name": "all_move_summaries",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "issues": [],
+  "interpretation": "The operation reorganized preserved historical artifacts and retained old-path compatibility. It did not reclaim storage and made no training-data or checkpoint deletion."
+}

@@ -1,0 +1,17 @@
+{"event": "validated", "ledger_sha256": "a114d79e7d6f927d71bf79ee65fe1d4e15e1c6ed72aa161345d81529c199fb66"}
+{"event": "move_intent", "old": "artifacts/cloud/ppo-smoke", "new": "artifacts/archive/20261031/cloud/ppo-smoke"}
+{"event": "moved", "old": "artifacts/cloud/ppo-smoke", "target": "../archive/20261031/cloud/ppo-smoke"}
+{"event": "move_intent", "old": "artifacts/cloud/previous-early-failures", "new": "artifacts/archive/20261031/cloud/previous-early-failures"}
+{"event": "moved", "old": "artifacts/cloud/previous-early-failures", "target": "../archive/20261031/cloud/previous-early-failures"}
+{"event": "move_intent", "old": "artifacts/cloud/rj45-paired-audit-sample-20261028", "new": "artifacts/archive/20261031/cloud/rj45-paired-audit-sample-20261028"}
+{"event": "moved", "old": "artifacts/cloud/rj45-paired-audit-sample-20261028", "target": "../archive/20261031/cloud/rj45-paired-audit-sample-20261028"}
+{"event": "move_intent", "old": "artifacts/cloud/rj45-paired-failed-snapshot-20261028", "new": "artifacts/archive/20261031/cloud/rj45-paired-failed-snapshot-20261028"}
+{"event": "moved", "old": "artifacts/cloud/rj45-paired-failed-snapshot-20261028", "target": "../archive/20261031/cloud/rj45-paired-failed-snapshot-20261028"}
+{"event": "move_intent", "old": "artifacts/cloud/retrieved-rj45-parallel-media-20261028", "new": "artifacts/archive/20261031/cloud/retrieved-rj45-parallel-media-20261028"}
+{"event": "moved", "old": "artifacts/cloud/retrieved-rj45-parallel-media-20261028", "target": "../archive/20261031/cloud/retrieved-rj45-parallel-media-20261028"}
+{"event": "move_intent", "old": "artifacts/cloud/retrieved-4c-generation-v2-20261028", "new": "artifacts/archive/20261031/cloud/retrieved-4c-generation-v2-20261028"}
+{"event": "moved", "old": "artifacts/cloud/retrieved-4c-generation-v2-20261028", "target": "../archive/20261031/cloud/retrieved-4c-generation-v2-20261028"}
+{"event": "move_intent", "old": "artifacts/cloud/retrieved-4c-recovery-20261028", "new": "artifacts/archive/20261031/cloud/retrieved-4c-recovery-20261028"}
+{"event": "moved", "old": "artifacts/cloud/retrieved-4c-recovery-20261028", "target": "../archive/20261031/cloud/retrieved-4c-recovery-20261028"}
+{"event": "move_intent", "old": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028", "new": "artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028"}
+{"event": "moved", "old": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028", "target": "../archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028"}
