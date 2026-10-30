@@ -1,0 +1,79 @@
+{
+  "arrays": {
+    "action": {
+      "sha256": "1a6449d11a92194a0c9b2942cc6b82b44ca9b75257cf79749e717ff5526e26d9"
+    },
+    "observation": {
+      "sha256": "18d97feb47b8f0d27308e47a004ca9185621a106beef8658a8e8c01513e8b356"
+    },
+    "valid_mask": {
+      "sha256": "751d7c3e2e1df57dd8d260ce29c95554f91ce56300fa5c5645de87f7154595b0"
+    }
+  },
+  "artifact_kind": "train_only_fixed_condition_offline_bc_probe_input",
+  "claims": {
+    "closed_loop_success": false,
+    "heldout_generalization": false,
+    "main_bc_actor_reusable": false,
+    "reinforcement_learning": false,
+    "train_only": true
+  },
+  "condition": {
+    "bias_case_id": "env-0-episode-1",
+    "episode_ids": [
+      "train-env0-episode1-247"
+    ],
+    "grasp_id": "rj45-train-02",
+    "seed": 66384140,
+    "split": "train",
+    "successful_and_terminal_valid": true
+  },
+  "contract": {
+    "action": "normalized teacher_applied 6D BC command; translation and rotation triplets are separately unit-ball bounded, not physical micrometre errors",
+    "fit_rows": "valid_mask_true_only",
+    "observation": "standard79_without_additional_normalization"
+  },
+  "inputs": {
+    "script": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "teacher_dataset": {
+      "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-4c-teacher-bc-collector-recovery-20261028/payload/artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/teacher-train.h5",
+      "sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc"
+    }
+  },
+  "lineage": {
+    "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+    "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+  },
+  "npz": {
+    "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+    "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+  },
+  "row_counts": {
+    "episode_total": 418,
+    "valid_action": 395
+  },
+  "runtime": {
+    "h5py": "3.14.0",
+    "numpy": "1.26.0",
+    "python": "3.11.15"
+  },
+  "schema_name": "rj45_train_condition_probe_v1",
+  "shapes": {
+    "action": [
+      418,
+      6
+    ],
+    "observation": [
+      418,
+      79
+    ],
+    "valid_mask": [
+      418
+    ]
+  }
+}

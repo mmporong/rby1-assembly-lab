@@ -1,0 +1,181 @@
+{
+  "artifact": {
+    "actor_state_sha256": "edc4d42f1e65236502ec67a508b65e51e04ec78acaf0e20615bae0292967aec3",
+    "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/fit/final-diagnostic-actor.pt",
+    "sha256": "b960fdd902453d0d37051f6d3f229898f46dd40bb0540db28d661f2702a12a77"
+  },
+  "artifact_kind": "train_only_fixed_condition_offline_bc_overfit_result",
+  "claims": {
+    "closed_loop_success": false,
+    "heldout_generalization": false,
+    "main_bc_actor_reusable": false,
+    "physics_learning_progress_gate": false,
+    "reinforcement_learning": false,
+    "same_trajectory_regression_check": true
+  },
+  "diagnostics": [
+    {
+      "optimizer_step": 200,
+      "train_normalized_mse": 2.345956318094977e-06
+    },
+    {
+      "optimizer_step": 400,
+      "train_normalized_mse": 2.341385425097542e-06
+    },
+    {
+      "optimizer_step": 600,
+      "train_normalized_mse": 2.332817075512139e-06
+    },
+    {
+      "optimizer_step": 800,
+      "train_normalized_mse": 2.31330091082782e-06
+    },
+    {
+      "optimizer_step": 1000,
+      "train_normalized_mse": 2.332370740987244e-06
+    },
+    {
+      "optimizer_step": 1200,
+      "train_normalized_mse": 2.2940942017157795e-06
+    },
+    {
+      "optimizer_step": 1400,
+      "train_normalized_mse": 2.3191009859147016e-06
+    },
+    {
+      "optimizer_step": 1600,
+      "train_normalized_mse": 2.3204593162517995e-06
+    },
+    {
+      "optimizer_step": 1800,
+      "train_normalized_mse": 2.3156114821176743e-06
+    },
+    {
+      "optimizer_step": 2000,
+      "train_normalized_mse": 2.3375296223093756e-06
+    }
+  ],
+  "input": {
+    "episode_ids": [
+      "train-env0-episode1-247"
+    ],
+    "lineage": {
+      "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+      "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+      "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+      "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+    },
+    "manifest_path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+    "manifest_sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578",
+    "valid_rows": 395
+  },
+  "interpretation": "This only tests whether the existing BC actor can regress one fixed train trajectory in normalized action coordinates. It is not held-out, RL, or closed-loop evidence and does not replace the physics-learning gate. The zero-relative pre-registered fit criterion alone does not demonstrate state-dependent trajectory tracking because a constant train-mean action predictor nearly matches the final actor.",
+  "metrics": {
+    "constant_train_mean_action": {
+      "axis_normalized_mse": {
+        "rx": 2.473697620043686e-07,
+        "ry": 6.797767065144734e-07,
+        "rz": 5.794606754112776e-06,
+        "tx": 4.329036239354651e-06,
+        "ty": 2.9369484302238864e-06,
+        "tz": 1.3789762112456904e-07
+      },
+      "axis_normalized_rmse": {
+        "rx": 0.0004973628072186023,
+        "ry": 0.0008244857224442843,
+        "rz": 0.002407198943609102,
+        "tx": 0.002080633614876644,
+        "ty": 0.0017137527331047167,
+        "tz": 0.0003713456895193063
+      },
+      "mean_normalized_action": {
+        "rx": -0.01090811479105791,
+        "ry": -0.049664167352492294,
+        "rz": -0.010903005583706913,
+        "tx": 0.0007500624856883976,
+        "ty": -0.004899548479289184,
+        "tz": -0.011419242257370224
+      },
+      "overall_normalized_mse": 2.3542725855557875e-06,
+      "predictor": "per_axis_train_mean_action_repeated_for_every_row"
+    },
+    "final_actor": {
+      "axis_normalized_mse": {
+        "rx": 2.4678071299366793e-07,
+        "ry": 6.843273245566868e-07,
+        "rz": 5.730827937884122e-06,
+        "tx": 4.3096504061199105e-06,
+        "ty": 2.9167995190996545e-06,
+        "tz": 1.3679093065174197e-07
+      },
+      "axis_normalized_rmse": {
+        "rx": 0.0004967702819147578,
+        "ry": 0.0008272407899497502,
+        "rz": 0.0023939147724771075,
+        "tx": 0.0020759697507718917,
+        "ty": 0.001707864022426743,
+        "tz": 0.00036985257962023456
+      },
+      "overall_normalized_mse": 2.3375294718842972e-06
+    },
+    "final_to_constant_mean_axis_mse_ratios": {
+      "rx": 0.997618750950287,
+      "ry": 1.0066942835766561,
+      "rz": 0.9889934176838858,
+      "tx": 0.995521905532112,
+      "ty": 0.9931395080291907,
+      "tz": 0.9919745499320299
+    },
+    "final_to_constant_mean_mse_ratio": 0.9928882008930425,
+    "final_to_initial_mse_ratio": 0.0048808945435213375,
+    "initial_zero_output": {
+      "axis_normalized_mse": {
+        "rx": 0.0001192343379466653,
+        "ry": 0.0024672092922927834,
+        "rz": 0.00012467013744937988,
+        "tx": 4.8916299641432466e-06,
+        "ty": 2.6942523678655653e-05,
+        "tz": 0.00013053699137195003
+      },
+      "axis_normalized_rmse": {
+        "rx": 0.010919447694213536,
+        "ry": 0.04967101058255996,
+        "rz": 0.011165578240708355,
+        "tx": 0.0022117029556753876,
+        "ty": 0.005190618814616968,
+        "tz": 0.011425278612443112
+      },
+      "overall_normalized_mse": 0.00047891415211726306
+    },
+    "parameters_finite": true
+  },
+  "post_hoc_constant_baseline_diagnostic": {
+    "added_after_initial_zero_relative_result": true,
+    "changes_original_fit_criterion_or_result": false,
+    "conclusion": "The zero-relative PASS is insufficient evidence of state-dependent tracking; no new retrospective pass threshold is defined.",
+    "pre_registered_pass_criterion": false,
+    "purpose": "Check whether the zero-relative improvement could be explained by learning the fixed trajectory's mean normalized action."
+  },
+  "pre_registered_offline_fit_criterion": {
+    "definition": "final normalized MSE <= 1% of initial zero-output MSE and finite",
+    "met": true
+  },
+  "recipe": {
+    "device": "cpu",
+    "final_layer_initialization": "zero_weight_and_bias",
+    "full_batch_optimizer_steps": 2000,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "report_interval_steps": 200,
+    "seed": 20261030,
+    "selection": "final_actor_only_no_intermediate_checkpoint_selection",
+    "threads": 2
+  },
+  "runtime": {
+    "numpy": "1.26.4",
+    "python": "3.12.3",
+    "torch": "2.13.0+cu130"
+  },
+  "schema_name": "rj45_train_condition_probe_v1",
+  "status": "completed"
+}
