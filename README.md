@@ -22,6 +22,7 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 | BC 안정화 실패 분석 | 선택된 BC 두 실행에서 자세 조건을 통과한 141개·31개 제어 시점 모두 속도 조건 위반 | 완료. 기준 제어의 같은 env54 사례는 0.4초 안정 유지 후 성공했다. 프레임 중복을 제거한 진단이며 전체 실패율이나 원인 확정으로 해석하지 않는다. [재현 분석](docs/evidence/rj45-stability-diagnosis-20261030/README.md) · [성공 1편·실패 2편과 동기 측정값](docs/evidence/rj45-demonstrations-20261028/policy-media/README.md) |
 | 고정 train 조건의 CPU 회귀 진단 | 유효 395행·2,000 step, 평균 행동 기준 대비 MSE 비율 `0.9929` | 완료. zero 행동 대비 오차 감소만으로는 상태에 따른 행동 학습을 입증할 수 없었다. 폐루프·강화학습·일반화 검증은 남아 있다. [입력 계보](docs/evidence/rj45-train-condition-probe-20261030/input-manifest.json) · [축별 오차와 평균 행동 대조](docs/evidence/rj45-train-condition-probe-20261030/fit-result.json) |
 | 전체 train 시연의 행동 예측 대조 | 95,826행에서 직전 교사 행동 복사 대비 BC의 MSE 감소 약 2.34% | 완료. BC는 전체 평균 행동보다 오차가 작았다. 교사가 실행한 이력의 사후 분석이므로 학생의 폐루프 성능이나 실패 원인의 증명은 아니다. [기준선·계보·재현](docs/evidence/rj45-teacher-forced-baselines-20261030/README.md) |
+| 고정 train 조건의 학습률 비교 | 학습률 `1e-3`·`1e-4` 모두 평균 행동 기준과 오차가 비슷했다. | 완료. 같은 런타임·초기 actor·입력에서 학습률만 바꿨다. 낮춘 학습률은 사전 진단 기준에 미달했다. [프로토콜·수치·해석](docs/evidence/rj45-g2-optimizer-probe-20261030/README.md) |
 
 현재 PPO의 추가 개선 효과는 입증하지 못했다. 다음 실험은 기준 제어·BC-only·PPO-only·같은 BC에서 시작한 PPO를 비교해 시연과 강화학습의 효과를 구분한다. 정책은 삽입 단계의 오른손 6차원 목표 보정을 결정하며, 지지팔과 삽입 진행·중단·복구는 스크립트가 담당한다. 작은 train 조건의 폐루프 진단을 통과한 뒤 다중 seed 비교를 수행한다. 데이터 분리와 판정 기준은 [강화학습 기여 검증 계획](docs/rj45-rl-contribution-plan.md)에 있다.
 

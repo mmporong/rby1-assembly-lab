@@ -1,0 +1,351 @@
+{
+  "claims": {
+    "closed_loop_physics_proven": false,
+    "heldout_generalization_proven": false,
+    "reinforcement_learning_proven": false,
+    "same_trajectory_optimizer_diagnostic": true,
+    "state_dependent_feedback_proven": false
+  },
+  "completed_at_utc": "2026-10-30T13:16:46.442449Z",
+  "diagnostic_criterion": {
+    "checks": {
+      "e1_at_most_90_percent_of_constant_mean": false,
+      "e1_last_five_monotonic_nonincrease": true,
+      "e1_lower_than_e0": false
+    },
+    "met": false,
+    "values": {
+      "constant_train_mean_normalized_mse": 2.3542725855557875e-06,
+      "e0_final_normalized_mse": 2.3204543819962887e-06,
+      "e1_final_normalized_mse": 2.336098790539343e-06,
+      "e1_last_five_reported_mse": [
+        2.3444231374014635e-06,
+        2.3430104647559347e-06,
+        2.341222398172249e-06,
+        2.339004595341976e-06,
+        2.3360989871434867e-06
+      ],
+      "e1_to_constant_mean_ratio": 0.9922805051853612
+    }
+  },
+  "initial_actor": {
+    "actor_state_sha256": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+    "per_run": {
+      "e0": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f",
+      "e1": "cef1e9bf062d4d63516cdc6a391dce6de37f5bd9e1a2125e22b3ae1611be3c5f"
+    },
+    "same_state_for_both_runs": true
+  },
+  "input_identity": {
+    "helper": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "manifest": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+      "sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578"
+    },
+    "npz": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+      "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+    },
+    "runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_optimizer_probe.py",
+      "sha256": "9b751ee4fd6f684eb6c76829ef108c73e76fa92e0c25e7dbac1ba4718ce36543"
+    }
+  },
+  "interpretation_limit": "This is a same-trajectory offline regression diagnostic. It does not establish state-dependent feedback, closed-loop physics success, RL contribution, or held-out generalization.",
+  "protocol": {
+    "frozen_at_utc": "2026-10-30T13:16:31.318942Z",
+    "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-g2-optimizer-probe-20261030/protocol.json",
+    "sha256": "c27682a11fb797846f87f58a9f96479561b3132eddb6675e2396186341378bb9"
+  },
+  "runs": {
+    "e0": {
+      "artifact": {
+        "actor_state_sha256": "9658ba4c3e220c0e5a6c6287c33815ce041089a5fc999d59510cbf860b79ead0",
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-optimizer-probe/e0/final-diagnostic-actor.pt",
+        "sha256": "794ba7754b30a84318c772f17c0d99dc096283f451643730e68c5540e0312628"
+      },
+      "diagnostics": [
+        {
+          "optimizer_step": 200,
+          "train_normalized_mse": 2.345956318094977e-06
+        },
+        {
+          "optimizer_step": 400,
+          "train_normalized_mse": 2.341385425097542e-06
+        },
+        {
+          "optimizer_step": 600,
+          "train_normalized_mse": 2.332817075512139e-06
+        },
+        {
+          "optimizer_step": 800,
+          "train_normalized_mse": 2.3132681690185564e-06
+        },
+        {
+          "optimizer_step": 1000,
+          "train_normalized_mse": 2.3344275632553035e-06
+        },
+        {
+          "optimizer_step": 1200,
+          "train_normalized_mse": 2.300247842867975e-06
+        },
+        {
+          "optimizer_step": 1400,
+          "train_normalized_mse": 2.3248310299095465e-06
+        },
+        {
+          "optimizer_step": 1600,
+          "train_normalized_mse": 2.265497869302635e-06
+        },
+        {
+          "optimizer_step": 1800,
+          "train_normalized_mse": 2.3062946183927124e-06
+        },
+        {
+          "optimizer_step": 2000,
+          "train_normalized_mse": 2.320454541404615e-06
+        }
+      ],
+      "metrics": {
+        "constant_train_mean_action": {
+          "axis_normalized_mse": {
+            "rx": 2.473697620043686e-07,
+            "ry": 6.797767065144734e-07,
+            "rz": 5.794606754112776e-06,
+            "tx": 4.329036239354651e-06,
+            "ty": 2.9369484302238864e-06,
+            "tz": 1.3789762112456904e-07
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.0004973628072186023,
+            "ry": 0.0008244857224442843,
+            "rz": 0.002407198943609102,
+            "tx": 0.002080633614876644,
+            "ty": 0.0017137527331047167,
+            "tz": 0.0003713456895193063
+          },
+          "mean_normalized_action": {
+            "rx": -0.01090811479105791,
+            "ry": -0.049664167352492294,
+            "rz": -0.010903005583706913,
+            "tx": 0.0007500624856883976,
+            "ty": -0.004899548479289184,
+            "tz": -0.011419242257370224
+          },
+          "overall_normalized_mse": 2.3542725855557875e-06,
+          "predictor": "per_axis_train_mean_action_repeated_for_every_row"
+        },
+        "final_actor": {
+          "axis_normalized_mse": {
+            "rx": 2.463470597053409e-07,
+            "ry": 6.794278325298654e-07,
+            "rz": 5.7225626916563204e-06,
+            "tx": 4.248857311576106e-06,
+            "ty": 2.8891647083128238e-06,
+            "tz": 1.3636668819727556e-07
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.0004963336173435574,
+            "ry": 0.0008242741246271567,
+            "rz": 0.002392187846231211,
+            "tx": 0.0020612756515265263,
+            "ty": 0.0016997543082201097,
+            "tz": 0.0003692786051171602
+          },
+          "overall_normalized_mse": 2.3204543819962887e-06
+        },
+        "final_to_constant_mean_axis_mse_ratios": {
+          "rx": 0.9958656939686524,
+          "ry": 0.999486781495652,
+          "rz": 0.9875670488932969,
+          "tx": 0.9814788042082785,
+          "ty": 0.9837301460865555,
+          "tz": 0.9888980468639809
+        },
+        "final_to_constant_mean_mse_ratio": 0.9856353916844701,
+        "final_to_initial_mse_ratio": 0.0048452407842567175,
+        "initial_zero_output": {
+          "axis_normalized_mse": {
+            "rx": 0.0001192343379466653,
+            "ry": 0.0024672092922927834,
+            "rz": 0.00012467013744937988,
+            "tx": 4.8916299641432466e-06,
+            "ty": 2.6942523678655653e-05,
+            "tz": 0.00013053699137195003
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.010919447694213536,
+            "ry": 0.04967101058255996,
+            "rz": 0.011165578240708355,
+            "tx": 0.0022117029556753876,
+            "ty": 0.005190618814616968,
+            "tz": 0.011425278612443112
+          },
+          "overall_normalized_mse": 0.00047891415211726306
+        },
+        "parameters_finite": true
+      },
+      "recipe": {
+        "device": "cpu",
+        "final_layer_initialization": "zero_weight_and_bias",
+        "full_batch_optimizer_steps": 2000,
+        "learning_rate": 0.001,
+        "optimizer": "Adam",
+        "report_interval_steps": 200,
+        "seed": 20261030,
+        "selection": "final_actor_only_no_intermediate_checkpoint_selection",
+        "threads": 2
+      }
+    },
+    "e1": {
+      "artifact": {
+        "actor_state_sha256": "76df2c21bd06f086cc79975c523986020eeb54413aed5b548f7f5e173baae183",
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-resume-20261030/g2-optimizer-probe/e1/final-diagnostic-actor.pt",
+        "sha256": "f24e98ac7a3e19663d55843e70cef31ddc2c92e86d186a85a5c82ae780aa0881"
+      },
+      "diagnostics": [
+        {
+          "optimizer_step": 200,
+          "train_normalized_mse": 2.3492273157899035e-06
+        },
+        {
+          "optimizer_step": 400,
+          "train_normalized_mse": 2.3483773929910967e-06
+        },
+        {
+          "optimizer_step": 600,
+          "train_normalized_mse": 2.3475627131119836e-06
+        },
+        {
+          "optimizer_step": 800,
+          "train_normalized_mse": 2.346637984373956e-06
+        },
+        {
+          "optimizer_step": 1000,
+          "train_normalized_mse": 2.3455779682990396e-06
+        },
+        {
+          "optimizer_step": 1200,
+          "train_normalized_mse": 2.3444231374014635e-06
+        },
+        {
+          "optimizer_step": 1400,
+          "train_normalized_mse": 2.3430104647559347e-06
+        },
+        {
+          "optimizer_step": 1600,
+          "train_normalized_mse": 2.341222398172249e-06
+        },
+        {
+          "optimizer_step": 1800,
+          "train_normalized_mse": 2.339004595341976e-06
+        },
+        {
+          "optimizer_step": 2000,
+          "train_normalized_mse": 2.3360989871434867e-06
+        }
+      ],
+      "metrics": {
+        "constant_train_mean_action": {
+          "axis_normalized_mse": {
+            "rx": 2.473697620043686e-07,
+            "ry": 6.797767065144734e-07,
+            "rz": 5.794606754112776e-06,
+            "tx": 4.329036239354651e-06,
+            "ty": 2.9369484302238864e-06,
+            "tz": 1.3789762112456904e-07
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.0004973628072186023,
+            "ry": 0.0008244857224442843,
+            "rz": 0.002407198943609102,
+            "tx": 0.002080633614876644,
+            "ty": 0.0017137527331047167,
+            "tz": 0.0003713456895193063
+          },
+          "mean_normalized_action": {
+            "rx": -0.01090811479105791,
+            "ry": -0.049664167352492294,
+            "rz": -0.010903005583706913,
+            "tx": 0.0007500624856883976,
+            "ty": -0.004899548479289184,
+            "tz": -0.011419242257370224
+          },
+          "overall_normalized_mse": 2.3542725855557875e-06,
+          "predictor": "per_axis_train_mean_action_repeated_for_every_row"
+        },
+        "final_actor": {
+          "axis_normalized_mse": {
+            "rx": 2.4631437571568855e-07,
+            "ry": 6.815438159040725e-07,
+            "rz": 5.780414504421108e-06,
+            "tx": 4.2387464095757874e-06,
+            "ty": 2.9325510612821944e-06,
+            "tz": 1.3702257633720765e-07
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.0004963006908273336,
+            "ry": 0.0008255566703165038,
+            "rz": 0.0024042492600437892,
+            "tx": 0.0020588216070305332,
+            "ty": 0.001712469287690204,
+            "tz": 0.0003701656066373639
+          },
+          "overall_normalized_mse": 2.336098790539343e-06
+        },
+        "final_to_constant_mean_axis_mse_ratios": {
+          "rx": 0.9957335679182107,
+          "ry": 1.0025995438982602,
+          "rz": 0.9975507829445727,
+          "tx": 0.9791432030626004,
+          "ty": 0.9985027422012457,
+          "tz": 0.9936543880871525
+        },
+        "final_to_constant_mean_mse_ratio": 0.9922805051853612,
+        "final_to_initial_mse_ratio": 0.004877907199466815,
+        "initial_zero_output": {
+          "axis_normalized_mse": {
+            "rx": 0.0001192343379466653,
+            "ry": 0.0024672092922927834,
+            "rz": 0.00012467013744937988,
+            "tx": 4.8916299641432466e-06,
+            "ty": 2.6942523678655653e-05,
+            "tz": 0.00013053699137195003
+          },
+          "axis_normalized_rmse": {
+            "rx": 0.010919447694213536,
+            "ry": 0.04967101058255996,
+            "rz": 0.011165578240708355,
+            "tx": 0.0022117029556753876,
+            "ty": 0.005190618814616968,
+            "tz": 0.011425278612443112
+          },
+          "overall_normalized_mse": 0.00047891415211726306
+        },
+        "parameters_finite": true
+      },
+      "recipe": {
+        "device": "cpu",
+        "final_layer_initialization": "zero_weight_and_bias",
+        "full_batch_optimizer_steps": 2000,
+        "learning_rate": 0.0001,
+        "optimizer": "Adam",
+        "report_interval_steps": 200,
+        "seed": 20261030,
+        "selection": "final_actor_only_no_intermediate_checkpoint_selection",
+        "threads": 2
+      }
+    }
+  },
+  "runtime": {
+    "numpy": "1.26.0",
+    "python": "3.11.15",
+    "torch": "2.7.0+cpu"
+  },
+  "schema_name": "rj45_g2_optimizer_probe_v1",
+  "status": "completed",
+  "stop_rule_observed": true
+}

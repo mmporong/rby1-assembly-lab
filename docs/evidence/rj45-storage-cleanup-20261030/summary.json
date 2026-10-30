@@ -1,0 +1,119 @@
+{
+  "started_at_utc": "2026-10-30T13:20:53.055533+00:00",
+  "member_ledger_sha256": "a9bb7d611c790d091d0901393d0f0f886f57b5d298844b4efea6b0a997eaaaee",
+  "df_available_before_bytes": 1791045632,
+  "canonical_payloads_preserved": true,
+  "status": "completed",
+  "removed_archive_count": 11,
+  "removed_logical_bytes": 734086847,
+  "removed_allocated_bytes": 734142464,
+  "df_available_after_bytes": 2525184000,
+  "df_available_delta_bytes": 734138368,
+  "completed_at_utc": "2026-10-30T13:20:53.584133+00:00",
+  "archives": [
+    {
+      "archive_path": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028/rj45-4c-bank-generation-v2-evidence-20261028.tar.gz",
+      "archive_bytes": 218326658,
+      "archive_sha256": "886d05d64305293300ae1950f043b50810c1465170c70a6f8294c5bba4617bef",
+      "canonical_root": "artifacts/cloud/retrieved-4c-bank-generation-v2-20261028/extracted",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 216
+    },
+    {
+      "archive_path": "artifacts/cloud/retrieved-4c-generation-v2-20261028/rj45-4c-generation-v2-evidence-20261028.tar.gz",
+      "archive_bytes": 35928663,
+      "archive_sha256": "6e566795fbaa22523330c7a728aebc67b543aecc8106ed0175d8f5039ecdc96a",
+      "canonical_root": "artifacts/cloud/retrieved-4c-generation-v2-20261028/extracted",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 89
+    },
+    {
+      "archive_path": "artifacts/cloud/retrieved-4c-recovery-20261028/rj45-4c-recovery-evidence-20261028.tar.gz",
+      "archive_bytes": 14126952,
+      "archive_sha256": "7a58eba9e10dc8f5b2723ef56a1b0320e82a2be14362f60b32a7ce1a7f4a1c13",
+      "canonical_root": "artifacts/cloud/retrieved-4c-recovery-20261028/extracted",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 49
+    },
+    {
+      "archive_path": "artifacts/cloud/retrieved-rj45-parallel-media-20261028/rj45-parallel-media-evidence-20261028.tar.gz",
+      "archive_bytes": 62282643,
+      "archive_sha256": "bf42d608bddbc4277c179e3ac87fd61c2a6e36f185cb7ed4e3a33b645157c1b6",
+      "canonical_root": "artifacts/cloud/retrieved-rj45-parallel-media-20261028/extracted",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 213
+    },
+    {
+      "archive_path": "artifacts/cloud/retrieved-4c-teacher-bc-collector-recovery-20261028/rj45-4c-teacher-bc-collector-recovery-evidence-20261028.tar.gz",
+      "archive_bytes": 31981163,
+      "archive_sha256": "a5f6ce84a0534931302cc000b2d74ce87ea775398ed9b2f785b4f2f23953ad0c",
+      "canonical_root": "artifacts/cloud/retrieved-4c-teacher-bc-collector-recovery-20261028/payload",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 21
+    },
+    {
+      "archive_path": "artifacts/cloud/rj45-paired-failed-snapshot-20261028/snapshot.tar.gz",
+      "archive_bytes": 129334220,
+      "archive_sha256": "6fa54e08bc004197a421d1eb62907cb72ff2adccf4dc07d12a125d1f81de3e88",
+      "canonical_root": "artifacts/cloud/rj45-paired-failed-snapshot-20261028/snapshot",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 212
+    },
+    {
+      "archive_path": "artifacts/cloud/rj45-paired-audit-sample-20261028/sample.tar.gz",
+      "archive_bytes": 31999176,
+      "archive_sha256": "c20c8c9ef1fd9514acc64f0b445bdb008f8ef2a5b03891f3afdf5f127ccd2bc0",
+      "canonical_root": "artifacts/cloud/rj45-paired-audit-sample-20261028/snapshot",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 69
+    },
+    {
+      "archive_path": "artifacts/cloud/retrieved-rj45-repeatability-20261028/snapshot.tar.gz",
+      "archive_bytes": 354927,
+      "archive_sha256": "de2f44d4fbcebbbb09850b394d6f18c825f3a9a5faef81c87bced4bb70a9da11",
+      "canonical_root": "artifacts/cloud/retrieved-rj45-repeatability-20261028/snapshot",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 21
+    },
+    {
+      "archive_path": "artifacts/cloud/rj45-4c-pilot-retrieval-20261028.tar.gz",
+      "archive_bytes": 27848021,
+      "archive_sha256": "2cc4503f73bf68eec6bb91fb4746307979792ef62f1153cce45abe513e6c532c",
+      "canonical_root": "artifacts/cloud/retrieved-4c-pilot-20261028",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 28
+    },
+    {
+      "archive_path": "artifacts/cloud/rj45-scale-4b-retrieval-20261028.tar.gz",
+      "archive_bytes": 86555974,
+      "archive_sha256": "7cb8f6ec1c12ab103160faafaf8db9f8693919d9f48e1316311f7f07cb0329eb",
+      "canonical_root": "artifacts/cloud/retrieved-scale-4b-20261028",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 185
+    },
+    {
+      "archive_path": "artifacts/cloud/rj45-f-followup-retrieval-20261028.tar.gz",
+      "archive_bytes": 95348450,
+      "archive_sha256": "4b5b9ed8309ff62d57043d196fd40e1bc731abfb38179c790fcd4578cb90c9fc",
+      "canonical_root": "artifacts/cloud/retrieved-f-followup-20261028",
+      "status": "redundant_archive_removed_canonical_payload_preserved",
+      "members": 115
+    }
+  ],
+  "member_count": 1218,
+  "full_member_ledger": {
+    "path": "artifacts/cloud/rj45-resume-20261030/storage-cleanup/verified-members.json",
+    "sha256": "a9bb7d611c790d091d0901393d0f0f886f57b5d298844b4efea6b0a997eaaaee",
+    "metadata": "member path, byte SHA, size, canonical mode, archive mode/mtime/uid/gid/uname/gname/type/linkname/pax_headers"
+  },
+  "deletion_receipt": {
+    "path": "artifacts/cloud/rj45-resume-20261030/storage-cleanup/deletion-receipt.json",
+    "sha256": "c6086af991db28c99774066aeed6f49f627d58bbe0348585645dd82cd6b52581"
+  },
+  "independent_review": {
+    "path": "artifacts/cloud/rj45-resume-20261030/storage-cleanup/independent-verification.json",
+    "sha256": "c718fac1d855d42925e0085999b58236a310dbcac8d5968ba7c2ab0b4957229b",
+    "pre_delete": "PASS",
+    "post_delete": "PASS"
+  }
+}

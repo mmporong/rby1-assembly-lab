@@ -1,0 +1,68 @@
+{
+  "claims": {
+    "closed_loop_physics_proven": false,
+    "heldout_generalization_proven": false,
+    "reinforcement_learning_proven": false,
+    "same_trajectory_optimizer_diagnostic": true,
+    "state_dependent_feedback_proven": false
+  },
+  "diagnostic_criterion": {
+    "all_conditions_required": true,
+    "controls_rl_or_generalization_gate": false,
+    "definition": "E1 final normalized MSE <= 90% of the constant train-mean MSE, E1 final MSE < E0 final MSE, and E1's last five reported MSE values are monotonically non-increasing"
+  },
+  "frozen_at_utc": "2026-10-30T13:16:31.318942Z",
+  "input_identity": {
+    "helper": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/probe_rj45_train_condition.py",
+      "sha256": "240d09dc794bc3c6a7f0acd48e3fc65a8a3cf734ebe0754aeac07955bfd72fa3"
+    },
+    "manifest": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/manifest.json",
+      "sha256": "10f0c1dbefd081b06c227beb34adba3469868e52962566f09706df3a6d0b3578"
+    },
+    "npz": {
+      "path": "/home/lim/rby1-assembly-lab-rj45-data/artifacts/local-g2-overfit-20261030/mean-baseline-v2/export/train-condition.npz",
+      "sha256": "482215e4507810e04d9a3a1168d0dde6007c9015fe0f3720101543b8e41a3633"
+    },
+    "runner": {
+      "path": "/home/lim/rby1-assembly-lab/scripts/run_rj45_g2_optimizer_probe.py",
+      "sha256": "9b751ee4fd6f684eb6c76829ef108c73e76fa92e0c25e7dbac1ba4718ce36543"
+    }
+  },
+  "model_contract": {
+    "action_dim": 6,
+    "architecture": "79->256->256->128->6 MLP from build_bc_actor",
+    "final_layer_initialization": "zero weight and bias",
+    "observation_dim": 79
+  },
+  "purpose": "Compare only the existing learning rate and a 10x lower learning rate on the same fixed train trajectory under one current CPU runtime.",
+  "recipes": [
+    {
+      "id": "e0",
+      "learning_rate": 0.001
+    },
+    {
+      "id": "e1",
+      "learning_rate": 0.0001
+    }
+  ],
+  "runtime": {
+    "numpy": "1.26.0",
+    "python": "3.11.15",
+    "torch": "2.7.0+cpu"
+  },
+  "schema_name": "rj45_g2_optimizer_probe_v1",
+  "shared_recipe": {
+    "device": "cpu",
+    "full_batch_optimizer_steps": 2000,
+    "input": "identical 395 valid rows from the frozen 79D/6D train condition",
+    "optimizer": "Adam",
+    "report_interval_steps": 200,
+    "seed": 20261030,
+    "selection": "final checkpoint only",
+    "threads": 2
+  },
+  "status": "frozen_before_execution",
+  "stop_rule": "Run E0 and E1 once; do not launch 20k-step or label-normalization follow-ups."
+}
