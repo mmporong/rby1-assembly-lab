@@ -19,6 +19,9 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 | 교사 시연과 BC 초기화 | train 256회·dev 64회 독립 성공, BC dev MSE `5.7879e-6` | 완료. 교사는 정답 상태를 쓰며 학생 입력은 79D로 제한한다. 교사 성공과 BC의 예측 오차는 정책의 물리 성공률과 구분한다. [데이터·학습 결과](docs/evidence/rj45-demonstrations-20261028/teacher-bc-results/README.md) |
 | BC-only 물리 평가 | 기본 평가 12/64, 앞선 같은 계약 평가 8/64; 기준 제어 38/64 | 완료. BC가 기준 제어보다 낮았고 실행 간 차이도 관찰됐다. [폐루프 진단](docs/evidence/rj45-demonstrations-20261028/bc-diagnostic/README.md) |
 | 첫 PPO와 BC 초기화 PPO 비교 | PPO 200 update는 32/64·27/64·31/64, BC 초기화 PPO는 중단 | BC 학습 중 파지 초기화 검사가 실패했다. 비교를 완료한 결과로 사용하지 않으며 복구 검증을 진행한다. [중단 기록](docs/evidence/rj45-demonstrations-20261028/paired-first-attempt/README.md) |
+| BC 안정화 실패 분석 | 선택된 BC 두 실행에서 자세 조건을 통과한 141개·31개 제어 시점 모두 속도 조건 위반 | 완료. 기준 제어의 같은 env54 사례는 0.4초 안정 유지 후 성공했다. 프레임 중복을 제거한 진단이며 전체 실패율이나 원인 확정으로 해석하지 않는다. [재현 분석](docs/evidence/rj45-stability-diagnosis-20261030/README.md) · [성공 1편·실패 2편과 동기 측정값](docs/evidence/rj45-demonstrations-20261028/policy-media/README.md) |
+
+현재 PPO의 추가 개선 효과는 입증하지 못했다. 다음 실험은 기준 제어·BC-only·PPO-only·같은 BC에서 시작한 PPO를 비교해 시연과 강화학습의 효과를 구분한다. 정책은 삽입 단계의 오른손 6차원 목표 보정을 결정하며, 지지팔과 삽입 진행·중단·복구는 스크립트가 담당한다. 작은 train 조건의 폐루프 진단을 통과한 뒤 다중 seed 비교를 수행한다. 데이터 분리와 판정 기준은 [강화학습 기여 검증 계획](docs/rj45-rl-contribution-plan.md)에 있다.
 
 ## 256환경 병렬 PPO 영상
 
@@ -114,6 +117,6 @@ RJ45 잔차 학습 환경은 검증된 파지 상태를 초기화 때 복원하�
 
 초기 79D·85D 단일 seed 실험과 논문 기반 예비 비교는 현재 결과를 만들기 전의 개발 기록이다. 수치와 원본 해시는 [강화학습 연구·실험 문서](docs/rj45-rl-research.md), [관측 방식 비교 자료](docs/media/rj45/target-offset42-observation-comparison-data.json), [과거 장기 결과](docs/evidence/rj45-paper-ablation/long-results/manifest.json)에 보존했다. 현재 판단에는 위의 `현재 결과` 표와 [규모 확대 결과](docs/evidence/rj45-refinement-20261028/scale-results/README.md)를 사용한다.
 
-다중 파지 생성과 교사 시연, BC 학습·물리 평가는 완료했다. PPO와 BC 초기화 PPO의 비교는 초기화 검사 실패로 중단돼 복구를 검증하고 있다. 지지팔 제어 비교와 실패 영상 분석도 남아 있다. 개발 평가에 사용하는 파지는 2개이며 최종 파지와 평가 seed는 봉인했다. 개발 기준을 넘은 후보가 생길 때만 최종 평가를 연다.
+다중 파지 생성과 교사 시연, BC 학습·물리 평가 및 선택된 BC 실패의 영상·안정성 분석은 완료했다. PPO와 BC 초기화 PPO의 비교는 초기화 검사 실패로 중단돼 복구를 검증하고 있다. 지지팔 제어 비교와 최종 정책 검증은 남아 있다. 개발 평가에 사용하는 파지는 2개이며 최종 파지와 평가 seed는 봉인했다. 개발 기준을 넘은 후보가 생길 때만 최종 평가를 연다.
 
 [실험 계약](docs/experiment-design.md)은 기준 제어 비교, 데이터 분리, 성공 판정과 남은 검증을 정의한다.
