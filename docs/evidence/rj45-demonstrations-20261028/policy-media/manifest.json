@@ -1,0 +1,279 @@
+{
+  "schema_version": 1,
+  "thresholds": {
+    "lateral_error_um": 50.0,
+    "relative_linear_speed_mm_s": 5.0,
+    "relative_angular_speed_rad_s": 0.05,
+    "stable_dwell_s": 0.4,
+    "lateral_threshold_scope": "project_evaluation_criterion"
+  },
+  "runs": [
+    {
+      "stem": "v3-biased-zero-env54",
+      "input": {
+        "video": {
+          "sha256": "69e7cce844bb31306b364601710dcd0a48b384f79dabeb4b71d8ba081c60d5e3",
+          "bytes": 5913265
+        },
+        "frames": {
+          "sha256": "fe758f10c3d24e8e14eb0d5709a5327948872c39934d970f4c953e13feb3899d",
+          "bytes": 3922821
+        },
+        "metadata": {
+          "sha256": "11adc382c76c6091b67c7c44a4ca015924f102bb87afa41649f513087845685a",
+          "bytes": 10546
+        },
+        "evidence": {
+          "sha256": "df6044dd82e34704e0d7d31561a1def9ad40bd2b6534cc126c596c580189f01f",
+          "bytes": 9059
+        },
+        "report": {
+          "sha256": "46f5e51e7371003e7663d315c845daec681c895be3d61ae376dc47fd1e31c5ed",
+          "bytes": 410041
+        }
+      },
+      "policy_lineage": {
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bc_actor": null,
+        "checkpoint": null,
+        "mode": "biased_zero",
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "policy_lineage_sha256": "a75ee5a8f3b1b997390547c482658ce053617be7174fbbe6ef494209bf2c631b",
+      "selection": {
+        "episode_index": 1,
+        "environment_index": 54,
+        "preselected_before_capture": true,
+        "reason": "preselected paired reference: biased-zero success for environment 54"
+      },
+      "output": {
+        "path": "v3-biased-zero-env54-diagnostic-60fps.mp4",
+        "sha256": "2716e4f3d65dc96df99a91189e4bfb046f2f4ff9f59c655c530cf825a26a1e4d",
+        "bytes": 1691584,
+        "width": 1600,
+        "height": 900,
+        "pix_fmt": "yuv420p",
+        "fps": 60.0,
+        "frame_count": 750
+      },
+      "final_preview": {
+        "path": "v3-biased-zero-env54-diagnostic-60fps-final-preview.png",
+        "sha256": "cfeb73bf7853abb41f09eb79e08f684a7e55b96faff7e57e106078cae52d368a",
+        "bytes": 720763
+      },
+      "timeseries": {
+        "path": "v3-biased-zero-env54-timeseries.csv",
+        "sha256": "8228662338e3513bac4e9510086fe735aca212c3477ddbf002b67e9a0369bce8",
+        "rows": 750
+      },
+      "terminal": {
+        "physics_time_s": 12.5,
+        "depth_mm": 12.319564819335938,
+        "lateral_error_um": 14.99952941230731,
+        "relative_linear_speed_mm_s": 0.5072116036899388,
+        "relative_angular_speed_rad_s": 0.012544283643364906,
+        "dwell_s": 0.4,
+        "contact_proxy_n": 3.782877206802368,
+        "physics_all_samples_stable": true,
+        "lateral_ok": true,
+        "dwell_ok": true,
+        "terminal": true,
+        "success": true
+      },
+      "termination_reason": "independent_success",
+      "presentation_contract": "one output frame per native source frame; no interpolation, duplication, added hold, or 3D modification"
+    },
+    {
+      "stem": "v5-bc-env54",
+      "input": {
+        "video": {
+          "sha256": "319461a0e50e7e75413063b6abe5c3e1bfa5dedb936cb7ffbd59b1544c8d1d9d",
+          "bytes": 10740583
+        },
+        "frames": {
+          "sha256": "1b2974c952ffd8f8e5c933bfc9632bb3c0e8f1f62e81773f27222945a443bbbb",
+          "bytes": 8231379
+        },
+        "metadata": {
+          "sha256": "6734d315af025fa59df2cf20530c3f014bccab9363b1bb2a21e4c90ca6548fc9",
+          "bytes": 15722
+        },
+        "evidence": {
+          "sha256": "0f8d53efad1bc3bfcbab1d636ad7356030e2dae3df2377ad81278aee0df2cc8b",
+          "bytes": 13574
+        },
+        "report": {
+          "sha256": "214d7a325a22d93363970801493442864fc6dff0b693fff06082735896a59c00",
+          "bytes": 428339
+        }
+      },
+      "policy_lineage": {
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bc_actor": {
+          "actor_state_sha256": "c28cf06e444c9939c4449f00a1da28bdf69162264f050928aa12ee3b1ee22313",
+          "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/bc_actor_init.pt",
+          "provenance": {
+            "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+            "dataset_sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+            "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+            "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+            "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+          },
+          "sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5"
+        },
+        "checkpoint": null,
+        "mode": "bc",
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "policy_lineage_sha256": "efc251adc8b74453e18dee14de46ab1b4f3e03675a3b0d2629b109457ac8218d",
+      "selection": {
+        "episode_index": 1,
+        "environment_index": 54,
+        "preselected_before_capture": true,
+        "reason": "preselected paired contrast: BC timeout for the same environment 54"
+      },
+      "output": {
+        "path": "v5-bc-env54-diagnostic-60fps.mp4",
+        "sha256": "76491a17942ad65148dca4249c9654cf9a77546ee127a75c6fc407fa046643e0",
+        "bytes": 3109475,
+        "width": 1600,
+        "height": 900,
+        "pix_fmt": "yuv420p",
+        "fps": 60.0,
+        "frame_count": 1454
+      },
+      "final_preview": {
+        "path": "v5-bc-env54-diagnostic-60fps-final-preview.png",
+        "sha256": "b578f853f6b86e4261db1477f7679b2e1ed842a65faea73379135c419e4e8675",
+        "bytes": 748306
+      },
+      "timeseries": {
+        "path": "v5-bc-env54-timeseries.csv",
+        "sha256": "69056d18130d2b96604c46376633c0be576b123d40bcef0c998a8f00809fc7fa",
+        "rows": 1454
+      },
+      "terminal": {
+        "physics_time_s": 24.233333333333334,
+        "depth_mm": 12.3291015625,
+        "lateral_error_um": 40.90145739610307,
+        "relative_linear_speed_mm_s": 22.68831431865692,
+        "relative_angular_speed_rad_s": 0.9071800112724304,
+        "dwell_s": 0.0,
+        "contact_proxy_n": 3.8469836711883545,
+        "physics_all_samples_stable": false,
+        "lateral_ok": true,
+        "dwell_ok": false,
+        "terminal": true,
+        "success": false
+      },
+      "termination_reason": "episode_timeout",
+      "presentation_contract": "one output frame per native source frame; no interpolation, duplication, added hold, or 3D modification"
+    },
+    {
+      "stem": "v5-bc-env42",
+      "input": {
+        "video": {
+          "sha256": "ba489425827e42bc3b2498ea7c9ac56e862d554e405de38b0449d4e189e27cf9",
+          "bytes": 9898437
+        },
+        "frames": {
+          "sha256": "2f1ac7e701d4c9253ad76a32e142b6ae3a6fbbe5446a4b0b734e072e1a910e2f",
+          "bytes": 8183266
+        },
+        "metadata": {
+          "sha256": "6304dbb29226bc130f4de63b3dde0bc39847940b20c17ca9c84e7c92bf1cc109",
+          "bytes": 15730
+        },
+        "evidence": {
+          "sha256": "1e1c3ded6bc634612c70a9b67fdd1b45117fc86d6f424e2adf8e2a41107ade3c",
+          "bytes": 13574
+        },
+        "report": {
+          "sha256": "996f73e1ba2c1f0542933915f4d1e97f6cfc5babb0b0532280340ac8a71b1843",
+          "bytes": 428365
+        }
+      },
+      "policy_lineage": {
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bc_actor": {
+          "actor_state_sha256": "c28cf06e444c9939c4449f00a1da28bdf69162264f050928aa12ee3b1ee22313",
+          "path": "/home/ubuntu/rby1-assembly-lab/artifacts/rj45-4c-teacher-bc-collector-recovery-v1-20261028/bc/bc_actor_init.pt",
+          "provenance": {
+            "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+            "dataset_sha256": "ae2884f3635d6177b278156f8cfadf1d3d29db54115cc99a938927ea3d6b1efc",
+            "source_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+            "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+            "training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+          },
+          "sha256": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5"
+        },
+        "checkpoint": null,
+        "mode": "bc",
+        "policy_config_sha256": "1b54f0342fe9c718957bb1995d694e486342ac7bc57df840d35cf9072958b7a5",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "policy_lineage_sha256": "efc251adc8b74453e18dee14de46ab1b4f3e03675a3b0d2629b109457ac8218d",
+      "selection": {
+        "episode_index": 1,
+        "environment_index": 42,
+        "preselected_before_capture": true,
+        "reason": "preselected representative BC timeout case from the fixed evaluation result"
+      },
+      "output": {
+        "path": "v5-bc-env42-diagnostic-60fps.mp4",
+        "sha256": "1485d8a91f649e44079210c40e72d90aaa638cc49233b3b8d98e7e711a74a76e",
+        "bytes": 3055096,
+        "width": 1600,
+        "height": 900,
+        "pix_fmt": "yuv420p",
+        "fps": 60.0,
+        "frame_count": 1454
+      },
+      "final_preview": {
+        "path": "v5-bc-env42-diagnostic-60fps-final-preview.png",
+        "sha256": "29719bf9f31e22996016e92370e6a4b4659aa4c7d36e5cc652be1e6280387a02",
+        "bytes": 803527
+      },
+      "timeseries": {
+        "path": "v5-bc-env42-timeseries.csv",
+        "sha256": "65bd0216639e5f683cd635ec47b0e7df4c06a23b38676b3a5639ba7d4a328ee7",
+        "rows": 1454
+      },
+      "terminal": {
+        "physics_time_s": 24.233333333333334,
+        "depth_mm": 12.309313751757145,
+        "lateral_error_um": 91.5174896363169,
+        "relative_linear_speed_mm_s": 5.607291590422392,
+        "relative_angular_speed_rad_s": 0.24966512620449066,
+        "dwell_s": 0.0,
+        "contact_proxy_n": 3.714271068572998,
+        "physics_all_samples_stable": false,
+        "lateral_ok": false,
+        "dwell_ok": false,
+        "terminal": true,
+        "success": false
+      },
+      "termination_reason": "episode_timeout",
+      "presentation_contract": "one output frame per native source frame; no interpolation, duplication, added hold, or 3D modification"
+    }
+  ],
+  "charts": [
+    {
+      "path": "policy-diagnostic-traces.png",
+      "sha256": "ae8c3df13f2e88a217b3085e6294d6231c5735814a07ba2a8487a46a8254e38e"
+    },
+    {
+      "path": "policy-diagnostic-traces.svg",
+      "sha256": "f604f6107e5737882543cd2ada00315818867f582a12d037be738cb1814bb0bd"
+    }
+  ],
+  "disclosures": {
+    "bc_actor": "f0fd65b56691748dce5bee378152524bf84f3f9daed2f1f36dd43e0e189233b5",
+    "bc_is_not_completed_ppo": true,
+    "contact_signal": "PhysX contact proxy, not wrist force/torque sensor",
+    "render_vs_control_time": "geometry is the native physics frame; stability telemetry is the recorded control-step snapshot",
+    "failure_interpretation": "observed evaluation criteria failures only; no action-fault causality claim"
+  }
+}
