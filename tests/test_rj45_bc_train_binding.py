@@ -4,12 +4,14 @@ import ast
 from collections.abc import Callable
 import copy
 from pathlib import Path
+import random
 import tempfile
 import types
 from typing import Any, cast
 import unittest
 from unittest import mock
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -45,8 +47,31 @@ def _load_train_binding() -> TrainBinding:
     return cast(TrainBinding, namespace["_initialize_verified_bc_actor"])
 
 
-class _DummyPolicy:
+def _load_initialization_fingerprint_helpers():
+    tree = ast.parse(TRAIN_SCRIPT.read_text(encoding="utf-8"), filename=str(TRAIN_SCRIPT))
+    selected = cast(list[ast.stmt], [
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef)
+        and node.name in {
+            "_initialization_state_fingerprint",
+            "_assert_actor_only_initialization_change",
+        }
+    ])
+    namespace: dict[str, Any] = {}
+    exec(
+        compile(ast.Module(body=selected, type_ignores=[]), str(TRAIN_SCRIPT), "exec"),
+        namespace,
+    )
+    return (
+        namespace["_initialization_state_fingerprint"],
+        namespace["_assert_actor_only_initialization_change"],
+    )
+
+
+class _DummyPolicy(nn.Module):
     def __init__(self) -> None:
+        super().__init__()
         self.actor = build_bc_actor()
         self.critic = nn.Sequential(nn.Linear(79, 32), nn.ELU(), nn.Linear(32, 1))
         self.std = nn.Parameter(torch.full((6,), 0.1))
@@ -64,6 +89,71 @@ class _DummyRunner:
             lr=1e-3,
         )
         self.alg = types.SimpleNamespace(policy=policy, optimizer=optimizer)
+
+
+class InitialStateFingerprintTests(unittest.TestCase):
+    def test_fingerprint_does_not_advance_cpu_rng_streams(self) -> None:
+        fingerprint, _assert_change = _load_initialization_fingerprint_helpers()
+        random.seed(81)
+        np.random.seed(82)
+        torch.manual_seed(83)
+        runner = _DummyRunner()
+        python_before = random.getstate()
+        numpy_before = cast(tuple[Any, ...], np.random.get_state())
+        torch_before = torch.random.get_rng_state().clone()
+
+        first = fingerprint(runner, "cpu")
+        second = fingerprint(runner, "cpu")
+
+        self.assertEqual(first, second)
+        self.assertEqual(random.getstate(), python_before)
+        numpy_after = cast(tuple[Any, ...], np.random.get_state())
+        self.assertEqual(numpy_after[0], numpy_before[0])
+        np.testing.assert_array_equal(numpy_after[1], numpy_before[1])
+        self.assertEqual(numpy_after[2:], numpy_before[2:])
+        torch.testing.assert_close(torch.random.get_rng_state(), torch_before)
+        self.assertIsNone(first["rng"]["torch_training_cuda_device"])
+
+    def test_actor_only_change_preserves_other_state_and_rng(self) -> None:
+        fingerprint, assert_change = _load_initialization_fingerprint_helpers()
+        runner = _DummyRunner()
+        before = fingerprint(runner, "cpu")
+        with torch.no_grad():
+            runner.alg.policy.actor[-1].weight.zero_()
+            runner.alg.policy.actor[-1].bias.zero_()
+        after = fingerprint(runner, "cpu")
+
+        assert_change(before, after)
+        self.assertNotEqual(before["state"]["actor"], after["state"]["actor"])
+        for name in ("critic", "noise", "optimizer"):
+            self.assertEqual(before["state"][name], after["state"][name])
+        self.assertEqual(before["rng"], after["rng"])
+
+    def test_fingerprint_reads_the_selected_cuda_device_rng(self) -> None:
+        fingerprint, _assert_change = _load_initialization_fingerprint_helpers()
+        runner = _DummyRunner()
+        cuda_state = torch.arange(16, dtype=torch.uint8)
+        with mock.patch.object(
+            torch.cuda, "get_rng_state", return_value=cuda_state
+        ) as get_rng_state:
+            result = fingerprint(runner, "cuda:2")
+
+        get_rng_state.assert_called_once_with(torch.device("cuda:2"))
+        self.assertIsInstance(
+            result["rng"]["torch_training_cuda_device"], str
+        )
+
+    def test_same_seed_runners_have_equal_initial_fingerprints(self) -> None:
+        fingerprint, _assert_change = _load_initialization_fingerprint_helpers()
+
+        def initialized(seed: int):
+            random.seed(seed)
+            np.random.seed(seed)
+            torch.manual_seed(seed)
+            runner = _DummyRunner()
+            return fingerprint(runner, "cpu")
+
+        self.assertEqual(initialized(91), initialized(91))
 
 
 class _FakeSnapshot:

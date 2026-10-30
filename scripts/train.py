@@ -97,6 +97,69 @@ def _initialize_verified_bc_actor(
     return result
 
 
+def _initialization_state_fingerprint(runner, training_device) -> dict[str, object]:
+    """Hash PPO state and RNG streams without advancing any generator."""
+    import random
+
+    import numpy as np
+    import torch
+
+    from rby1_assembly.rj45_bc import (
+        _policy_noise_sha256,
+        module_state_sha256,
+        object_sha256,
+    )
+
+    policy = runner.alg.policy
+    device = torch.device(training_device)
+    cuda_rng = (
+        object_sha256(torch.cuda.get_rng_state(device).detach().cpu())
+        if device.type == "cuda"
+        else None
+    )
+    return {
+        "schema_version": 1,
+        "training_device": str(device),
+        "state": {
+            "policy": module_state_sha256(policy),
+            "actor": module_state_sha256(policy.actor),
+            "critic": module_state_sha256(policy.critic),
+            "noise": _policy_noise_sha256(policy),
+            "optimizer": object_sha256(runner.alg.optimizer.state_dict()),
+        },
+        "rng": {
+            "python": object_sha256(random.getstate()),
+            "numpy": object_sha256(np.random.get_state()),
+            "torch_cpu": object_sha256(torch.random.get_rng_state().detach().cpu()),
+            "torch_training_cuda_device": cuda_rng,
+        },
+    }
+
+
+def _assert_actor_only_initialization_change(
+    before: dict[str, object], after: dict[str, object]
+) -> None:
+    if before.get("schema_version") != 1 or after.get("schema_version") != 1:
+        raise RuntimeError("initialization fingerprint schema differs")
+    before_state, after_state = before.get("state"), after.get("state")
+    before_rng, after_rng = before.get("rng"), after.get("rng")
+    if not isinstance(before_state, dict) or not isinstance(after_state, dict):
+        raise RuntimeError("initialization fingerprint is malformed")
+    if not isinstance(before_rng, dict) or not isinstance(after_rng, dict):
+        raise RuntimeError("initialization fingerprint is malformed")
+    if before.get("training_device") != after.get("training_device"):
+        raise RuntimeError("initialization changed the training device")
+    if before_state.get("actor") == after_state.get("actor"):
+        raise RuntimeError("requested actor initialization did not change the actor")
+    if before_state.get("policy") == after_state.get("policy"):
+        raise RuntimeError("actor initialization did not change the policy state")
+    for name in ("critic", "noise", "optimizer"):
+        if before_state.get(name) != after_state.get(name):
+            raise RuntimeError(f"actor initialization changed PPO {name}")
+    if before_rng != after_rng:
+        raise RuntimeError("actor initialization advanced an RNG stream")
+
+
 _bootstrap_task = _preimport_option("--task", "toy")
 _bootstrap_config_default = (
     "configs/ppo-rj45-v1.json" if _bootstrap_task == "rj45" else "configs/ppo.json"
@@ -634,6 +697,12 @@ def main() -> int:
                     "zero-initialized RJ45 residual actor requires 6D actions"
                 )
         runner = OnPolicyRunner(wrapped, runner_cfg, log_dir=str(log_dir), device=env.device)
+        paired_initialization_before = (
+            _initialization_state_fingerprint(runner, env.device)
+            if args.task == "rj45"
+            and (args.zero_init_actor_output or args.bc_actor_init is not None)
+            else None
+        )
         if args.task == "rj45":
             lineage["policy_initialization"] = configure_actor_output_initialization(
                 runner,
@@ -647,6 +716,22 @@ def main() -> int:
                 runner, args.bc_actor_init, args.bc_actor_init_sha256, input_snapshot,
                 task_path, training_config, held_bank_proof,
             )
+        if paired_initialization_before is not None:
+            paired_initialization_after = _initialization_state_fingerprint(
+                runner, env.device
+            )
+            _assert_actor_only_initialization_change(
+                paired_initialization_before, paired_initialization_after
+            )
+            lineage["paired_initialization_fingerprint"] = {
+                "schema_version": 1,
+                "claim": (
+                    "the requested initialization changes actor parameters only; "
+                    "critic, policy noise, optimizer, and RNG streams remain unchanged"
+                ),
+                "before": paired_initialization_before,
+                "after": paired_initialization_after,
+            }
         provenance_path = log_dir / "training_provenance.json"
         atomic_write_json(provenance_path, lineage)
         runner.add_git_repo_to_log(__file__)
