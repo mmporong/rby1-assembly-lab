@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "scope": "three preselected policy-media recordings only; not a population estimate",
+  "inputs": {
+    "v3-biased-zero-env54": {
+      "video": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v3-biased-zero-env54.mp4",
+        "sha256": "69e7cce844bb31306b364601710dcd0a48b384f79dabeb4b71d8ba081c60d5e3",
+        "bytes": 5913265
+      },
+      "frames": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v3-biased-zero-env54.mp4.frames.jsonl",
+        "sha256": "fe758f10c3d24e8e14eb0d5709a5327948872c39934d970f4c953e13feb3899d",
+        "bytes": 3922821
+      },
+      "metadata": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v3-biased-zero-env54.mp4.metadata.json",
+        "sha256": "11adc382c76c6091b67c7c44a4ca015924f102bb87afa41649f513087845685a",
+        "bytes": 10546
+      },
+      "evidence": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v3-biased-zero-env54.mp4.evidence.json",
+        "sha256": "df6044dd82e34704e0d7d31561a1def9ad40bd2b6534cc126c596c580189f01f",
+        "bytes": 9059
+      },
+      "report": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v3-biased-zero-env54.report.json",
+        "sha256": "46f5e51e7371003e7663d315c845daec681c895be3d61ae376dc47fd1e31c5ed",
+        "bytes": 410041
+      }
+    },
+    "v5-bc-env54": {
+      "video": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env54.mp4",
+        "sha256": "319461a0e50e7e75413063b6abe5c3e1bfa5dedb936cb7ffbd59b1544c8d1d9d",
+        "bytes": 10740583
+      },
+      "frames": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env54.mp4.frames.jsonl",
+        "sha256": "1b2974c952ffd8f8e5c933bfc9632bb3c0e8f1f62e81773f27222945a443bbbb",
+        "bytes": 8231379
+      },
+      "metadata": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env54.mp4.metadata.json",
+        "sha256": "6734d315af025fa59df2cf20530c3f014bccab9363b1bb2a21e4c90ca6548fc9",
+        "bytes": 15722
+      },
+      "evidence": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env54.mp4.evidence.json",
+        "sha256": "0f8d53efad1bc3bfcbab1d636ad7356030e2dae3df2377ad81278aee0df2cc8b",
+        "bytes": 13574
+      },
+      "report": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env54.report.json",
+        "sha256": "214d7a325a22d93363970801493442864fc6dff0b693fff06082735896a59c00",
+        "bytes": 428339
+      }
+    },
+    "v5-bc-env42": {
+      "video": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env42.mp4",
+        "sha256": "ba489425827e42bc3b2498ea7c9ac56e862d554e405de38b0449d4e189e27cf9",
+        "bytes": 9898437
+      },
+      "frames": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env42.mp4.frames.jsonl",
+        "sha256": "2f1ac7e701d4c9253ad76a32e142b6ae3a6fbbe5446a4b0b734e072e1a910e2f",
+        "bytes": 8183266
+      },
+      "metadata": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env42.mp4.metadata.json",
+        "sha256": "6304dbb29226bc130f4de63b3dde0bc39847940b20c17ca9c84e7c92bf1cc109",
+        "bytes": 15730
+      },
+      "evidence": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env42.mp4.evidence.json",
+        "sha256": "1e1c3ded6bc634612c70a9b67fdd1b45117fc86d6f424e2adf8e2a41107ade3c",
+        "bytes": 13574
+      },
+      "report": {
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/retrieved-rj45-policy-media-eval-recovery-v1-20261028/v5-bc-env42.report.json",
+        "sha256": "996f73e1ba2c1f0542933915f4d1e97f6cfc5babb0b0532280340ac8a71b1843",
+        "bytes": 428365
+      }
+    }
+  },
+  "analysis_script": {
+    "path": "/home/lim/rby1-assembly-lab-rj45-data/scripts/analyze_rj45_stability_traces.py",
+    "sha256": "f06374890518545f645ab5f067b062dee31376b32fb1b38665459ea5622394c5"
+  },
+  "lineage_validator": {
+    "path": "/home/lim/rby1-assembly-lab-rj45-data/scripts/export_rj45_policy_media.py",
+    "sha256": "786714066f91863507224a9a30a54344ca00331284034ae797e53e2af00f9419"
+  },
+  "media_manifest": {
+    "path": "/home/lim/rby1-assembly-lab-rj45-data/docs/evidence/rj45-demonstrations-20261028/policy-media/manifest.json",
+    "sha256": "c47471d59920766c002ab4e9fb84cde925ada1655d3f6f3bc28464e2d6fa6227"
+  },
+  "outputs": {
+    "summary.json": {
+      "sha256": "2e394422d21d06809f00b198557d0899182c021de7463d087f22ccd18eca4a22",
+      "bytes": 34518
+    },
+    "README.md": {
+      "sha256": "5ab8da21868f2547aa8ee152c2976cdc49af52f50f7080597f48d91a7fc1bbbc",
+      "bytes": 2101
+    }
+  }
+}
