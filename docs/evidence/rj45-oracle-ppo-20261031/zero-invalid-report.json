@@ -1,0 +1,20 @@
+{
+  "claims": {
+    "final_policy": false,
+    "reinforcement_learning_effect_proven": false
+  },
+  "error": {
+    "message": "'TerminalEvaluation' object has no attribute 'completion_time_s'",
+    "type": "AttributeError"
+  },
+  "failure_stage": "physics_and_learning",
+  "mode": "zero",
+  "partial_artifacts": [
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-ppo-20261031/results/zero/evaluation.jsonl",
+      "sha256": "9d9ecf63f2e6764fd45fec5d4cbef64b2dd7e3da8806c0c5d9e4d033099cfb24"
+    }
+  ],
+  "schema_name": "rj45_oracle_ppo_probe_v1",
+  "status": "invalid"
+}

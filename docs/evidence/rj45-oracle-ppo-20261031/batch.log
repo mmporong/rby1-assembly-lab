@@ -1,0 +1,10 @@
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+payload.tar.gz: OK
+{"torch": "2.7.0+cu128", "numpy": "1.26.0", "h5py": "3.14.0", "isaacsim": "5.1.0.0", "isaaclab": "0.47.2", "isaaclab-rl": "0.4.4", "rsl-rl-lib": "3.0.1"}
+MODE_START zero 2026-10-30T23:09:24Z
+MODE_END zero exit=0 2026-10-30T23:13:14Z
+MODE_START reference 2026-10-30T23:13:14Z
+MODE_END reference exit=0 2026-10-30T23:15:38Z
+Traceback (most recent call last):
+  File "<stdin>", line 3, in <module>
+KeyError: 'evaluation'

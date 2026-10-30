@@ -1,0 +1,151 @@
+{
+  "budget_and_stop": {
+    "absolute_deadline_utc": "2026-10-30T23:20:42Z",
+    "additional_reservation_usd": 3.0,
+    "budget_cap_usd": 700.0,
+    "combined_conservative_reservation_usd": 699.31822,
+    "conservative_rate_usd_per_hour": 8.0,
+    "max_single_mode_wall_s": 300.0,
+    "prior_conservative_reservation_usd": 696.31822,
+    "requires_external_stop_guard": true
+  },
+  "diagnostic_scope": {
+    "dev_and_final_unopened": true,
+    "not_final_policy": true,
+    "not_generalization_evidence": true,
+    "promotion_rule": "if zero succeeds, this condition cannot be promoted as evidence of a non-trivial RL contribution",
+    "required_modes": [
+      "zero",
+      "reference",
+      "standard79",
+      "oracle92"
+    ],
+    "single_fixed_train_condition": true
+  },
+  "fixed_condition": {
+    "base_seed": 20261120,
+    "calibration_case_seed": 66384140,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1,
+    "num_envs": 1,
+    "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+    "split": "train"
+  },
+  "frozen_inputs": {
+    "archived_runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "bank_source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+    "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "runtime_source_file_sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+      "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+      "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+      "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+      "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+      "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+      "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+      "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+      "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+      "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    },
+    "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+  },
+  "observation_groups": {
+    "ground_truth_usage": "oracle13 is diagnostic actor input only in oracle92; both learning modes use critic92",
+    "oracle92": {
+      "critic": [
+        "critic"
+      ],
+      "dimensions": {
+        "critic": 92,
+        "policy": 92
+      },
+      "policy": [
+        "policy"
+      ]
+    },
+    "standard79": {
+      "critic": [
+        "critic"
+      ],
+      "dimensions": {
+        "critic": 92,
+        "policy": 79
+      },
+      "policy": [
+        "policy"
+      ]
+    }
+  },
+  "physics_contract": {
+    "evaluation": "G2 independent geometry/contact/nine-substep verifier",
+    "evaluations": "deterministic pre-training and final-checkpoint episodes; zero/reference each one episode",
+    "execution_device": "cuda:0",
+    "task_reward_action_termination": "unchanged archived runtime"
+  },
+  "ppo": {
+    "actor_initialization_seed": 20261123,
+    "checkpoint_selection": "preregistered final checkpoint only",
+    "critic_initialization_seed": 20261122,
+    "distinguished_from_prior_campaign": "single_env_128x32_fixed_condition_not_256_env_x32",
+    "entropy_coefficient": 0.005,
+    "evaluation_seed": 20261124,
+    "gamma": 0.995,
+    "implementation": "rsl-rl-lib==3.0.1 OnPolicyRunner/PPO unchanged",
+    "initial_noise_std": 0.1,
+    "interpretation": "32 updates/4096 transitions is a learnability diagnostic, not effect proof",
+    "lambda": 0.95,
+    "learning_rate": 0.0003,
+    "num_learning_epochs": 5,
+    "num_mini_batches": 1,
+    "policy_training_seed": 20261121,
+    "rollout_steps": 128,
+    "schedule": "fixed",
+    "training_rng_reset_seed": 20261121,
+    "transitions": 4096,
+    "updates": 32,
+    "zero_actor_output": true
+  },
+  "schema_name": "rj45_oracle_ppo_probe_v1",
+  "source_sha256": {
+    "adapter": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+    "g2_physics_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "runner": "d212a86ae33b6a92c85c52c14463f68ee8494aac17b378d1ead34f8655822159",
+    "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+  },
+  "timing": {
+    "active_horizon_s": 24.0,
+    "control_decimation": 8,
+    "control_hz": 30,
+    "physics_hz": 240
+  }
+}

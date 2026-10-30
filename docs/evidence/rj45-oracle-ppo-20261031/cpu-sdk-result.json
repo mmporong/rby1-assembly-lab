@@ -1,0 +1,119 @@
+{
+  "scope": "CPU synthetic VecEnv checks actual rsl-rl-lib==3.0.1 API only; no physics or task learnability claim",
+  "passed": true,
+  "torch_version": "2.7.0+cpu",
+  "records": [
+    {
+      "mode": "standard79",
+      "policy_dim": 79,
+      "critic_dim": 92,
+      "real_rsl_rl_updates": 2,
+      "actor_changed": true,
+      "checkpoint_sha256": "76b7d34d5c0900fd7de7a46e7df95526e94a5d2816d1831e1a51db3523d29439",
+      "metrics": [
+        {
+          "update": 1,
+          "metrics": {
+            "value_function": 0.6195417761802673,
+            "surrogate": -0.025269430503249167,
+            "entropy": -5.29048433303833
+          },
+          "targets": {
+            "returns": 32,
+            "advantages": 32
+          }
+        },
+        {
+          "update": 2,
+          "metrics": {
+            "value_function": 0.4858503758907318,
+            "surrogate": -0.009686041623353958,
+            "entropy": -5.2691692352294925
+          },
+          "targets": {
+            "returns": 32,
+            "advantages": 32
+          }
+        }
+      ],
+      "paired_init": {
+        "mode": "standard79",
+        "seed": 20261122,
+        "state_sha256": "af5302c8a124b3efcd38db3747a58fbc8bc8575589e312a231bb308999716289",
+        "common_79d_projection_sha256": "035624152d630a0632da74e9f4ba429cb80b436cc7259a8f1de974f270eee5fa",
+        "oracle_extra_13_columns_zero": true,
+        "output_layer_zero": true,
+        "extra_columns_trainable": false
+      },
+      "critic_init": {
+        "seed": 20261123,
+        "device": "cpu",
+        "resettable_module_count": 4,
+        "state_sha256": "964c81ed3ce73edf5363bfdbeeefb3156172e2a4d8c3a7096ffcfbf79554118f",
+        "actor_input_width_independent": true
+      },
+      "evaluation_rng": {
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": null
+      }
+    },
+    {
+      "mode": "oracle92",
+      "policy_dim": 92,
+      "critic_dim": 92,
+      "real_rsl_rl_updates": 2,
+      "actor_changed": true,
+      "checkpoint_sha256": "3eef4fadfe6dbd2b8782d82989dcb5caa25b0a10e2a2ff5f2f64e99a81d64651",
+      "metrics": [
+        {
+          "update": 1,
+          "metrics": {
+            "value_function": 0.6195417404174804,
+            "surrogate": -0.025267444923520087,
+            "entropy": -5.29048433303833
+          },
+          "targets": {
+            "returns": 32,
+            "advantages": 32
+          }
+        },
+        {
+          "update": 2,
+          "metrics": {
+            "value_function": 0.48584548234939573,
+            "surrogate": -0.009689919650554657,
+            "entropy": -5.269168472290039
+          },
+          "targets": {
+            "returns": 32,
+            "advantages": 32
+          }
+        }
+      ],
+      "paired_init": {
+        "mode": "oracle92",
+        "seed": 20261122,
+        "state_sha256": "6bc20f65d5565ac128696db2bea129f013e7b8a1f0e50c015419706acc5c89d6",
+        "common_79d_projection_sha256": "035624152d630a0632da74e9f4ba429cb80b436cc7259a8f1de974f270eee5fa",
+        "oracle_extra_13_columns_zero": true,
+        "output_layer_zero": true,
+        "extra_columns_trainable": true
+      },
+      "critic_init": {
+        "seed": 20261123,
+        "device": "cpu",
+        "resettable_module_count": 4,
+        "state_sha256": "964c81ed3ce73edf5363bfdbeeefb3156172e2a4d8c3a7096ffcfbf79554118f",
+        "actor_input_width_independent": true
+      },
+      "evaluation_rng": {
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": null
+      }
+    }
+  ]
+}

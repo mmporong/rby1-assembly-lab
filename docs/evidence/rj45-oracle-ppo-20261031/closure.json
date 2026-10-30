@@ -1,0 +1,54 @@
+{
+  "recorded_at_utc": "2026-10-30T23:25:12.084387+00:00",
+  "instance_id": "g4xfquxz3",
+  "instance_name": "rby1-g2-l40s-20261031",
+  "instance_status": "STOPPED",
+  "stopped_observed_at_utc": "2026-10-30T23:25:05.736544+00:00",
+  "batch_exit": 1,
+  "artifacts_retrieved": true,
+  "ppo_cloud_updates": 0,
+  "guard_unit": "rby1-oracle-ppo-stop-20261031a",
+  "guard_cleanup": [
+    {
+      "command": [
+        "systemctl",
+        "--user",
+        "stop",
+        "rby1-oracle-ppo-stop-20261031a.timer",
+        "rby1-oracle-ppo-stop-20261031a.service"
+      ],
+      "returncode": 5,
+      "stdout": "",
+      "stderr": "Failed to stop rby1-oracle-ppo-stop-20261031a.timer: Unit rby1-oracle-ppo-stop-20261031a.timer not loaded.\nFailed to stop rby1-oracle-ppo-stop-20261031a.service: Unit rby1-oracle-ppo-stop-20261031a.service not loaded.\n"
+    },
+    {
+      "command": [
+        "systemctl",
+        "--user",
+        "reset-failed",
+        "rby1-oracle-ppo-stop-20261031a.service"
+      ],
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "Failed to reset failed state of unit rby1-oracle-ppo-stop-20261031a.service: Unit rby1-oracle-ppo-stop-20261031a.service not loaded.\n"
+    },
+    {
+      "command": [
+        "systemctl",
+        "--user",
+        "is-active",
+        "rby1-oracle-ppo-stop-20261031a.timer",
+        "rby1-oracle-ppo-stop-20261031a.service"
+      ],
+      "returncode": 4,
+      "stdout": "inactive\ninactive\n",
+      "stderr": ""
+    }
+  ],
+  "local_batch_session_completed": true,
+  "new_reservation_usd": 3.0,
+  "combined_conservative_reservation_usd": 699.31822,
+  "reservation_is_invoice": false,
+  "provider_stop_was_delayed": true,
+  "compute_stop_does_not_delete_storage": true
+}
