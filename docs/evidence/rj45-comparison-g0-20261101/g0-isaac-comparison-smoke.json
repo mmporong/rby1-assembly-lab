@@ -1,0 +1,2265 @@
+{
+  "algorithms": [
+    {
+      "algorithm": "ppo",
+      "algorithm_settings": {
+        "minimum_sac_updates": 2,
+        "ppo_rollout_steps_per_environment": 8,
+        "sac_batch_size": 16,
+        "sac_utd_ratio": 1.0,
+        "sac_vector_steps": 16,
+        "scope": "G0 tensor-path and optimizer execution smoke only; these settings do not establish a fair PPO/SAC outcome comparison"
+      },
+      "collector": {
+        "absorbing_transitions": 0,
+        "algorithm": "ppo",
+        "algorithm_updates": 2,
+        "learning_transitions": 64,
+        "mixed_validity_vector_steps": 0,
+        "num_envs": 4,
+        "optimizer_steps": 8,
+        "pending_policy_transitions": 0,
+        "ppo_bootstrap_adjustments": 8,
+        "ppo_rollout_target": 32,
+        "random_warmup_transitions": 0,
+        "replay_first_ready_at": 0,
+        "replay_insertions": 0,
+        "replay_size": 0,
+        "sac_utd_ratio": 0.0,
+        "skipped_valid_transitions": 0,
+        "terminated_transitions": 0,
+        "transitions": 64,
+        "truncated_transitions": 0,
+        "valid_policy_transitions": 64,
+        "vector_steps": 16,
+        "warmup_transitions": 0
+      },
+      "comparison_aggregate": {
+        "activated_episode_terminal_count": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "observation_failure_count": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "prepolicy_invalid_episode_count": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "timeout_failure_count": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "context": {
+        "asset_sha256": {
+          "plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+          "robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+          "scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+          "socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+          "table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d"
+        },
+        "comparison_contract": {
+          "action_observation_contract": "a submitted residual is applied only when the last returned policy observation for that environment was valid",
+          "actor_observation_dimension": 79,
+          "actual_camera_measurement": false,
+          "aggregate_denominator_scope": "activated policy episodes reaching a terminal transition only; this is not the external requested-case evaluation denominator",
+          "autoreset_final_observation_available": false,
+          "bootstrap_reset_observation": false,
+          "critic_observation_dimension": 79,
+          "external_requested_case_denominator_required": true,
+          "finite_horizon_timeout_handling": "absorbing_failure_no_bootstrap",
+          "ground_truth_claim": "policy-active invalid proxy rows never receive simulator-ground-truth control fallback; simulator ground truth still initializes the biased simulation proxy and remains available to the independent evaluator",
+          "left_arm_control": "scripted_legacy_support_controller",
+          "observation_scaling": "fixed_unit_scale_from_legacy_79d_contract",
+          "policy_active_invalid_handling": "absorbing_observation_failure",
+          "prepolicy_invalid_handling": "legacy_fallback_with_separate_diagnostic",
+          "prepolicy_preparation_failure_reporting": "the external evaluator must retain every requested case and classify prepolicy preparation failures separately as failed or invalid",
+          "proxy_initialization": "simulator_ground_truth_pose_with_configured_bias_at_calibration_event",
+          "proxy_kind": "frozen_hand_object_transform_simulation_proxy",
+          "residual_action_dimension": 6,
+          "residual_action_scope": "right_arm_only",
+          "schema_version": 1,
+          "scope": "held_grasp_rj45_right_arm_residual_comparison"
+        },
+        "comparison_dependency_versions": {
+          "gymnasium": "1.2.0",
+          "skrl": "2.1.0"
+        },
+        "held_bank_dependency_count": 26,
+        "held_bank_proof": {
+          "final_opened": false,
+          "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+          "manifest_split_counts": {
+            "dev": 2,
+            "final": 2,
+            "train": 8
+          },
+          "no_final_opened": true,
+          "provenance_contract": {
+            "source_and_config_sha256": {
+              "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+              "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+              "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+              "configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+              "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+              "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+              "scripts/run_sim.py": "d20444cac6af9b8ef11903249ea4b0f43ffa50f5bf0808352059b058638694ed",
+              "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+              "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+              "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+              "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+              "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+              "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+              "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+              "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+              "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+              "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+              "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+              "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+              "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+              "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+              "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+              "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+              "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+              "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+              "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+              "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+              "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+              "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+              "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+              "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+              "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+              "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+              "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+              "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+              "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+              "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+              "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+              "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+              "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+              "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+              "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+            },
+            "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+          },
+          "provenance_source_task_match": true,
+          "selected_artifact_sha256": [
+            "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+            "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+            "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+            "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+            "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+            "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+            "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+            "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea"
+          ],
+          "selected_count": 8,
+          "selected_grasp_ids": [
+            "rj45-train-01",
+            "rj45-train-02",
+            "rj45-train-03",
+            "rj45-train-04",
+            "rj45-train-05",
+            "rj45-train-06",
+            "rj45-train-07",
+            "rj45-train-08"
+          ],
+          "selected_split": "train"
+        },
+        "parallel_contact_evidence": {
+          "current_source_sha256": {
+            "checks/probe_parallel_hand_contacts.py": "3f44004bb692ff515676439aaaa5b07e76f90fc2329c31f55816a6dd23c3e4b9",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+            "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a"
+          },
+          "report_sha256": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+          "runtime_num_envs_requires_native_ordering_check": true,
+          "sat_report_sha256": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+          "schema_version": 1,
+          "scope": "4env routing proof; target num_envs runtime asserted; full task validation pending",
+          "trace_row_count": 292,
+          "trace_sha256": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+          "validated_probe_num_envs": 4
+        },
+        "parallel_contact_evidence_dependency_sha256": {
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72"
+        },
+        "runtime_versions": {
+          "h5py": "3.14.0",
+          "isaaclab": "0.47.2",
+          "isaaclab-rl": "0.4.4",
+          "isaacsim": "5.1.0.0",
+          "numpy": "1.26.0",
+          "rsl-rl-lib": "3.0.1",
+          "torch": "2.7.0+cu128"
+        },
+        "task": {
+          "_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+          "angle_unit": "rad",
+          "assets": {
+            "build_report": "assets/generated/tasks/rj45-v1/build-report.json",
+            "plug": "assets/generated/tasks/rj45-v1/plug.usda",
+            "robot": "assets/generated/tasks/rj45-v1/robot.usda",
+            "socket": "assets/generated/tasks/rj45-v1/socket.usda",
+            "table": "assets/generated/tasks/rj45-v1/table.usda"
+          },
+          "contact": {
+            "contact_offset_m": 2e-05,
+            "dynamic_friction": 0.6,
+            "enable_external_forces_every_iteration": true,
+            "rest_offset_m": 0.0,
+            "restitution": 0.0,
+            "solver_position_iteration_count": 24,
+            "solver_velocity_iteration_count": 0,
+            "static_friction": 0.8
+          },
+          "controller": {
+            "align_timeout_s": 15.0,
+            "alignment_integral_gain": 0.25,
+            "alignment_standoff_m": 0.006,
+            "approach_waypoint_max_joint_delta_rad": 0.025,
+            "approach_waypoint_tracking_tolerance_rad": 0.05,
+            "assembly_socket_goal_m": [
+              0.37,
+              0.05,
+              0.9
+            ],
+            "assembly_socket_goal_quaternion_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "grip_contact_force_n": 0.5,
+            "gripper_command_speed_m_s": 0.02,
+            "gripper_open_magnitude_m": 0.048,
+            "initial_clearance_joint_positions_rad": [
+              0.7,
+              0.0,
+              0.0,
+              -2.1,
+              0.0,
+              1.4,
+              0.0
+            ],
+            "insert_timeout_s": 30.0,
+            "insertion_advance_lateral_tolerance_m": 0.0005,
+            "insertion_advance_orientation_tolerance_rad": 0.015,
+            "insertion_max_tracking_lead_m": 0.0005,
+            "insertion_resume_lateral_tolerance_m": 0.00025,
+            "insertion_resume_orientation_tolerance_rad": 0.01,
+            "insertion_speed_m_s": 0.0015,
+            "insertion_target_margin_m": 0.0003,
+            "jam_contact_force_n": 8.0,
+            "left_above_joint_positions_rad": [
+              -1.401307132,
+              0.96650597,
+              -1.144795829,
+              -1.882112293,
+              1.650221357,
+              1.592792715,
+              1.25041778
+            ],
+            "left_gripper_grasp_magnitude_m": 0.0145,
+            "nullspace_max_joint_delta_rad": 0.01,
+            "nullspace_posture_gain": 0.1,
+            "phase_timeout_s": 8.0,
+            "pregrasp_above_height_m": 0.13,
+            "pregrasp_clearance_joint_pos_rad": [
+              0.1,
+              0.0,
+              0.0,
+              -2.4,
+              0.0,
+              1.4,
+              0.0
+            ],
+            "pregrasp_integral_gain": 0.25,
+            "pregrasp_orientation_tolerance_rad": 0.05,
+            "pregrasp_safe_wrist_height_m": 0.98,
+            "pregrasp_timeout_s": 70.0,
+            "pregrasp_torso_tolerance_rad": 0.03,
+            "pregrasp_waypoint_tolerance_rad": 0.08,
+            "residual_rotation_bound_rad": 0.026179938779914945,
+            "residual_translation_bound_m": 0.0015,
+            "right_above_joint_positions_rad": [
+              -0.890571288,
+              -1.389464923,
+              0.907748342,
+              -1.878895718,
+              -2.216244888,
+              1.023817252,
+              -0.490770811
+            ],
+            "right_gripper_grasp_magnitude_m": 0.002,
+            "torso_max_joint_delta_rad": 0.015,
+            "torso_reference_tracking_tolerance_rad": 0.05,
+            "torso_work_joint_positions_rad": [
+              0.0,
+              0.9,
+              -1.8,
+              0.9,
+              0.0,
+              0.0
+            ],
+            "waypoint_provenance": "Bounded IK from actual RB USD joint frames; FK cross-checked against PhysX traces. Elevated left and oblique45 right approach paths screened with fully open +/-48mm fingers and compound table/nest geometry. Kinematic candidates; physical validation remains separate."
+          },
+          "data": {
+            "evaluation_seed": 910261,
+            "observation_source": "simulator_state_with_noise",
+            "train_seed": 20261026
+          },
+          "evaluation": {
+            "assembled_depth_m": 0.012,
+            "dwell_s": 0.4,
+            "max_contact_force_n": 25.0,
+            "max_depth_m": 0.013,
+            "max_lateral_error_m": 5e-05,
+            "max_orientation_error_rad": 0.008726646259971648,
+            "max_relative_angular_speed_rad_s": 0.05,
+            "max_relative_linear_speed_m_s": 0.005,
+            "timeout_s": 120.0
+          },
+          "frames": {
+            "left_grasp": {
+              "position_m": [
+                0.0,
+                0.005,
+                0.028
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "plug_tip": {
+              "position_m": [
+                0.0,
+                0.01137,
+                0.0
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "right_grasp": {
+              "position_m": [
+                0.0,
+                -0.035,
+                0.012
+              ],
+              "quaternion_wxyz": [
+                0.9238795325112867,
+                0.3826834323650898,
+                0.0,
+                0.0
+              ]
+            },
+            "socket_entry": {
+              "position_m": [
+                0.0,
+                -0.033,
+                0.0005075
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "geometry": {
+            "adapter_enclosure_m": {
+              "height": 0.022,
+              "length": 0.066,
+              "wall": 0.0015,
+              "width": 0.032
+            },
+            "dimension_sources": {
+              "adapter_enclosure_and_nest": "project-designed geometry; dimensional and mass assumptions",
+              "jack_guide_envelope": "front-face coordinates extracted from TE CAD; simplified convex guide for mechanical insertion",
+              "jack_outer_envelope": "TE 5555153-1 official STEP, converted by existing KiCad10 OpenCascade importer",
+              "nose_length_and_contact_detail": "drawing-derived approximate segmentation; not a supplier STEP or a measured spring-contact model",
+              "plug_max_envelope": "TE customer drawing C-558530 revision H: 11.79mm max width,22.74mm length,6.15mm max terminated nose height,7.98mm rear height,8 contacts at1.02mm pitch"
+            },
+            "gripper_geometry_reference": "assets/generated/build-report.json: robot.gripper_geometry; unchanged RB default fingers",
+            "jack_cad_transform": {
+              "rotation_rows": [
+                [
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  -1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  -1
+                ]
+              ],
+              "scale": 1,
+              "translation_m": [
+                0,
+                -0.031405,
+                0
+              ]
+            },
+            "jack_canonical_mesh_sha256": "caf85e2ba78124034327bba524c398d121b8ed74c15a5e23dd6dd3da1f4d6dba",
+            "jack_mesh": "assets/cache/rj45/te-5555153-1-mesh.json",
+            "jack_source_step_sha256": "2a04f61d6f382b35df75da64210a8cc1410551a62f3d367e97513ab46a53e756",
+            "model_limits": [
+              "No Ethernet electrical continuity or network link simulation",
+              "No elastic latch deformation/retention validation; latch displayed in depressed/unlocked state",
+              "No contact-spring force calibration",
+              "No cable bending/tension dynamics",
+              "No robot-object attachment joint or runtime object pose overwrite"
+            ],
+            "pickup_nest": {
+              "locator": {
+                "front_clearance_m": 0.00015,
+                "side_rail_rear_edge_relative_to_plug_m": -0.0015,
+                "slot_width_m": 0.01209,
+                "wall_height_m": 0.002,
+                "wall_thickness_m": 0.0015
+              },
+              "scope": "project-designed open-top pickup locator: existing support column plus a 2mm top plate, two nose side rails and a front stop; 0.15mm nominal side/front clearance restrains initial yaw and sliding while leaving upward lift free; simulation fixture, not supplier part",
+              "size_m": [
+                0.01,
+                0.0115,
+                0.036925
+              ],
+              "top_height_m": 0.786925,
+              "top_plate": {
+                "rear_edge_relative_to_plug_m": -0.0015,
+                "size_m": [
+                  0.018,
+                  0.016,
+                  0.002
+                ]
+              },
+              "world_center_m": [
+                0.35,
+                -0.11575,
+                0.7684625
+              ]
+            },
+            "plug_profile": {
+              "cable_visual_only": true,
+              "contact_count": 8,
+              "contact_length_m": 0.0045,
+              "contact_pitch_m": 0.00102,
+              "contact_width_m": 0.00036,
+              "latch_visual_only": true,
+              "max_width_m": 0.01179,
+              "nose_length_m": 0.0145,
+              "rear_height_m": 0.00798,
+              "terminated_nose_height_m": 0.00615,
+              "total_length_m": 0.02274
+            },
+            "port_guide": {
+              "back_wall_m": 0.001,
+              "bevel_depth_m": 0.0008,
+              "cavity_depth_m": 0.0145,
+              "entry_y_m": -0.033,
+              "main_z_range_m": [
+                -0.002985,
+                0.004
+              ],
+              "mouth_half_width_m": 0.00635,
+              "throat_half_width_m": 0.0059563
+            }
+          },
+          "insertion_axis_world": "+Y",
+          "length_unit": "m",
+          "parameter_provenance": "vendor CAD/drawing dimensions plus explicitly labelled simulation-design assumptions; no hardware calibration",
+          "plug": {
+            "display_name": "drawing-derived terminated RJ45 8P8C plug, TE 5-558530 family",
+            "grip_height_m": 0.00798,
+            "grip_length_m": 0.02274,
+            "grip_width_m": 0.01179,
+            "initial_orientation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "initial_position_m": [
+              0.35,
+              -0.12,
+              0.79
+            ],
+            "mass_kg": 0.004,
+            "mass_source": "simulation assumption for cable-free terminated plug, not supplier measurement",
+            "shaft_height_m": 0.00615,
+            "shaft_length_m": 0.0145,
+            "shaft_width_m": 0.01179
+          },
+          "reset": {
+            "position_noise_m": [
+              8e-05,
+              8e-05,
+              0.0
+            ]
+          },
+          "schema_version": 1,
+          "scope": "RB-Y1 bimanual mechanical insertion of an RJ45 plug into a handheld LAN-adapter housing; no latch locking, cable dynamics or Ethernet-link claim",
+          "socket": {
+            "display_name": "portable LAN adapter with TE 5555153-1 RJ45 jack",
+            "hole_height_m": 0.006985,
+            "hole_width_m": 0.0119126,
+            "initial_orientation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "initial_position_m": [
+              0.35,
+              0.12,
+              0.761
+            ],
+            "length_m": 0.066,
+            "mass_kg": 0.055,
+            "mass_source": "simulation assumption for jack plus designed enclosure, not supplier measurement",
+            "outer_height_m": 0.022,
+            "outer_width_m": 0.032
+          },
+          "table": {
+            "center_xy_m": [
+              0.6,
+              0
+            ],
+            "size_m": [
+              0.65,
+              0.9,
+              0.05
+            ],
+            "top_height_m": 0.75
+          },
+          "task_id": "rj45-v1",
+          "world_up_axis": "Z"
+        },
+        "training": {
+          "_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+          "action_application_mode": "absolute_tip_pose_target_insert_only",
+          "action_mode": "right_only_6d",
+          "active_horizon_s": 24.0,
+          "base_observation_dim": 79,
+          "calibration_bias": {
+            "initial_level": 0,
+            "rotation_max_levels_rad": [
+              0.004363323129985824,
+              0.008726646259971648,
+              0.013962634015954637
+            ],
+            "translation_levels_m": [
+              0.00015,
+              0.00035,
+              0.0006
+            ]
+          },
+          "diagnostic_observation_mode": "standard",
+          "episode_scope": "held_grasp_alignment_insertion",
+          "held_reset_staging": {
+            "control_steps": 1,
+            "object_positions_local_m": [
+              [
+                0.8,
+                0.8,
+                2.5
+              ],
+              [
+                1.0,
+                0.8,
+                2.5
+              ]
+            ],
+            "provenance": {
+              "defined_at": "2026-10-26",
+              "source": "simulation_design_assumption",
+              "unit": "m",
+              "valid_for": "Fixed-base RB-Y1 M v1.2 held-state initialization in the current table scene; requires contact-free verification before recorded-state restoration"
+            }
+          },
+          "reward": {
+            "action_delta_penalty": 0.0001,
+            "angle_scale_rad": 0.017453292519943295,
+            "depth_scale_m": 0.012,
+            "failure_penalty": 3.0,
+            "force_penalty": 0.01,
+            "force_scale_n": 8.0,
+            "lateral_scale_m": 0.0005,
+            "normalized_error_cap": 20.0,
+            "success_bonus": 10.0
+          },
+          "schema_version": 1,
+          "task_id": "rj45-v1",
+          "task_physics": {
+            "mass_randomization_enabled": false
+          },
+          "warmup_s": 0.2
+        }
+      },
+      "finite_losses": {
+        "Loss / Policy loss": -0.017485152930021286,
+        "Loss / Value loss": 0.382858008146286
+      },
+      "frozen_input_sha256": {
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-01.json": "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-02.json": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-03.json": "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-04.json": "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-05.json": "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-06.json": "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-07.json": "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-08.json": "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/report.json": "5ed9a32c686a864b10303a9a9c14d440bf9fbe3ed0d7a4e9debe57204abd66a3",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/trace.jsonl": "f0caf62e4e5067faee24e7511d8e3d8c774ba32ff664cac314f99d3a265bb218",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/report.json": "1f671c6119f68fbe8a4b2a41f7ec3218ee829c8dd25db22786cf24f5993a4fb0",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/trace.jsonl": "2a42e006358b4dc6eb380f5976452d4ef45684be83c67a7df7e9c9bafc7f66c0",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/report.json": "153d91544e1cd8a14fa8422a499b82937f2d4f89e4c8588696f6e83f5ef6bcd5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/trace.jsonl": "ccd18efb9b0cd1b62cae672eab07a0163f187e855b33a5c0571e4952df1d96ae",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/report.json": "4774f5e16d5e13bd409544c23de39b349c4779068cb116b723fa5b525ff31b2b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/trace.jsonl": "74dfa78c47077320ce1596db00ba5b5101aacd1b9f754225986edcbc45dddbff",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/report.json": "68d1ba092a42e0b516b89e8521802b30af483343b84b5b1d61063d5e2ca9e630",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/trace.jsonl": "0f46423047916003ec2080fdbb571c7f98fa9a34d490d081621d50e3c191b476",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/report.json": "ccdfe4d7ac324ea8ed586638215a468305eb60f0f9c9d4f9fe0399c5943c5fbf",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/trace.jsonl": "a640c07ffcbee8097323de9e445e1f2f7a3e999e76baebb4747cdeee97e35b9b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/report.json": "819503312b0b725124330b68756c5938965e3f8d782ba2d2ef910d16ab5e3b7b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/trace.jsonl": "72906316824ede712a24f29a7d5bc899e9a626ea26e7ee3f2d53db975bbfc046",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/report.json": "57e528b89232b4617071f37a106a6cd064886de37be675d537df32c227acf4f7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/trace.jsonl": "38c0be65e43db7a12411f33d2fe4fc40c3a1cb5aa674d1ffe28350e772914d9f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/checks/probe_parallel_hand_contacts.py": "3f44004bb692ff515676439aaaa5b07e76f90fc2329c31f55816a6dd23c3e4b9",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+      },
+      "observed_agent_update_calls": 2,
+      "parameter_delta": {
+        "changed_element_count": 25484,
+        "element_count": 27532,
+        "finite": true,
+        "l2": 0.17051073908805847
+      },
+      "readiness": {
+        "all_rows_estimator_valid": true,
+        "all_rows_policy_active": true,
+        "ready_rows_history": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "warmup_transitions_excluded_from_learning": 64,
+        "warmup_vector_steps": 16
+      },
+      "status": "completed",
+      "updates": [
+        {
+          "index": 1,
+          "return_finite": true
+        },
+        {
+          "index": 2,
+          "return_finite": true
+        }
+      ]
+    },
+    {
+      "algorithm": "sac",
+      "algorithm_settings": {
+        "minimum_sac_updates": 2,
+        "ppo_rollout_steps_per_environment": 8,
+        "sac_batch_size": 16,
+        "sac_utd_ratio": 1.0,
+        "sac_vector_steps": 16,
+        "scope": "G0 tensor-path and optimizer execution smoke only; these settings do not establish a fair PPO/SAC outcome comparison"
+      },
+      "collector": {
+        "absorbing_transitions": 0,
+        "algorithm": "sac",
+        "algorithm_updates": 64,
+        "learning_transitions": 64,
+        "mixed_validity_vector_steps": 0,
+        "num_envs": 4,
+        "optimizer_steps": 192,
+        "pending_policy_transitions": 0,
+        "ppo_bootstrap_adjustments": 0,
+        "ppo_rollout_target": 0,
+        "random_warmup_transitions": 16,
+        "replay_first_ready_at": 16,
+        "replay_insertions": 64,
+        "replay_size": 64,
+        "sac_utd_ratio": 1.0,
+        "skipped_valid_transitions": 0,
+        "terminated_transitions": 0,
+        "transitions": 64,
+        "truncated_transitions": 0,
+        "valid_policy_transitions": 64,
+        "vector_steps": 16,
+        "warmup_transitions": 0
+      },
+      "comparison_aggregate": {
+        "activated_episode_terminal_count": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "observation_failure_count": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "prepolicy_invalid_episode_count": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "timeout_failure_count": [
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "context": {
+        "asset_sha256": {
+          "plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+          "robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+          "scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+          "socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+          "table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d"
+        },
+        "comparison_contract": {
+          "action_observation_contract": "a submitted residual is applied only when the last returned policy observation for that environment was valid",
+          "actor_observation_dimension": 79,
+          "actual_camera_measurement": false,
+          "aggregate_denominator_scope": "activated policy episodes reaching a terminal transition only; this is not the external requested-case evaluation denominator",
+          "autoreset_final_observation_available": false,
+          "bootstrap_reset_observation": false,
+          "critic_observation_dimension": 79,
+          "external_requested_case_denominator_required": true,
+          "finite_horizon_timeout_handling": "absorbing_failure_no_bootstrap",
+          "ground_truth_claim": "policy-active invalid proxy rows never receive simulator-ground-truth control fallback; simulator ground truth still initializes the biased simulation proxy and remains available to the independent evaluator",
+          "left_arm_control": "scripted_legacy_support_controller",
+          "observation_scaling": "fixed_unit_scale_from_legacy_79d_contract",
+          "policy_active_invalid_handling": "absorbing_observation_failure",
+          "prepolicy_invalid_handling": "legacy_fallback_with_separate_diagnostic",
+          "prepolicy_preparation_failure_reporting": "the external evaluator must retain every requested case and classify prepolicy preparation failures separately as failed or invalid",
+          "proxy_initialization": "simulator_ground_truth_pose_with_configured_bias_at_calibration_event",
+          "proxy_kind": "frozen_hand_object_transform_simulation_proxy",
+          "residual_action_dimension": 6,
+          "residual_action_scope": "right_arm_only",
+          "schema_version": 1,
+          "scope": "held_grasp_rj45_right_arm_residual_comparison"
+        },
+        "comparison_dependency_versions": {
+          "gymnasium": "1.2.0",
+          "skrl": "2.1.0"
+        },
+        "held_bank_dependency_count": 26,
+        "held_bank_proof": {
+          "final_opened": false,
+          "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+          "manifest_split_counts": {
+            "dev": 2,
+            "final": 2,
+            "train": 8
+          },
+          "no_final_opened": true,
+          "provenance_contract": {
+            "source_and_config_sha256": {
+              "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+              "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+              "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+              "configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+              "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+              "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+              "scripts/run_sim.py": "d20444cac6af9b8ef11903249ea4b0f43ffa50f5bf0808352059b058638694ed",
+              "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+              "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+              "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+              "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+              "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+              "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+              "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+              "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+              "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+              "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+              "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+              "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+              "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+              "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+              "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+              "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+              "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+              "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+              "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+              "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+              "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+              "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+              "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+              "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+              "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+              "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+              "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+              "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+              "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+              "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+              "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+              "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+              "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+              "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+              "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+            },
+            "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+          },
+          "provenance_source_task_match": true,
+          "selected_artifact_sha256": [
+            "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+            "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+            "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+            "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+            "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+            "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+            "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+            "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea"
+          ],
+          "selected_count": 8,
+          "selected_grasp_ids": [
+            "rj45-train-01",
+            "rj45-train-02",
+            "rj45-train-03",
+            "rj45-train-04",
+            "rj45-train-05",
+            "rj45-train-06",
+            "rj45-train-07",
+            "rj45-train-08"
+          ],
+          "selected_split": "train"
+        },
+        "parallel_contact_evidence": {
+          "current_source_sha256": {
+            "checks/probe_parallel_hand_contacts.py": "3f44004bb692ff515676439aaaa5b07e76f90fc2329c31f55816a6dd23c3e4b9",
+            "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+            "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+            "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a"
+          },
+          "report_sha256": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+          "runtime_num_envs_requires_native_ordering_check": true,
+          "sat_report_sha256": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+          "schema_version": 1,
+          "scope": "4env routing proof; target num_envs runtime asserted; full task validation pending",
+          "trace_row_count": 292,
+          "trace_sha256": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+          "validated_probe_num_envs": 4
+        },
+        "parallel_contact_evidence_dependency_sha256": {
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+          "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72"
+        },
+        "runtime_versions": {
+          "h5py": "3.14.0",
+          "isaaclab": "0.47.2",
+          "isaaclab-rl": "0.4.4",
+          "isaacsim": "5.1.0.0",
+          "numpy": "1.26.0",
+          "rsl-rl-lib": "3.0.1",
+          "torch": "2.7.0+cu128"
+        },
+        "task": {
+          "_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+          "angle_unit": "rad",
+          "assets": {
+            "build_report": "assets/generated/tasks/rj45-v1/build-report.json",
+            "plug": "assets/generated/tasks/rj45-v1/plug.usda",
+            "robot": "assets/generated/tasks/rj45-v1/robot.usda",
+            "socket": "assets/generated/tasks/rj45-v1/socket.usda",
+            "table": "assets/generated/tasks/rj45-v1/table.usda"
+          },
+          "contact": {
+            "contact_offset_m": 2e-05,
+            "dynamic_friction": 0.6,
+            "enable_external_forces_every_iteration": true,
+            "rest_offset_m": 0.0,
+            "restitution": 0.0,
+            "solver_position_iteration_count": 24,
+            "solver_velocity_iteration_count": 0,
+            "static_friction": 0.8
+          },
+          "controller": {
+            "align_timeout_s": 15.0,
+            "alignment_integral_gain": 0.25,
+            "alignment_standoff_m": 0.006,
+            "approach_waypoint_max_joint_delta_rad": 0.025,
+            "approach_waypoint_tracking_tolerance_rad": 0.05,
+            "assembly_socket_goal_m": [
+              0.37,
+              0.05,
+              0.9
+            ],
+            "assembly_socket_goal_quaternion_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "grip_contact_force_n": 0.5,
+            "gripper_command_speed_m_s": 0.02,
+            "gripper_open_magnitude_m": 0.048,
+            "initial_clearance_joint_positions_rad": [
+              0.7,
+              0.0,
+              0.0,
+              -2.1,
+              0.0,
+              1.4,
+              0.0
+            ],
+            "insert_timeout_s": 30.0,
+            "insertion_advance_lateral_tolerance_m": 0.0005,
+            "insertion_advance_orientation_tolerance_rad": 0.015,
+            "insertion_max_tracking_lead_m": 0.0005,
+            "insertion_resume_lateral_tolerance_m": 0.00025,
+            "insertion_resume_orientation_tolerance_rad": 0.01,
+            "insertion_speed_m_s": 0.0015,
+            "insertion_target_margin_m": 0.0003,
+            "jam_contact_force_n": 8.0,
+            "left_above_joint_positions_rad": [
+              -1.401307132,
+              0.96650597,
+              -1.144795829,
+              -1.882112293,
+              1.650221357,
+              1.592792715,
+              1.25041778
+            ],
+            "left_gripper_grasp_magnitude_m": 0.0145,
+            "nullspace_max_joint_delta_rad": 0.01,
+            "nullspace_posture_gain": 0.1,
+            "phase_timeout_s": 8.0,
+            "pregrasp_above_height_m": 0.13,
+            "pregrasp_clearance_joint_pos_rad": [
+              0.1,
+              0.0,
+              0.0,
+              -2.4,
+              0.0,
+              1.4,
+              0.0
+            ],
+            "pregrasp_integral_gain": 0.25,
+            "pregrasp_orientation_tolerance_rad": 0.05,
+            "pregrasp_safe_wrist_height_m": 0.98,
+            "pregrasp_timeout_s": 70.0,
+            "pregrasp_torso_tolerance_rad": 0.03,
+            "pregrasp_waypoint_tolerance_rad": 0.08,
+            "residual_rotation_bound_rad": 0.026179938779914945,
+            "residual_translation_bound_m": 0.0015,
+            "right_above_joint_positions_rad": [
+              -0.890571288,
+              -1.389464923,
+              0.907748342,
+              -1.878895718,
+              -2.216244888,
+              1.023817252,
+              -0.490770811
+            ],
+            "right_gripper_grasp_magnitude_m": 0.002,
+            "torso_max_joint_delta_rad": 0.015,
+            "torso_reference_tracking_tolerance_rad": 0.05,
+            "torso_work_joint_positions_rad": [
+              0.0,
+              0.9,
+              -1.8,
+              0.9,
+              0.0,
+              0.0
+            ],
+            "waypoint_provenance": "Bounded IK from actual RB USD joint frames; FK cross-checked against PhysX traces. Elevated left and oblique45 right approach paths screened with fully open +/-48mm fingers and compound table/nest geometry. Kinematic candidates; physical validation remains separate."
+          },
+          "data": {
+            "evaluation_seed": 910261,
+            "observation_source": "simulator_state_with_noise",
+            "train_seed": 20261026
+          },
+          "evaluation": {
+            "assembled_depth_m": 0.012,
+            "dwell_s": 0.4,
+            "max_contact_force_n": 25.0,
+            "max_depth_m": 0.013,
+            "max_lateral_error_m": 5e-05,
+            "max_orientation_error_rad": 0.008726646259971648,
+            "max_relative_angular_speed_rad_s": 0.05,
+            "max_relative_linear_speed_m_s": 0.005,
+            "timeout_s": 120.0
+          },
+          "frames": {
+            "left_grasp": {
+              "position_m": [
+                0.0,
+                0.005,
+                0.028
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "plug_tip": {
+              "position_m": [
+                0.0,
+                0.01137,
+                0.0
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            },
+            "right_grasp": {
+              "position_m": [
+                0.0,
+                -0.035,
+                0.012
+              ],
+              "quaternion_wxyz": [
+                0.9238795325112867,
+                0.3826834323650898,
+                0.0,
+                0.0
+              ]
+            },
+            "socket_entry": {
+              "position_m": [
+                0.0,
+                -0.033,
+                0.0005075
+              ],
+              "quaternion_wxyz": [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ]
+            }
+          },
+          "geometry": {
+            "adapter_enclosure_m": {
+              "height": 0.022,
+              "length": 0.066,
+              "wall": 0.0015,
+              "width": 0.032
+            },
+            "dimension_sources": {
+              "adapter_enclosure_and_nest": "project-designed geometry; dimensional and mass assumptions",
+              "jack_guide_envelope": "front-face coordinates extracted from TE CAD; simplified convex guide for mechanical insertion",
+              "jack_outer_envelope": "TE 5555153-1 official STEP, converted by existing KiCad10 OpenCascade importer",
+              "nose_length_and_contact_detail": "drawing-derived approximate segmentation; not a supplier STEP or a measured spring-contact model",
+              "plug_max_envelope": "TE customer drawing C-558530 revision H: 11.79mm max width,22.74mm length,6.15mm max terminated nose height,7.98mm rear height,8 contacts at1.02mm pitch"
+            },
+            "gripper_geometry_reference": "assets/generated/build-report.json: robot.gripper_geometry; unchanged RB default fingers",
+            "jack_cad_transform": {
+              "rotation_rows": [
+                [
+                  1,
+                  0,
+                  0
+                ],
+                [
+                  0,
+                  -1,
+                  0
+                ],
+                [
+                  0,
+                  0,
+                  -1
+                ]
+              ],
+              "scale": 1,
+              "translation_m": [
+                0,
+                -0.031405,
+                0
+              ]
+            },
+            "jack_canonical_mesh_sha256": "caf85e2ba78124034327bba524c398d121b8ed74c15a5e23dd6dd3da1f4d6dba",
+            "jack_mesh": "assets/cache/rj45/te-5555153-1-mesh.json",
+            "jack_source_step_sha256": "2a04f61d6f382b35df75da64210a8cc1410551a62f3d367e97513ab46a53e756",
+            "model_limits": [
+              "No Ethernet electrical continuity or network link simulation",
+              "No elastic latch deformation/retention validation; latch displayed in depressed/unlocked state",
+              "No contact-spring force calibration",
+              "No cable bending/tension dynamics",
+              "No robot-object attachment joint or runtime object pose overwrite"
+            ],
+            "pickup_nest": {
+              "locator": {
+                "front_clearance_m": 0.00015,
+                "side_rail_rear_edge_relative_to_plug_m": -0.0015,
+                "slot_width_m": 0.01209,
+                "wall_height_m": 0.002,
+                "wall_thickness_m": 0.0015
+              },
+              "scope": "project-designed open-top pickup locator: existing support column plus a 2mm top plate, two nose side rails and a front stop; 0.15mm nominal side/front clearance restrains initial yaw and sliding while leaving upward lift free; simulation fixture, not supplier part",
+              "size_m": [
+                0.01,
+                0.0115,
+                0.036925
+              ],
+              "top_height_m": 0.786925,
+              "top_plate": {
+                "rear_edge_relative_to_plug_m": -0.0015,
+                "size_m": [
+                  0.018,
+                  0.016,
+                  0.002
+                ]
+              },
+              "world_center_m": [
+                0.35,
+                -0.11575,
+                0.7684625
+              ]
+            },
+            "plug_profile": {
+              "cable_visual_only": true,
+              "contact_count": 8,
+              "contact_length_m": 0.0045,
+              "contact_pitch_m": 0.00102,
+              "contact_width_m": 0.00036,
+              "latch_visual_only": true,
+              "max_width_m": 0.01179,
+              "nose_length_m": 0.0145,
+              "rear_height_m": 0.00798,
+              "terminated_nose_height_m": 0.00615,
+              "total_length_m": 0.02274
+            },
+            "port_guide": {
+              "back_wall_m": 0.001,
+              "bevel_depth_m": 0.0008,
+              "cavity_depth_m": 0.0145,
+              "entry_y_m": -0.033,
+              "main_z_range_m": [
+                -0.002985,
+                0.004
+              ],
+              "mouth_half_width_m": 0.00635,
+              "throat_half_width_m": 0.0059563
+            }
+          },
+          "insertion_axis_world": "+Y",
+          "length_unit": "m",
+          "parameter_provenance": "vendor CAD/drawing dimensions plus explicitly labelled simulation-design assumptions; no hardware calibration",
+          "plug": {
+            "display_name": "drawing-derived terminated RJ45 8P8C plug, TE 5-558530 family",
+            "grip_height_m": 0.00798,
+            "grip_length_m": 0.02274,
+            "grip_width_m": 0.01179,
+            "initial_orientation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "initial_position_m": [
+              0.35,
+              -0.12,
+              0.79
+            ],
+            "mass_kg": 0.004,
+            "mass_source": "simulation assumption for cable-free terminated plug, not supplier measurement",
+            "shaft_height_m": 0.00615,
+            "shaft_length_m": 0.0145,
+            "shaft_width_m": 0.01179
+          },
+          "reset": {
+            "position_noise_m": [
+              8e-05,
+              8e-05,
+              0.0
+            ]
+          },
+          "schema_version": 1,
+          "scope": "RB-Y1 bimanual mechanical insertion of an RJ45 plug into a handheld LAN-adapter housing; no latch locking, cable dynamics or Ethernet-link claim",
+          "socket": {
+            "display_name": "portable LAN adapter with TE 5555153-1 RJ45 jack",
+            "hole_height_m": 0.006985,
+            "hole_width_m": 0.0119126,
+            "initial_orientation_wxyz": [
+              1.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "initial_position_m": [
+              0.35,
+              0.12,
+              0.761
+            ],
+            "length_m": 0.066,
+            "mass_kg": 0.055,
+            "mass_source": "simulation assumption for jack plus designed enclosure, not supplier measurement",
+            "outer_height_m": 0.022,
+            "outer_width_m": 0.032
+          },
+          "table": {
+            "center_xy_m": [
+              0.6,
+              0
+            ],
+            "size_m": [
+              0.65,
+              0.9,
+              0.05
+            ],
+            "top_height_m": 0.75
+          },
+          "task_id": "rj45-v1",
+          "world_up_axis": "Z"
+        },
+        "training": {
+          "_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+          "action_application_mode": "absolute_tip_pose_target_insert_only",
+          "action_mode": "right_only_6d",
+          "active_horizon_s": 24.0,
+          "base_observation_dim": 79,
+          "calibration_bias": {
+            "initial_level": 0,
+            "rotation_max_levels_rad": [
+              0.004363323129985824,
+              0.008726646259971648,
+              0.013962634015954637
+            ],
+            "translation_levels_m": [
+              0.00015,
+              0.00035,
+              0.0006
+            ]
+          },
+          "diagnostic_observation_mode": "standard",
+          "episode_scope": "held_grasp_alignment_insertion",
+          "held_reset_staging": {
+            "control_steps": 1,
+            "object_positions_local_m": [
+              [
+                0.8,
+                0.8,
+                2.5
+              ],
+              [
+                1.0,
+                0.8,
+                2.5
+              ]
+            ],
+            "provenance": {
+              "defined_at": "2026-10-26",
+              "source": "simulation_design_assumption",
+              "unit": "m",
+              "valid_for": "Fixed-base RB-Y1 M v1.2 held-state initialization in the current table scene; requires contact-free verification before recorded-state restoration"
+            }
+          },
+          "reward": {
+            "action_delta_penalty": 0.0001,
+            "angle_scale_rad": 0.017453292519943295,
+            "depth_scale_m": 0.012,
+            "failure_penalty": 3.0,
+            "force_penalty": 0.01,
+            "force_scale_n": 8.0,
+            "lateral_scale_m": 0.0005,
+            "normalized_error_cap": 20.0,
+            "success_bonus": 10.0
+          },
+          "schema_version": 1,
+          "task_id": "rj45-v1",
+          "task_physics": {
+            "mass_randomization_enabled": false
+          },
+          "warmup_s": 0.2
+        }
+      },
+      "finite_losses": {
+        "Loss / Critic loss": 0.320334255695343,
+        "Loss / Entropy loss": -12.025160789489746,
+        "Loss / Policy loss": -0.2794356942176819
+      },
+      "frozen_input_sha256": {
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-01.json": "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-02.json": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-03.json": "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-04.json": "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-05.json": "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-06.json": "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-07.json": "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-08.json": "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/report.json": "5ed9a32c686a864b10303a9a9c14d440bf9fbe3ed0d7a4e9debe57204abd66a3",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/trace.jsonl": "f0caf62e4e5067faee24e7511d8e3d8c774ba32ff664cac314f99d3a265bb218",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/report.json": "1f671c6119f68fbe8a4b2a41f7ec3218ee829c8dd25db22786cf24f5993a4fb0",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/trace.jsonl": "2a42e006358b4dc6eb380f5976452d4ef45684be83c67a7df7e9c9bafc7f66c0",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/report.json": "153d91544e1cd8a14fa8422a499b82937f2d4f89e4c8588696f6e83f5ef6bcd5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/trace.jsonl": "ccd18efb9b0cd1b62cae672eab07a0163f187e855b33a5c0571e4952df1d96ae",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/report.json": "4774f5e16d5e13bd409544c23de39b349c4779068cb116b723fa5b525ff31b2b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/trace.jsonl": "74dfa78c47077320ce1596db00ba5b5101aacd1b9f754225986edcbc45dddbff",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/report.json": "68d1ba092a42e0b516b89e8521802b30af483343b84b5b1d61063d5e2ca9e630",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/trace.jsonl": "0f46423047916003ec2080fdbb571c7f98fa9a34d490d081621d50e3c191b476",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/report.json": "ccdfe4d7ac324ea8ed586638215a468305eb60f0f9c9d4f9fe0399c5943c5fbf",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/trace.jsonl": "a640c07ffcbee8097323de9e445e1f2f7a3e999e76baebb4747cdeee97e35b9b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/report.json": "819503312b0b725124330b68756c5938965e3f8d782ba2d2ef910d16ab5e3b7b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/trace.jsonl": "72906316824ede712a24f29a7d5bc899e9a626ea26e7ee3f2d53db975bbfc046",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/report.json": "57e528b89232b4617071f37a106a6cd064886de37be675d537df32c227acf4f7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/trace.jsonl": "38c0be65e43db7a12411f33d2fe4fc40c3a1cb5aa674d1ffe28350e772914d9f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/actual-body-pose-sat-report.json": "6ea57ab1592fa0405adec95cc607bfef83fb40c9af72641b1e7c25868455d7c3",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/report.json": "61c6f67e7d6c94255932da23edae7dfb74ff6c8d8713b620b74e5fa04fe16aed",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/trace.jsonl": "9e5da7f54eb9e15d5edec7f6be21b1a00ff2c412b2455b926a6197ed83f5ec72",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/checks/probe_parallel_hand_contacts.py": "3f44004bb692ff515676439aaaa5b07e76f90fc2329c31f55816a6dd23c3e4b9",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+        "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+      },
+      "observed_agent_update_calls": 64,
+      "parameter_delta": {
+        "changed_element_count": 25484,
+        "element_count": 27532,
+        "finite": true,
+        "l2": 0.44554057717323303
+      },
+      "readiness": {
+        "all_rows_estimator_valid": true,
+        "all_rows_policy_active": true,
+        "ready_rows_history": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          1,
+          3,
+          3,
+          3,
+          3,
+          3,
+          3,
+          4
+        ],
+        "warmup_transitions_excluded_from_learning": 64,
+        "warmup_vector_steps": 16
+      },
+      "status": "completed",
+      "updates": [
+        {
+          "index": 1,
+          "return_finite": true
+        },
+        {
+          "index": 2,
+          "return_finite": true
+        },
+        {
+          "index": 3,
+          "return_finite": true
+        },
+        {
+          "index": 4,
+          "return_finite": true
+        },
+        {
+          "index": 5,
+          "return_finite": true
+        },
+        {
+          "index": 6,
+          "return_finite": true
+        },
+        {
+          "index": 7,
+          "return_finite": true
+        },
+        {
+          "index": 8,
+          "return_finite": true
+        },
+        {
+          "index": 9,
+          "return_finite": true
+        },
+        {
+          "index": 10,
+          "return_finite": true
+        },
+        {
+          "index": 11,
+          "return_finite": true
+        },
+        {
+          "index": 12,
+          "return_finite": true
+        },
+        {
+          "index": 13,
+          "return_finite": true
+        },
+        {
+          "index": 14,
+          "return_finite": true
+        },
+        {
+          "index": 15,
+          "return_finite": true
+        },
+        {
+          "index": 16,
+          "return_finite": true
+        },
+        {
+          "index": 17,
+          "return_finite": true
+        },
+        {
+          "index": 18,
+          "return_finite": true
+        },
+        {
+          "index": 19,
+          "return_finite": true
+        },
+        {
+          "index": 20,
+          "return_finite": true
+        },
+        {
+          "index": 21,
+          "return_finite": true
+        },
+        {
+          "index": 22,
+          "return_finite": true
+        },
+        {
+          "index": 23,
+          "return_finite": true
+        },
+        {
+          "index": 24,
+          "return_finite": true
+        },
+        {
+          "index": 25,
+          "return_finite": true
+        },
+        {
+          "index": 26,
+          "return_finite": true
+        },
+        {
+          "index": 27,
+          "return_finite": true
+        },
+        {
+          "index": 28,
+          "return_finite": true
+        },
+        {
+          "index": 29,
+          "return_finite": true
+        },
+        {
+          "index": 30,
+          "return_finite": true
+        },
+        {
+          "index": 31,
+          "return_finite": true
+        },
+        {
+          "index": 32,
+          "return_finite": true
+        },
+        {
+          "index": 33,
+          "return_finite": true
+        },
+        {
+          "index": 34,
+          "return_finite": true
+        },
+        {
+          "index": 35,
+          "return_finite": true
+        },
+        {
+          "index": 36,
+          "return_finite": true
+        },
+        {
+          "index": 37,
+          "return_finite": true
+        },
+        {
+          "index": 38,
+          "return_finite": true
+        },
+        {
+          "index": 39,
+          "return_finite": true
+        },
+        {
+          "index": 40,
+          "return_finite": true
+        },
+        {
+          "index": 41,
+          "return_finite": true
+        },
+        {
+          "index": 42,
+          "return_finite": true
+        },
+        {
+          "index": 43,
+          "return_finite": true
+        },
+        {
+          "index": 44,
+          "return_finite": true
+        },
+        {
+          "index": 45,
+          "return_finite": true
+        },
+        {
+          "index": 46,
+          "return_finite": true
+        },
+        {
+          "index": 47,
+          "return_finite": true
+        },
+        {
+          "index": 48,
+          "return_finite": true
+        },
+        {
+          "index": 49,
+          "return_finite": true
+        },
+        {
+          "index": 50,
+          "return_finite": true
+        },
+        {
+          "index": 51,
+          "return_finite": true
+        },
+        {
+          "index": 52,
+          "return_finite": true
+        },
+        {
+          "index": 53,
+          "return_finite": true
+        },
+        {
+          "index": 54,
+          "return_finite": true
+        },
+        {
+          "index": 55,
+          "return_finite": true
+        },
+        {
+          "index": 56,
+          "return_finite": true
+        },
+        {
+          "index": 57,
+          "return_finite": true
+        },
+        {
+          "index": 58,
+          "return_finite": true
+        },
+        {
+          "index": 59,
+          "return_finite": true
+        },
+        {
+          "index": 60,
+          "return_finite": true
+        },
+        {
+          "index": 61,
+          "return_finite": true
+        },
+        {
+          "index": 62,
+          "return_finite": true
+        },
+        {
+          "index": 63,
+          "return_finite": true
+        },
+        {
+          "index": 64,
+          "return_finite": true
+        }
+      ]
+    }
+  ],
+  "claims": {
+    "algorithm_fairness_proven": false,
+    "g0_isaac_integration_smoke_passed": true,
+    "generalization_proven": false,
+    "method_effect_comparison_completed": false,
+    "portfolio_result_ready": false,
+    "reinforcement_learning_effect_proven": false
+  },
+  "device": "cuda:0",
+  "gpu_executed": true,
+  "num_envs": 4,
+  "prelaunch": {
+    "current_root": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f",
+    "current_sources": {
+      "comparison_env": {
+        "path": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f/src/rby1_assembly/rj45_comparison_env.py",
+        "sha256": "a20449808c8cd75d181fdec444f8f834fa724280891654fe458f3351c0c50027"
+      },
+      "comparison_rl": {
+        "path": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f/src/rby1_assembly/rj45_comparison_rl.py",
+        "sha256": "982b02b925dd3e6c635ce11fdb41645696a01c07125c25c3e57d839cb2bccd17"
+      },
+      "requirements": {
+        "path": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f/configs/rj45-comparison-requirements.txt",
+        "sha256": "8818e4c26817861a0817160dddf72f9ba762a684289c0a96593a343c2aba7202"
+      },
+      "runner": {
+        "path": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f/scripts/smoke_rj45_comparison_isaac.py",
+        "sha256": "509aa0ccc29b88f34f4168b224f64efb3cbc3adde0367c6f6b38f81e7be8420a"
+      }
+    },
+    "frozen_inputs": {
+      "held_bank": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+        "sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5"
+      },
+      "parallel_contact_evidence": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-parallel-probe/after-persistent-target-hook/evidence-spec.json",
+        "sha256": "db1b1e6291490db85650764374dbbccf32d0f80273e3489d3b5966416d83a383"
+      },
+      "runtime_config": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/runtime.json",
+        "sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a"
+      },
+      "task_config": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/tasks/rj45-v1.json",
+        "sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+      },
+      "training_config": {
+        "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-training-target-offset-v1.json",
+        "sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      }
+    },
+    "runtime_manifest": {
+      "files": {
+        "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+        "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+        "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+        "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+        "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+        "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+        "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+        "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+        "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+        "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+        "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+        "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+        "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+        "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+        "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+        "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+        "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+        "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+        "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+        "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+        "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+        "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+        "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+        "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+        "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+        "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+        "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+        "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+        "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+        "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+        "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+        "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+        "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+        "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+        "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+      },
+      "git_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+      "path": "/home/ubuntu/workspace/rby1-comparison-g0-20261101f/configs/rj45-oracle-runtime-104721a.json",
+      "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+      "verified_file_count": 35
+    },
+    "runtime_root": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a",
+    "snapshot_labels": {
+      "comparison_adapter_and_algorithms": "current_root_uncommitted_bytes",
+      "physics_assets_and_legacy_environment": "archived_runtime_104721a"
+    }
+  },
+  "progress_events": [
+    {
+      "elapsed_seconds": 0.0,
+      "event": "g0_progress",
+      "interval_seconds": 60.0,
+      "pid": 34868,
+      "stage": "traceback_heartbeat_armed",
+      "utc": "2026-10-31T15:57:59.254586+00:00"
+    },
+    {
+      "elapsed_seconds": 0.0,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "execution_argument_validation_begin",
+      "utc": "2026-10-31T15:57:59.254632+00:00"
+    },
+    {
+      "elapsed_seconds": 0.0,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "execution_argument_validation_complete",
+      "utc": "2026-10-31T15:57:59.254647+00:00"
+    },
+    {
+      "elapsed_seconds": 0.0,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "runtime_validation_begin",
+      "utc": "2026-10-31T15:57:59.254658+00:00"
+    },
+    {
+      "elapsed_seconds": 0.002,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "runtime_validation_complete",
+      "utc": "2026-10-31T15:57:59.256734+00:00"
+    },
+    {
+      "elapsed_seconds": 0.033,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "application_launch_begin",
+      "utc": "2026-10-31T15:57:59.287780+00:00"
+    },
+    {
+      "elapsed_seconds": 4.494,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "application_launch_complete",
+      "utc": "2026-10-31T15:58:03.748979+00:00"
+    },
+    {
+      "elapsed_seconds": 4.495,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "comparison_smoke_begin",
+      "utc": "2026-10-31T15:58:03.749058+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 4.503,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "algorithm_begin",
+      "utc": "2026-10-31T15:58:03.757229+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 4.503,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_build_begin",
+      "utc": "2026-10-31T15:58:03.757275+00:00"
+    },
+    {
+      "elapsed_seconds": 26.957,
+      "event": "g0_progress",
+      "num_envs": 4,
+      "pid": 34868,
+      "stage": "environment_constructor_begin",
+      "utc": "2026-10-31T15:58:26.211438+00:00"
+    },
+    {
+      "elapsed_seconds": 29.056,
+      "event": "g0_progress",
+      "num_envs": 4,
+      "pid": 34868,
+      "stage": "environment_constructor_complete",
+      "utc": "2026-10-31T15:58:28.310742+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 29.06,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_build_complete",
+      "utc": "2026-10-31T15:58:28.314969+00:00"
+    },
+    {
+      "elapsed_seconds": 29.06,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "initial_reset_begin",
+      "utc": "2026-10-31T15:58:28.315010+00:00"
+    },
+    {
+      "elapsed_seconds": 29.208,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "initial_reset_complete",
+      "utc": "2026-10-31T15:58:28.462888+00:00"
+    },
+    {
+      "elapsed_seconds": 29.209,
+      "event": "g0_progress",
+      "max_steps": 120,
+      "num_envs": 4,
+      "pid": 34868,
+      "readiness_step": 0,
+      "ready_rows": 0,
+      "stage": "readiness_checkpoint",
+      "utc": "2026-10-31T15:58:28.463072+00:00"
+    },
+    {
+      "elapsed_seconds": 33.504,
+      "event": "g0_progress",
+      "max_steps": 120,
+      "num_envs": 4,
+      "pid": 34868,
+      "readiness_step": 16,
+      "ready_rows": 4,
+      "stage": "readiness_checkpoint",
+      "utc": "2026-10-31T15:58:32.758669+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 33.504,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "agent_creation_begin",
+      "utc": "2026-10-31T15:58:32.758858+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 33.638,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "agent_creation_complete",
+      "utc": "2026-10-31T15:58:32.892140+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 33.638,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "collection_begin",
+      "utc": "2026-10-31T15:58:32.892435+00:00",
+      "vector_steps": 16
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 37.024,
+      "event": "g0_progress",
+      "observed_transitions": 64,
+      "pid": 34868,
+      "stage": "collection_complete",
+      "utc": "2026-10-31T15:58:36.278387+00:00",
+      "vector_steps": 16
+    },
+    {
+      "algorithm": "ppo",
+      "algorithm_updates": 2,
+      "elapsed_seconds": 37.18,
+      "event": "g0_progress",
+      "optimizer_steps": 8,
+      "pid": 34868,
+      "stage": "algorithm_complete",
+      "utc": "2026-10-31T15:58:36.434220+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 37.18,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_close_begin",
+      "utc": "2026-10-31T15:58:36.434285+00:00"
+    },
+    {
+      "algorithm": "ppo",
+      "elapsed_seconds": 37.609,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_close_complete",
+      "utc": "2026-10-31T15:58:36.863949+00:00"
+    },
+    {
+      "elapsed_seconds": 37.61,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_transition_begin",
+      "timeline_playing": true,
+      "timeline_stopped": false,
+      "utc": "2026-10-31T15:58:36.864108+00:00"
+    },
+    {
+      "elapsed_seconds": 37.61,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "timeline_stop_requested",
+      "utc": "2026-10-31T15:58:36.864130+00:00"
+    },
+    {
+      "elapsed_seconds": 37.79,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "timeline_stop_event_flushed",
+      "timeline_playing": false,
+      "timeline_stopped": true,
+      "utc": "2026-10-31T15:58:37.044182+00:00"
+    },
+    {
+      "elapsed_seconds": 37.79,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "fresh_stage_creation_begin",
+      "utc": "2026-10-31T15:58:37.044255+00:00"
+    },
+    {
+      "elapsed_seconds": 37.798,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "fresh_stage_creation_complete",
+      "utc": "2026-10-31T15:58:37.052726+00:00"
+    },
+    {
+      "elapsed_seconds": 37.798,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_transition_complete",
+      "utc": "2026-10-31T15:58:37.052764+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 37.798,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "algorithm_begin",
+      "utc": "2026-10-31T15:58:37.052788+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 37.798,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_build_begin",
+      "utc": "2026-10-31T15:58:37.052803+00:00"
+    },
+    {
+      "elapsed_seconds": 58.805,
+      "event": "g0_progress",
+      "num_envs": 4,
+      "pid": 34868,
+      "stage": "environment_constructor_begin",
+      "utc": "2026-10-31T15:58:58.059072+00:00"
+    },
+    {
+      "elapsed_seconds": 60.164,
+      "event": "g0_progress",
+      "num_envs": 4,
+      "pid": 34868,
+      "stage": "environment_constructor_complete",
+      "utc": "2026-10-31T15:58:59.418309+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 60.167,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_build_complete",
+      "utc": "2026-10-31T15:58:59.421752+00:00"
+    },
+    {
+      "elapsed_seconds": 60.167,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "initial_reset_begin",
+      "utc": "2026-10-31T15:58:59.421783+00:00"
+    },
+    {
+      "elapsed_seconds": 60.18,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "initial_reset_complete",
+      "utc": "2026-10-31T15:58:59.434868+00:00"
+    },
+    {
+      "elapsed_seconds": 60.18,
+      "event": "g0_progress",
+      "max_steps": 120,
+      "num_envs": 4,
+      "pid": 34868,
+      "readiness_step": 0,
+      "ready_rows": 0,
+      "stage": "readiness_checkpoint",
+      "utc": "2026-10-31T15:58:59.434959+00:00"
+    },
+    {
+      "elapsed_seconds": 63.416,
+      "event": "g0_progress",
+      "max_steps": 120,
+      "num_envs": 4,
+      "pid": 34868,
+      "readiness_step": 16,
+      "ready_rows": 4,
+      "stage": "readiness_checkpoint",
+      "utc": "2026-10-31T15:59:02.670147+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 63.416,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "agent_creation_begin",
+      "utc": "2026-10-31T15:59:02.670294+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 63.422,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "agent_creation_complete",
+      "utc": "2026-10-31T15:59:02.677019+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 63.423,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "collection_begin",
+      "utc": "2026-10-31T15:59:02.677386+00:00",
+      "vector_steps": 16
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 66.955,
+      "event": "g0_progress",
+      "observed_transitions": 64,
+      "pid": 34868,
+      "stage": "collection_complete",
+      "utc": "2026-10-31T15:59:06.209465+00:00",
+      "vector_steps": 16
+    },
+    {
+      "algorithm": "sac",
+      "algorithm_updates": 64,
+      "elapsed_seconds": 67.11,
+      "event": "g0_progress",
+      "optimizer_steps": 192,
+      "pid": 34868,
+      "stage": "algorithm_complete",
+      "utc": "2026-10-31T15:59:06.364506+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 67.11,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_close_begin",
+      "utc": "2026-10-31T15:59:06.364573+00:00"
+    },
+    {
+      "algorithm": "sac",
+      "elapsed_seconds": 67.541,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "environment_close_complete",
+      "utc": "2026-10-31T15:59:06.795492+00:00"
+    },
+    {
+      "elapsed_seconds": 67.543,
+      "event": "g0_progress",
+      "pid": 34868,
+      "stage": "comparison_smoke_complete",
+      "utc": "2026-10-31T15:59:06.797867+00:00"
+    },
+    {
+      "elapsed_seconds": 67.543,
+      "event": "g0_progress",
+      "pid": 34868,
+      "report_status": "completed",
+      "stage": "report_write_begin",
+      "utc": "2026-10-31T15:59:06.797898+00:00"
+    }
+  ],
+  "runtime_import_origins": {
+    "rby1_assembly": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py",
+    "rby1_assembly.contact_loads": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py",
+    "rby1_assembly.contact_manifolds": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py",
+    "rby1_assembly.contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py",
+    "rby1_assembly.control_math": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py",
+    "rby1_assembly.experiment_contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py",
+    "rby1_assembly.hand_collision": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py",
+    "rby1_assembly.hand_contact_monitor": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py",
+    "rby1_assembly.held_grasp": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py",
+    "rby1_assembly.isaac_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py",
+    "rby1_assembly.parallel_contact_evidence": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py",
+    "rby1_assembly.rj45_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py",
+    "rby1_assembly.rj45_grasp_generation": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py",
+    "rby1_assembly.rj45_task": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py",
+    "rby1_assembly.rj45_training": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py",
+    "rby1_assembly.rj45_training_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py"
+  },
+  "schema_name": "rj45_comparison_isaac_smoke_v1",
+  "status": "completed"
+}

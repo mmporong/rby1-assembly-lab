@@ -1,0 +1,13 @@
+# Install inside the pinned Isaac Lab 2.3 / Torch 2.7 environment with:
+#   uv pip install --python .venv/bin/python --no-deps --require-hashes \
+#     -r configs/rj45-comparison-requirements.txt
+# skrl 2.1.0 is the last release in the current Isaac Lab 2.3 compatibility
+# lane; skrl 2.1.1 moved its Isaac Lab examples to Isaac Lab 3.x.
+# --no-deps is intentional: Torch, NumPy, packaging, and tensorboard remain owned
+# by the existing Isaac runtime. gymnasium matches Isaac Lab 2.3's setup.py pin.
+skrl==2.1.0 \
+    --hash=sha256:5d0cf61fcf81243018220dacbd4a04c84250c1e67274aaeac1779cd53db44e23
+gymnasium==1.2.0 \
+    --hash=sha256:fc4a1e4121a9464c29b4d7dc6ade3fbeaa36dea448682f5f71a6d2c17489ea76
+tqdm==4.67.1 \
+    --hash=sha256:26445eca388f82e72884e0d580d5464cd801a3ea01e63e5601bdff9ba6a48de2

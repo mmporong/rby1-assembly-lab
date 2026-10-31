@@ -1,0 +1,97 @@
+{
+  "status": "completed",
+  "num_envs": 4,
+  "report_sha256": "cd81227390670668976dd66b26d1cd0ed576dddc2b28efd9679c94091e7e2791",
+  "algorithms": [
+    {
+      "algorithm": "ppo",
+      "collector": {
+        "absorbing_transitions": 0,
+        "algorithm": "ppo",
+        "algorithm_updates": 2,
+        "learning_transitions": 64,
+        "mixed_validity_vector_steps": 0,
+        "num_envs": 4,
+        "optimizer_steps": 8,
+        "pending_policy_transitions": 0,
+        "ppo_bootstrap_adjustments": 8,
+        "ppo_rollout_target": 32,
+        "random_warmup_transitions": 0,
+        "replay_first_ready_at": 0,
+        "replay_insertions": 0,
+        "replay_size": 0,
+        "sac_utd_ratio": 0.0,
+        "skipped_valid_transitions": 0,
+        "terminated_transitions": 0,
+        "transitions": 64,
+        "truncated_transitions": 0,
+        "valid_policy_transitions": 64,
+        "vector_steps": 16,
+        "warmup_transitions": 0
+      },
+      "finite_losses": {
+        "Loss / Policy loss": -0.017485152930021286,
+        "Loss / Value loss": 0.382858008146286
+      },
+      "parameter_delta": {
+        "changed_element_count": 25484,
+        "element_count": 27532,
+        "finite": true,
+        "l2": 0.17051073908805847
+      }
+    },
+    {
+      "algorithm": "sac",
+      "collector": {
+        "absorbing_transitions": 0,
+        "algorithm": "sac",
+        "algorithm_updates": 64,
+        "learning_transitions": 64,
+        "mixed_validity_vector_steps": 0,
+        "num_envs": 4,
+        "optimizer_steps": 192,
+        "pending_policy_transitions": 0,
+        "ppo_bootstrap_adjustments": 0,
+        "ppo_rollout_target": 0,
+        "random_warmup_transitions": 16,
+        "replay_first_ready_at": 16,
+        "replay_insertions": 64,
+        "replay_size": 64,
+        "sac_utd_ratio": 1.0,
+        "skipped_valid_transitions": 0,
+        "terminated_transitions": 0,
+        "transitions": 64,
+        "truncated_transitions": 0,
+        "valid_policy_transitions": 64,
+        "vector_steps": 16,
+        "warmup_transitions": 0
+      },
+      "finite_losses": {
+        "Loss / Critic loss": 0.320334255695343,
+        "Loss / Entropy loss": -12.025160789489746,
+        "Loss / Policy loss": -0.2794356942176819
+      },
+      "parameter_delta": {
+        "changed_element_count": 25484,
+        "element_count": 27532,
+        "finite": true,
+        "l2": 0.44554057717323303
+      }
+    }
+  ],
+  "claims": {
+    "algorithm_fairness_proven": false,
+    "g0_isaac_integration_smoke_passed": true,
+    "generalization_proven": false,
+    "method_effect_comparison_completed": false,
+    "portfolio_result_ready": false,
+    "reinforcement_learning_effect_proven": false
+  },
+  "supervisor": {
+    "exit_code": 0,
+    "child_exit_code": 0,
+    "report_passed": true,
+    "started_at_utc": "2026-10-31T15:57:59.212080+00:00",
+    "finished_at_utc": "2026-10-31T15:59:07.338480+00:00"
+  }
+}
