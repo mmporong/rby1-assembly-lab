@@ -7,6 +7,8 @@ import json
 from pathlib import Path
 import sys
 import types
+import shutil
+import subprocess
 
 import pytest
 import torch
@@ -24,6 +26,144 @@ SPEC.loader.exec_module(SMOKE)
 
 def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _physics_fixture(tmp_path: Path) -> tuple[Path, Path, Path, dict]:
+    current = SCRIPT.parents[1]
+    runtime = tmp_path / "runtime"
+    generated = runtime / "assets/generated/tasks/rj45-v1"
+    cache = runtime / "assets/cache/rby1"
+    (cache / "gripper").mkdir(parents=True)
+    generated.mkdir(parents=True)
+    (runtime / "configs/tasks").mkdir(parents=True)
+    for relative in (
+        "configs/tasks/rj45-v1.json",
+        "configs/runtime.json",
+        "configs/rj45-training-target-offset-v1.json",
+    ):
+        destination = runtime / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(current / relative, destination)
+
+    generated_bytes = {
+        "robot.usda": (
+            b"#usda 1.0\n@../../../cache/rby1/model_v_1_2_m.usd@\n"
+            b"@../../../cache/rby1/gripper/rb_gripper_left.usd@\n"
+            b"@../../../cache/rby1/gripper/rb_gripper_right.usd@\n"
+        ),
+        "socket.usda": b"socket\n",
+        "plug.usda": b"plug\n",
+        "table.usda": b"table\n",
+        "scene.usda": b"scene\n",
+    }
+    for name, payload in generated_bytes.items():
+        (generated / name).write_bytes(payload)
+    build = {
+        "config_sha256": _sha(runtime / "configs/tasks/rj45-v1.json"),
+        "files": {name: _sha(generated / name) for name in generated_bytes},
+    }
+    (generated / "build-report.json").write_text(json.dumps(build), encoding="utf-8")
+
+    cache_rows = []
+    for asset_id, relative, payload in (
+        ("rby1_model_m_v1_2", "rby1/model_v_1_2_m.usd", b"robot-cache\n"),
+        ("rb_gripper_left", "rby1/gripper/rb_gripper_left.usd", b"left-cache\n"),
+        ("rb_gripper_right", "rby1/gripper/rb_gripper_right.usd", b"right-cache\n"),
+    ):
+        path = runtime / "assets/cache" / relative
+        path.write_bytes(payload)
+        cache_rows.append(
+            {
+                "id": asset_id,
+                "path": relative,
+                "size_bytes": len(payload),
+                "sha256": _sha(path),
+            }
+        )
+    (runtime / "configs/assets.json").write_text(
+        json.dumps({"assets": cache_rows}), encoding="utf-8"
+    )
+
+    core = json.loads((current / "configs/rj45-oracle-runtime-104721a.json").read_text())
+    for relative in core["files"]:
+        destination = runtime / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(
+            subprocess.run(
+                ["git", "show", f"{SMOKE.EXPECTED_RUNTIME_COMMIT}:{relative}"],
+                cwd=current,
+                check=True,
+                capture_output=True,
+            ).stdout
+        )
+
+    physics_paths = [
+        "configs/tasks/rj45-v1.json",
+        "configs/runtime.json",
+        "configs/rj45-training-target-offset-v1.json",
+        "configs/assets.json",
+        "assets/generated/tasks/rj45-v1/build-report.json",
+        *(f"assets/generated/tasks/rj45-v1/{name}" for name in generated_bytes),
+        *(f"assets/cache/{row['path']}" for row in cache_rows),
+    ]
+    physics = {relative: _sha(runtime / relative) for relative in physics_paths}
+    cache_records = [
+        {
+            "asset_id": row["id"],
+            "relative_path": f"assets/cache/{row['path']}",
+            "size_bytes": row["size_bytes"],
+            "sha256": row["sha256"],
+        }
+        for row in cache_rows
+    ]
+    graph = {
+        "robot_usda_sha256": physics["assets/generated/tasks/rj45-v1/robot.usda"],
+        "selected_cache_assets": cache_records,
+    }
+    manifest = {
+        "schema_name": SMOKE.PHYSICS_INPUT_SCHEMA,
+        "runtime_commit": SMOKE.EXPECTED_RUNTIME_COMMIT,
+        "runtime_core_manifest": {
+            "relative_path": "configs/rj45-oracle-runtime-104721a.json",
+            "sha256": _sha(current / "configs/rj45-oracle-runtime-104721a.json"),
+        },
+        "required_physics_relative_paths": sorted(physics),
+        "physics_inputs": physics,
+        "trusted_training_sha256": SMOKE.EXPECTED_TRAINING_SHA256,
+        "held_proof_required_source_and_config_sha256": {
+            key: physics[key]
+            for key in (
+                "configs/tasks/rj45-v1.json",
+                "configs/runtime.json",
+                "configs/assets.json",
+                "assets/generated/tasks/rj45-v1/build-report.json",
+            )
+        },
+        "generated_asset_sha256": build["files"],
+        "cache_assets": cache_records,
+        "generated_robot_references": [row["relative_path"] for row in cache_records],
+        "selected_cache_graph_sha256": SMOKE._canonical_json_sha256(graph),
+        "headless_physics_geometry_closure": {
+            "cache_roots": 3,
+            "self_layers_per_root": 1,
+            "extra_resolved_assets": 0,
+            "unresolved_authored_asset": "OmniPBR.mdl",
+            "authored_property": "Shader.info:mdl:sourceAsset",
+            "scope": "headless_physics_geometry_only",
+            "full_render_shader_closure_proven": False,
+        },
+        "current_source_paths": sorted(SMOKE.EXPECTED_CURRENT_SOURCE_PATHS),
+        "verification_contract": {
+            "verify_after_any_child_exit": True,
+            "completion_requires_endmatch": True,
+            "identity_missing_status": "unverifiable_start",
+            "end_missing_scientific_completion": False,
+            "current_attempt_retroactively_completed": False,
+        },
+    }
+    manifest_path = tmp_path / "physics.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    return runtime, current, manifest_path, manifest
 
 
 def test_parser_exposes_exact_frozen_runtime_and_gpu_arguments(tmp_path: Path) -> None:
@@ -90,6 +230,186 @@ def test_runtime_snapshot_validation_is_exact_and_fail_closed(
     source.write_text("value = 2\n", encoding="utf-8")
     with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="drifted"):
         SMOKE.validate_runtime_snapshot(runtime, manifest)
+
+
+def test_physics_snapshot_binds_all_inputs_and_validator_source(tmp_path: Path) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path)
+    snapshot = SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+    assert len(snapshot["normalized_sha256"]["runtime"]) == 48
+    assert snapshot["normalized_sha256"]["current"] == {
+        relative: _sha(current / relative)
+        for relative in SMOKE.EXPECTED_CURRENT_SOURCE_PATHS
+    }
+    assert snapshot["manifest"]["sha256"] == _sha(manifest_path)
+    assert snapshot["selected_cache_graph_sha256"] == manifest[
+        "selected_cache_graph_sha256"
+    ]
+    assert snapshot["headless_physics_geometry_closure"][
+        "full_render_shader_closure_proven"
+    ] is False
+    end = SMOKE.verify_physics_input_end(snapshot, runtime, current)
+    assert end["matched"] is True
+    assert end["selected_cache_graph_sha256"] == snapshot[
+        "selected_cache_graph_sha256"
+    ]
+    (runtime / "src/rby1_assembly/late.py").write_text("value = 1\n")
+    added = SMOKE.verify_physics_input_end(snapshot, runtime, current)
+    assert added["status"] == "input_mutation_blocked"
+    assert added["added"] == ["runtime/src/rby1_assembly/late.py"]
+
+
+@pytest.mark.parametrize("mutation", ["missing", "additional", "absolute", "escape"])
+def test_physics_manifest_rejects_incomplete_or_escaping_paths(
+    tmp_path: Path, mutation: str
+) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path)
+    if mutation == "missing":
+        manifest["physics_inputs"].pop("assets/generated/tasks/rj45-v1/scene.usda")
+    elif mutation == "additional":
+        manifest["physics_inputs"]["extra.usd"] = "0" * 64
+    else:
+        old = "assets/generated/tasks/rj45-v1/scene.usda"
+        replacement = "/tmp/scene.usda" if mutation == "absolute" else "../scene.usda"
+        manifest["physics_inputs"][replacement] = manifest["physics_inputs"].pop(old)
+        manifest["required_physics_relative_paths"] = sorted(manifest["physics_inputs"])
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+def test_physics_snapshot_rejects_unlisted_runtime_python(tmp_path: Path) -> None:
+    runtime, current, manifest_path, _manifest = _physics_fixture(tmp_path)
+    (runtime / "src/rby1_assembly/unlisted.py").write_text("value = 1\n")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="exact 35-file"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+def test_physics_snapshot_rejects_training_generated_and_cache_drift(tmp_path: Path) -> None:
+    for target, message in (
+        ("configs/rj45-training-target-offset-v1.json", "physics input SHA"),
+        ("assets/generated/tasks/rj45-v1/plug.usda", "physics input SHA"),
+        ("assets/cache/rby1/model_v_1_2_m.usd", "physics input SHA"),
+    ):
+        case = tmp_path / target.replace("/", "-")
+        runtime, current, manifest_path, _manifest = _physics_fixture(case)
+        with (runtime / target).open("ab") as stream:
+            stream.write(b"tamper")
+        with pytest.raises(SMOKE.ComparisonSmokeBlocked, match=message):
+            SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+def test_generated_build_and_cache_catalog_mismatches_are_rejected(tmp_path: Path) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path / "build")
+    manifest["generated_asset_sha256"]["plug.usda"] = "0" * 64
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="build report"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path / "cache")
+    manifest["cache_assets"][0]["size_bytes"] += 1
+    graph = {
+        "robot_usda_sha256": manifest["physics_inputs"][
+            "assets/generated/tasks/rj45-v1/robot.usda"
+        ],
+        "selected_cache_assets": manifest["cache_assets"],
+    }
+    manifest["selected_cache_graph_sha256"] = SMOKE._canonical_json_sha256(graph)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="size declaration"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+def test_cache_and_robot_reference_sets_reject_duplicate_substitution(
+    tmp_path: Path,
+) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path / "cache-set")
+    repeated = dict(manifest["cache_assets"][1])
+    manifest["cache_assets"] = [dict(repeated) for _ in range(3)]
+    manifest["generated_robot_references"] = [repeated["relative_path"]] * 3
+    graph = {
+        "robot_usda_sha256": manifest["physics_inputs"][
+            "assets/generated/tasks/rj45-v1/robot.usda"
+        ],
+        "selected_cache_assets": manifest["cache_assets"],
+    }
+    manifest["selected_cache_graph_sha256"] = SMOKE._canonical_json_sha256(graph)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="ID/path set"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path / "robot-set")
+    robot = runtime / "assets/generated/tasks/rj45-v1/robot.usda"
+    robot.write_text(
+        "#usda 1.0\n" + "@../../../cache/rby1/gripper/rb_gripper_left.usd@\n" * 3,
+        encoding="utf-8",
+    )
+    robot_sha = _sha(robot)
+    build_path = runtime / "assets/generated/tasks/rj45-v1/build-report.json"
+    build = json.loads(build_path.read_text(encoding="utf-8"))
+    build["files"]["robot.usda"] = robot_sha
+    build_path.write_text(json.dumps(build), encoding="utf-8")
+    manifest["generated_asset_sha256"]["robot.usda"] = robot_sha
+    manifest["physics_inputs"]["assets/generated/tasks/rj45-v1/robot.usda"] = robot_sha
+    manifest["physics_inputs"]["assets/generated/tasks/rj45-v1/build-report.json"] = _sha(
+        build_path
+    )
+    graph = {
+        "robot_usda_sha256": robot_sha,
+        "selected_cache_assets": manifest["cache_assets"],
+    }
+    manifest["selected_cache_graph_sha256"] = SMOKE._canonical_json_sha256(graph)
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="authored reference set"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["./scripts/tool.py", "scripts//tool.py", "scripts/tool.py/", "scripts\\tool.py"],
+)
+def test_safe_relative_rejects_noncanonical_spelling(value: str) -> None:
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="project-relative"):
+        SMOKE._safe_relative(value, label="test path")
+
+
+@pytest.mark.parametrize("mutation", ["missing", "extra"])
+def test_current_source_paths_require_exact_six_files(
+    tmp_path: Path, mutation: str
+) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path)
+    if mutation == "missing":
+        manifest["current_source_paths"].pop()
+    else:
+        manifest["current_source_paths"].append("README.md")
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="exact six"):
+        SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+
+
+def test_held_proof_binding_and_end_mutation_fail_closed(tmp_path: Path) -> None:
+    runtime, current, manifest_path, manifest = _physics_fixture(tmp_path)
+    snapshot = SMOKE.validate_physics_input_snapshot(runtime, current, manifest_path)
+    proof = {
+        "provenance_contract": {
+            "source_and_config_sha256": dict(
+                manifest["held_proof_required_source_and_config_sha256"]
+            )
+        }
+    }
+    SMOKE.validate_held_proof_physics_binding(proof, snapshot, manifest_path)
+    proof["provenance_contract"]["source_and_config_sha256"][
+        "configs/assets.json"
+    ] = "0" * 64
+    with pytest.raises(SMOKE.ComparisonSmokeBlocked, match="held proof"):
+        SMOKE.validate_held_proof_physics_binding(proof, snapshot, manifest_path)
+    with (runtime / "assets/generated/tasks/rj45-v1/scene.usda").open("ab") as stream:
+        stream.write(b"mutation")
+    end = SMOKE.verify_physics_input_end(snapshot, runtime, current)
+    assert end["status"] == "input_mutation_blocked"
+    assert end["matched"] is False
+    assert end["changed"] == [
+        "runtime/assets/generated/tasks/rj45-v1/scene.usda"
+    ]
 
 
 def test_resolve_accepts_path_and_string_asset_boundaries(tmp_path: Path) -> None:
