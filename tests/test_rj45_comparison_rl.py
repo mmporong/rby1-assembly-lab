@@ -116,6 +116,67 @@ class _AlternatingSingleEnv(_SyntheticEnv):
 
 
 class ComparisonContractTests(unittest.TestCase):
+    def test_zero_mean_initializer_is_exact_for_all_observations(self):
+        observations = torch.randn(37, OBSERVATION_DIM)
+        for algorithm in ("ppo", "sac"):
+            agent = make_agent(
+                algorithm,
+                num_envs=2,
+                rollout_steps=2,
+                batch_size=4,
+                seed=17,
+                mean_initializer="zero",
+                initial_log_std=-3.0,
+            )
+            self.assertEqual(torch.count_nonzero(agent.policy.mean.weight).item(), 0)
+            self.assertEqual(torch.count_nonzero(agent.policy.mean.bias).item(), 0)
+            self.assertTrue(torch.equal(deterministic_action(agent, observations), torch.zeros(37, ACTION_DIM)))
+            self.assertEqual(agent._comparison_mean_initializer, "zero")
+            self.assertEqual(agent._comparison_initial_log_std, -3.0)
+            self.assertEqual(agent._comparison_log_std_bounds, (-5.0, 1.0))
+
+    def test_default_initializer_preserves_seeded_legacy_construction(self):
+        for algorithm in ("ppo", "sac"):
+            legacy = make_agent(algorithm, num_envs=2, rollout_steps=2, batch_size=4, seed=23)
+            explicit = make_agent(
+                algorithm,
+                num_envs=2,
+                rollout_steps=2,
+                batch_size=4,
+                seed=23,
+                mean_initializer="legacy_random",
+                initial_log_std=-1.0,
+            )
+            self.assertEqual(legacy.models.keys(), explicit.models.keys())
+            for name in legacy.models:
+                for key, value in legacy.models[name].state_dict().items():
+                    self.assertTrue(torch.equal(value, explicit.models[name].state_dict()[key]))
+
+    def test_zero_initializer_changes_only_policy_mean_head(self):
+        for algorithm in ("ppo", "sac"):
+            legacy = make_agent(algorithm, num_envs=2, rollout_steps=2, batch_size=4, seed=31)
+            zero = make_agent(
+                algorithm,
+                num_envs=2,
+                rollout_steps=2,
+                batch_size=4,
+                seed=31,
+                mean_initializer="zero",
+            )
+            for model_name in legacy.models:
+                for key, value in legacy.models[model_name].state_dict().items():
+                    if model_name == "policy" and key in {"mean.weight", "mean.bias"}:
+                        self.assertEqual(torch.count_nonzero(zero.models[model_name].state_dict()[key]).item(), 0)
+                    else:
+                        self.assertTrue(torch.equal(value, zero.models[model_name].state_dict()[key]))
+
+    def test_initializer_contract_rejects_invalid_values(self):
+        with self.assertRaisesRegex(ValueError, "mean_initializer"):
+            make_agent("ppo", num_envs=1, mean_initializer="unknown")
+        for value in (float("nan"), float("inf"), -5.01, 1.01, None, "invalid"):
+            with self.assertRaisesRegex(ValueError, "initial_log_std"):
+                make_agent("sac", num_envs=1, initial_log_std=value)
+
     def test_absorbing_timeout_and_gae_do_not_bootstrap_reset_observation(self):
         rewards = torch.tensor([[[1.0]], [[2.0]]])
         values = torch.tensor([[[0.5]], [[0.7]]])

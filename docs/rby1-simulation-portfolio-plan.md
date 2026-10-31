@@ -1,6 +1,6 @@
 # RB-Y1 Isaac Lab 양팔 조립·병렬 강화학습 포트폴리오 계획
 
-상태: 2026-11-01 기준 **G0 완료, G1 물리 gate 검증 전**이다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 실행 경로는 실제 Isaac GPU smoke를 통과했다. G1 runner와 CPU 계약은 구현·검수됐지만 G1 Isaac smoke는 아직 실행하지 않았고, 강화학습 효과와 게시 준비도 완료되지 않았다.
+상태: 2026-11-01 기준 **G0 완료, G1 전체 task-admission 실행 중**이다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 실행 경로는 실제 Isaac GPU smoke를 통과했고, G1의 3-episode Isaac 사전 검증도 계약 3/3으로 통과했다. 같은 동결 조건의 classical tuning 18회와 admission 72회는 실행 중이며 G1 완료, RL pilot 진입, 강화학습 효과와 게시 준비는 아직 확정되지 않았다.
 
 ## 1. 결정과 프로젝트 주제
 
@@ -42,7 +42,7 @@
 | gate | 현재 상태 | 완료 근거 또는 남은 조건 |
 |---|---|---|
 | G0 공통 실행 경로 | 완료 | 4환경 PPO/SAC GPU smoke, 유한 손실과 비영 파라미터 변화, 독립 verifier PASS |
-| G1 task admission | 검증 중 | runner·provider·bias·telemetry·CPU 계약 구현, core architect CLEAR, CPU prelaunch APPROVE. 실제 Isaac smoke 미실행 |
+| G1 task admission | 전체 실행 중 | 3-episode Isaac 사전 검증은 계약 3/3으로 통과. 같은 동결 조건의 classical tuning 18회 뒤 admission 72회 실행 중이며 전체 판정 전에는 G1 완료나 pilot 진입을 주장하지 않음 |
 | G2 반복 학습 | 미완료 | G1 admission 뒤 같은 경험 예산의 PPO/SAC pilot과 반복 학습 필요 |
 | G3 봉인 평가 | 미완료 | 독립 조건·seed·CI·안전 비열등 기준을 실행 전에 봉인해야 함 |
 | 영상·게시물 | 미완료 | G2/G3 결과와 실패 근거를 연결한 미디어가 필요 |
@@ -71,7 +71,7 @@ actor, classical controller, 단계 전이는 같은 encoder/FK·자세/접촉 p
 
 환경 수를 늘릴 때 교차 환경 접촉, reset 독립성, 종료 후 상태, 접촉 buffer 용량과 누락을 검사한다. 처리량·VRAM·GPU 사용량과 유효 episode 수를 함께 기록한다. 실제 시뮬레이션을 여러 환경으로 배치한 영상은 원 run과 연결하고 복제 편집으로 대신하지 않는다.
 
-현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. 통합 CPU suite 75개, G1 core architect CLEAR, runner CPU prelaunch APPROVE까지 확인했다. `configs/rj45-comparison-development.json`의 2 grasp × 6 bias × 6 slot 계약을 실제 Isaac에서 실행해 접촉·snapshot·physical action·관측 가능성 gate를 확인하는 단계는 남아 있다.
+현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. 통합 CPU suite 79개, G1 core architect CLEAR, runner CPU prelaunch APPROVE를 확인했고, [3-episode Isaac 사전 검증](evidence/rj45-task-admission-smoke-20261101/README.md)은 계약 3/3으로 통과했다. source `2e1f926`과 로깅·source 계약을 보존한 채 `configs/rj45-comparison-development.json`의 동일 조건으로 classical tuning 18회 뒤 2 grasp × 6 bias × 6 slot admission 72회를 실행 중이다. 전체 결과가 나오기 전에는 task admission 완료, RL pilot 진입 또는 학습 효과를 주장하지 않는다.
 
 ### G2 — 공정한 학습과 봉인 평가
 
@@ -97,7 +97,7 @@ MuJoCo–PhysX 전체 task 정합, 실물 식별·Sim-to-Real, 유연 케이블,
 
 ## 6. 자원·검증·완료 경계
 
-계획 단계와 G0 구현·검증·GPU smoke는 끝났고 G1 물리 gate를 준비한다. 프로젝트의 GPU 인스턴스는 한 대만 사용하며 전체 실험은 사용자가 정한 700 USD 한도 안에서 관리한다. `6 USD`는 완료된 G0 smoke 한 건에 잡았던 예약 상한이다. G1의 새 GPU 예산은 별도 심사 중이며 G0 예약이 G1로 확대됐다고 보지 않는다. 비용·프로세스·실행 결과는 기술 기록에 남기되 비공개 계정·청구 자료는 문서와 게시물에 넣지 않는다.
+계획 단계와 G0 구현·검증·GPU smoke는 끝났고, G1은 3-episode Isaac 사전 검증을 통과한 뒤 같은 동결 조건의 classical tuning 18회와 admission 72회를 실행 중이다. 프로젝트의 GPU 인스턴스는 한 대만 사용하며 전체 실험은 사용자가 정한 700 USD 한도 안에서 관리한다. `6 USD`는 완료된 G0 smoke에 잡았던 과거 예약 상한이고 실제 청구액이 아니다. 현재 G1 full90의 예약 상한은 `7.50 USD`이며 240분 자동 stop guard와 최대 13,800초 process timeout을 둔다. 실제 process 한도는 guard deadline 300초 전을 넘지 않도록 동적으로 줄이며, 현재 guard deadline은 `2026-10-31T20:48:44.655689Z`다. 비용 수치는 관측 단가와 실행 시간을 사용한 추정치이며 청구액으로 쓰지 않는다. G2 실행 예산은 승인되지 않았고, G1 결과만으로 다음 단계의 실행 권한이 생기지 않는다. 비용·프로세스·실행 결과는 기술 기록에 남기되 비공개 계정·청구 자료는 문서와 게시물에 넣지 않는다.
 
 렌더 없는 학습과 촬영은 분리한다. home과 `/data`의 실제 peak 여유를 검사하고 원본을 삭제해 조건을 억지로 맞추지 않는다. 사용하지 않는 GPU·프로세스는 작업 후 종료한다. G0 target은 `2026-10-31T16:04:21.816443Z`에 `STOPPED`로 확인됐고 종료 guard의 timer와 service는 모두 `inactive/not-found`였다. 결과 회수도 완료됐다. 후속 실행 전에는 구체 자원 상태를 런타임에서 다시 확인한다.
 

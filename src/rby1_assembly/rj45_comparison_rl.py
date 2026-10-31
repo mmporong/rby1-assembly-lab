@@ -9,6 +9,7 @@ same bounded 6D residual action, and have no privileged critic input.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from pathlib import Path
 import tempfile
 from typing import Any, Protocol
@@ -19,6 +20,8 @@ from torch import nn
 
 OBSERVATION_DIM = 79
 ACTION_DIM = 6
+MIN_LOG_STD = -5.0
+MAX_LOG_STD = 1.0
 CHECKPOINT_FORMAT = "rby1-rj45-comparison-policy-v1"
 
 
@@ -173,7 +176,7 @@ def _model_types():
         ) from error
 
     class GaussianActor(GaussianMixin, Model):
-        def __init__(self, observation_space, action_space, device):
+        def __init__(self, observation_space, action_space, device, initial_log_std=-1.0):
             Model.__init__(
                 self,
                 observation_space=observation_space,
@@ -185,13 +188,13 @@ def _model_types():
                 clip_actions=True,
                 clip_mean_actions=False,
                 clip_log_std=True,
-                min_log_std=-5.0,
-                max_log_std=1.0,
+                min_log_std=MIN_LOG_STD,
+                max_log_std=MAX_LOG_STD,
                 reduction="sum",
             )
             self.net = _hidden()
             self.mean = nn.Linear(128, ACTION_DIM)
-            self.log_std = nn.Parameter(torch.full((ACTION_DIM,), -1.0))
+            self.log_std = nn.Parameter(torch.full((ACTION_DIM,), initial_log_std))
 
         def compute(self, inputs, role=""):
             mean = torch.tanh(self.mean(self.net(inputs["observations"])))
@@ -200,7 +203,7 @@ def _model_types():
     class SquashedGaussianActor(Model):
         """SAC policy with tanh reparameterisation and Jacobian correction."""
 
-        def __init__(self, observation_space, action_space, device):
+        def __init__(self, observation_space, action_space, device, initial_log_std=-1.0):
             Model.__init__(
                 self,
                 observation_space=observation_space,
@@ -209,11 +212,11 @@ def _model_types():
             )
             self.net = _hidden()
             self.mean = nn.Linear(128, ACTION_DIM)
-            self.log_std = nn.Parameter(torch.full((ACTION_DIM,), -1.0))
+            self.log_std = nn.Parameter(torch.full((ACTION_DIM,), initial_log_std))
 
         def compute(self, inputs, role=""):
             raw_mean = self.mean(self.net(inputs["observations"]))
-            log_std = torch.clamp(self.log_std, min=-5.0, max=1.0).expand_as(raw_mean)
+            log_std = torch.clamp(self.log_std, min=MIN_LOG_STD, max=MAX_LOG_STD).expand_as(raw_mean)
             return raw_mean, log_std
 
         def act(self, inputs, *, role=""):
@@ -278,6 +281,8 @@ def make_agent(
     batch_size: int = 32,
     sac_utd_ratio: float = 1.0,
     seed: int = 0,
+    mean_initializer: str = "legacy_random",
+    initial_log_std: float = -1.0,
 ):
     """Build PPO or SAC with identical 79D actor/critic and 6D action rights."""
 
@@ -287,6 +292,16 @@ def make_agent(
         raise ValueError("num_envs and rollout_steps must be positive")
     if sac_utd_ratio <= 0:
         raise ValueError("sac_utd_ratio must be positive")
+    if mean_initializer not in {"legacy_random", "zero"}:
+        raise ValueError("mean_initializer must be 'legacy_random' or 'zero'")
+    try:
+        initial_log_std = float(initial_log_std)
+    except (TypeError, ValueError) as error:
+        raise ValueError("initial_log_std must be a finite number") from error
+    if not math.isfinite(initial_log_std) or not MIN_LOG_STD <= initial_log_std <= MAX_LOG_STD:
+        raise ValueError(
+            f"initial_log_std must be finite and within [{MIN_LOG_STD}, {MAX_LOG_STD}]"
+        )
     torch.manual_seed(seed)
     observation_space, action_space = _spaces()
     GaussianActor, SquashedGaussianActor, ValueModel, CriticModel = _model_types()
@@ -306,7 +321,10 @@ def make_agent(
     if algorithm == "ppo":
         from skrl.agents.torch.ppo import PPO, PPO_CFG
 
-        policy = GaussianActor(**common)
+        policy = GaussianActor(**common, initial_log_std=initial_log_std)
+        if mean_initializer == "zero":
+            nn.init.zeros_(policy.mean.weight)
+            nn.init.zeros_(policy.mean.bias)
         value = ValueModel(**common)
         rollout_target = rollout_steps * num_envs
         memory = RandomMemory(memory_size=rollout_target, num_envs=1, device=device)
@@ -327,7 +345,10 @@ def make_agent(
     else:
         from skrl.agents.torch.sac import SAC, SAC_CFG
 
-        policy = SquashedGaussianActor(**common)
+        policy = SquashedGaussianActor(**common, initial_log_std=initial_log_std)
+        if mean_initializer == "zero":
+            nn.init.zeros_(policy.mean.weight)
+            nn.init.zeros_(policy.mean.bias)
         critic_1 = CriticModel(**common)
         critic_2 = CriticModel(**common)
         target_critic_1 = CriticModel(**common)
@@ -362,6 +383,9 @@ def make_agent(
     agent._comparison_num_envs = num_envs
     agent._comparison_ppo_rollout_target = rollout_steps * num_envs
     agent._comparison_sac_utd_ratio = float(sac_utd_ratio)
+    agent._comparison_mean_initializer = mean_initializer
+    agent._comparison_initial_log_std = float(initial_log_std)
+    agent._comparison_log_std_bounds = (MIN_LOG_STD, MAX_LOG_STD)
     agent._comparison_random_warmup_target = batch_size if algorithm == "sac" else 0
     agent._comparison_state = {
         "trajectories": [[] for _ in range(num_envs)],
