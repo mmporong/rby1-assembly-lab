@@ -98,16 +98,33 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --headless --device cuda:0
 ```
 
-전체 development admission은 `--smoke-only`를 빼고 별도의 새 출력 경로로 실행한다. 이 명령은 classical tuning 18회와 admission 72회, 최대 90회를 수행한다. source `2e1f926` packet의 첫 full90은 32/90에서 native signal로 중단됐으므로 아래 명령을 완료 결과로 보지 않는다. 과학 조건과 성공 기준은 바꾸지 않으며, provenance 보강과 프로세스 격리 뒤 짧은 fresh-process 진단을 먼저 수행한다. 진단을 통과하면 기존 32회와 섞지 않는 새 campaign을 처음부터 실행한다. 진단과 새 campaign은 아직 실행하지 않았고 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+전체 development admission은 CPU coordinator가 물리 입력 48개와 held-bank 입력 26개를 구분해 봉인한 뒤, 최대 12 episode씩 9개 fresh process chunk로 순차 실행한다. classical tuning 18회와 admission 72회, 최대 90회의 과학 조건·seed·성공 기준은 바꾸지 않는다. 이 구조는 native process 수명을 제한하고 chunk 전후 provenance를 검증하기 위한 것이며 병렬 환경 학습을 뜻하지 않는다. source `2e1f926` packet의 첫 full90은 32/90에서 native `SIGSEGV`로 중단됐고 원인은 확정되지 않았다. 기존 32회와 새 campaign을 섞지 않는다.
+
+먼저 ordinal 33 한 건만 비판정 diagnostic으로 실행한다. 별도 출력 경로를 사용하며 이 결과로 task admission이나 RL pilot을 판정하지 않는다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
-OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission.py \
+OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission_isolated.py \
   --runtime-root <동결-archive-root> \
   --current-root "$PWD" \
   --config configs/rj45-comparison-development.json \
-  --output-dir artifacts/rj45-task-admission-full-<새-ID> \
-  --headless --device cuda:0
+  --playback-actions docs/evidence/rj45-frozen-ablation-20261031/source-actions.json \
+  --output-dir artifacts/rj45-task-admission-diagnostic-33-<새-ID> \
+  --purpose diagnostic_nonadjudicative \
+  --diagnostic-ordinal 33
+```
+
+diagnostic이 격리·종료·provenance 계약을 통과하면 새 출력 경로에서 formal campaign을 처음부터 실행한다. 이 두 실제 GPU 실행은 아직 수행하지 않았고 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission_isolated.py \
+  --runtime-root <동결-archive-root> \
+  --current-root "$PWD" \
+  --config configs/rj45-comparison-development.json \
+  --playback-actions docs/evidence/rj45-frozen-ablation-20261031/source-actions.json \
+  --output-dir artifacts/rj45-task-admission-isolated-full-<새-ID> \
+  --purpose formal_campaign
 ```
 
 attempt-C는 환경 생성 전에 `cfg.seed`가 없어서 세 번 모두 중단됐다. 이는 물리 또는 제어 결과가 아니라 구성 실패다. 실패 기록은 보존했고, attempt-D에서는 모든 case·method·slot에 같은 nonnegative integer seed `20261121`을 factory 호출 전에 전달하고 provenance에 기록했다. runner SHA-256은 `2f5483ee2c11cd8deb8b9bd87c2b1ddc1c10e912d1b21ece6eec1fe3af96a0f8`이다. 독립 검증은 3/3 terminal, 실행 계획, 144,686개 유한 수치, bias·held identity·최초 action 계약, 동결 runtime hash 35개를 확인했다. VM은 결과 회수 뒤 `STOPPED`로 확인됐다. 실행 창 비용 `0.7288 USD`는 시간과 단가를 곱한 추정치이며 청구액이 아니다. G0 완료 근거는 [`docs/evidence/rj45-comparison-g0-20261101/README.md`](evidence/rj45-comparison-g0-20261101/README.md)에 보존한다.

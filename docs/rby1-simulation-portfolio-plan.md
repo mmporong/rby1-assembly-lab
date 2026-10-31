@@ -1,6 +1,6 @@
 # RB-Y1 Isaac Lab 양팔 조립·병렬 강화학습 포트폴리오 계획
 
-상태: 2026-11-01 기준 **G0 완료, G1 full90 native 중단 뒤 보완 중**이다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 실행 경로는 실제 Isaac GPU smoke를 통과했고, G1의 3-episode Isaac 사전 검증도 계약 3/3으로 통과했다. 후속 full90은 tuning 18회와 admission 14회, 합계 32/90을 원자적으로 보존한 뒤 native signal로 중단됐다. G1 완료, RL pilot 진입, main training, 강화학습 효과와 게시 준비는 아직 확정되지 않았다.
+상태: 2026-11-01 기준 **G0 완료, G1 격리 실행 경로 CPU 검증 완료·실제 GPU 재진단 대기**다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 실행 경로는 실제 Isaac GPU smoke를 통과했고, G1의 3-episode Isaac 사전 검증도 계약 3/3으로 통과했다. 후속 full90은 tuning 18회와 admission 14회, 합계 32/90을 원자적으로 보존한 뒤 native signal로 중단됐다. 물리 입력 봉인과 fresh-process 격리 보완은 CPU 검증을 마쳤지만 실제 diagnostic 33과 새 full90은 실행하지 않았다. G1 완료, RL pilot 진입, main training, 강화학습 효과와 게시 준비는 아직 확정되지 않았다.
 
 ## 1. 결정과 프로젝트 주제
 
@@ -42,7 +42,7 @@
 | gate | 현재 상태 | 완료 근거 또는 남은 조건 |
 |---|---|---|
 | G0 공통 실행 경로 | 완료 | 4환경 PPO/SAC GPU smoke, 유한 손실과 비영 파라미터 변화, 독립 verifier PASS |
-| G1 task admission | 중단·보완 중 | 3-episode 사전 검증은 계약 3/3 통과. full90은 32/90에서 native signal로 중단됐고 full report가 없어 결과 판정·pilot 진입에 사용하지 않음 |
+| G1 task admission | CPU 보완 검증 완료·GPU 재실행 대기 | 3-episode 사전 검증은 계약 3/3 통과. 첫 full90은 32/90에서 native signal로 중단. 입력 봉인·fresh-process coordinator는 171개 관련 CPU 테스트와 독립 검수를 통과했지만 diagnostic 33과 새 full90은 미실행 |
 | G2 반복 학습 | 미완료 | G1 admission 뒤 같은 경험 예산의 PPO/SAC pilot과 반복 학습 필요 |
 | G3 봉인 평가 | 미완료 | 독립 조건·seed·CI·안전 비열등 기준을 실행 전에 봉인해야 함 |
 | 영상·게시물 | 미완료 | G2/G3 결과와 실패 근거를 연결한 미디어가 필요 |
@@ -71,7 +71,7 @@ actor, classical controller, 단계 전이는 같은 encoder/FK·자세/접촉 p
 
 환경 수를 늘릴 때 교차 환경 접촉, reset 독립성, 종료 후 상태, 접촉 buffer 용량과 누락을 검사한다. 처리량·VRAM·GPU 사용량과 유효 episode 수를 함께 기록한다. 실제 시뮬레이션을 여러 환경으로 배치한 영상은 원 run과 연결하고 복제 편집으로 대신하지 않는다.
 
-현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. 통합 CPU suite 79개, G1 core architect CLEAR, runner CPU prelaunch APPROVE를 확인했고, [3-episode Isaac 사전 검증](evidence/rj45-task-admission-smoke-20261101/README.md)은 계약 3/3으로 통과했다. source `2e1f926`의 full90은 tuning 18회와 admission 14회까지 보존한 뒤 exit `-11`로 끝났고 full report는 생성되지 않았다. 이 중단은 학습 실패나 방법 성능으로 집계하지 않는다. [중단 근거](evidence/rj45-task-admission-interrupted-20261101/README.md)를 보존하고 입력 봉인·프로세스 격리를 보완한 뒤, 짧은 fresh-process 진단을 통과한 새 campaign만 전체 G1 판정에 사용한다. 진단과 새 campaign은 아직 실행하지 않았다.
+현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. 통합 CPU suite 79개, G1 core architect CLEAR, runner CPU prelaunch APPROVE를 확인했고, [3-episode Isaac 사전 검증](evidence/rj45-task-admission-smoke-20261101/README.md)은 계약 3/3으로 통과했다. source `2e1f926`의 full90은 tuning 18회와 admission 14회까지 보존한 뒤 exit `-11`로 끝났고 full report는 생성되지 않았다. 이 중단은 학습 실패나 방법 성능으로 집계하지 않으며 native `SIGSEGV` 원인은 아직 확정하지 않았다. [중단 근거](evidence/rj45-task-admission-interrupted-20261101/README.md)를 보존한 채 물리 입력 48개와 held-bank 입력 26개를 구분해 봉인하고, CPU coordinator가 최대 12 episode씩 9개 fresh process chunk를 순차 실행하는 격리 경로를 구현했다. 관련 CPU 테스트 171개와 code review·science review를 통과했지만 diagnostic 33과 새 full90은 아직 실행하지 않았다. 기존 32회와 섞지 않은 새 campaign만 전체 G1 판정에 사용한다. 이 순차 chunk 실행은 병렬 환경 학습이 아니다.
 
 ### G2 — 공정한 학습과 봉인 평가
 
