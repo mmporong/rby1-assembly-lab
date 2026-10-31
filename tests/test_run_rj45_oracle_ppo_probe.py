@@ -33,6 +33,63 @@ def valid_budget_admission() -> dict[str, object]:
 
 
 class OraclePpoProbeTests(unittest.TestCase):
+    def test_evaluation_reset_and_step_run_inside_inference_mode(self) -> None:
+        with torch.inference_mode():
+            inference_buffer = torch.zeros(1)
+
+        class FakeEnv:
+            def reset(self):
+                self.reset_inference_mode = torch.is_inference_mode_enabled()
+                inference_buffer.add_(1)
+
+            def step(self):
+                self.step_inference_mode = torch.is_inference_mode_enabled()
+                inference_buffer.add_(1)
+
+        env = FakeEnv()
+
+        def exercise_environment(**kwargs):
+            kwargs["env"].reset()
+            kwargs["env"].step()
+            return {"classification": "valid_failure"}
+
+        with mock.patch.object(
+            RUNNER, "_run_evaluation_impl", side_effect=exercise_environment
+        ):
+            result = RUNNER._run_evaluation(
+                env, "oracle92", object(), object(), {}, {}, Path("trace.jsonl"),
+                lambda: None,
+            )
+
+        self.assertEqual(result["classification"], "valid_failure")
+        self.assertTrue(env.reset_inference_mode)
+        self.assertTrue(env.step_inference_mode)
+        self.assertEqual(inference_buffer.item(), 2.0)
+        self.assertFalse(torch.is_inference_mode_enabled())
+
+    def test_evaluation_exception_does_not_leak_inference_mode(self) -> None:
+        with torch.inference_mode():
+            inference_buffer = torch.zeros(1)
+
+        def mutate_then_fail(**_kwargs):
+            self.assertTrue(torch.is_inference_mode_enabled())
+            inference_buffer.add_(1)
+            raise RuntimeError("evaluation failed")
+
+        with (
+            mock.patch.object(
+                RUNNER, "_run_evaluation_impl", side_effect=mutate_then_fail
+            ),
+            self.assertRaisesRegex(RuntimeError, "evaluation failed"),
+        ):
+            RUNNER._run_evaluation(
+                object(), "oracle92", object(), object(), {}, {},
+                Path("trace.jsonl"), lambda: None,
+            )
+
+        self.assertEqual(inference_buffer.item(), 1.0)
+        self.assertFalse(torch.is_inference_mode_enabled())
+
     def test_actual_terminal_evaluation_serializes_through_dataclass_contract(self) -> None:
         try:
             import h5py  # noqa: F401

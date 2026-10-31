@@ -1081,6 +1081,33 @@ def _run_evaluation(
     time_guard: Any,
     physics_seed: int = BASE_SEED,
 ) -> dict[str, Any]:
+    import torch
+
+    with torch.inference_mode():
+        return _run_evaluation_impl(
+            env=env,
+            mode=mode,
+            policy=policy,
+            g2=g2,
+            task=task,
+            training=training,
+            trace_path=trace_path,
+            time_guard=time_guard,
+            physics_seed=physics_seed,
+        )
+
+
+def _run_evaluation_impl(
+    env: Any,
+    mode: str,
+    policy: Any,
+    g2: Any,
+    task: Mapping[str, Any],
+    training: Mapping[str, Any],
+    trace_path: Path,
+    time_guard: Any,
+    physics_seed: int = BASE_SEED,
+) -> dict[str, Any]:
     import numpy as np
     import torch
     from rby1_assembly.evaluation import EvaluationResult, TaskEvaluator
@@ -1667,6 +1694,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"status": "completed", "mode": args.mode, "report": str(report_path)}, sort_keys=True))
         exit_code = 0
     except Exception as error:
+        traceback.print_exc()
         failure = {
             "schema_name": SCHEMA_NAME,
             "status": "invalid",
