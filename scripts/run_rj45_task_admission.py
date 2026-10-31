@@ -26,6 +26,7 @@ EXPECTED_PLAYBACK_ACTIONS_FILE_SHA256 = "7dfc8db1558aea29295436f60e850da9b377d0b
 EXPECTED_IDS = tuple(f"rj45-train-{index:02d}" for index in range(1, 9))
 EXPECTED_FIXED_INDICES = {"rj45-train-02": 1, "rj45-train-05": 4, "rj45-train-03": 2}
 MAX_DEVELOPMENT_EPISODES = 90
+TASK_ADMISSION_ENVIRONMENT_SEED = 20261121
 SMOKE_PLAN = (
     ("tuning", "rj45-train-03", "tx-positive", "classical_force_search", 1, "A"),
     ("admission", "rj45-train-02", "tx-positive", "zero", 1, None),
@@ -511,6 +512,7 @@ def _provenance(prepared, runtime):
     return {
         "runtime_snapshot": prepared["runtime_snapshot"],
         "runtime_versions": runtime["runtime_versions"],
+        "environment_seed": TASK_ADMISSION_ENVIRONMENT_SEED,
         "config": {"path": str(prepared["config_path"]), "sha256": _sha256(prepared["config_path"])},
         "playback_actions": {"path": str(prepared["playback_path"]), "sha256": _sha256(prepared["playback_path"])},
         "held_bank_proof": runtime["proof"],
@@ -560,6 +562,7 @@ def _make_env(prepared, runtime, row):
     apply_runtime_timing(cfg, _json(runtime_root / "configs/runtime.json"))
     cfg.scene.num_envs = 1
     cfg.sim.device = "cuda:0"
+    cfg.seed = TASK_ADMISSION_ENVIRONMENT_SEED
     env_type = configure_rj45_task(cfg, task, runtime_root)
     training = load_training_config(runtime_root / "configs/rj45-training-target-offset-v1.json")
     env_type = make_rj45_training_env_type(

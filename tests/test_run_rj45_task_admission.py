@@ -40,6 +40,100 @@ def test_smoke_plan_is_fixed_and_cannot_claim_full_admission() -> None:
     }
 
 
+def test_make_env_forwards_fixed_nonnegative_seed_before_construction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    observed: dict[str, object] = {}
+
+    class Config:
+        def __init__(self) -> None:
+            self.scene = SimpleNamespace(num_envs=None)
+            self.sim = SimpleNamespace(device=None)
+
+    class Environment:
+        def __init__(self, cfg) -> None:
+            observed["seed_at_construction"] = cfg.seed
+
+    def module(name: str, **attributes: object) -> ModuleType:
+        value = ModuleType(name)
+        for attribute, item in attributes.items():
+            setattr(value, attribute, item)
+        monkeypatch.setitem(sys.modules, name, value)
+        return value
+
+    module(
+        "rby1_assembly.experiment_contracts",
+        apply_runtime_timing=lambda _cfg, _runtime: None,
+    )
+    module("rby1_assembly.isaac_env", Rby1AssemblyEnvCfg=Config)
+
+    def configure_task(cfg, _task, _root):
+        observed["seed_at_task_configuration"] = cfg.seed
+        return Environment
+
+    module(
+        "rby1_assembly.rj45_env",
+        configure_rj45_task=configure_task,
+    )
+    module(
+        "rby1_assembly.rj45_training",
+        load_training_config=lambda _path: {
+            "calibration_bias": {"initial_level": 0}
+        },
+    )
+    module(
+        "rby1_assembly.rj45_training_env",
+        make_rj45_training_env_type=lambda env_type, *_args, **_kwargs: env_type,
+    )
+
+    runtime_root = tmp_path / "runtime"
+    (runtime_root / "configs").mkdir(parents=True)
+    (runtime_root / "configs/runtime.json").write_text("{}\n", encoding="utf-8")
+    (runtime_root / "configs/rj45-training-target-offset-v1.json").write_text(
+        "{}\n", encoding="utf-8"
+    )
+    passthrough = SimpleNamespace(
+        make_rj45_comparison_env_type=lambda env_type: env_type,
+        make_rj45_task_admission_env_type=lambda env_type, **_kwargs: env_type,
+    )
+    prepared = {
+        "runtime_root": runtime_root,
+        "config": {
+            "bias_cases": [
+                {
+                    "case_id": "tx-positive",
+                    "translation_bias_entry_m": [0.00012, 0.0, 0.0],
+                    "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0],
+                }
+            ]
+        },
+    }
+    runtime = {
+        "task": {},
+        "bank": [object()],
+        "proof": {"selected_artifact_sha256": ["a" * 64]},
+        "indices": {"rj45-train-02": 0},
+        "modules": {
+            "rj45_comparison_env": passthrough,
+            "rj45_task_admission_env": passthrough,
+        },
+    }
+
+    env, _torch = RUNNER._make_env(
+        prepared,
+        runtime,
+        ("admission", "rj45-train-02", "tx-positive", "zero", 1, None),
+    )
+
+    assert isinstance(env, Environment)
+    assert type(RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED) is int
+    assert RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED >= 0
+    assert observed == {
+        "seed_at_task_configuration": RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
+        "seed_at_construction": RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
+    }
+
+
 def test_playback_actions_are_the_fixed_364_row_artifact() -> None:
     path = SCRIPT.parents[1] / RUNNER._parser().get_default("playback_actions")
     payload = json.loads(path.read_text(encoding="utf-8"))
