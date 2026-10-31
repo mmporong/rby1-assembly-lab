@@ -1,0 +1,53 @@
+{
+  "provenance": {
+    "evidence_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/trace.jsonl",
+    "control_step": 5,
+    "environment_index": 0
+  },
+  "socket_pose_world_wxyz": [
+    0.34998735785484314,
+    0.12000788003206253,
+    0.7609999775886536,
+    1.0,
+    -3.7329402857722016e-07,
+    -8.566180298430481e-08,
+    0.0001898907939903438
+  ],
+  "plug_pose_world_wxyz": [
+    0.3499999940395355,
+    -0.12000001221895218,
+    0.7899999618530273,
+    1.0,
+    2.1268244836392114e-06,
+    3.593256110434595e-07,
+    -2.2621385653565085e-07
+  ],
+  "socket_entry": {
+    "position_m": [0, -0.033, 0.0005075],
+    "quaternion_wxyz": [1, 0, 0, 0]
+  },
+  "plug_tip": {
+    "position_m": [0, 0.01137, 0],
+    "quaternion_wxyz": [1, 0, 0, 0]
+  },
+  "actual_depth_m": -0.19563788175582886,
+  "actual_lateral_error_m": 0.02849246747791767,
+  "actual_orientation_error_rad": 0.00038021185901015997,
+  "recorded_geometry": {
+    "depth_m": -0.19563790807978632,
+    "lateral_error_m": 0.028492459524292607,
+    "orientation_error_rad": 0.00038026792876127605,
+    "relative_position_entry_m": [
+      -0.00007418616917037602,
+      -0.19563790807978632,
+      0.028492362944405936
+    ],
+    "relative_quaternion_entry_wxyz": [
+      0.9999999999562194,
+      0.000002500186725464127,
+      4.445836340821698e-7,
+      -0.00019011700789493298
+    ],
+    "source": "numpy_recalculation_from_recorded_raw_object_poses"
+  }
+}
