@@ -1,6 +1,6 @@
 # RJ45 비교 과제 학습 진입 조건
 
-상태: **G1 Isaac task-admission 3-episode smoke 통과, 전체 90-episode development admission 실행 중**. source `2e1f926` packet으로 classical tuning 18회를 완료해 후보 B를 사전등록 규칙에 따라 선택·봉인했고, admission 72회를 이어서 실행하고 있다. `classical_force_search A`, `zero`, `oracle_gt_reference`가 각 1회씩 terminal contract를 완성한 smoke에서는 hard/forbidden contact가 모두 0회였다. 이는 실행 경로·접촉 telemetry·계약 판정의 작동 확인이다. smoke는 한 bias case만 사용했고 classical은 train-03, zero와 oracle은 train-02에서 실행됐으므로 세 방식의 성능 차이나 학습 효과를 비교하는 근거가 아니다. `task_admission_completed=false`, `rl_pilot_admitted=false`이며 G1은 아직 완료되지 않았다. 근거 요약은 [`docs/evidence/rj45-task-admission-smoke-20261101/README.md`](evidence/rj45-task-admission-smoke-20261101/README.md)에 보존한다.
+상태: **G1 Isaac task-admission 3-episode smoke 통과, full90은 32/90에서 native 중단**. source `2e1f926` packet의 classical tuning 18회와 admission 14회는 원자 파일로 보존됐지만 exit `-11` 뒤 full report가 생성되지 않았다. 따라서 중간 32회를 방법 성능이나 학습 효과로 집계하지 않는다. `classical_force_search A`, `zero`, `oracle_gt_reference`가 각 1회씩 terminal contract를 완성한 앞선 smoke에서는 hard/forbidden contact가 모두 0회였다. 이는 실행 경로·접촉 telemetry·계약 판정의 작동 확인이다. smoke는 한 bias case만 사용했고 classical은 train-03, zero와 oracle은 train-02에서 실행됐으므로 세 방식의 성능 차이나 학습 효과를 비교하는 근거가 아니다. `task_admission_completed=false`, `rl_pilot_admitted=false`이며 G1은 아직 완료되지 않았다. [smoke 근거](evidence/rj45-task-admission-smoke-20261101/README.md)와 [full90 중단 근거](evidence/rj45-task-admission-interrupted-20261101/README.md)를 분리해 보존한다.
 
 ## 검증 범위
 
@@ -98,7 +98,7 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --headless --device cuda:0
 ```
 
-전체 development admission은 `--smoke-only`를 빼고 별도의 새 출력 경로로 실행한다. 이 명령은 classical tuning 18회와 admission 72회, 최대 90회를 수행한다. 현재 source `2e1f926` packet의 tuning 18회와 후보 B 봉인은 완료됐고 admission 72회가 실행 중이다. 전체 결과가 봉인되기 전에는 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+전체 development admission은 `--smoke-only`를 빼고 별도의 새 출력 경로로 실행한다. 이 명령은 classical tuning 18회와 admission 72회, 최대 90회를 수행한다. source `2e1f926` packet의 첫 full90은 32/90에서 native signal로 중단됐으므로 아래 명령을 완료 결과로 보지 않는다. 과학 조건과 성공 기준은 바꾸지 않으며, provenance 보강과 프로세스 격리 뒤 짧은 fresh-process 진단을 먼저 수행한다. 진단을 통과하면 기존 32회와 섞지 않는 새 campaign을 처음부터 실행한다. 진단과 새 campaign은 아직 실행하지 않았고 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
