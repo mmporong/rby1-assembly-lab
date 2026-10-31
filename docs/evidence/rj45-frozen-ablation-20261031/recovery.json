@@ -1,0 +1,9 @@
+{
+  "archive_sha256": "30a994ba2b9c0c7faac2f67ea727747258346190e004aa7607d512533f5f5e6e",
+  "archive_bytes": 13024453,
+  "members": 66,
+  "report_sha256": "98d89571b35f92ac4e6e8e10d2bf0d8cb9b19e2136ec6d6952e7e3251794664d",
+  "source_files_match_uploaded_packet": true,
+  "all_twenty_traces_recovered": true,
+  "all_twenty_episode_reports_recovered": true
+}

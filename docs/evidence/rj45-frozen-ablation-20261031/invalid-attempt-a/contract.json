@@ -1,0 +1,112 @@
+{
+  "schema_name": "rj45_frozen_ablation_contract_v1",
+  "helper_sha256": "9132c7b6a94aa301457dd21fe6b9901cd819eec036ae02642cd529825181d5af",
+  "source_sha256": {
+    "runner": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+    "replay_helper": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+    "g2_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+  },
+  "origin": {
+    "mode": "standard79",
+    "protocol_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "report_sha256": "aa8f890b0e337f8a35c76839cc8b21148b2e2b24051346009f1133e73e42bd92",
+    "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02",
+    "updates_trace_sha256": "11743fdef8ecdf98e7793cf1e3046c64d1333ead56f1f24f7f057570b387c807",
+    "source_trace_gzip_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+    "source_trace_jsonl_sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4",
+    "updates": 32
+  },
+  "cases": [
+    {
+      "case_id": "anchor",
+      "base_seed": 20261128,
+      "calibration_case_seed": 66384148,
+      "split": "train",
+      "grasp_id": "rj45-train-02",
+      "episode_index": 1
+    },
+    {
+      "case_id": "transfer-01",
+      "base_seed": 20270104,
+      "calibration_case_seed": 66393124,
+      "split": "train",
+      "grasp_id": "rj45-train-02",
+      "episode_index": 1
+    },
+    {
+      "case_id": "transfer-02",
+      "base_seed": 20270112,
+      "calibration_case_seed": 66393132,
+      "split": "train",
+      "grasp_id": "rj45-train-02",
+      "episode_index": 1
+    },
+    {
+      "case_id": "transfer-03",
+      "base_seed": 20270120,
+      "calibration_case_seed": 66393140,
+      "split": "train",
+      "grasp_id": "rj45-train-02",
+      "episode_index": 1
+    },
+    {
+      "case_id": "transfer-04",
+      "base_seed": 20270128,
+      "calibration_case_seed": 66393148,
+      "split": "train",
+      "grasp_id": "rj45-train-02",
+      "episode_index": 1
+    }
+  ],
+  "case_order": [
+    "anchor",
+    "transfer-01",
+    "transfer-02",
+    "transfer-03",
+    "transfer-04"
+  ],
+  "mode_order": [
+    "standard79",
+    "zero",
+    "mean_constant",
+    "open_loop_playback"
+  ],
+  "budget_and_stop": {
+    "budget_cap_usd": 700,
+    "reservation_usd": 6,
+    "deadline_utc": "2026-10-31T07:21:13Z",
+    "helper_wall_time_s": 3900,
+    "per_episode_wall_time_s": 300,
+    "external_stop_wall_time_s": 4500
+  },
+  "claims": {
+    "final_split_sealed": true,
+    "dev_split_sealed": true,
+    "training_executed": false,
+    "checkpoint_selection_changed": false,
+    "single_environment_serial": true,
+    "episode_count": 20
+  },
+  "public_input_analysis": {
+    "source_actions_canonical_sha256": "a3210e53e1352cad675ac0d319459c64025a5a19b806a435c5a8ee2784cc8542",
+    "source_action_count": 364,
+    "source_action_dimension": 6,
+    "source_action_mean": [
+      0.034892102401539844,
+      -0.010848934130210961,
+      -0.041849699608244736,
+      0.03485121803133042,
+      -0.07816294091497804,
+      -0.02233053562947764
+    ],
+    "source_action_last": [
+      0.026319513097405434,
+      -0.006674428936094046,
+      -0.0464036650955677,
+      0.05627892538905144,
+      -0.0649009421467781,
+      -0.030505681410431862
+    ]
+  }
+}

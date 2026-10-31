@@ -1,0 +1,38 @@
+{
+  "error": {
+    "message": "policy eligibility count differs from evaluation active rows",
+    "type": "FrozenAblationError"
+  },
+  "failure_stage": "evaluation:zero:anchor",
+  "learning_executed": false,
+  "partial_artifacts": [
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/bias-cases.json",
+      "sha256": "8f907cdd3dad7f3429ff24e4ea00ffca5c4f1451531d5378d417b1b71f52b501"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/episodes/01-anchor-standard79.json",
+      "sha256": "3989488751f56c58afeead5aff47a4a55f405de12a21eeee0e2e77f345ae077f"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/partial-results.json",
+      "sha256": "41c4df63fc919edfb19187fb7f62776a2a423569d7fa7a98b0865db6b2af4a99"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/source-actions.json",
+      "sha256": "c1ecea79458d6f67cd08353a8137ef56d884f20f2b91bb0c152af2274e44a01e"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/traces/01-anchor-standard79.jsonl",
+      "sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/results/traces/02-anchor-zero.jsonl",
+      "sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+    }
+  ],
+  "ranking_permitted": false,
+  "schema_name": "rj45_frozen_ablation_evaluation_v1",
+  "status": "invalid",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/ubuntu/workspace/rby1-frozen-ablation-20261031a/current/scripts/evaluate_rj45_frozen_ablation.py\", line 558, in main\n    raise FrozenAblationError(\"policy eligibility count differs from evaluation active rows\")\nFrozenAblationError: policy eligibility count differs from evaluation active rows\n"
+}

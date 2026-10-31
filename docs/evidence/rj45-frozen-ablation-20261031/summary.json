@@ -1,0 +1,85 @@
+{
+  "audit_sha256": "30f3c95b1a2eeffde572f009fd645dc92b2e81c098bb097c5ad0e12d79023bf6",
+  "case_count": 5,
+  "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02",
+  "classification_counts": {
+    "valid_failure": 13,
+    "valid_success": 7
+  },
+  "effect_proven": false,
+  "episode_count": 20,
+  "exploratory_only": true,
+  "mode_results": {
+    "mean_constant": {
+      "anchor": {
+        "failure": 0,
+        "success": 1,
+        "total": 1
+      },
+      "overall": {
+        "failure": 4,
+        "success": 1,
+        "total": 5
+      },
+      "transfer": {
+        "failure": 4,
+        "success": 0,
+        "total": 4
+      }
+    },
+    "open_loop_playback": {
+      "anchor": {
+        "failure": 0,
+        "success": 1,
+        "total": 1
+      },
+      "overall": {
+        "failure": 4,
+        "success": 1,
+        "total": 5
+      },
+      "transfer": {
+        "failure": 4,
+        "success": 0,
+        "total": 4
+      }
+    },
+    "standard79": {
+      "anchor": {
+        "failure": 0,
+        "success": 1,
+        "total": 1
+      },
+      "overall": {
+        "failure": 4,
+        "success": 1,
+        "total": 5
+      },
+      "transfer": {
+        "failure": 4,
+        "success": 0,
+        "total": 4
+      }
+    },
+    "zero": {
+      "anchor": {
+        "failure": 1,
+        "success": 0,
+        "total": 1
+      },
+      "overall": {
+        "failure": 1,
+        "success": 4,
+        "total": 5
+      },
+      "transfer": {
+        "failure": 0,
+        "success": 4,
+        "total": 4
+      }
+    }
+  },
+  "promotion_permitted": false,
+  "source_actions_canonical_sha256": "a3210e53e1352cad675ac0d319459c64025a5a19b806a435c5a8ee2784cc8542",
+  "status": "completed"
+}

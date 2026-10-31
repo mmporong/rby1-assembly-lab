@@ -1,0 +1,51 @@
+{
+  "recorded_at_utc": "2026-10-31T06:18:32.315247+00:00",
+  "repair_reason": "pre_step_vs_post_step_counter_off_by_one",
+  "prior_attempt_status": "invalid",
+  "prior_report_sha256": "8a51d4fe117efece023c5ad7443d10abf0754e5e1867d210ea52245cdec016de",
+  "prior_recovery_archive_sha256": "e588799ca3037bc6bac9b2a9934731375069bfd67b1e99ae7781cb17ef4e3dbc",
+  "prior_payload_sha256": "aa8f57e276e74cd8bfbd9698da4882438f791606041bd535e1506859daf8b8e4",
+  "prior_contract_sha256": "d3a82690ed2065cb3db10582d9606122cf5d6bd29c3ab24d2d8a1a02e01560c3",
+  "prior_helper_sha256": "9132c7b6a94aa301457dd21fe6b9901cd819eec036ae02642cd529825181d5af",
+  "helper_sha256": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+  "test_sha256": "6926667c851e8d50759d8a679d6ec9bcd11dceb8356569b210aa97cadd597c3d",
+  "new_contract_sha256": "e85fbddc78bb3394de91cc6e232ecd1af6edd64bb4b130a067247bfb12e04b48",
+  "change": "Remove the previous valid-input count gate before stepping; keep active, no-warmup and current-valid gates. The runtime counts the current input after stepping.",
+  "observed_prior_trace_active_rows": 717,
+  "observed_prior_first_active_step": 11,
+  "prior_policy_call_count_recorded": false,
+  "counter_off_by_one_confirmed_from_frozen_runtime": true,
+  "unchanged": [
+    "checkpoint",
+    "source action sequence",
+    "cases",
+    "mode order",
+    "physics",
+    "action bounds",
+    "reward",
+    "terminal criteria",
+    "seeds",
+    "train grasp",
+    "deadline",
+    "total reservation"
+  ],
+  "deadline_utc": "2026-10-31T07:21:13Z",
+  "reservation_usd_combined_attempts": 6,
+  "new_instances": 0,
+  "learning_executed": false,
+  "prior_partial_results_excluded_from_primary": true,
+  "primary_requires_new_complete_20_episode_batch": true,
+  "independent_code_review": "APPROVE",
+  "cpu_tests": {
+    "passed": 779,
+    "subtests_passed": 307,
+    "log_sha256": "2774fdec5fc7c0e1ee448128aa774e5cfda3d3992c40e5b53afe39c1cce6ee91"
+  },
+  "prior_stop": {
+    "instance_id": "pyf1b9s0a",
+    "instance_name": "rby1-oracle-crusoe-20261031a",
+    "ok": true,
+    "polls": 3,
+    "status": "stopped"
+  }
+}

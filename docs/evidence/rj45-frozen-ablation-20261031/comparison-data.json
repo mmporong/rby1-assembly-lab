@@ -1,0 +1,491 @@
+{
+  "exploratory_only": true,
+  "effect_proven": false,
+  "report_sha256": "98d89571b35f92ac4e6e8e10d2bf0d8cb9b19e2136ec6d6952e7e3251794664d",
+  "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+  "lateral_limit_um": 50.0,
+  "by_mode": {
+    "standard79": {
+      "anchor": {
+        "success": 1,
+        "failure": 0,
+        "total": 1
+      },
+      "transfer": {
+        "success": 0,
+        "failure": 4,
+        "total": 4
+      },
+      "overall": {
+        "success": 1,
+        "failure": 4,
+        "total": 5
+      }
+    },
+    "zero": {
+      "anchor": {
+        "success": 0,
+        "failure": 1,
+        "total": 1
+      },
+      "transfer": {
+        "success": 4,
+        "failure": 0,
+        "total": 4
+      },
+      "overall": {
+        "success": 4,
+        "failure": 1,
+        "total": 5
+      }
+    },
+    "mean_constant": {
+      "anchor": {
+        "success": 1,
+        "failure": 0,
+        "total": 1
+      },
+      "transfer": {
+        "success": 0,
+        "failure": 4,
+        "total": 4
+      },
+      "overall": {
+        "success": 1,
+        "failure": 4,
+        "total": 5
+      }
+    },
+    "open_loop_playback": {
+      "anchor": {
+        "success": 1,
+        "failure": 0,
+        "total": 1
+      },
+      "transfer": {
+        "success": 0,
+        "failure": 4,
+        "total": 4
+      },
+      "overall": {
+        "success": 1,
+        "failure": 4,
+        "total": 5
+      }
+    }
+  },
+  "paired_transfer": {
+    "zero": {
+      "case_count": 4,
+      "ppo_only_success": [],
+      "baseline_only_success": [
+        "transfer-01",
+        "transfer-02",
+        "transfer-03",
+        "transfer-04"
+      ],
+      "both_success": [],
+      "both_failure": []
+    },
+    "mean_constant": {
+      "case_count": 4,
+      "ppo_only_success": [],
+      "baseline_only_success": [],
+      "both_success": [],
+      "both_failure": [
+        "transfer-01",
+        "transfer-02",
+        "transfer-03",
+        "transfer-04"
+      ]
+    },
+    "open_loop_playback": {
+      "case_count": 4,
+      "ppo_only_success": [],
+      "baseline_only_success": [],
+      "both_success": [],
+      "both_failure": [
+        "transfer-01",
+        "transfer-02",
+        "transfer-03",
+        "transfer-04"
+      ]
+    }
+  },
+  "entries": [
+    {
+      "case_id": "anchor",
+      "mode": "standard79",
+      "success": true,
+      "terminal_lateral_error_um": 28.004151161271906,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012163298783499771,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777652740478516,
+        "grasp_both": 1.0,
+        "lateral_error_m": 2.8004151161271907e-05,
+        "orientation_error_rad": 0.0021418305847776234
+      },
+      "trace_sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4"
+    },
+    {
+      "case_id": "anchor",
+      "mode": "zero",
+      "success": false,
+      "terminal_lateral_error_um": 87.49515761276632,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.01219391092200214,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777498960494995,
+        "grasp_both": 1.0,
+        "lateral_error_m": 8.749515761276632e-05,
+        "orientation_error_rad": 0.005260984545356934
+      },
+      "trace_sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+    },
+    {
+      "case_id": "anchor",
+      "mode": "mean_constant",
+      "success": true,
+      "terminal_lateral_error_um": 14.988347823664274,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012157277827818641,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7776739597320557,
+        "grasp_both": 1.0,
+        "lateral_error_m": 1.4988347823664274e-05,
+        "orientation_error_rad": 0.002012765695944875
+      },
+      "trace_sha256": "74a1b1136607afd1500ff2576c79b6b6f9e0f75a3fa12b371ce1e1afc5d1c521"
+    },
+    {
+      "case_id": "anchor",
+      "mode": "open_loop_playback",
+      "success": true,
+      "terminal_lateral_error_um": 28.004151161271906,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012163298783499771,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777652740478516,
+        "grasp_both": 1.0,
+        "lateral_error_m": 2.8004151161271907e-05,
+        "orientation_error_rad": 0.0021418305847776234
+      },
+      "trace_sha256": "f8fc50fd273f98cbd81dc389680ce2fce3f0fbeebd42036d4d277fb00ff4d11d"
+    },
+    {
+      "case_id": "transfer-01",
+      "mode": "standard79",
+      "success": false,
+      "terminal_lateral_error_um": 102.54591415187211,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012357993396567495,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7778172492980957,
+        "grasp_both": 1.0,
+        "lateral_error_m": 0.00010254591415187211,
+        "orientation_error_rad": 0.0036947177899215892
+      },
+      "trace_sha256": "d05a64c9c086a7df03d12f411d56f28fcf5b2570ab45d31d827f946c869e89ed"
+    },
+    {
+      "case_id": "transfer-01",
+      "mode": "zero",
+      "success": true,
+      "terminal_lateral_error_um": 30.278077881497207,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012363064066159897,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7776646614074707,
+        "grasp_both": 1.0,
+        "lateral_error_m": 3.0278077881497208e-05,
+        "orientation_error_rad": 0.0031516242674863863
+      },
+      "trace_sha256": "85ca6d36d8878a03a2afb997e60177347dba106a9384e0e23a768d0f3b29629c"
+    },
+    {
+      "case_id": "transfer-01",
+      "mode": "mean_constant",
+      "success": false,
+      "terminal_lateral_error_um": 104.30557593761577,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012350347310577516,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777090072631836,
+        "grasp_both": 1.0,
+        "lateral_error_m": 0.00010430557593761577,
+        "orientation_error_rad": 0.003365181148882955
+      },
+      "trace_sha256": "5d1591720719129797987af5932b6afd912bb32278b1b05ca461b97780e37943"
+    },
+    {
+      "case_id": "transfer-01",
+      "mode": "open_loop_playback",
+      "success": false,
+      "terminal_lateral_error_um": 105.05794290965014,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012356930495091255,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777891159057617,
+        "grasp_both": 1.0,
+        "lateral_error_m": 0.00010505794290965013,
+        "orientation_error_rad": 0.003688555088818102
+      },
+      "trace_sha256": "e2563c0105a0e8e945809e18fc699e4269561a90ddecd7d3ba273723771516a3"
+    },
+    {
+      "case_id": "transfer-02",
+      "mode": "standard79",
+      "success": false,
+      "terminal_lateral_error_um": 58.54435830592428,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral",
+        "orientation"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012302312787611895,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.9317474365234375,
+        "grasp_both": 1.0,
+        "lateral_error_m": 5.854435830592428e-05,
+        "orientation_error_rad": 0.00996716971246129
+      },
+      "trace_sha256": "ff345c4ec4efff22392887980d3510b21ec8398781f90be198038c5b95f22724"
+    },
+    {
+      "case_id": "transfer-02",
+      "mode": "zero",
+      "success": true,
+      "terminal_lateral_error_um": 32.099637768256706,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012287987736957023,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777297496795654,
+        "grasp_both": 1.0,
+        "lateral_error_m": 3.20996377682567e-05,
+        "orientation_error_rad": 0.004100068295023821
+      },
+      "trace_sha256": "c99a0c209820bb8026a1bc708b9ac20c8ff80c81b9ae496eda7cc5baab343c54"
+    },
+    {
+      "case_id": "transfer-02",
+      "mode": "mean_constant",
+      "success": false,
+      "terminal_lateral_error_um": 44.363548298888624,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "orientation"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012295383160550573,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 4.014939785003662,
+        "grasp_both": 1.0,
+        "lateral_error_m": 4.436354829888862e-05,
+        "orientation_error_rad": 0.010776492310001926
+      },
+      "trace_sha256": "f463ee17dd2d1b84a51a81a1b2e646eb048506ad41081634e6b43a4d1aac7bce"
+    },
+    {
+      "case_id": "transfer-02",
+      "mode": "open_loop_playback",
+      "success": false,
+      "terminal_lateral_error_um": 58.44035272251133,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral",
+        "orientation"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012302791938846518,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.93681001663208,
+        "grasp_both": 1.0,
+        "lateral_error_m": 5.844035272251133e-05,
+        "orientation_error_rad": 0.009995544671048398
+      },
+      "trace_sha256": "b584af3ba00f44c7f3d9a0f5e1ec4d838996d20255adaa9f09641739eb4a4c6c"
+    },
+    {
+      "case_id": "transfer-03",
+      "mode": "standard79",
+      "success": false,
+      "terminal_lateral_error_um": 76.23873241857103,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012299012145045873,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.9342596530914307,
+        "grasp_both": 1.0,
+        "lateral_error_m": 7.623873241857103e-05,
+        "orientation_error_rad": 0.0029337946844450223
+      },
+      "trace_sha256": "a8f60367d4246244f21356cf98eb85bccb6ed4e6e98d85f85e7230fd822d4fbf"
+    },
+    {
+      "case_id": "transfer-03",
+      "mode": "zero",
+      "success": true,
+      "terminal_lateral_error_um": 5.888883845664652,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012304967654138889,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777775526046753,
+        "grasp_both": 1.0,
+        "lateral_error_m": 5.888883845664652e-06,
+        "orientation_error_rad": 0.0013374521595326992
+      },
+      "trace_sha256": "4a44bdd1c5c308bd47a2b112ab0a60a823884934d9b86d6bcbe629ccc1ad9d0b"
+    },
+    {
+      "case_id": "transfer-03",
+      "mode": "mean_constant",
+      "success": false,
+      "terminal_lateral_error_um": 77.41205624925013,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012293680116343943,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7813613414764404,
+        "grasp_both": 1.0,
+        "lateral_error_m": 7.741205624925013e-05,
+        "orientation_error_rad": 0.0028316733107189773
+      },
+      "trace_sha256": "6a297029217b0a50d65ca1a80afe6c53f3ae4674d7093f77cdefe1890ccd1ab9"
+    },
+    {
+      "case_id": "transfer-03",
+      "mode": "open_loop_playback",
+      "success": false,
+      "terminal_lateral_error_um": 76.15886334908656,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012297982703072894,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777916431427002,
+        "grasp_both": 1.0,
+        "lateral_error_m": 7.615886334908656e-05,
+        "orientation_error_rad": 0.0029312518253315893
+      },
+      "trace_sha256": "84ee8c323cf4d94f0879c88cc91c203ec2e868aa6bd647bc04703be9d4c0f485"
+    },
+    {
+      "case_id": "transfer-04",
+      "mode": "standard79",
+      "success": false,
+      "terminal_lateral_error_um": 66.58673767668853,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.01231260363762604,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777709722518921,
+        "grasp_both": 1.0,
+        "lateral_error_m": 6.658673767668853e-05,
+        "orientation_error_rad": 0.0027163648636099416
+      },
+      "trace_sha256": "9cf92b122d656a12dc3489976245a79a227f11be079b30e0db6fa7f83ea30751"
+    },
+    {
+      "case_id": "transfer-04",
+      "mode": "zero",
+      "success": true,
+      "terminal_lateral_error_um": 14.882266867528541,
+      "failed_criteria": [],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012319263072541844,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7775986194610596,
+        "grasp_both": 1.0,
+        "lateral_error_m": 1.4882266867528541e-05,
+        "orientation_error_rad": 0.00419749915554442
+      },
+      "trace_sha256": "014b0f8e9e7b8aeb4ab8d1ebed8bdc2fb10e7a0cb9b2dbc2067b2c4d56f2e820"
+    },
+    {
+      "case_id": "transfer-04",
+      "mode": "mean_constant",
+      "success": false,
+      "terminal_lateral_error_um": 68.36432778929506,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012307466683190785,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777672529220581,
+        "grasp_both": 1.0,
+        "lateral_error_m": 6.836432778929507e-05,
+        "orientation_error_rad": 0.0021942326296592383
+      },
+      "trace_sha256": "3f9973841711c8ef34a7fa007320e0cb843e6445c585e606c8021d2ec98a6eaf"
+    },
+    {
+      "case_id": "transfer-04",
+      "mode": "open_loop_playback",
+      "success": false,
+      "terminal_lateral_error_um": 65.07973228951664,
+      "failed_criteria": [
+        "dwell",
+        "independent_evaluator_terminal",
+        "lateral"
+      ],
+      "terminal_metrics": {
+        "actual_depth_m": 0.012314171310188207,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777950763702393,
+        "grasp_both": 1.0,
+        "lateral_error_m": 6.507973228951664e-05,
+        "orientation_error_rad": 0.002717163587353564
+      },
+      "trace_sha256": "7121cbd2b277bd0c87a1471a3fbaadb4da469a33c7a19deff1c54c1b6360c7da"
+    }
+  ]
+}

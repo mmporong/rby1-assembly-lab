@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "base_seed": 20261128,
+      "calibration_case_seed": 66384148,
+      "case_id": "anchor",
+      "rotation_vector_entry_rad": [
+        0.0017766417004168034,
+        -0.003810248104855418,
+        -0.0010570123558863997
+      ],
+      "translation_entry_m": [
+        6.795803346903995e-05,
+        0.00012224896636325866,
+        -5.2392562793102115e-05
+      ]
+    },
+    {
+      "base_seed": 20270104,
+      "calibration_case_seed": 66393124,
+      "case_id": "transfer-01",
+      "rotation_vector_entry_rad": [
+        0.0002630569797474891,
+        -0.0016296337125822902,
+        0.002691196743398905
+      ],
+      "translation_entry_m": [
+        -1.0079464118462056e-05,
+        -6.675990880466998e-05,
+        2.943377876363229e-05
+      ]
+    },
+    {
+      "base_seed": 20270112,
+      "calibration_case_seed": 66393132,
+      "case_id": "transfer-02",
+      "rotation_vector_entry_rad": [
+        0.002833211561664939,
+        0.0019135676557198167,
+        -0.0022655045613646507
+      ],
+      "translation_entry_m": [
+        -1.1270396498730406e-05,
+        6.2165404415281955e-06,
+        -1.4388354429684114e-05
+      ]
+    },
+    {
+      "base_seed": 20270120,
+      "calibration_case_seed": 66393140,
+      "case_id": "transfer-03",
+      "rotation_vector_entry_rad": [
+        0.00031574745662510395,
+        -1.3117191883793566e-05,
+        0.001299845869652927
+      ],
+      "translation_entry_m": [
+        -4.465322035684949e-06,
+        -8.961668754636776e-06,
+        -2.3052009510138305e-06
+      ]
+    },
+    {
+      "base_seed": 20270128,
+      "calibration_case_seed": 66393148,
+      "case_id": "transfer-04",
+      "rotation_vector_entry_rad": [
+        0.0005541881546378136,
+        -0.004168505314737558,
+        -0.00015150259423535317
+      ],
+      "translation_entry_m": [
+        6.621408829232678e-06,
+        -2.3899021471152082e-05,
+        -1.0277850378770381e-05
+      ]
+    }
+  ],
+  "generated_at_utc": "2026-10-31T06:10:47.308512Z",
+  "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+  "runtime_source_canonical_sha256": "660e12886c2ad8dd3cfd896d14d028fc7621e8897c4c55f6efd96a31129a5a7d",
+  "runtime_source_file_count": 35,
+  "sampling": "frozen CUDA generator: randn3/norm/clamp1e-9, rand1*max; translation then rotation"
+}

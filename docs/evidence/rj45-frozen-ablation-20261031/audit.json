@@ -1,0 +1,312 @@
+{
+  "checks": {
+    "all_classifications_valid": true,
+    "all_twenty_episodes_present": true,
+    "applied_actions_verified": true,
+    "cyclic_order_verified": true,
+    "paired_conditions_identical": true,
+    "source_and_checkpoint_lineage_verified": true
+  },
+  "episodes": [
+    {
+      "active_rows": 364,
+      "case_id": "anchor",
+      "classification": "valid_success",
+      "index": 1,
+      "mode": "standard79",
+      "playback_tail_holds": 0,
+      "trace_sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4"
+    },
+    {
+      "active_rows": 717,
+      "case_id": "anchor",
+      "classification": "valid_failure",
+      "index": 2,
+      "mode": "zero",
+      "playback_tail_holds": 0,
+      "trace_sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+    },
+    {
+      "active_rows": 364,
+      "case_id": "anchor",
+      "classification": "valid_success",
+      "index": 3,
+      "mode": "mean_constant",
+      "playback_tail_holds": 0,
+      "trace_sha256": "74a1b1136607afd1500ff2576c79b6b6f9e0f75a3fa12b371ce1e1afc5d1c521"
+    },
+    {
+      "active_rows": 364,
+      "case_id": "anchor",
+      "classification": "valid_success",
+      "index": 4,
+      "mode": "open_loop_playback",
+      "playback_tail_holds": 0,
+      "trace_sha256": "f8fc50fd273f98cbd81dc389680ce2fce3f0fbeebd42036d4d277fb00ff4d11d"
+    },
+    {
+      "active_rows": 387,
+      "case_id": "transfer-01",
+      "classification": "valid_success",
+      "index": 5,
+      "mode": "zero",
+      "playback_tail_holds": 0,
+      "trace_sha256": "85ca6d36d8878a03a2afb997e60177347dba106a9384e0e23a768d0f3b29629c"
+    },
+    {
+      "active_rows": 709,
+      "case_id": "transfer-01",
+      "classification": "valid_failure",
+      "index": 6,
+      "mode": "mean_constant",
+      "playback_tail_holds": 0,
+      "trace_sha256": "5d1591720719129797987af5932b6afd912bb32278b1b05ca461b97780e37943"
+    },
+    {
+      "active_rows": 709,
+      "case_id": "transfer-01",
+      "classification": "valid_failure",
+      "index": 7,
+      "mode": "open_loop_playback",
+      "playback_tail_holds": 345,
+      "trace_sha256": "e2563c0105a0e8e945809e18fc699e4269561a90ddecd7d3ba273723771516a3"
+    },
+    {
+      "active_rows": 709,
+      "case_id": "transfer-01",
+      "classification": "valid_failure",
+      "index": 8,
+      "mode": "standard79",
+      "playback_tail_holds": 0,
+      "trace_sha256": "d05a64c9c086a7df03d12f411d56f28fcf5b2570ab45d31d827f946c869e89ed"
+    },
+    {
+      "active_rows": 710,
+      "case_id": "transfer-02",
+      "classification": "valid_failure",
+      "index": 9,
+      "mode": "mean_constant",
+      "playback_tail_holds": 0,
+      "trace_sha256": "f463ee17dd2d1b84a51a81a1b2e646eb048506ad41081634e6b43a4d1aac7bce"
+    },
+    {
+      "active_rows": 710,
+      "case_id": "transfer-02",
+      "classification": "valid_failure",
+      "index": 10,
+      "mode": "open_loop_playback",
+      "playback_tail_holds": 346,
+      "trace_sha256": "b584af3ba00f44c7f3d9a0f5e1ec4d838996d20255adaa9f09641739eb4a4c6c"
+    },
+    {
+      "active_rows": 710,
+      "case_id": "transfer-02",
+      "classification": "valid_failure",
+      "index": 11,
+      "mode": "standard79",
+      "playback_tail_holds": 0,
+      "trace_sha256": "ff345c4ec4efff22392887980d3510b21ec8398781f90be198038c5b95f22724"
+    },
+    {
+      "active_rows": 384,
+      "case_id": "transfer-02",
+      "classification": "valid_success",
+      "index": 12,
+      "mode": "zero",
+      "playback_tail_holds": 0,
+      "trace_sha256": "c99a0c209820bb8026a1bc708b9ac20c8ff80c81b9ae496eda7cc5baab343c54"
+    },
+    {
+      "active_rows": 708,
+      "case_id": "transfer-03",
+      "classification": "valid_failure",
+      "index": 13,
+      "mode": "open_loop_playback",
+      "playback_tail_holds": 344,
+      "trace_sha256": "84ee8c323cf4d94f0879c88cc91c203ec2e868aa6bd647bc04703be9d4c0f485"
+    },
+    {
+      "active_rows": 708,
+      "case_id": "transfer-03",
+      "classification": "valid_failure",
+      "index": 14,
+      "mode": "standard79",
+      "playback_tail_holds": 0,
+      "trace_sha256": "a8f60367d4246244f21356cf98eb85bccb6ed4e6e98d85f85e7230fd822d4fbf"
+    },
+    {
+      "active_rows": 387,
+      "case_id": "transfer-03",
+      "classification": "valid_success",
+      "index": 15,
+      "mode": "zero",
+      "playback_tail_holds": 0,
+      "trace_sha256": "4a44bdd1c5c308bd47a2b112ab0a60a823884934d9b86d6bcbe629ccc1ad9d0b"
+    },
+    {
+      "active_rows": 708,
+      "case_id": "transfer-03",
+      "classification": "valid_failure",
+      "index": 16,
+      "mode": "mean_constant",
+      "playback_tail_holds": 0,
+      "trace_sha256": "6a297029217b0a50d65ca1a80afe6c53f3ae4674d7093f77cdefe1890ccd1ab9"
+    },
+    {
+      "active_rows": 717,
+      "case_id": "transfer-04",
+      "classification": "valid_failure",
+      "index": 17,
+      "mode": "standard79",
+      "playback_tail_holds": 0,
+      "trace_sha256": "9cf92b122d656a12dc3489976245a79a227f11be079b30e0db6fa7f83ea30751"
+    },
+    {
+      "active_rows": 367,
+      "case_id": "transfer-04",
+      "classification": "valid_success",
+      "index": 18,
+      "mode": "zero",
+      "playback_tail_holds": 0,
+      "trace_sha256": "014b0f8e9e7b8aeb4ab8d1ebed8bdc2fb10e7a0cb9b2dbc2067b2c4d56f2e820"
+    },
+    {
+      "active_rows": 717,
+      "case_id": "transfer-04",
+      "classification": "valid_failure",
+      "index": 19,
+      "mode": "mean_constant",
+      "playback_tail_holds": 0,
+      "trace_sha256": "3f9973841711c8ef34a7fa007320e0cb843e6445c585e606c8021d2ec98a6eaf"
+    },
+    {
+      "active_rows": 717,
+      "case_id": "transfer-04",
+      "classification": "valid_failure",
+      "index": 20,
+      "mode": "open_loop_playback",
+      "playback_tail_holds": 353,
+      "trace_sha256": "7121cbd2b277bd0c87a1471a3fbaadb4da469a33c7a19deff1c54c1b6360c7da"
+    }
+  ],
+  "execution_order": [
+    {
+      "ablation_mode": "standard79",
+      "case_id": "anchor",
+      "index": 1
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "anchor",
+      "index": 2
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "anchor",
+      "index": 3
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "anchor",
+      "index": 4
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-01",
+      "index": 5
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-01",
+      "index": 6
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-01",
+      "index": 7
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-01",
+      "index": 8
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-02",
+      "index": 9
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-02",
+      "index": 10
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-02",
+      "index": 11
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-02",
+      "index": 12
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-03",
+      "index": 13
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-03",
+      "index": 14
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-03",
+      "index": 15
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-03",
+      "index": 16
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-04",
+      "index": 17
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-04",
+      "index": 18
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-04",
+      "index": 19
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-04",
+      "index": 20
+    }
+  ],
+  "exit_codes": {
+    "batch.raw.exit": 0,
+    "batch.validated.exit": 0
+  },
+  "lineage": {
+    "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02",
+    "protocol_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "runtime_source_file_count": 35
+  },
+  "paired_case_count": 5,
+  "root": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-frozen-ablation-20261031",
+  "schema_name": "rj45_frozen_ablation_independent_audit_v1",
+  "source_actions": {
+    "canonical_sha256": "a3210e53e1352cad675ac0d319459c64025a5a19b806a435c5a8ee2784cc8542",
+    "count": 364
+  },
+  "status": "completed"
+}

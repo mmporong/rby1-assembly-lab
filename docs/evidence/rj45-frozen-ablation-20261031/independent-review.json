@@ -1,0 +1,131 @@
+{
+  "schema_name": "rj45_frozen_ablation_independent_review_v1",
+  "reviewed_at_utc": "2026-10-31T07:08:59Z",
+  "verdict": "APPROVE",
+  "role": "independent_verifier",
+  "scope": [
+    "docs/evidence/rj45-frozen-ablation-20261031/",
+    "README.md",
+    "docs/rj45-rl-contribution-plan.md",
+    "docs/evidence/rj45-oracle-condition-20261031/README.md"
+  ],
+  "sealed_artifacts_modified_by_reviewer": false,
+  "manifest": {
+    "sha256": "04d868886119bb4a2598ed9f3992aab1a4882d00d4d97cacd2ae8909c01bb4d6",
+    "public_file_count": 99,
+    "public_total_bytes": 15818828,
+    "external_repo_file_count": 5,
+    "all_public_file_hashes_match": true,
+    "all_public_file_sizes_match": true,
+    "all_external_repo_file_hashes_match": true,
+    "manifest_excludes_this_review": true
+  },
+  "fresh_audit": {
+    "method": "Imported audit_results.py with bytecode generation disabled and called run_audit(root); no audit or plot artifact was rewritten.",
+    "audit_script_sha256": "0fe6891627aa8ce2f4c8589a5a354f2402130227d69b98e8e350d25a5566a77a",
+    "fresh_audit_equals_stored_audit": true,
+    "fresh_summary_equals_stored_summary": true,
+    "episode_count": 20,
+    "classification_counts": {
+      "valid_success": 7,
+      "valid_failure": 13
+    },
+    "all_twenty_episode_json_files_present": true,
+    "all_twenty_trace_files_present": true,
+    "report_episode_identity_and_original_classification_verified": true,
+    "terminal_classification_and_success_consistency_verified": true,
+    "applied_actions_verified_for_all_trace_rows": true,
+    "playback_tail_hold_verified": true,
+    "first_79d_observation_rng_bias_and_grasp_paired_across_modes": true,
+    "source_and_checkpoint_lineage_verified": true
+  },
+  "results": {
+    "anchor": {
+      "standard79": "success",
+      "zero": "failure",
+      "mean_constant": "success",
+      "open_loop_playback": "success"
+    },
+    "transfer_successes_out_of_4": {
+      "standard79": 0,
+      "zero": 4,
+      "mean_constant": 0,
+      "open_loop_playback": 0
+    },
+    "ppo_only_transfer_wins": 0,
+    "zero_only_transfer_wins": 4,
+    "paired_wins": 0,
+    "reverse_losses": 4,
+    "source_action_count": 364,
+    "source_actions_canonical_sha256": "a3210e53e1352cad675ac0d319459c64025a5a19b806a435c5a8ee2784cc8542",
+    "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02"
+  },
+  "scope_checks": {
+    "new_training_executed": false,
+    "checkpoint_selection_changed": false,
+    "dev_split_sealed": true,
+    "final_split_sealed": true,
+    "physics_scene_constructed_once": true,
+    "physx_reseeded_between_cases": false,
+    "legacy_physics_seed_field_is_not_presented_as_reseed_evidence": true,
+    "mean_and_playback_actions_are_described_as_extracted_from_the_existing_ppo_success_trace": true,
+    "first_invalid_attempt_is_preserved_separately_and_excluded_from_primary_counts": true,
+    "effect_proven": false,
+    "policy_promotion_permitted": false
+  },
+  "documentation_review": {
+    "result_counts_match_primary_evidence": true,
+    "failure_criteria_are_not_reduced_to_lateral_error_only": true,
+    "single_grasp_single_training_seed_exploratory_scope_is_stated": true,
+    "no_feedback_learning_or_generalization_overclaim_found": true,
+    "root_readme_and_followup_plan_match_the_evidence": true,
+    "comparison_png": {
+      "width_px": 2124,
+      "height_px": 1134,
+      "readable": true,
+      "success_failure_labels_and_terminal_lateral_values_match_comparison_data": true
+    }
+  },
+  "format_followup": {
+    "verdict": "APPROVE",
+    "plot_results_sha256": "8cc4e83280e89822e5f20ba5104b8eac302c9b62d6fa1c075bfde4892f064f6c",
+    "comparison_svg_sha256": "27561bd1c65050fdf67a6c784013f8757fbf47b74e40ef9b6fd4cb12e9af9718",
+    "previous_plot_reconstructed_sha256": "511687cca7c280044a7f5b569c42a3f246162a4c375b4098955a9478de9f9371",
+    "previous_plot_reconstruction_matches_prior_reviewed_hash": true,
+    "only_plot_source_change_is_post_save_svg_line_rstrip": true,
+    "svg_xml_parse_passed": true,
+    "svg_trailing_whitespace_lines": 0,
+    "isolated_regeneration_png_exact": true,
+    "isolated_regeneration_comparison_data_exact": true,
+    "isolated_regeneration_svg_structure_attributes_text_and_tail_equal_after_normalizing_generated_timestamp_and_ids": true,
+    "physical_results_and_primary_audit_unchanged": true,
+    "staged_whitespace_check_passed": true
+  },
+  "execution_and_shutdown": {
+    "batch_raw_exit": 0,
+    "batch_validated_exit": 0,
+    "recovered_archive_bytes": 13024453,
+    "recovered_archive_sha256": "30a994ba2b9c0c7faac2f67ea727747258346190e004aa7607d512533f5f5e6e",
+    "all_twenty_episode_reports_and_traces_recovered": true,
+    "instance_status": "STOPPED",
+    "stop_identity_matches": true,
+    "guard_timer_state": "inactive",
+    "guard_service_state": "inactive",
+    "owned_local_ssh_pids": [],
+    "owned_remote_python_processes": [],
+    "gpu_compute_processes": []
+  },
+  "test_evidence": {
+    "passed": 779,
+    "subtests_passed": 307,
+    "log": "cpu-tests.log.gz"
+  },
+  "limitations": [
+    "The comparison covers one train grasp, one training seed, one anchor calibration bias, and four exploratory transfer calibration biases.",
+    "The frozen-policy ablation does not prove a reinforcement-learning improvement, feedback advantage, generalization, or a benchmark result.",
+    "The environment was created once and reused, so the run is not a repeated-PhysX-seed experiment.",
+    "The mean-constant and playback controls depend on actions extracted from the prior successful PPO trace; they are controls for state-responsive residual action, not independently learned baselines.",
+    "The audit revalidates recovered artifacts and trace semantics; it does not rerun PhysX or checkpoint inference."
+  ],
+  "blocking_findings": []
+}

@@ -1,0 +1,4655 @@
+{
+  "bias_preflight": {
+    "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/bias-cases.json",
+    "runtime_source_canonical_sha256": "660e12886c2ad8dd3cfd896d14d028fc7621e8897c4c55f6efd96a31129a5a7d",
+    "sha256": "b3aa3c83bf7b3ef37367457dada1b356f71c9c8056bb4f8370870277e17a3e2a"
+  },
+  "checkpoint_selection_changed": false,
+  "contract": {
+    "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/contract.json",
+    "sha256": "e85fbddc78bb3394de91cc6e232ecd1af6edd64bb4b130a067247bfb12e04b48"
+  },
+  "episodes": [
+    {
+      "ablation_mode": "standard79",
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 364,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012163298783499771,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777652740478516,
+            "grasp_both": 1.0,
+            "lateral_error_m": 2.8004151161271907e-05,
+            "orientation_error_rad": 0.0021418305847776234
+          },
+          "success": true,
+          "terminal_timestamp_s": 12.233333587646484,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/01-anchor-standard79.jsonl",
+          "sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "bias": {
+          "base_seed": 20261128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0017766417004168034,
+              -0.003810248104855418,
+              -0.0010570123558863997
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.795803346903995e-05,
+              0.00012224896636325866,
+              -5.2392562793102115e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          0.016464238986372948,
+          -0.42312589287757874,
+          -0.052547648549079895,
+          0.9999977946281433,
+          0.015518326312303543,
+          -0.20519204437732697,
+          0.12840621173381805,
+          -0.48077237606048584,
+          0.23018525540828705,
+          -0.37070661783218384,
+          -0.5256827473640442,
+          0.5241769552230835,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3574497103691101,
+          -0.3373448848724365,
+          0.3512722849845886,
+          -0.581346869468689,
+          -0.6299213767051697,
+          0.27789220213890076,
+          -0.25937071442604065,
+          -0.00010171638132305816,
+          -6.50059591862373e-05,
+          -9.468127245781943e-05,
+          9.106316429097205e-05,
+          9.43956765695475e-05,
+          5.322258402884472e-06,
+          1.721867374726571e-05,
+          0.0016521613579243422,
+          -0.00028644761187024415,
+          -0.002799757057800889,
+          0.0022572753950953484,
+          -0.002364323940128088,
+          0.004498745780438185,
+          -0.00429801270365715,
+          0.18510401248931885,
+          0.4721299409866333,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4113236963748932,
+          1.0,
+          -0.05487203970551491,
+          0.014787913300096989,
+          0.0010967255802825093,
+          0.0024835269432514906,
+          0.0006000201101414859,
+          0.0002543131704442203,
+          -0.00042120617581531405,
+          -0.06810029596090317,
+          -0.0007947286358103156,
+          -0.03637472912669182,
+          0.03732840344309807,
+          -0.030684472993016243,
+          0.05280177295207977,
+          -0.03979802504181862,
+          1.0
+        ],
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+      },
+      "index": 1,
+      "policy_telemetry": null
+    },
+    {
+      "ablation_mode": "zero",
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.01219391092200214,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777498960494995,
+            "grasp_both": 1.0,
+            "lateral_error_m": 8.749515761276632e-05,
+            "orientation_error_rad": 0.005260984545356934
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/02-anchor-zero.jsonl",
+          "sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "bias": {
+          "base_seed": 20261128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0017766417004168034,
+              -0.003810248104855418,
+              -0.0010570123558863997
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.795803346903995e-05,
+              0.00012224896636325866,
+              -5.2392562793102115e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          0.016464238986372948,
+          -0.42312589287757874,
+          -0.052547648549079895,
+          0.9999977946281433,
+          0.015518326312303543,
+          -0.20519204437732697,
+          0.12840621173381805,
+          -0.48077237606048584,
+          0.23018525540828705,
+          -0.37070661783218384,
+          -0.5256827473640442,
+          0.5241769552230835,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3574497103691101,
+          -0.3373448848724365,
+          0.3512722849845886,
+          -0.581346869468689,
+          -0.6299213767051697,
+          0.27789220213890076,
+          -0.25937071442604065,
+          -0.00010171638132305816,
+          -6.50059591862373e-05,
+          -9.468127245781943e-05,
+          9.106316429097205e-05,
+          9.43956765695475e-05,
+          5.322258402884472e-06,
+          1.721867374726571e-05,
+          0.0016521613579243422,
+          -0.00028644761187024415,
+          -0.002799757057800889,
+          0.0022572753950953484,
+          -0.002364323940128088,
+          0.004498745780438185,
+          -0.00429801270365715,
+          0.18510401248931885,
+          0.4721299409866333,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4113236963748932,
+          1.0,
+          -0.05487203970551491,
+          0.014787913300096989,
+          0.0010967255802825093,
+          0.0024835269432514906,
+          0.0006000201101414859,
+          0.0002543131704442203,
+          -0.00042120617581531405,
+          -0.06810029596090317,
+          -0.0007947286358103156,
+          -0.03637472912669182,
+          0.03732840344309807,
+          -0.030684472993016243,
+          0.05280177295207977,
+          -0.03979802504181862,
+          1.0
+        ],
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+      },
+      "index": 2,
+      "policy_telemetry": {
+        "eligible_call_count": 717,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 364,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012157277827818641,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7776739597320557,
+            "grasp_both": 1.0,
+            "lateral_error_m": 1.4988347823664274e-05,
+            "orientation_error_rad": 0.002012765695944875
+          },
+          "success": true,
+          "terminal_timestamp_s": 12.233333587646484,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/03-anchor-mean_constant.jsonl",
+          "sha256": "74a1b1136607afd1500ff2576c79b6b6f9e0f75a3fa12b371ce1e1afc5d1c521"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "bias": {
+          "base_seed": 20261128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0017766417004168034,
+              -0.003810248104855418,
+              -0.0010570123558863997
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.795803346903995e-05,
+              0.00012224896636325866,
+              -5.2392562793102115e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          0.016464238986372948,
+          -0.42312589287757874,
+          -0.052547648549079895,
+          0.9999977946281433,
+          0.015518326312303543,
+          -0.20519204437732697,
+          0.12840621173381805,
+          -0.48077237606048584,
+          0.23018525540828705,
+          -0.37070661783218384,
+          -0.5256827473640442,
+          0.5241769552230835,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3574497103691101,
+          -0.3373448848724365,
+          0.3512722849845886,
+          -0.581346869468689,
+          -0.6299213767051697,
+          0.27789220213890076,
+          -0.25937071442604065,
+          -0.00010171638132305816,
+          -6.50059591862373e-05,
+          -9.468127245781943e-05,
+          9.106316429097205e-05,
+          9.43956765695475e-05,
+          5.322258402884472e-06,
+          1.721867374726571e-05,
+          0.0016521613579243422,
+          -0.00028644761187024415,
+          -0.002799757057800889,
+          0.0022572753950953484,
+          -0.002364323940128088,
+          0.004498745780438185,
+          -0.00429801270365715,
+          0.18510401248931885,
+          0.4721299409866333,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4113236963748932,
+          1.0,
+          -0.05487203970551491,
+          0.014787913300096989,
+          0.0010967255802825093,
+          0.0024835269432514906,
+          0.0006000201101414859,
+          0.0002543131704442203,
+          -0.00042120617581531405,
+          -0.06810029596090317,
+          -0.0007947286358103156,
+          -0.03637472912669182,
+          0.03732840344309807,
+          -0.030684472993016243,
+          0.05280177295207977,
+          -0.03979802504181862,
+          1.0
+        ],
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+      },
+      "index": 3,
+      "policy_telemetry": {
+        "eligible_call_count": 364,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 364,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012163298783499771,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777652740478516,
+            "grasp_both": 1.0,
+            "lateral_error_m": 2.8004151161271907e-05,
+            "orientation_error_rad": 0.0021418305847776234
+          },
+          "success": true,
+          "terminal_timestamp_s": 12.233333587646484,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/04-anchor-open_loop_playback.jsonl",
+          "sha256": "f8fc50fd273f98cbd81dc389680ce2fce3f0fbeebd42036d4d277fb00ff4d11d"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "bias": {
+          "base_seed": 20261128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0017766417004168034,
+              -0.003810248104855418,
+              -0.0010570123558863997
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.795803346903995e-05,
+              0.00012224896636325866,
+              -5.2392562793102115e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          0.016464238986372948,
+          -0.42312589287757874,
+          -0.052547648549079895,
+          0.9999977946281433,
+          0.015518326312303543,
+          -0.20519204437732697,
+          0.12840621173381805,
+          -0.48077237606048584,
+          0.23018525540828705,
+          -0.37070661783218384,
+          -0.5256827473640442,
+          0.5241769552230835,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3574497103691101,
+          -0.3373448848724365,
+          0.3512722849845886,
+          -0.581346869468689,
+          -0.6299213767051697,
+          0.27789220213890076,
+          -0.25937071442604065,
+          -0.00010171638132305816,
+          -6.50059591862373e-05,
+          -9.468127245781943e-05,
+          9.106316429097205e-05,
+          9.43956765695475e-05,
+          5.322258402884472e-06,
+          1.721867374726571e-05,
+          0.0016521613579243422,
+          -0.00028644761187024415,
+          -0.002799757057800889,
+          0.0022572753950953484,
+          -0.002364323940128088,
+          0.004498745780438185,
+          -0.00429801270365715,
+          0.18510401248931885,
+          0.4721299409866333,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4113236963748932,
+          1.0,
+          -0.05487203970551491,
+          0.014787913300096989,
+          0.0010967255802825093,
+          0.0024835269432514906,
+          0.0006000201101414859,
+          0.0002543131704442203,
+          -0.00042120617581531405,
+          -0.06810029596090317,
+          -0.0007947286358103156,
+          -0.03637472912669182,
+          0.03732840344309807,
+          -0.030684472993016243,
+          0.05280177295207977,
+          -0.03979802504181862,
+          1.0
+        ],
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+      },
+      "index": 4,
+      "policy_telemetry": {
+        "eligible_call_count": 364,
+        "source_rows_consumed": 364,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "zero",
+      "case": {
+        "base_seed": 20270104,
+        "calibration_case_seed": 66393124,
+        "case_id": "transfer-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 387,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78",
+          "critic_sha256": "9d1306759b7c368000d3c6a64133379aaff9eac0e749c2b1db0b64698a3c54fd",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "d5929876b44742f439bd84e508021b1b275b068ab6d87eecc100d7b4e3ed03b2",
+          "policy_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012363064066159897,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7776646614074707,
+            "grasp_both": 1.0,
+            "lateral_error_m": 3.0278077881497208e-05,
+            "orientation_error_rad": 0.0031516242674863863
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.266667366027832,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/05-transfer-01-zero.jsonl",
+          "sha256": "85ca6d36d8878a03a2afb997e60177347dba106a9384e0e23a768d0f3b29629c"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270104,
+        "bias": {
+          "base_seed": 20270104,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0002630569797474891,
+              -0.0016296337125822902,
+              0.002691196743398905
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.0079464118462056e-05,
+              -6.675990880466998e-05,
+              2.943377876363229e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03951605409383774,
+          -0.5117945075035095,
+          -0.044794145971536636,
+          1.0,
+          0.0052999467588961124,
+          0.018481262028217316,
+          -0.038005996495485306,
+          -0.4807906448841095,
+          0.23019075393676758,
+          -0.3707113564014435,
+          -0.5257132649421692,
+          0.5241796374320984,
+          0.5167800784111023,
+          0.40858641266822815,
+          -0.35519033670425415,
+          -0.33845168352127075,
+          0.34946897625923157,
+          -0.5832064151763916,
+          -0.6280784606933594,
+          0.27729690074920654,
+          -0.2620830237865448,
+          8.449106098851189e-05,
+          0.00019729019550140947,
+          -6.029608630342409e-05,
+          -0.000102427409728989,
+          9.948520892066881e-05,
+          -3.426185867283493e-05,
+          -2.7542639145394787e-05,
+          0.003558931639418006,
+          0.0003982459311373532,
+          -0.004577352199703455,
+          -0.0006407629698514938,
+          0.0030459656845778227,
+          0.002071025315672159,
+          -0.0030364899430423975,
+          0.18508274853229523,
+          0.4721441864967346,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5050275921821594,
+          1.0,
+          -0.05278190225362778,
+          0.01754363439977169,
+          0.0014503798447549343,
+          0.0003933906846214086,
+          0.0006477038841694593,
+          -0.00017484030104242265,
+          -0.0009099643211811781,
+          -0.04868507757782936,
+          0.006214777939021587,
+          -0.0549316443502903,
+          0.007088979706168175,
+          0.025888286530971527,
+          0.027358533814549446,
+          -0.026603542268276215,
+          1.0
+        ],
+        "initial_base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+      },
+      "index": 5,
+      "policy_telemetry": {
+        "eligible_call_count": 387,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case": {
+        "base_seed": 20270104,
+        "calibration_case_seed": 66393124,
+        "case_id": "transfer-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 709,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78",
+          "critic_sha256": "9d1306759b7c368000d3c6a64133379aaff9eac0e749c2b1db0b64698a3c54fd",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "d5929876b44742f439bd84e508021b1b275b068ab6d87eecc100d7b4e3ed03b2",
+          "policy_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012350347310577516,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777090072631836,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00010430557593761577,
+            "orientation_error_rad": 0.003365181148882955
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/06-transfer-01-mean_constant.jsonl",
+          "sha256": "5d1591720719129797987af5932b6afd912bb32278b1b05ca461b97780e37943"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270104,
+        "bias": {
+          "base_seed": 20270104,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0002630569797474891,
+              -0.0016296337125822902,
+              0.002691196743398905
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.0079464118462056e-05,
+              -6.675990880466998e-05,
+              2.943377876363229e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03951605409383774,
+          -0.5117945075035095,
+          -0.044794145971536636,
+          1.0,
+          0.0052999467588961124,
+          0.018481262028217316,
+          -0.038005996495485306,
+          -0.4807906448841095,
+          0.23019075393676758,
+          -0.3707113564014435,
+          -0.5257132649421692,
+          0.5241796374320984,
+          0.5167800784111023,
+          0.40858641266822815,
+          -0.35519033670425415,
+          -0.33845168352127075,
+          0.34946897625923157,
+          -0.5832064151763916,
+          -0.6280784606933594,
+          0.27729690074920654,
+          -0.2620830237865448,
+          8.449106098851189e-05,
+          0.00019729019550140947,
+          -6.029608630342409e-05,
+          -0.000102427409728989,
+          9.948520892066881e-05,
+          -3.426185867283493e-05,
+          -2.7542639145394787e-05,
+          0.003558931639418006,
+          0.0003982459311373532,
+          -0.004577352199703455,
+          -0.0006407629698514938,
+          0.0030459656845778227,
+          0.002071025315672159,
+          -0.0030364899430423975,
+          0.18508274853229523,
+          0.4721441864967346,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5050275921821594,
+          1.0,
+          -0.05278190225362778,
+          0.01754363439977169,
+          0.0014503798447549343,
+          0.0003933906846214086,
+          0.0006477038841694593,
+          -0.00017484030104242265,
+          -0.0009099643211811781,
+          -0.04868507757782936,
+          0.006214777939021587,
+          -0.0549316443502903,
+          0.007088979706168175,
+          0.025888286530971527,
+          0.027358533814549446,
+          -0.026603542268276215,
+          1.0
+        ],
+        "initial_base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+      },
+      "index": 6,
+      "policy_telemetry": {
+        "eligible_call_count": 709,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case": {
+        "base_seed": 20270104,
+        "calibration_case_seed": 66393124,
+        "case_id": "transfer-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 709,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78",
+          "critic_sha256": "9d1306759b7c368000d3c6a64133379aaff9eac0e749c2b1db0b64698a3c54fd",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "d5929876b44742f439bd84e508021b1b275b068ab6d87eecc100d7b4e3ed03b2",
+          "policy_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012356930495091255,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777891159057617,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00010505794290965013,
+            "orientation_error_rad": 0.003688555088818102
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/07-transfer-01-open_loop_playback.jsonl",
+          "sha256": "e2563c0105a0e8e945809e18fc699e4269561a90ddecd7d3ba273723771516a3"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270104,
+        "bias": {
+          "base_seed": 20270104,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0002630569797474891,
+              -0.0016296337125822902,
+              0.002691196743398905
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.0079464118462056e-05,
+              -6.675990880466998e-05,
+              2.943377876363229e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03951605409383774,
+          -0.5117945075035095,
+          -0.044794145971536636,
+          1.0,
+          0.0052999467588961124,
+          0.018481262028217316,
+          -0.038005996495485306,
+          -0.4807906448841095,
+          0.23019075393676758,
+          -0.3707113564014435,
+          -0.5257132649421692,
+          0.5241796374320984,
+          0.5167800784111023,
+          0.40858641266822815,
+          -0.35519033670425415,
+          -0.33845168352127075,
+          0.34946897625923157,
+          -0.5832064151763916,
+          -0.6280784606933594,
+          0.27729690074920654,
+          -0.2620830237865448,
+          8.449106098851189e-05,
+          0.00019729019550140947,
+          -6.029608630342409e-05,
+          -0.000102427409728989,
+          9.948520892066881e-05,
+          -3.426185867283493e-05,
+          -2.7542639145394787e-05,
+          0.003558931639418006,
+          0.0003982459311373532,
+          -0.004577352199703455,
+          -0.0006407629698514938,
+          0.0030459656845778227,
+          0.002071025315672159,
+          -0.0030364899430423975,
+          0.18508274853229523,
+          0.4721441864967346,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5050275921821594,
+          1.0,
+          -0.05278190225362778,
+          0.01754363439977169,
+          0.0014503798447549343,
+          0.0003933906846214086,
+          0.0006477038841694593,
+          -0.00017484030104242265,
+          -0.0009099643211811781,
+          -0.04868507757782936,
+          0.006214777939021587,
+          -0.0549316443502903,
+          0.007088979706168175,
+          0.025888286530971527,
+          0.027358533814549446,
+          -0.026603542268276215,
+          1.0
+        ],
+        "initial_base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+      },
+      "index": 7,
+      "policy_telemetry": {
+        "eligible_call_count": 709,
+        "source_rows_consumed": 364,
+        "tail_hold_count": 345
+      }
+    },
+    {
+      "ablation_mode": "standard79",
+      "case": {
+        "base_seed": 20270104,
+        "calibration_case_seed": 66393124,
+        "case_id": "transfer-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 709,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78",
+          "critic_sha256": "9d1306759b7c368000d3c6a64133379aaff9eac0e749c2b1db0b64698a3c54fd",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "d5929876b44742f439bd84e508021b1b275b068ab6d87eecc100d7b4e3ed03b2",
+          "policy_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012357993396567495,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7778172492980957,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00010254591415187211,
+            "orientation_error_rad": 0.0036947177899215892
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/08-transfer-01-standard79.jsonl",
+          "sha256": "d05a64c9c086a7df03d12f411d56f28fcf5b2570ab45d31d827f946c869e89ed"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270104,
+        "bias": {
+          "base_seed": 20270104,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0002630569797474891,
+              -0.0016296337125822902,
+              0.002691196743398905
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.0079464118462056e-05,
+              -6.675990880466998e-05,
+              2.943377876363229e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270104,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03951605409383774,
+          -0.5117945075035095,
+          -0.044794145971536636,
+          1.0,
+          0.0052999467588961124,
+          0.018481262028217316,
+          -0.038005996495485306,
+          -0.4807906448841095,
+          0.23019075393676758,
+          -0.3707113564014435,
+          -0.5257132649421692,
+          0.5241796374320984,
+          0.5167800784111023,
+          0.40858641266822815,
+          -0.35519033670425415,
+          -0.33845168352127075,
+          0.34946897625923157,
+          -0.5832064151763916,
+          -0.6280784606933594,
+          0.27729690074920654,
+          -0.2620830237865448,
+          8.449106098851189e-05,
+          0.00019729019550140947,
+          -6.029608630342409e-05,
+          -0.000102427409728989,
+          9.948520892066881e-05,
+          -3.426185867283493e-05,
+          -2.7542639145394787e-05,
+          0.003558931639418006,
+          0.0003982459311373532,
+          -0.004577352199703455,
+          -0.0006407629698514938,
+          0.0030459656845778227,
+          0.002071025315672159,
+          -0.0030364899430423975,
+          0.18508274853229523,
+          0.4721441864967346,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5050275921821594,
+          1.0,
+          -0.05278190225362778,
+          0.01754363439977169,
+          0.0014503798447549343,
+          0.0003933906846214086,
+          0.0006477038841694593,
+          -0.00017484030104242265,
+          -0.0009099643211811781,
+          -0.04868507757782936,
+          0.006214777939021587,
+          -0.0549316443502903,
+          0.007088979706168175,
+          0.025888286530971527,
+          0.027358533814549446,
+          -0.026603542268276215,
+          1.0
+        ],
+        "initial_base79_sha256": "37687a60f293d40e569158f0d8569019588dc1a35b7f910fb99dbbc735404a78"
+      },
+      "index": 8,
+      "policy_telemetry": null
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case": {
+        "base_seed": 20270112,
+        "calibration_case_seed": 66393132,
+        "case_id": "transfer-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 710,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479",
+          "critic_sha256": "128fd3c06c5e1d5599518600559590a1a104a6ce21f10c990d34550cde2ae03d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5c40cdbcedea21ca74ec30c3a979a453dcc7541bc55e5fd947641b0cbade8189",
+          "policy_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": true,
+            "orientation": false
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012295383160550573,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.014939785003662,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.436354829888862e-05,
+            "orientation_error_rad": 0.010776492310001926
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/09-transfer-02-mean_constant.jsonl",
+          "sha256": "f463ee17dd2d1b84a51a81a1b2e646eb048506ad41081634e6b43a4d1aac7bce"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270112,
+        "bias": {
+          "base_seed": 20270112,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.002833211561664939,
+              0.0019135676557198167,
+              -0.0022655045613646507
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.1270396498730406e-05,
+              6.2165404415281955e-06,
+              -1.4388354429684114e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03543756529688835,
+          -0.5012497901916504,
+          0.04322744533419609,
+          1.0,
+          -0.005593876354396343,
+          -0.0012407798785716295,
+          -0.00861448049545288,
+          -0.480783075094223,
+          0.23018619418144226,
+          -0.3707100450992584,
+          -0.5256903767585754,
+          0.5241811871528625,
+          0.516779899597168,
+          0.40856534242630005,
+          -0.35622265934944153,
+          -0.3379615843296051,
+          0.34967631101608276,
+          -0.5824581980705261,
+          -0.6280626654624939,
+          0.27848607301712036,
+          -0.2604997754096985,
+          -6.510988168884069e-05,
+          5.36630759597756e-05,
+          -8.085734589258209e-05,
+          -0.00010265879245707765,
+          9.657724876888096e-05,
+          1.0555242624832317e-05,
+          0.00010313084931112826,
+          0.0035206640604883432,
+          7.143771654227749e-05,
+          -0.004543969873338938,
+          -0.0006044947076588869,
+          0.0033484259620308876,
+          0.0027377919759601355,
+          -0.001965581439435482,
+          0.18505896627902985,
+          0.4721379280090332,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4921928346157074,
+          1.0,
+          -0.054438911378383636,
+          0.016033651307225227,
+          0.0012318294029682875,
+          0.00038941705133765936,
+          0.0006159147014841437,
+          0.00031391781521961093,
+          0.0005165736074559391,
+          -0.04880031198263168,
+          0.0028173131868243217,
+          -0.05458593741059303,
+          0.007470449432730675,
+          0.0291188582777977,
+          0.03434022516012192,
+          -0.015389920212328434,
+          1.0
+        ],
+        "initial_base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+      },
+      "index": 9,
+      "policy_telemetry": {
+        "eligible_call_count": 710,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case": {
+        "base_seed": 20270112,
+        "calibration_case_seed": 66393132,
+        "case_id": "transfer-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 710,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479",
+          "critic_sha256": "128fd3c06c5e1d5599518600559590a1a104a6ce21f10c990d34550cde2ae03d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5c40cdbcedea21ca74ec30c3a979a453dcc7541bc55e5fd947641b0cbade8189",
+          "policy_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": false
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012302791938846518,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.93681001663208,
+            "grasp_both": 1.0,
+            "lateral_error_m": 5.844035272251133e-05,
+            "orientation_error_rad": 0.009995544671048398
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/10-transfer-02-open_loop_playback.jsonl",
+          "sha256": "b584af3ba00f44c7f3d9a0f5e1ec4d838996d20255adaa9f09641739eb4a4c6c"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270112,
+        "bias": {
+          "base_seed": 20270112,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.002833211561664939,
+              0.0019135676557198167,
+              -0.0022655045613646507
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.1270396498730406e-05,
+              6.2165404415281955e-06,
+              -1.4388354429684114e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03543756529688835,
+          -0.5012497901916504,
+          0.04322744533419609,
+          1.0,
+          -0.005593876354396343,
+          -0.0012407798785716295,
+          -0.00861448049545288,
+          -0.480783075094223,
+          0.23018619418144226,
+          -0.3707100450992584,
+          -0.5256903767585754,
+          0.5241811871528625,
+          0.516779899597168,
+          0.40856534242630005,
+          -0.35622265934944153,
+          -0.3379615843296051,
+          0.34967631101608276,
+          -0.5824581980705261,
+          -0.6280626654624939,
+          0.27848607301712036,
+          -0.2604997754096985,
+          -6.510988168884069e-05,
+          5.36630759597756e-05,
+          -8.085734589258209e-05,
+          -0.00010265879245707765,
+          9.657724876888096e-05,
+          1.0555242624832317e-05,
+          0.00010313084931112826,
+          0.0035206640604883432,
+          7.143771654227749e-05,
+          -0.004543969873338938,
+          -0.0006044947076588869,
+          0.0033484259620308876,
+          0.0027377919759601355,
+          -0.001965581439435482,
+          0.18505896627902985,
+          0.4721379280090332,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4921928346157074,
+          1.0,
+          -0.054438911378383636,
+          0.016033651307225227,
+          0.0012318294029682875,
+          0.00038941705133765936,
+          0.0006159147014841437,
+          0.00031391781521961093,
+          0.0005165736074559391,
+          -0.04880031198263168,
+          0.0028173131868243217,
+          -0.05458593741059303,
+          0.007470449432730675,
+          0.0291188582777977,
+          0.03434022516012192,
+          -0.015389920212328434,
+          1.0
+        ],
+        "initial_base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+      },
+      "index": 10,
+      "policy_telemetry": {
+        "eligible_call_count": 710,
+        "source_rows_consumed": 364,
+        "tail_hold_count": 346
+      }
+    },
+    {
+      "ablation_mode": "standard79",
+      "case": {
+        "base_seed": 20270112,
+        "calibration_case_seed": 66393132,
+        "case_id": "transfer-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 710,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479",
+          "critic_sha256": "128fd3c06c5e1d5599518600559590a1a104a6ce21f10c990d34550cde2ae03d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5c40cdbcedea21ca74ec30c3a979a453dcc7541bc55e5fd947641b0cbade8189",
+          "policy_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": false
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012302312787611895,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.9317474365234375,
+            "grasp_both": 1.0,
+            "lateral_error_m": 5.854435830592428e-05,
+            "orientation_error_rad": 0.00996716971246129
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/11-transfer-02-standard79.jsonl",
+          "sha256": "ff345c4ec4efff22392887980d3510b21ec8398781f90be198038c5b95f22724"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270112,
+        "bias": {
+          "base_seed": 20270112,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.002833211561664939,
+              0.0019135676557198167,
+              -0.0022655045613646507
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.1270396498730406e-05,
+              6.2165404415281955e-06,
+              -1.4388354429684114e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03543756529688835,
+          -0.5012497901916504,
+          0.04322744533419609,
+          1.0,
+          -0.005593876354396343,
+          -0.0012407798785716295,
+          -0.00861448049545288,
+          -0.480783075094223,
+          0.23018619418144226,
+          -0.3707100450992584,
+          -0.5256903767585754,
+          0.5241811871528625,
+          0.516779899597168,
+          0.40856534242630005,
+          -0.35622265934944153,
+          -0.3379615843296051,
+          0.34967631101608276,
+          -0.5824581980705261,
+          -0.6280626654624939,
+          0.27848607301712036,
+          -0.2604997754096985,
+          -6.510988168884069e-05,
+          5.36630759597756e-05,
+          -8.085734589258209e-05,
+          -0.00010265879245707765,
+          9.657724876888096e-05,
+          1.0555242624832317e-05,
+          0.00010313084931112826,
+          0.0035206640604883432,
+          7.143771654227749e-05,
+          -0.004543969873338938,
+          -0.0006044947076588869,
+          0.0033484259620308876,
+          0.0027377919759601355,
+          -0.001965581439435482,
+          0.18505896627902985,
+          0.4721379280090332,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4921928346157074,
+          1.0,
+          -0.054438911378383636,
+          0.016033651307225227,
+          0.0012318294029682875,
+          0.00038941705133765936,
+          0.0006159147014841437,
+          0.00031391781521961093,
+          0.0005165736074559391,
+          -0.04880031198263168,
+          0.0028173131868243217,
+          -0.05458593741059303,
+          0.007470449432730675,
+          0.0291188582777977,
+          0.03434022516012192,
+          -0.015389920212328434,
+          1.0
+        ],
+        "initial_base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+      },
+      "index": 11,
+      "policy_telemetry": null
+    },
+    {
+      "ablation_mode": "zero",
+      "case": {
+        "base_seed": 20270112,
+        "calibration_case_seed": 66393132,
+        "case_id": "transfer-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 384,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479",
+          "critic_sha256": "128fd3c06c5e1d5599518600559590a1a104a6ce21f10c990d34550cde2ae03d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5c40cdbcedea21ca74ec30c3a979a453dcc7541bc55e5fd947641b0cbade8189",
+          "policy_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012287987736957023,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777297496795654,
+            "grasp_both": 1.0,
+            "lateral_error_m": 3.20996377682567e-05,
+            "orientation_error_rad": 0.004100068295023821
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.133334159851074,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/12-transfer-02-zero.jsonl",
+          "sha256": "c99a0c209820bb8026a1bc708b9ac20c8ff80c81b9ae496eda7cc5baab343c54"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270112,
+        "bias": {
+          "base_seed": 20270112,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.002833211561664939,
+              0.0019135676557198167,
+              -0.0022655045613646507
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -1.1270396498730406e-05,
+              6.2165404415281955e-06,
+              -1.4388354429684114e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270112,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03543756529688835,
+          -0.5012497901916504,
+          0.04322744533419609,
+          1.0,
+          -0.005593876354396343,
+          -0.0012407798785716295,
+          -0.00861448049545288,
+          -0.480783075094223,
+          0.23018619418144226,
+          -0.3707100450992584,
+          -0.5256903767585754,
+          0.5241811871528625,
+          0.516779899597168,
+          0.40856534242630005,
+          -0.35622265934944153,
+          -0.3379615843296051,
+          0.34967631101608276,
+          -0.5824581980705261,
+          -0.6280626654624939,
+          0.27848607301712036,
+          -0.2604997754096985,
+          -6.510988168884069e-05,
+          5.36630759597756e-05,
+          -8.085734589258209e-05,
+          -0.00010265879245707765,
+          9.657724876888096e-05,
+          1.0555242624832317e-05,
+          0.00010313084931112826,
+          0.0035206640604883432,
+          7.143771654227749e-05,
+          -0.004543969873338938,
+          -0.0006044947076588869,
+          0.0033484259620308876,
+          0.0027377919759601355,
+          -0.001965581439435482,
+          0.18505896627902985,
+          0.4721379280090332,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4921928346157074,
+          1.0,
+          -0.054438911378383636,
+          0.016033651307225227,
+          0.0012318294029682875,
+          0.00038941705133765936,
+          0.0006159147014841437,
+          0.00031391781521961093,
+          0.0005165736074559391,
+          -0.04880031198263168,
+          0.0028173131868243217,
+          -0.05458593741059303,
+          0.007470449432730675,
+          0.0291188582777977,
+          0.03434022516012192,
+          -0.015389920212328434,
+          1.0
+        ],
+        "initial_base79_sha256": "e8920a3d16863341b2967dde3895012f9696cadaf88ba4bab750c321ad08e479"
+      },
+      "index": 12,
+      "policy_telemetry": {
+        "eligible_call_count": 384,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case": {
+        "base_seed": 20270120,
+        "calibration_case_seed": 66393140,
+        "case_id": "transfer-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d",
+          "critic_sha256": "a86cc3ad5da4e3a6108118692af380a8cefa6f1311cfb1d4e1de31cbd8920720",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "9305db51a62d63c183edd8b0a16d4bc8c4d8ddb7f1672fff7386de6e9ec6e3bc",
+          "policy_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012297982703072894,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777916431427002,
+            "grasp_both": 1.0,
+            "lateral_error_m": 7.615886334908656e-05,
+            "orientation_error_rad": 0.0029312518253315893
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/13-transfer-03-open_loop_playback.jsonl",
+          "sha256": "84ee8c323cf4d94f0879c88cc91c203ec2e868aa6bd647bc04703be9d4c0f485"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270120,
+        "bias": {
+          "base_seed": 20270120,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.00031574745662510395,
+              -1.3117191883793566e-05,
+              0.001299845869652927
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -4.465322035684949e-06,
+              -8.961668754636776e-06,
+              -2.3052009510138305e-06
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.0327184796333313,
+          -0.5127884149551392,
+          -0.023779310286045074,
+          1.0,
+          0.00536821223795414,
+          0.010175972245633602,
+          -0.036287128925323486,
+          -0.48078423738479614,
+          0.23019874095916748,
+          -0.37071147561073303,
+          -0.5257159471511841,
+          0.5241804122924805,
+          0.5167800188064575,
+          0.40858545899391174,
+          -0.3549618124961853,
+          -0.3384140133857727,
+          0.34910818934440613,
+          -0.5832151174545288,
+          -0.6278315782546997,
+          0.27750667929649353,
+          -0.26150158047676086,
+          0.00010664586443454027,
+          0.00022376986453309655,
+          -5.3027921239845455e-05,
+          -9.91682245512493e-05,
+          9.919867443386465e-05,
+          -8.156506373779848e-05,
+          -0.0001007035025395453,
+          0.0032455387990921736,
+          0.001055882079526782,
+          -0.004626462236046791,
+          0.00010787522478494793,
+          0.0029236956033855677,
+          0.0026842220686376095,
+          -0.0018404758302494884,
+          0.18508398532867432,
+          0.47211986780166626,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5068681240081787,
+          1.0,
+          -0.052607063204050064,
+          0.017827751114964485,
+          0.0015377999516204,
+          0.00042915347148664296,
+          0.0006437302217818797,
+          -0.0006874402752146125,
+          -0.0017086665611714125,
+          -0.0518798865377903,
+          0.013037523254752159,
+          -0.055396560579538345,
+          0.014917057007551193,
+          0.02458890527486801,
+          0.033779941499233246,
+          -0.014086565002799034,
+          1.0
+        ],
+        "initial_base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+      },
+      "index": 13,
+      "policy_telemetry": {
+        "eligible_call_count": 708,
+        "source_rows_consumed": 364,
+        "tail_hold_count": 344
+      }
+    },
+    {
+      "ablation_mode": "standard79",
+      "case": {
+        "base_seed": 20270120,
+        "calibration_case_seed": 66393140,
+        "case_id": "transfer-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d",
+          "critic_sha256": "a86cc3ad5da4e3a6108118692af380a8cefa6f1311cfb1d4e1de31cbd8920720",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "9305db51a62d63c183edd8b0a16d4bc8c4d8ddb7f1672fff7386de6e9ec6e3bc",
+          "policy_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012299012145045873,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.9342596530914307,
+            "grasp_both": 1.0,
+            "lateral_error_m": 7.623873241857103e-05,
+            "orientation_error_rad": 0.0029337946844450223
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/14-transfer-03-standard79.jsonl",
+          "sha256": "a8f60367d4246244f21356cf98eb85bccb6ed4e6e98d85f85e7230fd822d4fbf"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270120,
+        "bias": {
+          "base_seed": 20270120,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.00031574745662510395,
+              -1.3117191883793566e-05,
+              0.001299845869652927
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -4.465322035684949e-06,
+              -8.961668754636776e-06,
+              -2.3052009510138305e-06
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.0327184796333313,
+          -0.5127884149551392,
+          -0.023779310286045074,
+          1.0,
+          0.00536821223795414,
+          0.010175972245633602,
+          -0.036287128925323486,
+          -0.48078423738479614,
+          0.23019874095916748,
+          -0.37071147561073303,
+          -0.5257159471511841,
+          0.5241804122924805,
+          0.5167800188064575,
+          0.40858545899391174,
+          -0.3549618124961853,
+          -0.3384140133857727,
+          0.34910818934440613,
+          -0.5832151174545288,
+          -0.6278315782546997,
+          0.27750667929649353,
+          -0.26150158047676086,
+          0.00010664586443454027,
+          0.00022376986453309655,
+          -5.3027921239845455e-05,
+          -9.91682245512493e-05,
+          9.919867443386465e-05,
+          -8.156506373779848e-05,
+          -0.0001007035025395453,
+          0.0032455387990921736,
+          0.001055882079526782,
+          -0.004626462236046791,
+          0.00010787522478494793,
+          0.0029236956033855677,
+          0.0026842220686376095,
+          -0.0018404758302494884,
+          0.18508398532867432,
+          0.47211986780166626,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5068681240081787,
+          1.0,
+          -0.052607063204050064,
+          0.017827751114964485,
+          0.0015377999516204,
+          0.00042915347148664296,
+          0.0006437302217818797,
+          -0.0006874402752146125,
+          -0.0017086665611714125,
+          -0.0518798865377903,
+          0.013037523254752159,
+          -0.055396560579538345,
+          0.014917057007551193,
+          0.02458890527486801,
+          0.033779941499233246,
+          -0.014086565002799034,
+          1.0
+        ],
+        "initial_base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+      },
+      "index": 14,
+      "policy_telemetry": null
+    },
+    {
+      "ablation_mode": "zero",
+      "case": {
+        "base_seed": 20270120,
+        "calibration_case_seed": 66393140,
+        "case_id": "transfer-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 387,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d",
+          "critic_sha256": "a86cc3ad5da4e3a6108118692af380a8cefa6f1311cfb1d4e1de31cbd8920720",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "9305db51a62d63c183edd8b0a16d4bc8c4d8ddb7f1672fff7386de6e9ec6e3bc",
+          "policy_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012304967654138889,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777775526046753,
+            "grasp_both": 1.0,
+            "lateral_error_m": 5.888883845664652e-06,
+            "orientation_error_rad": 0.0013374521595326992
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.30000114440918,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/15-transfer-03-zero.jsonl",
+          "sha256": "4a44bdd1c5c308bd47a2b112ab0a60a823884934d9b86d6bcbe629ccc1ad9d0b"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270120,
+        "bias": {
+          "base_seed": 20270120,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.00031574745662510395,
+              -1.3117191883793566e-05,
+              0.001299845869652927
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -4.465322035684949e-06,
+              -8.961668754636776e-06,
+              -2.3052009510138305e-06
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.0327184796333313,
+          -0.5127884149551392,
+          -0.023779310286045074,
+          1.0,
+          0.00536821223795414,
+          0.010175972245633602,
+          -0.036287128925323486,
+          -0.48078423738479614,
+          0.23019874095916748,
+          -0.37071147561073303,
+          -0.5257159471511841,
+          0.5241804122924805,
+          0.5167800188064575,
+          0.40858545899391174,
+          -0.3549618124961853,
+          -0.3384140133857727,
+          0.34910818934440613,
+          -0.5832151174545288,
+          -0.6278315782546997,
+          0.27750667929649353,
+          -0.26150158047676086,
+          0.00010664586443454027,
+          0.00022376986453309655,
+          -5.3027921239845455e-05,
+          -9.91682245512493e-05,
+          9.919867443386465e-05,
+          -8.156506373779848e-05,
+          -0.0001007035025395453,
+          0.0032455387990921736,
+          0.001055882079526782,
+          -0.004626462236046791,
+          0.00010787522478494793,
+          0.0029236956033855677,
+          0.0026842220686376095,
+          -0.0018404758302494884,
+          0.18508398532867432,
+          0.47211986780166626,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5068681240081787,
+          1.0,
+          -0.052607063204050064,
+          0.017827751114964485,
+          0.0015377999516204,
+          0.00042915347148664296,
+          0.0006437302217818797,
+          -0.0006874402752146125,
+          -0.0017086665611714125,
+          -0.0518798865377903,
+          0.013037523254752159,
+          -0.055396560579538345,
+          0.014917057007551193,
+          0.02458890527486801,
+          0.033779941499233246,
+          -0.014086565002799034,
+          1.0
+        ],
+        "initial_base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+      },
+      "index": 15,
+      "policy_telemetry": {
+        "eligible_call_count": 387,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case": {
+        "base_seed": 20270120,
+        "calibration_case_seed": 66393140,
+        "case_id": "transfer-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d",
+          "critic_sha256": "a86cc3ad5da4e3a6108118692af380a8cefa6f1311cfb1d4e1de31cbd8920720",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "9305db51a62d63c183edd8b0a16d4bc8c4d8ddb7f1672fff7386de6e9ec6e3bc",
+          "policy_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012293680116343943,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7813613414764404,
+            "grasp_both": 1.0,
+            "lateral_error_m": 7.741205624925013e-05,
+            "orientation_error_rad": 0.0028316733107189773
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/16-transfer-03-mean_constant.jsonl",
+          "sha256": "6a297029217b0a50d65ca1a80afe6c53f3ae4674d7093f77cdefe1890ccd1ab9"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270120,
+        "bias": {
+          "base_seed": 20270120,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.00031574745662510395,
+              -1.3117191883793566e-05,
+              0.001299845869652927
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              -4.465322035684949e-06,
+              -8.961668754636776e-06,
+              -2.3052009510138305e-06
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270120,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.0327184796333313,
+          -0.5127884149551392,
+          -0.023779310286045074,
+          1.0,
+          0.00536821223795414,
+          0.010175972245633602,
+          -0.036287128925323486,
+          -0.48078423738479614,
+          0.23019874095916748,
+          -0.37071147561073303,
+          -0.5257159471511841,
+          0.5241804122924805,
+          0.5167800188064575,
+          0.40858545899391174,
+          -0.3549618124961853,
+          -0.3384140133857727,
+          0.34910818934440613,
+          -0.5832151174545288,
+          -0.6278315782546997,
+          0.27750667929649353,
+          -0.26150158047676086,
+          0.00010664586443454027,
+          0.00022376986453309655,
+          -5.3027921239845455e-05,
+          -9.91682245512493e-05,
+          9.919867443386465e-05,
+          -8.156506373779848e-05,
+          -0.0001007035025395453,
+          0.0032455387990921736,
+          0.001055882079526782,
+          -0.004626462236046791,
+          0.00010787522478494793,
+          0.0029236956033855677,
+          0.0026842220686376095,
+          -0.0018404758302494884,
+          0.18508398532867432,
+          0.47211986780166626,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.5068681240081787,
+          1.0,
+          -0.052607063204050064,
+          0.017827751114964485,
+          0.0015377999516204,
+          0.00042915347148664296,
+          0.0006437302217818797,
+          -0.0006874402752146125,
+          -0.0017086665611714125,
+          -0.0518798865377903,
+          0.013037523254752159,
+          -0.055396560579538345,
+          0.014917057007551193,
+          0.02458890527486801,
+          0.033779941499233246,
+          -0.014086565002799034,
+          1.0
+        ],
+        "initial_base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+      },
+      "index": 16,
+      "policy_telemetry": {
+        "eligible_call_count": 708,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "standard79",
+      "case": {
+        "base_seed": 20270128,
+        "calibration_case_seed": 66393148,
+        "case_id": "transfer-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9",
+          "critic_sha256": "ea69897e3c7c6868693c17e478a6e7423ec9735c5b2e44637f5c9ee4667798c6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "3554ee012cbf30e4de8f3a3e9a4627e151de9975316040755b7388deae785dac",
+          "policy_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.01231260363762604,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777709722518921,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.658673767668853e-05,
+            "orientation_error_rad": 0.0027163648636099416
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/17-transfer-04-standard79.jsonl",
+          "sha256": "9cf92b122d656a12dc3489976245a79a227f11be079b30e0db6fa7f83ea30751"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270128,
+        "bias": {
+          "base_seed": 20270128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0005541881546378136,
+              -0.004168505314737558,
+              -0.00015150259423535317
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.621408829232678e-06,
+              -2.3899021471152082e-05,
+              -1.0277850378770381e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03005851060152054,
+          -0.4343794584274292,
+          -0.0469941645860672,
+          0.9999971389770508,
+          -0.03082510083913803,
+          -0.21876181662082672,
+          0.1628579944372177,
+          -0.48077306151390076,
+          0.23018480837345123,
+          -0.3707069158554077,
+          -0.525682806968689,
+          0.5241767168045044,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3573080897331238,
+          -0.3373674750328064,
+          0.3512536883354187,
+          -0.581382155418396,
+          -0.6299402117729187,
+          0.27773410081863403,
+          -0.25934934616088867,
+          -0.00010041461791843176,
+          -7.106184784788638e-05,
+          -9.631788998376578e-05,
+          9.485035843681544e-05,
+          9.467016934650019e-05,
+          9.246969966625329e-06,
+          2.9948621886433102e-05,
+          0.0033797561191022396,
+          -0.0006414002273231745,
+          -0.0030470367055386305,
+          0.0018538403091952205,
+          -0.0026723735500127077,
+          0.0027579281013458967,
+          -0.003932582214474678,
+          0.18505851924419403,
+          0.4721115231513977,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.42263364791870117,
+          1.0,
+          -0.054887935519218445,
+          0.014680624939501286,
+          0.0010927518596872687,
+          0.0025113425217568874,
+          0.0006039937725290656,
+          0.0002940495905932039,
+          -0.0002821286616381258,
+          -0.05029440298676491,
+          -0.0044663748703897,
+          -0.039068859070539474,
+          0.033088527619838715,
+          -0.0339309386909008,
+          0.03456473723053932,
+          -0.03597339242696762,
+          1.0
+        ],
+        "initial_base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+      },
+      "index": 17,
+      "policy_telemetry": null
+    },
+    {
+      "ablation_mode": "zero",
+      "case": {
+        "base_seed": 20270128,
+        "calibration_case_seed": 66393148,
+        "case_id": "transfer-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 367,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9",
+          "critic_sha256": "ea69897e3c7c6868693c17e478a6e7423ec9735c5b2e44637f5c9ee4667798c6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "3554ee012cbf30e4de8f3a3e9a4627e151de9975316040755b7388deae785dac",
+          "policy_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012319263072541844,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7775986194610596,
+            "grasp_both": 1.0,
+            "lateral_error_m": 1.4882266867528541e-05,
+            "orientation_error_rad": 0.00419749915554442
+          },
+          "success": true,
+          "terminal_timestamp_s": 12.333333969116211,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/18-transfer-04-zero.jsonl",
+          "sha256": "014b0f8e9e7b8aeb4ab8d1ebed8bdc2fb10e7a0cb9b2dbc2067b2c4d56f2e820"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270128,
+        "bias": {
+          "base_seed": 20270128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0005541881546378136,
+              -0.004168505314737558,
+              -0.00015150259423535317
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.621408829232678e-06,
+              -2.3899021471152082e-05,
+              -1.0277850378770381e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03005851060152054,
+          -0.4343794584274292,
+          -0.0469941645860672,
+          0.9999971389770508,
+          -0.03082510083913803,
+          -0.21876181662082672,
+          0.1628579944372177,
+          -0.48077306151390076,
+          0.23018480837345123,
+          -0.3707069158554077,
+          -0.525682806968689,
+          0.5241767168045044,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3573080897331238,
+          -0.3373674750328064,
+          0.3512536883354187,
+          -0.581382155418396,
+          -0.6299402117729187,
+          0.27773410081863403,
+          -0.25934934616088867,
+          -0.00010041461791843176,
+          -7.106184784788638e-05,
+          -9.631788998376578e-05,
+          9.485035843681544e-05,
+          9.467016934650019e-05,
+          9.246969966625329e-06,
+          2.9948621886433102e-05,
+          0.0033797561191022396,
+          -0.0006414002273231745,
+          -0.0030470367055386305,
+          0.0018538403091952205,
+          -0.0026723735500127077,
+          0.0027579281013458967,
+          -0.003932582214474678,
+          0.18505851924419403,
+          0.4721115231513977,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.42263364791870117,
+          1.0,
+          -0.054887935519218445,
+          0.014680624939501286,
+          0.0010927518596872687,
+          0.0025113425217568874,
+          0.0006039937725290656,
+          0.0002940495905932039,
+          -0.0002821286616381258,
+          -0.05029440298676491,
+          -0.0044663748703897,
+          -0.039068859070539474,
+          0.033088527619838715,
+          -0.0339309386909008,
+          0.03456473723053932,
+          -0.03597339242696762,
+          1.0
+        ],
+        "initial_base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+      },
+      "index": 18,
+      "policy_telemetry": {
+        "eligible_call_count": 367,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case": {
+        "base_seed": 20270128,
+        "calibration_case_seed": 66393148,
+        "case_id": "transfer-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9",
+          "critic_sha256": "ea69897e3c7c6868693c17e478a6e7423ec9735c5b2e44637f5c9ee4667798c6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "3554ee012cbf30e4de8f3a3e9a4627e151de9975316040755b7388deae785dac",
+          "policy_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012307466683190785,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777672529220581,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.836432778929507e-05,
+            "orientation_error_rad": 0.0021942326296592383
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/19-transfer-04-mean_constant.jsonl",
+          "sha256": "3f9973841711c8ef34a7fa007320e0cb843e6445c585e606c8021d2ec98a6eaf"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270128,
+        "bias": {
+          "base_seed": 20270128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0005541881546378136,
+              -0.004168505314737558,
+              -0.00015150259423535317
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.621408829232678e-06,
+              -2.3899021471152082e-05,
+              -1.0277850378770381e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03005851060152054,
+          -0.4343794584274292,
+          -0.0469941645860672,
+          0.9999971389770508,
+          -0.03082510083913803,
+          -0.21876181662082672,
+          0.1628579944372177,
+          -0.48077306151390076,
+          0.23018480837345123,
+          -0.3707069158554077,
+          -0.525682806968689,
+          0.5241767168045044,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3573080897331238,
+          -0.3373674750328064,
+          0.3512536883354187,
+          -0.581382155418396,
+          -0.6299402117729187,
+          0.27773410081863403,
+          -0.25934934616088867,
+          -0.00010041461791843176,
+          -7.106184784788638e-05,
+          -9.631788998376578e-05,
+          9.485035843681544e-05,
+          9.467016934650019e-05,
+          9.246969966625329e-06,
+          2.9948621886433102e-05,
+          0.0033797561191022396,
+          -0.0006414002273231745,
+          -0.0030470367055386305,
+          0.0018538403091952205,
+          -0.0026723735500127077,
+          0.0027579281013458967,
+          -0.003932582214474678,
+          0.18505851924419403,
+          0.4721115231513977,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.42263364791870117,
+          1.0,
+          -0.054887935519218445,
+          0.014680624939501286,
+          0.0010927518596872687,
+          0.0025113425217568874,
+          0.0006039937725290656,
+          0.0002940495905932039,
+          -0.0002821286616381258,
+          -0.05029440298676491,
+          -0.0044663748703897,
+          -0.039068859070539474,
+          0.033088527619838715,
+          -0.0339309386909008,
+          0.03456473723053932,
+          -0.03597339242696762,
+          1.0
+        ],
+        "initial_base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+      },
+      "index": 19,
+      "policy_telemetry": {
+        "eligible_call_count": 717,
+        "source_rows_consumed": 0,
+        "tail_hold_count": 0
+      }
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case": {
+        "base_seed": 20270128,
+        "calibration_case_seed": 66393148,
+        "case_id": "transfer-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9",
+          "critic_sha256": "ea69897e3c7c6868693c17e478a6e7423ec9735c5b2e44637f5c9ee4667798c6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "3554ee012cbf30e4de8f3a3e9a4627e151de9975316040755b7388deae785dac",
+          "policy_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012314171310188207,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7777950763702393,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.507973228951664e-05,
+            "orientation_error_rad": 0.002717163587353564
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/20-transfer-04-open_loop_playback.jsonl",
+          "sha256": "7121cbd2b277bd0c87a1471a3fbaadb4da469a33c7a19deff1c54c1b6360c7da"
+        }
+      },
+      "fixed_condition": {
+        "base_seed": 20270128,
+        "bias": {
+          "base_seed": 20270128,
+          "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+          "enabled": true,
+          "episode_index": [
+            1
+          ],
+          "episode_stride": 1000003,
+          "level": 0,
+          "rotation_vector_entry_rad": [
+            [
+              0.0005541881546378136,
+              -0.004168505314737558,
+              -0.00015150259423535317
+            ]
+          ],
+          "sampling_event": "once_per_environment_reset_before_calibration",
+          "stream_offset": 45123017,
+          "translation_entry_m": [
+            [
+              6.621408829232678e-06,
+              -2.3899021471152082e-05,
+              -1.0277850378770381e-05
+            ]
+          ]
+        },
+        "episode_index": [
+          1
+        ],
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20270128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "initial_base79": [
+          -0.03005851060152054,
+          -0.4343794584274292,
+          -0.0469941645860672,
+          0.9999971389770508,
+          -0.03082510083913803,
+          -0.21876181662082672,
+          0.1628579944372177,
+          -0.48077306151390076,
+          0.23018480837345123,
+          -0.3707069158554077,
+          -0.525682806968689,
+          0.5241767168045044,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3573080897331238,
+          -0.3373674750328064,
+          0.3512536883354187,
+          -0.581382155418396,
+          -0.6299402117729187,
+          0.27773410081863403,
+          -0.25934934616088867,
+          -0.00010041461791843176,
+          -7.106184784788638e-05,
+          -9.631788998376578e-05,
+          9.485035843681544e-05,
+          9.467016934650019e-05,
+          9.246969966625329e-06,
+          2.9948621886433102e-05,
+          0.0033797561191022396,
+          -0.0006414002273231745,
+          -0.0030470367055386305,
+          0.0018538403091952205,
+          -0.0026723735500127077,
+          0.0027579281013458967,
+          -0.003932582214474678,
+          0.18505851924419403,
+          0.4721115231513977,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.42263364791870117,
+          1.0,
+          -0.054887935519218445,
+          0.014680624939501286,
+          0.0010927518596872687,
+          0.0025113425217568874,
+          0.0006039937725290656,
+          0.0002940495905932039,
+          -0.0002821286616381258,
+          -0.05029440298676491,
+          -0.0044663748703897,
+          -0.039068859070539474,
+          0.033088527619838715,
+          -0.0339309386909008,
+          0.03456473723053932,
+          -0.03597339242696762,
+          1.0
+        ],
+        "initial_base79_sha256": "ffd1706e3fde27e94501ac0dc5f9b3b846bbf9287d0f8f55a8d517ec620264f9"
+      },
+      "index": 20,
+      "policy_telemetry": {
+        "eligible_call_count": 717,
+        "source_rows_consumed": 364,
+        "tail_hold_count": 353
+      }
+    }
+  ],
+  "execution": {
+    "application_cleanup_verified_by_report": false,
+    "elapsed_wall_s_before_close": 2389.898577854
+  },
+  "execution_order": [
+    {
+      "ablation_mode": "standard79",
+      "case_id": "anchor",
+      "index": 1
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "anchor",
+      "index": 2
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "anchor",
+      "index": 3
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "anchor",
+      "index": 4
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-01",
+      "index": 5
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-01",
+      "index": 6
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-01",
+      "index": 7
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-01",
+      "index": 8
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-02",
+      "index": 9
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-02",
+      "index": 10
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-02",
+      "index": 11
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-02",
+      "index": 12
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-03",
+      "index": 13
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-03",
+      "index": 14
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-03",
+      "index": 15
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-03",
+      "index": 16
+    },
+    {
+      "ablation_mode": "standard79",
+      "case_id": "transfer-04",
+      "index": 17
+    },
+    {
+      "ablation_mode": "zero",
+      "case_id": "transfer-04",
+      "index": 18
+    },
+    {
+      "ablation_mode": "mean_constant",
+      "case_id": "transfer-04",
+      "index": 19
+    },
+    {
+      "ablation_mode": "open_loop_playback",
+      "case_id": "transfer-04",
+      "index": 20
+    }
+  ],
+  "learning_executed": false,
+  "protocol_record": {
+    "file_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/origin-protocol.json",
+    "payload": {
+      "budget_and_stop": {
+        "absolute_deadline_utc": "2026-10-31T01:30:00Z",
+        "budget_admission": {
+          "budget_cap_usd": 700.0,
+          "external_guard_minutes": 75,
+          "locally_verified": true,
+          "new_run_reservation_usd": 12.0,
+          "private_evidence_sha256": "80d4767917e8eb82a4121d4984356a30003bf0196c5033ba4ffe7e30ceeb0209"
+        },
+        "external_guard_minutes": 75,
+        "historical_reservation_not_invoice": true,
+        "mode_wall_time_limit_s": {
+          "oracle92": 1800.0,
+          "reference": 300.0,
+          "standard79": 1800.0,
+          "zero": 300.0
+        },
+        "new_run_reservation_usd": 12.0
+      },
+      "diagnostic_scope": {
+        "dev_and_final_unopened": true,
+        "not_final_policy": true,
+        "not_generalization_evidence": true,
+        "promotion_rule": "if zero succeeds, this condition cannot be promoted as evidence of a non-trivial RL contribution",
+        "required_modes": [
+          "zero",
+          "reference",
+          "standard79",
+          "oracle92"
+        ],
+        "single_fixed_train_condition": true
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "environment_index": 0,
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "num_envs": 1,
+        "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+        "split": "train"
+      },
+      "frozen_inputs": {
+        "archived_runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bank_source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+        "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+        "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+        "runtime_source_file_sha256": {
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+          "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+          "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+          "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+          "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+          "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+          "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+          "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+          "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+          "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+          "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+          "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+          "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+          "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+          "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+          "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+          "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+          "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+          "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+          "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+          "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+          "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+          "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+          "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+        },
+        "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "observation_groups": {
+        "ground_truth_usage": "oracle13 is diagnostic actor input only in oracle92; both learning modes use critic92",
+        "oracle92": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 92
+          },
+          "policy": [
+            "policy"
+          ]
+        },
+        "standard79": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "policy": [
+            "policy"
+          ]
+        }
+      },
+      "physics_contract": {
+        "evaluation": "G2 independent geometry/contact/nine-substep verifier",
+        "evaluations": "deterministic pre-training and final-checkpoint episodes; zero/reference each one episode",
+        "execution_device": "cuda:0",
+        "task_reward_action_termination": "unchanged archived runtime"
+      },
+      "ppo": {
+        "actor_initialization_seed": 20261123,
+        "checkpoint_selection": "preregistered final checkpoint only",
+        "critic_initialization_seed": 20261122,
+        "diagnostic_intermediate_checkpoint_updates": [
+          8,
+          16,
+          24
+        ],
+        "distinguished_from_prior_campaign": "single_env_128x32_fixed_condition_not_256_env_x32",
+        "entropy_coefficient": 0.005,
+        "evaluation_seed": 20261124,
+        "gamma": 0.995,
+        "implementation": "rsl-rl-lib==3.0.1 OnPolicyRunner/PPO unchanged",
+        "initial_noise_std": 0.1,
+        "intermediate_checkpoint_policy": "diagnostic recovery artifacts only; never eligible for promotion or selection",
+        "interpretation": "32 updates/4096 transitions is a learnability diagnostic, not effect proof",
+        "lambda": 0.95,
+        "learning_rate": 0.0003,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 1,
+        "policy_training_seed": 20261121,
+        "rollout_steps": 128,
+        "schedule": "fixed",
+        "training_rng_reset_seed": 20261121,
+        "transitions": 4096,
+        "updates": 32,
+        "zero_actor_output": true
+      },
+      "schema_name": "rj45_oracle_ppo_probe_v1",
+      "source_sha256": {
+        "adapter": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+        "g2_physics_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+        "runner": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+        "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+      },
+      "timing": {
+        "active_horizon_s": 24.0,
+        "control_decimation": 8,
+        "control_hz": 30,
+        "physics_hz": 240
+      }
+    },
+    "payload_sha256": "43ac1dfb48347b59bfb91a2e100b8d8c28f3f76628a31b9aae2e395259e2c06f"
+  },
+  "runtime_import_origins": {
+    "rby1_assembly": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py",
+    "rby1_assembly.contact_loads": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py",
+    "rby1_assembly.contact_manifolds": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py",
+    "rby1_assembly.contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py",
+    "rby1_assembly.control_math": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py",
+    "rby1_assembly.experiment_contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py",
+    "rby1_assembly.hand_collision": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py",
+    "rby1_assembly.hand_contact_monitor": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py",
+    "rby1_assembly.held_grasp": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py",
+    "rby1_assembly.isaac_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py",
+    "rby1_assembly.parallel_contact_evidence": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py",
+    "rby1_assembly.rj45_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py",
+    "rby1_assembly.rj45_grasp_generation": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py",
+    "rby1_assembly.rj45_task": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py",
+    "rby1_assembly.rj45_training": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py",
+    "rby1_assembly.rj45_training_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py"
+  },
+  "runtime_manifest": {
+    "file_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "git_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/current/configs/rj45-oracle-runtime-104721a.json",
+    "source_file_count": 35,
+    "source_file_sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+      "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+      "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+      "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+      "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+      "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+      "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+      "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+      "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+      "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    }
+  },
+  "schema_name": "rj45_frozen_ablation_evaluation_v1",
+  "scope": "fresh single-environment physics ablation; no training or benchmark claim",
+  "source_action_analysis": {
+    "canonical_sha256": "a3210e53e1352cad675ac0d319459c64025a5a19b806a435c5a8ee2784cc8542",
+    "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/source-actions.json",
+    "sha256": "7dfc8db1558aea29295436f60e850da9b377d0b85c7b8e7fcdcecd9f54bcbc96"
+  },
+  "source_binding": {
+    "checkpoint": {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/final_checkpoint.pt",
+      "sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02"
+    },
+    "g2_helper": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/current/scripts/run_rj45_g2_physics_probe.py",
+      "sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42"
+    },
+    "protocol": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/origin-protocol.json",
+      "sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef"
+    },
+    "replay_helper": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/current/scripts/record_rj45_oracle_probe.py",
+      "sha256": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd"
+    },
+    "report": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/standard79-origin-report.json",
+      "sha256": "aa8f890b0e337f8a35c76839cc8b21148b2e2b24051346009f1133e73e42bd92"
+    },
+    "runner": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/current/scripts/run_rj45_oracle_ppo_probe.py",
+      "sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1"
+    },
+    "runtime_manifest": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/current/configs/rj45-oracle-runtime-104721a.json",
+      "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+    },
+    "source_trace_gzip": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/standard79-source-trace.jsonl.gz",
+      "sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59"
+    }
+  },
+  "status": "completed"
+}

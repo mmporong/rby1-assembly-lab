@@ -1,0 +1,37 @@
+{
+  "recorded_at_utc": "2026-10-31T07:02:14.472376+00:00",
+  "stop_helper": {
+    "instance_id": "pyf1b9s0a",
+    "instance_name": "rby1-oracle-crusoe-20261031a",
+    "ok": true,
+    "polls": 3,
+    "status": "stopped"
+  },
+  "fresh_inventory_status": "STOPPED",
+  "fresh_inventory_identity_matches": true,
+  "units": {
+    "rby1-frozen-ablation-stop-20261031a.timer": {
+      "LoadState": "not-found",
+      "ActiveState": "inactive"
+    },
+    "rby1-frozen-ablation-stop-20261031a.service": {
+      "LoadState": "not-found",
+      "ActiveState": "inactive"
+    }
+  },
+  "owned_local_ssh_pids": [],
+  "remote_process_check": {
+    "recorded_at_utc": "2026-10-31T07:00:11.729283+00:00",
+    "owned_python_processes": [],
+    "compute_processes": "",
+    "report_status": "completed",
+    "episodes": 20
+  },
+  "reservation_usd_combined_attempts": 6,
+  "budget_cap_usd": 700,
+  "new_instances_created": 0,
+  "deletions_performed": 0,
+  "prior_instance_volumes_preserved": true,
+  "stop_deadline_utc": "2026-10-31T07:21:13Z",
+  "raw_report_modified": false
+}

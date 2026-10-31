@@ -1,0 +1,15 @@
+{
+  "admission-plan.json": "fb42e098d758e42ae0d215b6bf9a481e818e8970b2eba882988977776577f788",
+  "budget-admission.json": "fc4d629c869590130bddedd30cadd3bc6d6bcbefe8f5966c1e0ca8e0b923a5a8",
+  "contract.json": "e85fbddc78bb3394de91cc6e232ecd1af6edd64bb4b130a067247bfb12e04b48",
+  "current/configs/rj45-oracle-runtime-104721a.json": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+  "current/scripts/evaluate_rj45_frozen_ablation.py": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+  "current/scripts/record_rj45_oracle_probe.py": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+  "current/scripts/run_rj45_g2_physics_probe.py": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+  "current/scripts/run_rj45_oracle_ppo_probe.py": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+  "current/src/rby1_assembly/rj45_oracle_diagnostic.py": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+  "origin-protocol.json": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+  "repair-admission.json": "b0c1b00dd2b3ea9b487ddf07adbf80810345e2e4c965a09e4511d5f636b8d667",
+  "standard79-origin-report.json": "aa8f890b0e337f8a35c76839cc8b21148b2e2b24051346009f1133e73e42bd92",
+  "standard79-source-trace.jsonl.gz": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59"
+}

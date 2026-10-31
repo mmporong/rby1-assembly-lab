@@ -1,0 +1,22 @@
+{
+  "prepared_at_utc": "2026-10-31T06:18:32.315247+00:00",
+  "deadline_utc": "2026-10-31T07:21:13Z",
+  "contract_sha256": "e85fbddc78bb3394de91cc6e232ecd1af6edd64bb4b130a067247bfb12e04b48",
+  "helper_sha256": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+  "manifest_sha256": "909927eb9991815be98b99935e050ced071c4c72f4554f9ef349d530cb3b68da",
+  "launch_sha256": "66e3fd0596ae305c13b75e1f6a9a1a5ef2f6b02d247ec2d29ef09f724a153103",
+  "payload_sha256": "16273faf72b9384539de02fd52019c5c19c18c319640582c64950ffceac942cc",
+  "manifest_members": 13,
+  "packet_files": 15,
+  "instance_id": "pyf1b9s0a",
+  "instance_name": "rby1-oracle-crusoe-20261031a",
+  "guard_unit": "rby1-frozen-ablation-stop-20261031a",
+  "reservation_usd": 6,
+  "cap_usd": 700,
+  "new_instances": 0,
+  "source_commit_before_run": "f33584d2d56e3f2cad20df2429cd7f054437c29e",
+  "attempt": "repair-b",
+  "repair_admission_sha256": "b0c1b00dd2b3ea9b487ddf07adbf80810345e2e4c965a09e4511d5f636b8d667",
+  "original_deadline_unchanged": true,
+  "reservation_shared_with_invalid_attempt": true
+}

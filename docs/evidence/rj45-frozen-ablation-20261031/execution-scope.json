@@ -1,0 +1,20 @@
+{
+  "recorded_at_utc": "2026-10-31T06:54:01.736932+00:00",
+  "type": "derived_scope_annotation_not_a_protocol_change",
+  "raw_report_modified": false,
+  "physics_scene_constructed_once": true,
+  "physx_reseeded_between_cases": false,
+  "varied_factor": "episode_fixed_calibration_bias",
+  "evaluation_rng_reset": [
+    "python",
+    "numpy",
+    "torch_cpu",
+    "torch_cuda"
+  ],
+  "evaluation_rng_seed": 20261124,
+  "legacy_field": "evaluation_rng.seeded.physics_seed_unchanged",
+  "legacy_field_meaning": "case base-seed argument recorded by the runner; not an observation of PhysX scene reseeding",
+  "independent_code_review": "APPROVE",
+  "frozen_runner_sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+  "helper_sha256": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b"
+}

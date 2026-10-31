@@ -1,0 +1,17 @@
+{
+  "timer_show": "NextElapseUSecRealtime=Sat 2026-10-31 16:21:13 KST\nTriggers=rby1-frozen-ablation-stop-20261031a.service\nActiveState=active\n",
+  "service_show": "Restart=on-failure\nExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/lim/rby1-assembly-lab/scripts/stop_brev_instance.py --org mmporong-3ec75d-5yzu --instance-id pyf1b9s0a --instance-name rby1-oracle-crusoe-20261031a ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }\n",
+  "stop_helper_sha256": "b172c36587aaff56c6185c268fb7c065eed574b2c3661efdd4141e3468bc3803",
+  "review_before_execution": {
+    "role": "code-reviewer",
+    "verdict": "APPROVE",
+    "packet_hashes_verified": true,
+    "exact_existing_vm_only": true,
+    "episode_count_gate": 20
+  },
+  "cpu_tests": {
+    "passed": 778,
+    "subtests_passed": 307,
+    "log_sha256": "053e516bbfac681202e1122288dd92861caaafa71d3a4365a2dd72e44c0151cf"
+  }
+}

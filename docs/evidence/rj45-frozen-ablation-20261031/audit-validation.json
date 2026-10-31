@@ -1,0 +1,36 @@
+{
+  "audit_script_sha256": "0fe6891627aa8ce2f4c8589a5a354f2402130227d69b98e8e350d25a5566a77a",
+  "source_episode_sha256": "3989488751f56c58afeead5aff47a4a55f405de12a21eeee0e2e77f345ae077f",
+  "checks": [
+    {
+      "name": "live_valid_episode",
+      "pass": true
+    },
+    {
+      "name": "report_episode_mismatch",
+      "rejected": true,
+      "reason": "report episode 1 differs from the recovered episode JSON"
+    },
+    {
+      "name": "contradictory_terminal",
+      "rejected": true,
+      "reason": "episode 1 terminal success differs from classification"
+    },
+    {
+      "name": "actor_dimension_mutation",
+      "rejected": true,
+      "reason": "episode 1 observation dimensions changed"
+    },
+    {
+      "name": "unknown_trace_event",
+      "rejected": true,
+      "reason": "trace must have one final complete event: /tmp/tmpyrjy3a1z/trace.jsonl.gz"
+    },
+    {
+      "name": "missing_active_flag",
+      "rejected": true,
+      "reason": "active must be boolean at /tmp/tmpyrjy3a1z/trace.jsonl.gz:1"
+    }
+  ],
+  "all_passed": true
+}

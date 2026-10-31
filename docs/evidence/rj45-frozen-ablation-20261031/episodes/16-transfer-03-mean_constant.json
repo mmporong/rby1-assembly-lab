@@ -1,0 +1,214 @@
+{
+  "ablation_mode": "mean_constant",
+  "case": {
+    "base_seed": 20270120,
+    "calibration_case_seed": 66393140,
+    "case_id": "transfer-03",
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "split": "train"
+  },
+  "evaluation": {
+    "action_boundary_fraction_over_active": 0.0,
+    "action_boundary_rows": 0,
+    "active_rows": 708,
+    "classification": "valid_failure",
+    "evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20270120,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "observation": {
+      "actor_ground_truth_access": false,
+      "base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d",
+      "critic_sha256": "a86cc3ad5da4e3a6108118692af380a8cefa6f1311cfb1d4e1de31cbd8920720",
+      "dimensions": {
+        "critic": 92,
+        "policy": 79
+      },
+      "oracle13_sha256": "9305db51a62d63c183edd8b0a16d4bc8c4d8ddb7f1672fff7386de6e9ec6e3bc",
+      "policy_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+    },
+    "reference_controller": null,
+    "terminal": {
+      "criteria": {
+        "depth": true,
+        "dwell": false,
+        "forbidden_contact": true,
+        "force": true,
+        "grasp_live_and_proven": true,
+        "independent_evaluator_terminal": false,
+        "lateral": false,
+        "orientation": true
+      },
+      "evaluator_source": "simulator_ground_truth_independent",
+      "evaluator_version": "task-evaluator-v1+environment-cross-check",
+      "metrics": {
+        "actual_depth_m": 0.012293680116343943,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7813613414764404,
+        "grasp_both": 1.0,
+        "lateral_error_m": 7.741205624925013e-05,
+        "orientation_error_rad": 0.0028316733107189773
+      },
+      "success": false,
+      "terminal_timestamp_s": 24.000001907348633,
+      "termination_reason": "episode_timeout",
+      "valid": true
+    },
+    "terminal_phase": "insert",
+    "trace": {
+      "path": "/home/ubuntu/workspace/rby1-frozen-ablation-20261031b/results/traces/16-transfer-03-mean_constant.jsonl",
+      "sha256": "6a297029217b0a50d65ca1a80afe6c53f3ae4674d7093f77cdefe1890ccd1ab9"
+    }
+  },
+  "fixed_condition": {
+    "base_seed": 20270120,
+    "bias": {
+      "base_seed": 20270120,
+      "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+      "enabled": true,
+      "episode_index": [
+        1
+      ],
+      "episode_stride": 1000003,
+      "level": 0,
+      "rotation_vector_entry_rad": [
+        [
+          0.00031574745662510395,
+          -1.3117191883793566e-05,
+          0.001299845869652927
+        ]
+      ],
+      "sampling_event": "once_per_environment_reset_before_calibration",
+      "stream_offset": 45123017,
+      "translation_entry_m": [
+        [
+          -4.465322035684949e-06,
+          -8.961668754636776e-06,
+          -2.3052009510138305e-06
+        ]
+      ]
+    },
+    "episode_index": [
+      1
+    ],
+    "evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20270120,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1,
+    "initial_base79": [
+      -0.0327184796333313,
+      -0.5127884149551392,
+      -0.023779310286045074,
+      1.0,
+      0.00536821223795414,
+      0.010175972245633602,
+      -0.036287128925323486,
+      -0.48078423738479614,
+      0.23019874095916748,
+      -0.37071147561073303,
+      -0.5257159471511841,
+      0.5241804122924805,
+      0.5167800188064575,
+      0.40858545899391174,
+      -0.3549618124961853,
+      -0.3384140133857727,
+      0.34910818934440613,
+      -0.5832151174545288,
+      -0.6278315782546997,
+      0.27750667929649353,
+      -0.26150158047676086,
+      0.00010664586443454027,
+      0.00022376986453309655,
+      -5.3027921239845455e-05,
+      -9.91682245512493e-05,
+      9.919867443386465e-05,
+      -8.156506373779848e-05,
+      -0.0001007035025395453,
+      0.0032455387990921736,
+      0.001055882079526782,
+      -0.004626462236046791,
+      0.00010787522478494793,
+      0.0029236956033855677,
+      0.0026842220686376095,
+      -0.0018404758302494884,
+      0.18508398532867432,
+      0.47211986780166626,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      -0.5068681240081787,
+      1.0,
+      -0.052607063204050064,
+      0.017827751114964485,
+      0.0015377999516204,
+      0.00042915347148664296,
+      0.0006437302217818797,
+      -0.0006874402752146125,
+      -0.0017086665611714125,
+      -0.0518798865377903,
+      0.013037523254752159,
+      -0.055396560579538345,
+      0.014917057007551193,
+      0.02458890527486801,
+      0.033779941499233246,
+      -0.014086565002799034,
+      1.0
+    ],
+    "initial_base79_sha256": "4da85ffb3462e7617b2e6d05004965549a5712b35d48049fec36f62b63e6533d"
+  },
+  "index": 16,
+  "policy_telemetry": {
+    "eligible_call_count": 708,
+    "source_rows_consumed": 0,
+    "tail_hold_count": 0
+  }
+}

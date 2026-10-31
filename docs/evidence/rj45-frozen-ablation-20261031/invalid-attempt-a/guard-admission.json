@@ -1,0 +1,9 @@
+{
+  "status": "armed_before_start",
+  "timer": "rby1-frozen-ablation-stop-20261031a.timer",
+  "deadline_utc": "2026-10-31T07:21:13Z",
+  "instance_id": "pyf1b9s0a",
+  "instance_name": "rby1-oracle-crusoe-20261031a",
+  "identity_before_start": "STOPPED",
+  "independent_review": "APPROVE"
+}

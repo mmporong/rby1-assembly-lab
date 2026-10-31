@@ -1,0 +1,13 @@
+{
+  "recorded_at_utc": "2026-10-31T06:10:58.392083+00:00",
+  "platform": "Linux-5.15.0-126-generic-x86_64-with-glibc2.35",
+  "python": "3.11.15",
+  "packages": {
+    "isaacsim": "5.1.0.0",
+    "isaaclab": "0.47.2",
+    "torch": "2.7.0+cu128",
+    "numpy": "1.26.0",
+    "rsl-rl-lib": "3.0.1"
+  },
+  "gpu": "NVIDIA L40S, 580.196.07, 46068 MiB"
+}
