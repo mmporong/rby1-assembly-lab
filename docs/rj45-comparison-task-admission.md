@@ -1,6 +1,6 @@
 # RJ45 비교 과제 학습 진입 조건
 
-상태: **G1 CPU prelaunch 승인, Isaac task-admission smoke 미실행**. G0 공통 PPO/SAC GPU smoke와 결과 회수는 완료됐고 target도 `STOPPED`로 확인됐지만 학습 효과는 입증되지 않았다. `scripts/run_rj45_task_admission.py`, 공정 provider, 명시 bias·held identity wrapper, snapshot과 physical-action gate는 구현돼 통합 CPU suite 75개와 별도 검수에서 통과했다. G1의 실제 PhysX 접촉·관측·판정 결과는 아직 없다.
+상태: **G1 Isaac task-admission 3-episode smoke 통과, 전체 90-episode development admission 미실행**. `classical_force_search A`, `zero`, `oracle_gt_reference`가 각 1회씩 terminal contract를 완성했고 hard/forbidden contact는 모두 0회였다. 이는 실행 경로·접촉 telemetry·계약 판정의 작동 확인이다. smoke는 한 bias case만 사용했고 classical은 train-03, zero와 oracle은 train-02에서 실행됐으므로 세 방식의 성능 차이나 학습 효과를 비교하는 근거가 아니다. `task_admission_completed=false`, `rl_pilot_admitted=false`이며 G1은 아직 완료되지 않았다. 근거 요약은 [`docs/evidence/rj45-task-admission-smoke-20261101/README.md`](evidence/rj45-task-admission-smoke-20261101/README.md)에 보존한다.
 
 ## 검증 범위
 
@@ -79,17 +79,35 @@ feature는 GT·추정 상대 자세를 제외한 `concat(obs[7:40], obs[63:78])`
 
 어떤 상태에서도 현재 결과를 보고 bias 크기나 tolerance를 조절해 같은 계약을 다시 실행하지 않는다. `valid_stop_no_headroom`과 `valid_stop_insufficient_structured_headroom`은 v1의 terminal 상태다. classical 승리를 피하거나 구조화 headroom 부족을 해소하려고 사후에 더 어려운 v2를 만들지 않는다. v2는 계측·계약 결함을 고치거나 별도의 과학 질문을 세울 때만 독립 development envelope로 만들고 v1 결과를 보존한다. G3의 여러 크기 범위 곡선과 final 5-seed/CI/안전 비열등 기준은 pilot 뒤 별도로 봉인한다.
 
-## G1 Isaac smoke 예정 명령
+## G1 Isaac smoke 결과와 실행 명령
+
+2026-10-31 UTC의 attempt-D는 고정 환경 시드 `20261121`로 아래 3개 episode를 실행했다. classical A와 zero는 24.000 s horizon에서 실패했고 privileged GT reference는 12.133 s에 성공했다. 세 episode 모두 terminal contract를 완성했고 hard/forbidden contact는 없었다. 서로 다른 grasp가 섞인 단일 case smoke이므로 방법 간 성능 비교에는 사용하지 않는다.
+
+실행된 smoke 명령의 재현 형태는 다음과 같다. 출력 디렉터리는 기존 결과를 덮어쓰지 않는 새 경로를 사용한다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
-OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src python scripts/run_rj45_task_admission.py \
+OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission.py \
   --runtime-root <동결-archive-root> \
+  --current-root "$PWD" \
   --config configs/rj45-comparison-development.json \
-  --output-dir artifacts/rj45-comparison-task-admission \
+  --output-dir artifacts/rj45-task-admission-smoke-<새-ID> \
+  --smoke-only \
   --headless --device cuda:0
 ```
 
-`python`은 G0 lock을 설치한 Isaac 전용 가상환경의 실행 파일이어야 한다. runner와 API는 CPU prelaunch 승인을 받았지만 이 명령의 실제 G1 smoke는 아직 실행하지 않았다. G1의 새 GPU 예산은 별도 심사 중이며 G0 예약이 G1 실행 권한이나 예산으로 이어지지 않는다. G0 완료 근거는 [`docs/evidence/rj45-comparison-g0-20261101/README.md`](evidence/rj45-comparison-g0-20261101/README.md)에 보존한다.
+전체 development admission은 `--smoke-only`를 빼고 별도의 새 출력 경로로 실행한다. 이 명령은 classical tuning 18회와 admission 72회, 최대 90회를 수행한다. 아직 실행하지 않았다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission.py \
+  --runtime-root <동결-archive-root> \
+  --current-root "$PWD" \
+  --config configs/rj45-comparison-development.json \
+  --output-dir artifacts/rj45-task-admission-full-<새-ID> \
+  --headless --device cuda:0
+```
+
+attempt-C는 환경 생성 전에 `cfg.seed`가 없어서 세 번 모두 중단됐다. 이는 물리 또는 제어 결과가 아니라 구성 실패다. 실패 기록은 보존했고, attempt-D에서는 모든 case·method·slot에 같은 nonnegative integer seed `20261121`을 factory 호출 전에 전달하고 provenance에 기록했다. runner SHA-256은 `2f5483ee2c11cd8deb8b9bd87c2b1ddc1c10e912d1b21ece6eec1fe3af96a0f8`이다. 독립 검증은 3/3 terminal, 실행 계획, 144,686개 유한 수치, bias·held identity·최초 action 계약, 동결 runtime hash 35개를 확인했다. VM은 결과 회수 뒤 `STOPPED`로 확인됐다. 실행 창 비용 `0.7288 USD`는 시간과 단가를 곱한 추정치이며 청구액이 아니다. G0 완료 근거는 [`docs/evidence/rj45-comparison-g0-20261101/README.md`](evidence/rj45-comparison-g0-20261101/README.md)에 보존한다.
 
 기존 `single64 2/8`, `multi64 3/8`, `zero 2/8`과 고정 PPO·상수·재생 대조는 모두 효과 미입증 개발 근거다. 단일 train 조건의 reference/PPO 성공도 물리 가능성과 한 조건 학습 가능성만 보여준다.

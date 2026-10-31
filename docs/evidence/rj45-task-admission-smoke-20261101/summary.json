@@ -1,0 +1,114 @@
+{
+  "artifact_schema_version": 1,
+  "scope": "G1 three-episode Isaac task-admission smoke only",
+  "status": "PASS",
+  "claims": {
+    "task_admission_completed": false,
+    "rl_pilot_admitted": false,
+    "training_effect_proven": false,
+    "method_performance_comparison_allowed": false,
+    "full_90_episode_development_run_executed": false
+  },
+  "execution": {
+    "attempt": "d",
+    "smoke_only": true,
+    "environment_seed": 20261121,
+    "started_at_utc": "2026-10-31T16:24:36.114151+00:00",
+    "finished_at_utc": "2026-10-31T16:31:02.956650+00:00",
+    "measured_wall_seconds": 386.842499,
+    "child_exit_code": 0,
+    "report_passed": true
+  },
+  "runtime_versions": {
+    "isaac_sim": "5.1.0.0",
+    "isaac_lab_release": "2.3.0",
+    "isaac_lab_distribution": "0.47.2",
+    "torch": "2.7.0+cu128",
+    "numpy": "1.26.0"
+  },
+  "episodes": [
+    {
+      "stage": "tuning",
+      "grasp_id": "rj45-train-03",
+      "case_id": "tx-positive",
+      "method_id": "classical_force_search",
+      "candidate_id": "A",
+      "success": false,
+      "completion_time_s": 24.000001907348633,
+      "hard_contact": false,
+      "forbidden_contact": false,
+      "terminal_complete": true,
+      "execution_error": null
+    },
+    {
+      "stage": "admission",
+      "grasp_id": "rj45-train-02",
+      "case_id": "tx-positive",
+      "method_id": "zero",
+      "candidate_id": null,
+      "success": false,
+      "completion_time_s": 24.000001907348633,
+      "hard_contact": false,
+      "forbidden_contact": false,
+      "terminal_complete": true,
+      "execution_error": null
+    },
+    {
+      "stage": "admission",
+      "grasp_id": "rj45-train-02",
+      "case_id": "tx-positive",
+      "method_id": "oracle_gt_reference",
+      "candidate_id": null,
+      "success": true,
+      "completion_time_s": 12.133334159851074,
+      "hard_contact": false,
+      "forbidden_contact": false,
+      "terminal_complete": true,
+      "execution_error": null
+    }
+  ],
+  "limitations": {
+    "bias_case_count": 1,
+    "bias_case_id": "tx-positive",
+    "same_grasp_across_all_methods": false,
+    "classical_grasp_id": "rj45-train-03",
+    "zero_and_oracle_grasp_id": "rj45-train-02",
+    "causal_method_comparison_forbidden": true,
+    "remaining_development_episode_max": 90
+  },
+  "verification": {
+    "verdict": "PASS",
+    "independent_role": "verifier",
+    "episode_terminal_count": 3,
+    "plan_matched": true,
+    "finite_numeric_values_checked": 144686,
+    "bias_held_action_contract_passed": true,
+    "runtime_hashes_verified": 35,
+    "final_split_unopened": true
+  },
+  "provenance": {
+    "raw_report_path": ".omx/evidence/rj45-task-admission-20261101/attempt-d/output/report.json",
+    "raw_report_sha256": "33b5ab8861ba4afe635967881d00dad91092aee15cbcad8eb0dd55876fa12753",
+    "runner_sha256": "2f5483ee2c11cd8deb8b9bd87c2b1ddc1c10e912d1b21ece6eec1fe3af96a0f8",
+    "development_config_sha256": "ce917d703735e311c44af344486eb92d3049abfbc61ce2836c42f4e6b7719386",
+    "launch_packet_sha256": "4b5dfd03901630d0a3b060b31a04615c6d787e191b89729091cab35cb38b6b30",
+    "attempt_c": {
+      "status": "blocked_before_environment_construction",
+      "reason": "cfg.seed missing; a non-negative integer was required",
+      "raw_report_path": ".omx/evidence/rj45-task-admission-20261101/attempt-c/output/report.json",
+      "raw_report_sha256": "4e4b23b00bf4d047d1be46935de16724e800c541eee79525fb705b510cfadf83",
+      "preserved": true
+    }
+  },
+  "cloud_closure": {
+    "status": "STOPPED",
+    "verified_at_utc": "2026-10-31T16:34:58.694510+00:00",
+    "all_artifacts_recovered": true,
+    "new_training_active": false,
+    "reserved_ceiling_usd": 1.5,
+    "estimated_window_hours": 0.4117427377777778,
+    "compute_plus_storage_usd_h": 1.77,
+    "estimated_window_usd": 0.7287846458666667,
+    "invoice_claim": false
+  }
+}

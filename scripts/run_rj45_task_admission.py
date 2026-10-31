@@ -13,6 +13,7 @@ import math
 import os
 from pathlib import Path
 import sys
+import tempfile
 import traceback
 from typing import Any, Mapping, Sequence
 
@@ -71,12 +72,110 @@ def _replace_json(path: Path, payload: Mapping[str, Any]) -> None:
     os.replace(temporary, path)
 
 
+def _atomic_immutable_json(path: Path, payload: Mapping[str, Any]) -> None:
+    """Publish a fully flushed JSON file without an overwrite race."""
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            stream.write(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(temporary, path)
+        _fsync_directory(path.parent)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+            _fsync_directory(path.parent)
+
+
+def _fsync_directory(path: Path) -> None:
+    descriptor = os.open(path, os.O_RDONLY | os.O_DIRECTORY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
 def _append_jsonl(path: Path, payload: Mapping[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as stream:
         stream.write(json.dumps(payload, sort_keys=True, allow_nan=False) + "\n")
         stream.flush()
         os.fsync(stream.fileno())
+
+
+def _persist_episode_row(
+    output_dir: Path,
+    ordinal: int,
+    plan_row: Sequence[Any],
+    candidate_id: str | None,
+    episode: Mapping[str, Any],
+    run_identity: Mapping[str, str],
+) -> Path:
+    """Persist one complete runner row before any progress acknowledgement."""
+
+    identity = {
+        "stage": plan_row[0],
+        "grasp_id": plan_row[1],
+        "case_id": plan_row[2],
+        "method_id": plan_row[3],
+        "slot": plan_row[4],
+        "candidate_id": candidate_id,
+    }
+    if ordinal < 1:
+        raise AdmissionRunBlocked("episode ordinal must be positive")
+    for key, expected in identity.items():
+        if episode.get(key) != expected:
+            raise AdmissionRunBlocked(
+                f"episode row source identity mismatch for ordinal {ordinal}: {key}"
+            )
+    path = output_dir / "episode-rows" / f"{ordinal:03d}.json"
+    _atomic_immutable_json(
+        path,
+        {
+            "schema_name": "rj45-task-admission-episode-row-v1",
+            "ordinal": ordinal,
+            "source_identity": identity,
+            "run_identity_sha256": run_identity["sha256"],
+            "episode": episode,
+        },
+    )
+    return path
+
+
+def _write_run_identity(
+    output_dir: Path, prepared: Mapping[str, Any], runtime: Mapping[str, Any]
+) -> dict[str, str]:
+    path = output_dir / "run-identity.json"
+    payload = {
+        "schema_name": "rj45-task-admission-run-identity-v1",
+        "environment_seed": TASK_ADMISSION_ENVIRONMENT_SEED,
+        "execution_plan": [
+            {
+                "ordinal": ordinal,
+                "stage": row[0],
+                "grasp_id": row[1],
+                "case_id": row[2],
+                "method_id": row[3],
+                "slot": row[4],
+                "candidate_id": row[5],
+            }
+            for ordinal, row in enumerate(prepared["plan"], start=1)
+        ],
+        "provenance": _provenance(prepared, runtime),
+    }
+    _atomic_immutable_json(path, payload)
+    return {"path": str(path), "sha256": _sha256(path)}
 
 
 def validate_bank_contract(proof: Mapping[str, Any], config: Mapping[str, Any]) -> dict[str, int]:
@@ -836,11 +935,17 @@ def _evidence(
     )
 
 
-def _failure_report(status: str, error: BaseException, progress_path: Path) -> dict[str, Any]:
+def _failure_report(
+    status: str,
+    error: BaseException,
+    progress_path: Path,
+    run_identity: Mapping[str, str] | None,
+) -> dict[str, Any]:
     return {
         "status": status,
         "error": {"type": type(error).__name__, "message": str(error)},
         "requested_process_exit_code": 2,
+        "run_identity": run_identity,
         "external_supervisor_contract": {
             "validate_report_status_and_claims": True,
             "enforce_wall_clock_timeout": True,
@@ -860,6 +965,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     report_path = args.output_dir / "report.json"
     progress_path = args.output_dir / "progress.json"
     simulation_app = None
+    run_identity: dict[str, str] | None = None
     faulthandler.enable()
     faulthandler.dump_traceback_later(60, repeat=True)
     try:
@@ -884,6 +990,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             {"headless": args.headless, "device": args.device}
         ).app
         runtime = _load_runtime(prepared)
+        run_identity = _write_run_identity(args.output_dir, prepared, runtime)
         rows: list[dict[str, Any]] = []
         episodes_path = args.output_dir / "episodes-progress.jsonl"
         _replace_json(
@@ -957,6 +1064,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                             "message": str(error),
                         },
                     }
+                _persist_episode_row(
+                    args.output_dir,
+                    ordinal,
+                    plan_row,
+                    candidate_id,
+                    episode,
+                    run_identity,
+                )
                 produced.append(episode)
                 completed_count = ordinal
                 _append_jsonl(
@@ -1068,6 +1183,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "status": "smoke_completed",
                 "smoke_only": True,
                 "provenance": _provenance(prepared, runtime),
+                "run_identity": run_identity,
                 "episodes": rows,
                 "claims": {
                     "task_admission_completed": False,
@@ -1110,6 +1226,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "status": protocol.decision.state,
                 "smoke_only": False,
                 "provenance": _provenance(prepared, runtime),
+                "run_identity": run_identity,
                 "tuning_selection": asdict(protocol.selection),
                 "classical_seal": classical_seal_json,
                 "baseline_artifact_seal": asdict(baseline_seal),
@@ -1134,7 +1251,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 0 if args.smoke_only or report["status"] != "invalid_contract" else 2
     except KeyboardInterrupt as error:
         if not report_path.exists():
-            _atomic_json(report_path, _failure_report("interrupted", error, progress_path))
+            _atomic_json(
+                report_path,
+                _failure_report("interrupted", error, progress_path, run_identity),
+            )
         return 2
     except Exception as error:
         traceback.print_exc()
@@ -1144,7 +1264,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 if type(error).__name__ == "TaskAdmissionContractViolation"
                 else "blocked"
             )
-            _atomic_json(report_path, _failure_report(status, error, progress_path))
+            _atomic_json(
+                report_path,
+                _failure_report(status, error, progress_path, run_identity),
+            )
         return 2
     finally:
         faulthandler.cancel_dump_traceback_later()

@@ -318,6 +318,7 @@ def test_failing_smoke_main_writes_blocked_report(
     prepared = {"plan": RUNNER.SMOKE_PLAN}
     monkeypatch.setattr(RUNNER, "_prepare", lambda _args: prepared)
     monkeypatch.setattr(RUNNER, "_load_runtime", lambda _prepared: {})
+    monkeypatch.setattr(RUNNER, "_provenance", lambda _prepared, _runtime: {"source": "test"})
     calls = 0
 
     def episode(_prepared, _runtime, row, candidate_id, *, heartbeat):
@@ -365,6 +366,175 @@ def test_failing_smoke_main_writes_blocked_report(
     assert report["claims"]["task_admission_completed"] is False
 
 
+def test_partial_interrupt_preserves_full_immutable_episode_row(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    prepared = {"plan": RUNNER.SMOKE_PLAN}
+    monkeypatch.setattr(RUNNER, "_prepare", lambda _args: prepared)
+    monkeypatch.setattr(RUNNER, "_load_runtime", lambda _prepared: {})
+    monkeypatch.setattr(RUNNER, "_provenance", lambda _prepared, _runtime: {"source": "test"})
+    events: list[str] = []
+    original_link = RUNNER.os.link
+    original_fsync_directory = RUNNER._fsync_directory
+    original_append_jsonl = RUNNER._append_jsonl
+
+    def link(source, destination):
+        events.append("publish")
+        return original_link(source, destination)
+
+    def fsync_directory(path):
+        events.append("directory_fsync")
+        return original_fsync_directory(path)
+
+    def append_jsonl(path, payload):
+        events.append("progress_jsonl")
+        return original_append_jsonl(path, payload)
+
+    monkeypatch.setattr(RUNNER.os, "link", link)
+    monkeypatch.setattr(RUNNER, "_fsync_directory", fsync_directory)
+    monkeypatch.setattr(RUNNER, "_append_jsonl", append_jsonl)
+    calls = 0
+    first_row: dict[str, object] = {}
+
+    def episode(_prepared, _runtime, row, candidate_id, *, heartbeat):
+        nonlocal calls, first_row
+        calls += 1
+        if calls == 2:
+            raise KeyboardInterrupt()
+        events.clear()
+        first_row = {
+            **_complete_row(),
+            "stage": row[0],
+            "grasp_id": row[1],
+            "case_id": row[2],
+            "method_id": row[3],
+            "slot": row[4],
+            "candidate_id": candidate_id,
+            "success": False,
+            "hard_contact": False,
+            "forbidden_contact": False,
+            "evaluator_force_p95_n": 4.0,
+            "completion_time_s": 1.5,
+            "provider_inputs": ["observation79", "provider_owned_state"],
+            "applied_controller_sha256": "a" * 64,
+            "applied_artifact_sha256": None,
+            "observation_samples": [[0.0] * 79],
+        }
+        return first_row
+
+    monkeypatch.setattr(RUNNER, "_episode", episode)
+    app_module = ModuleType("isaaclab.app")
+    app_module.AppLauncher = lambda _options: SimpleNamespace(  # type: ignore[attr-defined]
+        app=SimpleNamespace(close=lambda: None)
+    )
+    package = ModuleType("isaaclab")
+    package.app = app_module  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "isaaclab", package)
+    monkeypatch.setitem(sys.modules, "isaaclab.app", app_module)
+
+    output = tmp_path / "partial-interrupt"
+    exit_code = RUNNER.main(
+        [
+            "--runtime-root", str(tmp_path / "runtime"),
+            "--config", str(tmp_path / "config.json"),
+            "--output-dir", str(output),
+            "--smoke-only",
+        ]
+    )
+
+    assert exit_code == 2
+    persisted_path = output / "episode-rows" / "001.json"
+    persisted = json.loads(persisted_path.read_text(encoding="utf-8"))
+    assert persisted["ordinal"] == 1
+    identity_sha = RUNNER._sha256(output / "run-identity.json")
+    assert persisted["run_identity_sha256"] == identity_sha
+    assert persisted["source_identity"] == {
+        "stage": RUNNER.SMOKE_PLAN[0][0],
+        "grasp_id": RUNNER.SMOKE_PLAN[0][1],
+        "case_id": RUNNER.SMOKE_PLAN[0][2],
+        "method_id": RUNNER.SMOKE_PLAN[0][3],
+        "slot": RUNNER.SMOKE_PLAN[0][4],
+        "candidate_id": RUNNER.SMOKE_PLAN[0][5],
+    }
+    assert persisted["episode"] == first_row
+    assert not (output / "episode-rows" / "002.json").exists()
+    progress_rows = [
+        json.loads(line)
+        for line in (output / "episodes-progress.jsonl").read_text(
+            encoding="utf-8"
+        ).splitlines()
+    ]
+    assert len(progress_rows) == 1
+    assert set(progress_rows[0]) == {
+        "stage", "grasp_id", "case_id", "method_id", "slot", "candidate_id",
+        "success", "hard_contact", "forbidden_contact", "terminal_complete",
+        "execution_error",
+    }
+    assert events.index("publish") < events.index("directory_fsync") < events.index("progress_jsonl")
+    failure_report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+    assert failure_report["run_identity"]["sha256"] == identity_sha
+    with pytest.raises(FileExistsError):
+        RUNNER._persist_episode_row(
+            output,
+            1,
+            RUNNER.SMOKE_PLAN[0],
+            RUNNER.SMOKE_PLAN[0][5],
+            first_row,
+            failure_report["run_identity"],
+        )
+
+
+def test_episode_persist_failure_is_not_acknowledged_as_completed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(RUNNER, "_prepare", lambda _args: {"plan": RUNNER.SMOKE_PLAN})
+    monkeypatch.setattr(RUNNER, "_load_runtime", lambda _prepared: {})
+    monkeypatch.setattr(RUNNER, "_provenance", lambda _prepared, _runtime: {"source": "test"})
+
+    def episode(_prepared, _runtime, row, candidate_id, *, heartbeat):
+        return {
+            **_complete_row(),
+            "stage": row[0], "grasp_id": row[1], "case_id": row[2],
+            "method_id": row[3], "slot": row[4], "candidate_id": candidate_id,
+            "success": False, "hard_contact": False, "forbidden_contact": False,
+        }
+
+    monkeypatch.setattr(RUNNER, "_episode", episode)
+    monkeypatch.setattr(
+        RUNNER,
+        "_persist_episode_row",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(OSError("disk write failed")),
+    )
+    app_module = ModuleType("isaaclab.app")
+    app_module.AppLauncher = lambda _options: SimpleNamespace(  # type: ignore[attr-defined]
+        app=SimpleNamespace(close=lambda: None)
+    )
+    package = ModuleType("isaaclab")
+    package.app = app_module  # type: ignore[attr-defined]
+    monkeypatch.setitem(sys.modules, "isaaclab", package)
+    monkeypatch.setitem(sys.modules, "isaaclab.app", app_module)
+
+    output = tmp_path / "persist-failure"
+    exit_code = RUNNER.main(
+        [
+            "--runtime-root", str(tmp_path / "runtime"),
+            "--config", str(tmp_path / "config.json"),
+            "--output-dir", str(output),
+            "--smoke-only",
+        ]
+    )
+
+    assert exit_code == 2
+    assert not (output / "episodes-progress.jsonl").exists()
+    progress = json.loads((output / "progress.json").read_text(encoding="utf-8"))
+    assert progress["completed_episodes"] == 0
+    report = json.loads((output / "report.json").read_text(encoding="utf-8"))
+    assert report["status"] == "blocked"
+    assert report["run_identity"]["sha256"] == RUNNER._sha256(
+        output / "run-identity.json"
+    )
+
+
 def test_preflight_error_writes_blocked_report(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -389,6 +559,7 @@ def test_preflight_error_writes_blocked_report(
     assert report["status"] == "blocked"
     assert report["requested_process_exit_code"] == 2
     assert report["external_supervisor_contract"]["enforce_wall_clock_timeout"] is True
+    assert report["run_identity"] is None
 
 
 def test_sigint_writes_interrupted_report_and_preserves_exit_contract(
@@ -415,6 +586,7 @@ def test_sigint_writes_interrupted_report_and_preserves_exit_contract(
     assert report["status"] == "interrupted"
     assert report["requested_process_exit_code"] == 2
     assert report["claims"]["task_admission_completed"] is False
+    assert report["run_identity"] is None
 
 
 def test_episode_lifecycle_stops_timeline_then_creates_fresh_stage() -> None:
