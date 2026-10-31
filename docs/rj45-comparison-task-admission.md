@@ -62,9 +62,11 @@ constant/playback 봉인은 원본과 파생 아티팩트를 나눠 검증한다
 
 2 grasp × 6 bias case = 12 case다. provider는 5개지만 `zero`만 2회이므로 case당 실행 slot은 6개, 최대 `12 × 6 = 72 episode`다. case 교체와 성공 tolerance 완화는 금지한다.
 
-`zero` slot 1의 12개만 성공률·headroom 분모에 넣는다. slot 2는 관측 repeat-noise 측정 전용이며 성과 횟수에 합산하지 않는다. 각 run을 30 Hz의 첫 entry contact tick에 맞추고 그 tick을 포함한 13 sample, 즉 12 transition의 0.4초 window로 잡는다. contact는 SI로 복원한 `||obs[37:40]×8||₂ ≥ 0.25 N`이다. contact가 없거나 13 sample이 없으면 그 case/축은 관측 불가다.
+실제 G1은 frozen `104721a`의 training core를 사용한다. `rj45_training_env.py` SHA-256은 `ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c`, `rj45_training.py` SHA-256은 `cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180`이며 run identity manifest와 일치한다. 이 경로의 79D simulation proxy는 estimator·controller·joint·force state로 구성되고 base가 반환하는 noisy observation을 입력으로 소비하지 않는다. 별도의 센서 latency·dropout sampler도 없다. 따라서 아래 반복 차이 `N`은 일반적인 센서 노이즈 분산 추정이 아니라, 고정 시드 프로토콜에서 calibration bias·reset·접촉 동역학을 포함한 상태와 관측 궤적의 반복성을 보는 지표다.
 
-feature는 GT·추정 상대 자세를 제외한 `concat(obs[7:40], obs[63:78])` 48D normalized vector다. 각 run의 13 sample별 feature 중앙값을 `m`이라 한다. 한 grasp·오차축의 부호 간 거리는 `D=||m₊¹-m₋¹||₂`, repeat noise는 `N=max(||m₊¹-m₊²||₂, ||m₋¹-m₋²||₂, 1e-6)`다. `D≥0.05`이고 `D/N≥2.0`인 축만 observable이다. 각 grasp에서 3개 축 중 2개 이상이 통과해야 한다.
+`zero` slot 1의 12개만 성공률·headroom 분모에 넣는다. slot 2는 동일 시드 반복 관측 차이 `N` 측정 전용이며 성과 횟수에 합산하지 않는다. 각 run을 30 Hz의 첫 entry contact tick에 맞추고 그 tick을 포함한 13 sample, 즉 12 transition의 0.4초 window로 잡는다. contact는 SI로 복원한 `||obs[37:40]×8||₂ ≥ 0.25 N`이다. contact가 없거나 13 sample이 없으면 그 case/축은 관측 불가다.
+
+feature는 GT·추정 상대 자세를 제외한 `concat(obs[7:40], obs[63:78])` 48D normalized vector다. 각 run의 13 sample별 feature 중앙값을 `m`이라 한다. 한 grasp·오차축의 부호 간 거리는 `D=||m₊¹-m₋¹||₂`, 동일 시드 반복 차이는 `N=max(||m₊¹-m₊²||₂, ||m₋¹-m₋²||₂, 1e-6)`다. `D≥0.05`이고 `D/N≥2.0`인 축만 observable이다. 각 grasp에서 3개 축 중 2개 이상이 통과해야 한다.
 
 ## 결과 상태와 학습 진입 gate
 
