@@ -1,0 +1,53 @@
+{
+  "deadline_extended": false,
+  "guard_cleanup_note": "Exact timer/service stop returned nonzero; subsequent show confirmed both unloaded (not-found), inactive and dead. No broad cleanup performed.",
+  "guard_units": {
+    "rby1-multibias-stop-20261031a.service": {
+      "ActiveState": "inactive",
+      "LoadState": "not-found",
+      "SubState": "dead"
+    },
+    "rby1-multibias-stop-20261031a.timer": {
+      "ActiveState": "inactive",
+      "LoadState": "not-found",
+      "SubState": "dead"
+    }
+  },
+  "instance": {
+    "fresh_cli_status": "STOPPED",
+    "id": "pyf1b9s0a",
+    "name": "rby1-oracle-crusoe-20261031a"
+  },
+  "media_pre_stop": {
+    "gpu_compute_processes": "",
+    "media_status": "completed",
+    "owned_processes": []
+  },
+  "media_recovery": {
+    "bytes": 29329539,
+    "files": 35,
+    "sha256": "e872a697168a949ef186579a23c6f62b566c2063d366c91688fcd68b7357da49"
+  },
+  "original_deadline_utc": "2026-10-31T10:50:52Z",
+  "other_instances_or_volumes_mutated": false,
+  "primary_pre_stop": {
+    "batch_validated_exit": "0",
+    "gpu_compute_processes": "",
+    "owned_processes": []
+  },
+  "primary_recovery": {
+    "bytes": 50064786,
+    "files": 122,
+    "sha256": "a3545e26e3a768e4d3667bca78de7029fe9363e4f6c0a90f1df4b2d8a7ff7cff"
+  },
+  "schema": "rj45_multibias_execution_closure_v1",
+  "stop_result": {
+    "instance_id": "pyf1b9s0a",
+    "instance_name": "rby1-oracle-crusoe-20261031a",
+    "ok": true,
+    "polls": 2,
+    "status": "stopped"
+  },
+  "storage_preserved": true,
+  "utc": "2026-10-31T10:21:24.769033+00:00"
+}

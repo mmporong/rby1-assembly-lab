@@ -1,0 +1,9 @@
+{
+  "elapsed_s": 522.439532465,
+  "error": {
+    "message": "('train-single', 'invalid')",
+    "type": "AssertionError"
+  },
+  "ranking_allowed": false,
+  "status": "incomplete"
+}

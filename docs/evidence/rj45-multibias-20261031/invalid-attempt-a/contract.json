@@ -1,0 +1,178 @@
+{
+  "budget_and_stop": {
+    "admission": {
+      "budget_cap_usd": 700,
+      "external_guard_minutes": 180,
+      "locally_verified": true,
+      "new_run_reservation_usd": 6,
+      "private_evidence_sha256": "306b7ca200fda99e3f88673bf59338d6c4f861d52829d9f84e836483baa0be31"
+    },
+    "deadline_utc": "2026-10-31T10:50:52Z",
+    "evaluate_phase_wall_time_s": 4000,
+    "external_stop_wall_time_s": 10800,
+    "train_phase_wall_time_s": 3200
+  },
+  "claims": {
+    "dev_split_sealed": true,
+    "effect_proven": false,
+    "final_split_sealed": true,
+    "generalization_proven": false
+  },
+  "decision_rule": {
+    "checkpoint_replacement_allowed": false,
+    "effect_proven": false,
+    "followup_multiseed_candidate": "fresh8_multi_successes_at_least_single_plus_2_and_greater_than_zero_and_zero_success_multi_failure_count_at_most_1"
+  },
+  "evaluation": {
+    "cases": [
+      {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-anchor",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281208,
+        "calibration_case_seed": 66404228,
+        "case_id": "fresh-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281216,
+        "calibration_case_seed": 66404236,
+        "case_id": "fresh-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281224,
+        "calibration_case_seed": 66404244,
+        "case_id": "fresh-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281232,
+        "calibration_case_seed": 66404252,
+        "case_id": "fresh-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281248,
+        "calibration_case_seed": 66404268,
+        "case_id": "fresh-06",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281256,
+        "calibration_case_seed": 66404276,
+        "case_id": "fresh-07",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281264,
+        "calibration_case_seed": 66404284,
+        "case_id": "fresh-08",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      }
+    ],
+    "episode_count": 27,
+    "methods": [
+      "single64",
+      "multi64",
+      "zero"
+    ],
+    "order": "case_outer_cyclic_method_offset_case_index_mod_3",
+    "per_episode_wall_time_s": 300
+  },
+  "helper_sha256": "26063d1de61eff7722519d9d92bfe018aa6e9912d50276fd63e5873c4e766543",
+  "origin_protocol": {
+    "path_name": "origin-protocol.json",
+    "sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "template_only": true
+  },
+  "reference_preflight": {
+    "episode_count": 4,
+    "failure_policy": "no_replacement_no_ranking",
+    "pool": [
+      20261128,
+      20271208,
+      20271216,
+      20271224
+    ],
+    "required_successes": 4
+  },
+  "schema_name": "rj45_multibias_contract_v1",
+  "source_sha256": {
+    "ablation_helper": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+    "adapter": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+    "g2_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "replay_helper": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+    "runner": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+    "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+  },
+  "training": {
+    "action_dim": 6,
+    "actor_initialization_seed": 20261123,
+    "actor_observation_dim": 79,
+    "checkpoint_selection": "final64_only_no_outcome_selection",
+    "critic_initialization_seed": 20261122,
+    "critic_observation_dim": 92,
+    "diagnostic_checkpoint_updates": [
+      32
+    ],
+    "eligible_checkpoint_updates": [
+      64
+    ],
+    "evaluation_seed": 20261124,
+    "final_checkpoint_update": 64,
+    "held_bank_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+    "mode": "standard79",
+    "multi_pool": [
+      20261128,
+      20271208,
+      20271216,
+      20271224
+    ],
+    "num_envs": 1,
+    "policy_training_seed": 20261121,
+    "right_arm_only": true,
+    "rollout_steps": 128,
+    "single_pool": [
+      20261128
+    ],
+    "transitions": 8192,
+    "updates": 64
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "status": "pass",
+  "checks": [
+    {
+      "target": "runner",
+      "optimized": false,
+      "exit": 1,
+      "status": "invalid"
+    },
+    {
+      "target": "launcher",
+      "optimized": false,
+      "exit": 1,
+      "packet_created": false
+    },
+    {
+      "target": "runner",
+      "optimized": true,
+      "exit": 1,
+      "status": "invalid"
+    },
+    {
+      "target": "launcher",
+      "optimized": true,
+      "exit": 1,
+      "packet_created": false
+    }
+  ]
+}

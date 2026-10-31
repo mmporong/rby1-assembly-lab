@@ -1,0 +1,10 @@
+{
+  "decision": "APPROVE",
+  "role": "code-reviewer",
+  "audit_sha256": "8269e16a93ba6e41300a9bff345e35ff1a80fbe2ea51c0b7158e6912942c5da8",
+  "test_sha256": "bf39e90075687af1b0518f836ce387250f1f1ff7b3c5a5a9f8896d11a94a63b8",
+  "targeted_tests_passed": 39,
+  "pyright_errors": 0,
+  "remaining_findings": 0,
+  "scope": "post-recovery audit code, not yet approval of actual experiment data"
+}

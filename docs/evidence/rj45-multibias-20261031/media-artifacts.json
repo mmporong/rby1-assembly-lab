@@ -1,0 +1,42 @@
+{
+  "files": {
+    "docs/media/rj45/multibias/fresh05-comparison-preview.png": {
+      "bytes": 774913,
+      "sha256": "14679fe84aa2c63f0c4b35d2cd11fa59710bd21b8eabe99f5b10369878b34514"
+    },
+    "docs/media/rj45/multibias/fresh05-multibias-comparison-background.png": {
+      "bytes": 107187,
+      "sha256": "eb3607919ecd2180f8aaa529bcb3607e8432373933a0e5189fb006bc31542355"
+    },
+    "docs/media/rj45/multibias/fresh05-multibias-comparison-provenance.json": {
+      "bytes": 11229,
+      "sha256": "b68fb2596f3e81de288bf4861a40507f67604e87e29f7f4e31fbcd27db52e248"
+    },
+    "docs/media/rj45/multibias/fresh05-multibias-comparison-thumbnail.png": {
+      "bytes": 107187,
+      "sha256": "eb3607919ecd2180f8aaa529bcb3607e8432373933a0e5189fb006bc31542355"
+    },
+    "docs/media/rj45/multibias/fresh05-multibias-comparison.ass": {
+      "bytes": 361310,
+      "sha256": "e15447e80950c44343d53b56be4b2586370801ce4e1aed2bb6182db3013c752e"
+    },
+    "docs/media/rj45/multibias/fresh05-multibias-comparison.mp4": {
+      "bytes": 2878436,
+      "sha256": "62ad1698803830f048a8678f0f0983ff3f08cbbea5b1df87bc1e141a47ab7b3c"
+    },
+    "docs/media/rj45/multibias/raw/fresh05-multi64.mp4": {
+      "bytes": 10088609,
+      "sha256": "d3b10b766c7bdeb329ba41d3277b0b54d051da88b04a877047cab67a24f04c87"
+    },
+    "docs/media/rj45/multibias/raw/fresh05-zero.mp4": {
+      "bytes": 17941698,
+      "sha256": "c30d2b2728608ca28c26d56f43ea6fc92cee05bb3cb331e7f24b8c046c48fc40"
+    }
+  },
+  "preview": {
+    "command": "ffmpeg -v error -ss 6 -i SOURCE -frames:v 1 PREVIEW.png",
+    "seek_s": 6.0,
+    "source": "docs/media/rj45/multibias/fresh05-multibias-comparison.mp4"
+  },
+  "schema": "rj45_multibias_public_media_files_v1"
+}

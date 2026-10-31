@@ -1,0 +1,99 @@
+{
+  "schema": "rj45_multibias_admission_v1",
+  "written_before_gpu": true,
+  "recorded_at_utc": "2026-10-31T07:47:06.618993+00:00",
+  "comparison": "fresh matched single64 versus multi64 versus zero",
+  "training": {
+    "single_pool": [
+      20261128
+    ],
+    "multi_pool": [
+      20261128,
+      20271208,
+      20271216,
+      20271224
+    ],
+    "updates_each": 64,
+    "rollout_steps": 128,
+    "transitions_each": 8192,
+    "num_envs": 1,
+    "actor79_critic92": true,
+    "actor_seed": 20261123,
+    "critic_seed": 20261122,
+    "training_seed": 20261121,
+    "evaluation_seed": 20261124,
+    "reset_schedule": "inactive during constructor and pre-evaluation; activate then explicit inference-mode raw reset once; episode-cyclic conditions; no physics reseed",
+    "exposure": "episode rotation, not equal transitions; retain per-case transition/active-valid/reset counts; all four require active exposure",
+    "held_grasp": "train-02 only",
+    "frozen_reward_action_geometry_runtime": true
+  },
+  "preflight": {
+    "reference_cases": 4,
+    "strict_success_required": 4,
+    "failure": "abort without replacement or ranking"
+  },
+  "evaluation": {
+    "anchor": 20261128,
+    "fresh_seeds": [
+      20281208,
+      20281216,
+      20281224,
+      20281232,
+      20281240,
+      20281248,
+      20281256,
+      20281264
+    ],
+    "methods": [
+      "single64",
+      "multi64",
+      "zero"
+    ],
+    "episodes": 27,
+    "order": "case-outer with cyclic mode offset index modulo three",
+    "paired_initial_79_bias_grasp_rng_required": true,
+    "invalid_or_timeout": "no ranking or replacement",
+    "all_methods_fail": "fresh case recoverability unconfirmed"
+  },
+  "checkpoint_selection": "final64 only; update32 diagnostic excluded from selection",
+  "followup_candidate": "multi fresh success >=single+2, >zero, zero-success multi-failure count <=1; never effect proof",
+  "limits": {
+    "train_phase_s": 3200,
+    "evaluation_phase_s": 4000,
+    "per_eval_episode_s": 300,
+    "batch_s": 10500,
+    "external_stop_s": 10800,
+    "reservation_usd": 6,
+    "existing_instance_id": "pyf1b9s0a"
+  },
+  "interpretation": {
+    "single_training_seed": true,
+    "exploratory_only": true,
+    "camera_policy": false,
+    "sim_to_real": false,
+    "full_dual_arm_rl": false,
+    "dev_final_grasps_remain_sealed": true
+  },
+  "reset_api_references": [
+    {
+      "version": "IsaacLab v2.3.0",
+      "url": "https://github.com/isaac-sim/IsaacLab/blob/v2.3.0/source/isaaclab_rl/isaaclab_rl/rsl_rl/vecenv_wrapper.py",
+      "fact": "wrapper constructor resets once"
+    },
+    {
+      "version": "rsl_rl v3.0.1",
+      "url": "https://github.com/leggedrobotics/rsl_rl/blob/v3.0.1/rsl_rl/runners/on_policy_runner.py",
+      "fact": "runner constructor/learn/load/get_inference_policy do not reset"
+    }
+  ],
+  "design_review": {
+    "agent": "architect multibias_experiment_review",
+    "decision": "CLEAR",
+    "conditions": [
+      "explicit training reset within inference_mode",
+      "reference preflight 4/4",
+      "per-case exposure audit",
+      "final64 only"
+    ]
+  }
+}

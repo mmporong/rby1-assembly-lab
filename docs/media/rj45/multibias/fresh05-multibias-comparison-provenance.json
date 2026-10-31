@@ -1,0 +1,296 @@
+{
+  "audit": {
+    "bytes": 46157,
+    "effect_proven": false,
+    "followup_multiseed_candidate": false,
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/audit.json",
+    "sha256": "d7c3e9cbbf4cf3c6766308159b27c1de23199f74661d215fbbddc0749b54776a",
+    "sha256_after_render": "d7c3e9cbbf4cf3c6766308159b27c1de23199f74661d215fbbddc0749b54776a",
+    "status": "pass"
+  },
+  "claims": {
+    "effect_proven": false,
+    "learned_bimanual_policy": false,
+    "primary_results_changed": false,
+    "real_robot_evidence": false
+  },
+  "ffmpeg_args": [
+    "ffmpeg",
+    "-hide_banner",
+    "-loglevel",
+    "error",
+    "-loop",
+    "1",
+    "-framerate",
+    "60",
+    "-t",
+    "26.233333333",
+    "-i",
+    "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/fresh05-multibias-comparison-background.png",
+    "-i",
+    "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/multi64.mp4",
+    "-i",
+    "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/zero.mp4",
+    "-filter_complex",
+    "[1:v]scale=928:696:flags=lanczos,setsar=1[left];[2:v]scale=928:696:flags=lanczos,setsar=1[right];[0:v][left]overlay=24:160:eof_action=pass:repeatlast=0[stage1];[stage1][right]overlay=968:160:eof_action=pass:repeatlast=0[stage2];[stage2]subtitles='/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/fresh05-multibias-comparison.ass'[out]",
+    "-map",
+    "[out]",
+    "-an",
+    "-r",
+    "60",
+    "-frames:v",
+    "1574",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "medium",
+    "-crf",
+    "19",
+    "-pix_fmt",
+    "yuv420p",
+    "-movflags",
+    "+faststart",
+    "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/fresh05-multibias-comparison.mp4"
+  ],
+  "outputs": {
+    "background": {
+      "bytes": 107187,
+      "path": "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/fresh05-multibias-comparison-background.png",
+      "sha256": "eb3607919ecd2180f8aaa529bcb3607e8432373933a0e5189fb006bc31542355"
+    },
+    "subtitles": {
+      "bytes": 361310,
+      "path": "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/fresh05-multibias-comparison.ass",
+      "sha256": "e15447e80950c44343d53b56be4b2586370801ce4e1aed2bb6182db3013c752e"
+    },
+    "thumbnail": {
+      "bytes": 107187,
+      "path": "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/fresh05-multibias-comparison-thumbnail.png",
+      "sha256": "eb3607919ecd2180f8aaa529bcb3607e8432373933a0e5189fb006bc31542355"
+    },
+    "video": {
+      "bytes": 2878436,
+      "path": "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/fresh05-multibias-comparison.mp4",
+      "sha256": "62ad1698803830f048a8678f0f0983ff3f08cbbea5b1df87bc1e141a47ab7b3c"
+    }
+  },
+  "presentation": {
+    "fps": 60,
+    "metric_timing": {
+      "depth_and_lateral": "60 Hz render-time frame JSONL values; row i is displayed at i/60 with no interpolation",
+      "dwell": "30 Hz control-end value is adopted only at offset 8 and causally held through the next offset-4 frame; unknown before the first control end"
+    },
+    "resolution": [
+      1920,
+      1080
+    ],
+    "shorter_source_after_eof": "background result card is exposed and labelled as post-recording presentation",
+    "source_frame_policy": "recorded frames only; no repeated final raw frame",
+    "source_panels": {
+      "multi64": {
+        "eof_action": "pass",
+        "height": 696,
+        "width": 928,
+        "x": 24,
+        "y": 160
+      },
+      "zero": {
+        "eof_action": "pass",
+        "height": 696,
+        "width": 928,
+        "x": 968,
+        "y": 160
+      }
+    },
+    "static_result_card_duration_s": 2.0,
+    "thresholds": {
+      "lateral_error_um": 50.0,
+      "scope": "project evaluation criteria, not manufacturer specifications",
+      "stable_dwell_s": 0.4
+    }
+  },
+  "recording_validation": {
+    "multi64": {
+      "control_group_offsets": [
+        4,
+        8
+      ],
+      "control_groups": 380,
+      "exact_frame_clock_verified": true,
+      "frame_indices_contiguous": true,
+      "frames_jsonl_rows": 760,
+      "metadata_frame_count_matches": true,
+      "physics_step_stride": 4,
+      "probe": {
+        "average_fps": 60.0,
+        "command": [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_frames",
+          "-show_entries",
+          "stream=width,height,avg_frame_rate,r_frame_rate,nb_read_frames",
+          "-of",
+          "json",
+          "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/multi64.mp4"
+        ],
+        "frame_count": 760,
+        "height": 960,
+        "nominal_fps": 60.0,
+        "width": 1280
+      },
+      "terminal": {
+        "classification": "valid_success",
+        "depth_mm": 12.26498931646347,
+        "dwell_s": 0.4,
+        "lateral_error_um": 33.50917904754169,
+        "physics_time_s": 12.666666666666666,
+        "success": true
+      }
+    },
+    "zero": {
+      "control_group_offsets": [
+        4,
+        8
+      ],
+      "control_groups": 727,
+      "exact_frame_clock_verified": true,
+      "frame_indices_contiguous": true,
+      "frames_jsonl_rows": 1454,
+      "metadata_frame_count_matches": true,
+      "physics_step_stride": 4,
+      "probe": {
+        "average_fps": 60.0,
+        "command": [
+          "ffprobe",
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-count_frames",
+          "-show_entries",
+          "stream=width,height,avg_frame_rate,r_frame_rate,nb_read_frames",
+          "-of",
+          "json",
+          "/home/lim/rby1-assembly-lab/docs/media/rj45/multibias/.fresh05-multibias-comparison-ris8ew6y/zero.mp4"
+        ],
+        "frame_count": 1454,
+        "height": 960,
+        "nominal_fps": 60.0,
+        "width": 1280
+      },
+      "terminal": {
+        "classification": "valid_failure",
+        "depth_mm": 12.221241369843483,
+        "dwell_s": 0.0,
+        "lateral_error_um": 64.71163942478597,
+        "physics_time_s": 24.233333333333334,
+        "success": false
+      }
+    }
+  },
+  "recovery_manifest": {
+    "bytes": 4605,
+    "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/recovery-files.json",
+    "sha256": "7c67cd9806743e092b0536dc9c3a172e26ff0d1efe895bf9efeacf9564533a19",
+    "sha256_after_render": "7c67cd9806743e092b0536dc9c3a172e26ff0d1efe895bf9efeacf9564533a19"
+  },
+  "schema_name": "rj45_multibias_comparison_media_v1",
+  "selection": {
+    "benchmark_statistical_evidence": false,
+    "case_id": "fresh-05",
+    "purpose": "visualization contrast only",
+    "selected_after_primary_outcomes": true,
+    "training_evidence": false
+  },
+  "source_sha256_after_render": {
+    "multi64": {
+      "evidence": "3c36c5c683b06f6ac4da2cb71d0bef73587a7295da10760179f2e2133aeb6486",
+      "frames": "7d8a0d514fe8336f7b056bdb697b58f225e9bc08167049cbc48e54671fb9059b",
+      "metadata": "5f89f66f529605a0885322354e7d5a65a3b7c12e278f45197989bb0f47122d39",
+      "report": "b267c04edf955d37fa85ebc89acd62528a00c8ef3beba4600cd4fd0514950a17",
+      "video": "d3b10b766c7bdeb329ba41d3277b0b54d051da88b04a877047cab67a24f04c87"
+    },
+    "zero": {
+      "evidence": "0557007f5374e73f9b6fc27f41494ebe46e4b0b5384ec89c1c698a1969000f10",
+      "frames": "cd1199581a3f07dca1c5f766baf60dfbb937cf6c841e050b89417ea9c8cd1229",
+      "metadata": "a0932ced8107672a9d9663b62d1a94741979c5de0ce57615d28810e0b06d0c92",
+      "report": "67404e90f3ed207986d791ce8923324ea3e560116d65be8975bfef1a559c383a",
+      "video": "c30d2b2728608ca28c26d56f43ea6fc92cee05bb3cb331e7f24b8c046c48fc40"
+    }
+  },
+  "sources": {
+    "multi64": {
+      "evidence": {
+        "bytes": 16362,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-multi64.mp4.evidence.json",
+        "relative_path": "fresh05-multi64.mp4.evidence.json",
+        "sha256": "3c36c5c683b06f6ac4da2cb71d0bef73587a7295da10760179f2e2133aeb6486"
+      },
+      "frames": {
+        "bytes": 4278420,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-multi64.mp4.frames.jsonl",
+        "relative_path": "fresh05-multi64.mp4.frames.jsonl",
+        "sha256": "7d8a0d514fe8336f7b056bdb697b58f225e9bc08167049cbc48e54671fb9059b"
+      },
+      "metadata": {
+        "bytes": 18561,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-multi64.mp4.metadata.json",
+        "relative_path": "fresh05-multi64.mp4.metadata.json",
+        "sha256": "5f89f66f529605a0885322354e7d5a65a3b7c12e278f45197989bb0f47122d39"
+      },
+      "report": {
+        "bytes": 26024,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-multi64-report.json",
+        "relative_path": "fresh05-multi64-report.json",
+        "sha256": "b267c04edf955d37fa85ebc89acd62528a00c8ef3beba4600cd4fd0514950a17"
+      },
+      "video": {
+        "bytes": 10088609,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-multi64.mp4",
+        "relative_path": "fresh05-multi64.mp4",
+        "sha256": "d3b10b766c7bdeb329ba41d3277b0b54d051da88b04a877047cab67a24f04c87"
+      }
+    },
+    "zero": {
+      "evidence": {
+        "bytes": 16133,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-zero.mp4.evidence.json",
+        "relative_path": "fresh05-zero.mp4.evidence.json",
+        "sha256": "0557007f5374e73f9b6fc27f41494ebe46e4b0b5384ec89c1c698a1969000f10"
+      },
+      "frames": {
+        "bytes": 7592288,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-zero.mp4.frames.jsonl",
+        "relative_path": "fresh05-zero.mp4.frames.jsonl",
+        "sha256": "cd1199581a3f07dca1c5f766baf60dfbb937cf6c841e050b89417ea9c8cd1229"
+      },
+      "metadata": {
+        "bytes": 18318,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-zero.mp4.metadata.json",
+        "relative_path": "fresh05-zero.mp4.metadata.json",
+        "sha256": "a0932ced8107672a9d9663b62d1a94741979c5de0ce57615d28810e0b06d0c92"
+      },
+      "report": {
+        "bytes": 25720,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-zero-report.json",
+        "relative_path": "fresh05-zero-report.json",
+        "sha256": "67404e90f3ed207986d791ce8923324ea3e560116d65be8975bfef1a559c383a"
+      },
+      "video": {
+        "bytes": 17941698,
+        "path": "/home/lim/rby1-assembly-lab/artifacts/cloud/rj45-multibias-20261031/media-completed/fresh05-zero.mp4",
+        "relative_path": "fresh05-zero.mp4",
+        "sha256": "c30d2b2728608ca28c26d56f43ea6fc92cee05bb3cb331e7f24b8c046c48fc40"
+      }
+    }
+  },
+  "status": "completed"
+}

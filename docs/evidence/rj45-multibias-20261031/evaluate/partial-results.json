@@ -1,0 +1,2840 @@
+{
+  "episodes": [
+    {
+      "bias": {
+        "base_seed": 20261128,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0017766417004168034,
+            -0.003810248104855418,
+            -0.0010570123558863997
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.795803346903995e-05,
+            0.00012224896636325866,
+            -5.2392562793102115e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-anchor",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012260411426540777,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.899244785308838,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00011461197436591173,
+            "orientation_error_rad": 0.00413143279218966
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/01-anchor-single64.jsonl",
+          "sha256": "c65da1b3f242be5e07ac765342a3b1d1f824eb5bfb41ef420f4f7392bfaadcc3"
+        }
+      },
+      "index": 1,
+      "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20261128,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0017766417004168034,
+            -0.003810248104855418,
+            -0.0010570123558863997
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.795803346903995e-05,
+            0.00012224896636325866,
+            -5.2392562793102115e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-anchor",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012238387746252553,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.816946268081665,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00014078650663270395,
+            "orientation_error_rad": 0.005213061937238652
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/02-anchor-multi64.jsonl",
+          "sha256": "1d249055280676700f2c635a74a6d3c784d7c172bd02ed1a00f64c7027d7c6b0"
+        }
+      },
+      "index": 2,
+      "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20261128,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0017766417004168034,
+            -0.003810248104855418,
+            -0.0010570123558863997
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.795803346903995e-05,
+            0.00012224896636325866,
+            -5.2392562793102115e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-anchor",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 717,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+          "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+          "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.01219391092200214,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777498960494995,
+            "grasp_both": 1.0,
+            "lateral_error_m": 8.749515761276632e-05,
+            "orientation_error_rad": 0.005260984545356934
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/03-anchor-zero.jsonl",
+          "sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+        }
+      },
+      "index": 3,
+      "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281208,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            1.7988479157793336e-05,
+            0.00013803849287796766,
+            2.174604787796852e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -5.780487117590383e-05,
+            -2.45838987211755e-06,
+            0.00010334836406400427
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281208,
+        "calibration_case_seed": 66404228,
+        "case_id": "fresh-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+          "critic_sha256": "863eee149550b3fc12e37c6f229d2ac8a45a92b6148d26b9a1f041abcec35f8a",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "74c21a1c7d22bdff3cdae29f9cd95632ba80e6b0c22bc63e9ce84f5125f3db38",
+          "policy_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012349407612209633,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.911933660507202,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.233393888705056e-05,
+            "orientation_error_rad": 0.0009440686807236769
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/04-fresh-01-multi64.jsonl",
+          "sha256": "4dd55622ba39242a904be20e0463bf1c365ea9fc6ba7ed0928c1ad182c3e1cf6"
+        }
+      },
+      "index": 4,
+      "initial_base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281208,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            1.7988479157793336e-05,
+            0.00013803849287796766,
+            2.174604787796852e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -5.780487117590383e-05,
+            -2.45838987211755e-06,
+            0.00010334836406400427
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281208,
+        "calibration_case_seed": 66404228,
+        "case_id": "fresh-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+          "critic_sha256": "863eee149550b3fc12e37c6f229d2ac8a45a92b6148d26b9a1f041abcec35f8a",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "74c21a1c7d22bdff3cdae29f9cd95632ba80e6b0c22bc63e9ce84f5125f3db38",
+          "policy_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012320951023204133,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.824021339416504,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00011835709419693484,
+            "orientation_error_rad": 0.006020902002216025
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/05-fresh-01-zero.jsonl",
+          "sha256": "068f0845abaf7746cab6ee81666d64c08376f246f54c6890b3cf7741f023856e"
+        }
+      },
+      "index": 5,
+      "initial_base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281208,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            1.7988479157793336e-05,
+            0.00013803849287796766,
+            2.174604787796852e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -5.780487117590383e-05,
+            -2.45838987211755e-06,
+            0.00010334836406400427
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281208,
+        "calibration_case_seed": 66404228,
+        "case_id": "fresh-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+          "critic_sha256": "863eee149550b3fc12e37c6f229d2ac8a45a92b6148d26b9a1f041abcec35f8a",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "74c21a1c7d22bdff3cdae29f9cd95632ba80e6b0c22bc63e9ce84f5125f3db38",
+          "policy_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012371205887809822,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.829069137573242,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00011710596660841786,
+            "orientation_error_rad": 0.004113454219991605
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/06-fresh-01-single64.jsonl",
+          "sha256": "fa354da5866867035323308e81990fc7a3bbe67f4e53a6966cd335e6e1615b8c"
+        }
+      },
+      "index": 6,
+      "initial_base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281216,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.002799372188746929,
+            0.001693094614893198,
+            4.1655392124084756e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.018484782543965e-06,
+            4.680950041802134e-06,
+            3.675539846881293e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281216,
+        "calibration_case_seed": 66404236,
+        "case_id": "fresh-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 421,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+          "critic_sha256": "a135bbfb916ca8c464973f5e4d3b8211097a12aad42a96adaa2ecafa4b3adca6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2bff4052a8677b549f778c05e5824baf87d3394b37a984a8566e060763745f56",
+          "policy_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012298929161769102,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7776577472686768,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.6571162118247685e-05,
+            "orientation_error_rad": 0.0032912385943461167
+          },
+          "success": true,
+          "terminal_timestamp_s": 14.500000953674316,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/07-fresh-02-zero.jsonl",
+          "sha256": "5a08d93b1d10d308a2d96d7590c884bbd9d634d84289d51d65e18b236e915d72"
+        }
+      },
+      "index": 7,
+      "initial_base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281216,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.002799372188746929,
+            0.001693094614893198,
+            4.1655392124084756e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.018484782543965e-06,
+            4.680950041802134e-06,
+            3.675539846881293e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281216,
+        "calibration_case_seed": 66404236,
+        "case_id": "fresh-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 706,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+          "critic_sha256": "a135bbfb916ca8c464973f5e4d3b8211097a12aad42a96adaa2ecafa4b3adca6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2bff4052a8677b549f778c05e5824baf87d3394b37a984a8566e060763745f56",
+          "policy_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012378417532689031,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.9918200969696045,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00010232067775570991,
+            "orientation_error_rad": 0.0025280230173873163
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/08-fresh-02-single64.jsonl",
+          "sha256": "e10c98ce9c06c7933cded613911ecbedc84815a2f097ef6e74208db7387dadfe"
+        }
+      },
+      "index": 8,
+      "initial_base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281216,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.002799372188746929,
+            0.001693094614893198,
+            4.1655392124084756e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.018484782543965e-06,
+            4.680950041802134e-06,
+            3.675539846881293e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281216,
+        "calibration_case_seed": 66404236,
+        "case_id": "fresh-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 394,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+          "critic_sha256": "a135bbfb916ca8c464973f5e4d3b8211097a12aad42a96adaa2ecafa4b3adca6",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2bff4052a8677b549f778c05e5824baf87d3394b37a984a8566e060763745f56",
+          "policy_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012332428707439655,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777858018875122,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.22613606954852e-05,
+            "orientation_error_rad": 0.002804915792937357
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.600000381469727,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/09-fresh-02-multi64.jsonl",
+          "sha256": "1681e2473172b0d45c1f4030637738a66db1a6ee53cd38fea9aa7c08fad4ac63"
+        }
+      },
+      "index": 9,
+      "initial_base79_sha256": "84848fef0ccaa7335ad0a6ea1953a3e323af06e267714fdd3d4965d193b0d80f",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281224,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001765239576343447,
+            -4.650590199162252e-05,
+            -3.845490027742926e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            9.622966172173619e-05,
+            -0.00010997388744726777,
+            -9.344855243398342e-06
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281224,
+        "calibration_case_seed": 66404244,
+        "case_id": "fresh-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+          "critic_sha256": "947083df39b0004660275c3c54d7864239a826b92cdf988f9895271ae30a2b7d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "19e37c3f598a226986feedc9947f2993c4ed639328def91bd628b9a2628f68d7",
+          "policy_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012482333790380266,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.034144878387451,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.615696259669598e-05,
+            "orientation_error_rad": 0.005401993313368807
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/10-fresh-03-single64.jsonl",
+          "sha256": "60812db48c2043f4ca07dde851029d3c8b31bd53824f623d7109b47acafc87e8"
+        }
+      },
+      "index": 10,
+      "initial_base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281224,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001765239576343447,
+            -4.650590199162252e-05,
+            -3.845490027742926e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            9.622966172173619e-05,
+            -0.00010997388744726777,
+            -9.344855243398342e-06
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281224,
+        "calibration_case_seed": 66404244,
+        "case_id": "fresh-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+          "critic_sha256": "947083df39b0004660275c3c54d7864239a826b92cdf988f9895271ae30a2b7d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "19e37c3f598a226986feedc9947f2993c4ed639328def91bd628b9a2628f68d7",
+          "policy_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012469558959868246,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.006760120391846,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.0001054482412932856,
+            "orientation_error_rad": 0.0036357271203121904
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/11-fresh-03-multi64.jsonl",
+          "sha256": "005a7995ada9ffc7aa250a5edcfb37999d761ce6a8e7c5cbbfb6b7f786c03658"
+        }
+      },
+      "index": 11,
+      "initial_base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281224,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001765239576343447,
+            -4.650590199162252e-05,
+            -3.845490027742926e-06
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            9.622966172173619e-05,
+            -0.00010997388744726777,
+            -9.344855243398342e-06
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281224,
+        "calibration_case_seed": 66404244,
+        "case_id": "fresh-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+          "critic_sha256": "947083df39b0004660275c3c54d7864239a826b92cdf988f9895271ae30a2b7d",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "19e37c3f598a226986feedc9947f2993c4ed639328def91bd628b9a2628f68d7",
+          "policy_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012425924336239999,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.8412842750549316,
+            "grasp_both": 1.0,
+            "lateral_error_m": 7.935184370925691e-05,
+            "orientation_error_rad": 0.00378832573874046
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/12-fresh-03-zero.jsonl",
+          "sha256": "5540322345a21293a4508b4c44024a9e98123e4abcf918763852683410409aa6"
+        }
+      },
+      "index": 12,
+      "initial_base79_sha256": "c70c4b7868b34e6d5ffa41d93dcdc22f8e25985b2143ed2d624abd12befa1446",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281232,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0019979982171207666,
+            0.0027672264259308577,
+            0.000597480102442205
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -7.209550676634535e-05,
+            4.8760710342321545e-05,
+            2.4274278985103592e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281232,
+        "calibration_case_seed": 66404252,
+        "case_id": "fresh-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 392,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+          "critic_sha256": "1ba695f8fc2b55f2567ae20e4c1132ca7a8b574fbc0d918b1a8d5f35347dcde8",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "f12be396599dcdf835083457cb076665cbd41503241a132954763663bc00c97a",
+          "policy_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012282160142262761,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7854435443878174,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.6046103053493154e-05,
+            "orientation_error_rad": 0.0038934221876069947
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.500000953674316,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/13-fresh-04-multi64.jsonl",
+          "sha256": "3bf8fb32a0e14b5f671a15d5855f7646f8b4c74f72d44f0125baaec034d7ee17"
+        }
+      },
+      "index": 13,
+      "initial_base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281232,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0019979982171207666,
+            0.0027672264259308577,
+            0.000597480102442205
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -7.209550676634535e-05,
+            4.8760710342321545e-05,
+            2.4274278985103592e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281232,
+        "calibration_case_seed": 66404252,
+        "case_id": "fresh-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 497,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+          "critic_sha256": "1ba695f8fc2b55f2567ae20e4c1132ca7a8b574fbc0d918b1a8d5f35347dcde8",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "f12be396599dcdf835083457cb076665cbd41503241a132954763663bc00c97a",
+          "policy_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012269361022459416,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.901325225830078,
+            "grasp_both": 1.0,
+            "lateral_error_m": 2.9975495353901757e-05,
+            "orientation_error_rad": 0.008419901719969213
+          },
+          "success": true,
+          "terminal_timestamp_s": 17.0,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/14-fresh-04-zero.jsonl",
+          "sha256": "f61c62b88b88894e60e592da760f292adcb5dc3747228acb68d514ac399aec87"
+        }
+      },
+      "index": 14,
+      "initial_base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281232,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0019979982171207666,
+            0.0027672264259308577,
+            0.000597480102442205
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -7.209550676634535e-05,
+            4.8760710342321545e-05,
+            2.4274278985103592e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281232,
+        "calibration_case_seed": 66404252,
+        "case_id": "fresh-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 387,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+          "critic_sha256": "1ba695f8fc2b55f2567ae20e4c1132ca7a8b574fbc0d918b1a8d5f35347dcde8",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "f12be396599dcdf835083457cb076665cbd41503241a132954763663bc00c97a",
+          "policy_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012313438427170708,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.501992702484131,
+            "grasp_both": 1.0,
+            "lateral_error_m": 3.662299628730098e-05,
+            "orientation_error_rad": 0.003165543850688087
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.333333969116211,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/15-fresh-04-single64.jsonl",
+          "sha256": "a1264905ebf07756cb7a82bfd7b79c10f636e9c31c5f521c085b5c50f82a8219"
+        }
+      },
+      "index": 15,
+      "initial_base79_sha256": "28a734e409b875c76e2fa376dbc1ba9094953ba129a4213661788c89100b76b2",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281240,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0005159016000106931,
+            -0.0029632113873958588,
+            -0.0004348555230535567
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -1.1959751645918004e-05,
+            7.950815779622644e-05,
+            6.070226299925707e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 716,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+          "critic_sha256": "fb349382469f9114d9e9344116efaa540b7c18473fcc31658a9ac74380e79ada",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2d2ab60f884963bd86a8d25672768f6da0b35ef6a6dd780d6938a76c22410379",
+          "policy_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012221240217864731,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.77762770652771,
+            "grasp_both": 1.0,
+            "lateral_error_m": 6.471742355067195e-05,
+            "orientation_error_rad": 0.003042458330595321
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/16-fresh-05-zero.jsonl",
+          "sha256": "3c755b26be79dc345055d6b1c53b3671b4caf85dadcf3290282a90d36058a92b"
+        }
+      },
+      "index": 16,
+      "initial_base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281240,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0005159016000106931,
+            -0.0029632113873958588,
+            -0.0004348555230535567
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -1.1959751645918004e-05,
+            7.950815779622644e-05,
+            6.070226299925707e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 716,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+          "critic_sha256": "fb349382469f9114d9e9344116efaa540b7c18473fcc31658a9ac74380e79ada",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2d2ab60f884963bd86a8d25672768f6da0b35ef6a6dd780d6938a76c22410379",
+          "policy_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012301913928093468,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.929630994796753,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.0001105945807833395,
+            "orientation_error_rad": 0.0048117403331765195
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/17-fresh-05-single64.jsonl",
+          "sha256": "25f430cee788fe87a371a27f6c40dddf4a20cb3378d58dc1f7f2fda8907687c3"
+        }
+      },
+      "index": 17,
+      "initial_base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281240,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0005159016000106931,
+            -0.0029632113873958588,
+            -0.0004348555230535567
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -1.1959751645918004e-05,
+            7.950815779622644e-05,
+            6.070226299925707e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 369,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+          "critic_sha256": "fb349382469f9114d9e9344116efaa540b7c18473fcc31658a9ac74380e79ada",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "2d2ab60f884963bd86a8d25672768f6da0b35ef6a6dd780d6938a76c22410379",
+          "policy_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012264989808629695,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.777688503265381,
+            "grasp_both": 1.0,
+            "lateral_error_m": 3.348981426498232e-05,
+            "orientation_error_rad": 0.003088652219338353
+          },
+          "success": true,
+          "terminal_timestamp_s": 12.433334350585938,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/18-fresh-05-multi64.jsonl",
+          "sha256": "5a11d7ec97ec1a69ec174b283b2a9f98b8a12a8c2c8f28e875a1c537be46c6ce"
+        }
+      },
+      "index": 18,
+      "initial_base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281248,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.00035232791560702026,
+            -0.000870252784807235,
+            -0.0001796650030883029
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            0.00010565330740064383,
+            -7.808440568624064e-05,
+            -1.0674187251424883e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281248,
+        "calibration_case_seed": 66404268,
+        "case_id": "fresh-06",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+          "critic_sha256": "cc3ef6f002cb0cc09e80e9b51f2b7f664c50bd6402f6f8efcc78b1732c56878e",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ea7e6fdb8894b56ebc16d770407c1417765377f09850cd3e6b802466334fc212",
+          "policy_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012451930613274504,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.052692413330078,
+            "grasp_both": 1.0,
+            "lateral_error_m": 7.371973999135738e-05,
+            "orientation_error_rad": 0.006196196081156557
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/19-fresh-06-single64.jsonl",
+          "sha256": "bc612461bb9512e4cbb9fbe6a7523ecf41d076cd290a0288424f9fc9812e9e50"
+        }
+      },
+      "index": 19,
+      "initial_base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281248,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.00035232791560702026,
+            -0.000870252784807235,
+            -0.0001796650030883029
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            0.00010565330740064383,
+            -7.808440568624064e-05,
+            -1.0674187251424883e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281248,
+        "calibration_case_seed": 66404268,
+        "case_id": "fresh-06",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+          "critic_sha256": "cc3ef6f002cb0cc09e80e9b51f2b7f664c50bd6402f6f8efcc78b1732c56878e",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ea7e6fdb8894b56ebc16d770407c1417765377f09850cd3e6b802466334fc212",
+          "policy_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012436535398728483,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 4.01050329208374,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00011705284238309213,
+            "orientation_error_rad": 0.0032288653115739086
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/20-fresh-06-multi64.jsonl",
+          "sha256": "4ba670418b1468cc5c93783713eda1bef2033e926afdbee19dcbb1a157ab477a"
+        }
+      },
+      "index": 20,
+      "initial_base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281248,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.00035232791560702026,
+            -0.000870252784807235,
+            -0.0001796650030883029
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            0.00010565330740064383,
+            -7.808440568624064e-05,
+            -1.0674187251424883e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281248,
+        "calibration_case_seed": 66404268,
+        "case_id": "fresh-06",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 719,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+          "critic_sha256": "cc3ef6f002cb0cc09e80e9b51f2b7f664c50bd6402f6f8efcc78b1732c56878e",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "ea7e6fdb8894b56ebc16d770407c1417765377f09850cd3e6b802466334fc212",
+          "policy_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012393855090545948,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.8590519428253174,
+            "grasp_both": 1.0,
+            "lateral_error_m": 8.205556891255982e-05,
+            "orientation_error_rad": 0.0033388768304613253
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/21-fresh-06-zero.jsonl",
+          "sha256": "607e6e3eff4589d7f03c2d437b35649dee07bf8c30cca7987dad41b282d28aa7"
+        }
+      },
+      "index": 21,
+      "initial_base79_sha256": "5d1e2b90cb0995ab345e65ec6cbc3981a99122d255e0db1bc060bd5dd28664a5",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281256,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001841925986809656,
+            0.00014939418178983033,
+            3.291088796686381e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            5.952469291514717e-05,
+            9.76028386503458e-05,
+            -8.54722602525726e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281256,
+        "calibration_case_seed": 66404276,
+        "case_id": "fresh-07",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+          "critic_sha256": "c8375c817d779c0cd6d43e5b9063710094ad1807b5fb14fb29e5aa822b8d6a63",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5838005b409fd50291c0f4eb9e27dfd0510a8797432c9219a2dc25bcb1e87358",
+          "policy_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012263096535613166,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.821352481842041,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00015249010446863318,
+            "orientation_error_rad": 0.004503248114834879
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/22-fresh-07-multi64.jsonl",
+          "sha256": "5d17d72ac34103f377651096230f86c6025765753bf1d0f4ae142dc823079edf"
+        }
+      },
+      "index": 22,
+      "initial_base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+      "method": "multi64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281256,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001841925986809656,
+            0.00014939418178983033,
+            3.291088796686381e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            5.952469291514717e-05,
+            9.76028386503458e-05,
+            -8.54722602525726e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281256,
+        "calibration_case_seed": 66404276,
+        "case_id": "fresh-07",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+          "critic_sha256": "c8375c817d779c0cd6d43e5b9063710094ad1807b5fb14fb29e5aa822b8d6a63",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5838005b409fd50291c0f4eb9e27dfd0510a8797432c9219a2dc25bcb1e87358",
+          "policy_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.01221774934154823,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.7774596214294434,
+            "grasp_both": 1.0,
+            "lateral_error_m": 9.956280714578518e-05,
+            "orientation_error_rad": 0.0045639243849100964
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/23-fresh-07-zero.jsonl",
+          "sha256": "72dc17793ec80faf55865ea5090d3ceafd4a179462287812c08afc46603c84dd"
+        }
+      },
+      "index": 23,
+      "initial_base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281256,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0001841925986809656,
+            0.00014939418178983033,
+            3.291088796686381e-05
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            5.952469291514717e-05,
+            9.76028386503458e-05,
+            -8.54722602525726e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281256,
+        "calibration_case_seed": 66404276,
+        "case_id": "fresh-07",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 708,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+          "critic_sha256": "c8375c817d779c0cd6d43e5b9063710094ad1807b5fb14fb29e5aa822b8d6a63",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "5838005b409fd50291c0f4eb9e27dfd0510a8797432c9219a2dc25bcb1e87358",
+          "policy_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012282288081551195,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.9324958324432373,
+            "grasp_both": 1.0,
+            "lateral_error_m": 0.00012469175223044437,
+            "orientation_error_rad": 0.001122232743207321
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/24-fresh-07-single64.jsonl",
+          "sha256": "109c5bc66b8e91f8dd50a7fa1f17fad2c1c8b48533b9d782b55807f1b3042488"
+        }
+      },
+      "index": 24,
+      "initial_base79_sha256": "cabb1cea4ad1bee643e8e1dde7f40552f04a538413eabeb871633597119c0434",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281264,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0006659590872004628,
+            0.0014083103742450476,
+            -0.003755333600565791
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -4.05078571930062e-05,
+            -6.253347237361595e-05,
+            -6.232252781046554e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281264,
+        "calibration_case_seed": 66404284,
+        "case_id": "fresh-08",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 709,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+          "critic_sha256": "61a0551adbdf4fd6d36cd04ae28638698ae5e959be10e638754230f4890b5145",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "176894c176f6f6fa93a8eb22ade2b0e905f26a2b9eb9451454a9303251230027",
+          "policy_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": true,
+            "orientation": false
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012381840605379932,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.9925782680511475,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.879275578631969e-05,
+            "orientation_error_rad": 0.010803425923228256
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/25-fresh-08-zero.jsonl",
+          "sha256": "1c30590b8384634f76049df5c8b47e982976e9a1e824780c95eead7d08fee7ce"
+        }
+      },
+      "index": 25,
+      "initial_base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+      "method": "zero"
+    },
+    {
+      "bias": {
+        "base_seed": 20281264,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0006659590872004628,
+            0.0014083103742450476,
+            -0.003755333600565791
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -4.05078571930062e-05,
+            -6.253347237361595e-05,
+            -6.232252781046554e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281264,
+        "calibration_case_seed": 66404284,
+        "case_id": "fresh-08",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 399,
+        "classification": "valid_success",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+          "critic_sha256": "61a0551adbdf4fd6d36cd04ae28638698ae5e959be10e638754230f4890b5145",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "176894c176f6f6fa93a8eb22ade2b0e905f26a2b9eb9451454a9303251230027",
+          "policy_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": true,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": true,
+            "lateral": true,
+            "orientation": true
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012426107467770297,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.8500404357910156,
+            "grasp_both": 1.0,
+            "lateral_error_m": 4.4603008302317736e-05,
+            "orientation_error_rad": 0.0031895514759274534
+          },
+          "success": true,
+          "terminal_timestamp_s": 13.666666984558105,
+          "termination_reason": "independent_success",
+          "valid": true
+        },
+        "terminal_phase": "done",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/26-fresh-08-single64.jsonl",
+          "sha256": "e77f95d00d694b554def2d7d17d9e9db669a067b701a7329dfff489398c25560"
+        }
+      },
+      "index": 26,
+      "initial_base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+      "method": "single64"
+    },
+    {
+      "bias": {
+        "base_seed": 20281264,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            -0.0006659590872004628,
+            0.0014083103742450476,
+            -0.003755333600565791
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            -4.05078571930062e-05,
+            -6.253347237361595e-05,
+            -6.232252781046554e-05
+          ]
+        ]
+      },
+      "case": {
+        "base_seed": 20281264,
+        "calibration_case_seed": 66404284,
+        "case_id": "fresh-08",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "evaluation": {
+        "action_boundary_fraction_over_active": 0.0,
+        "action_boundary_rows": 0,
+        "active_rows": 709,
+        "classification": "valid_failure",
+        "evaluation_rng": {
+          "seeded": {
+            "numpy": true,
+            "physics_seed_unchanged": 20261128,
+            "python": true,
+            "seed": 20261124,
+            "torch_cpu": true,
+            "torch_cuda_all_available_devices": true
+          },
+          "state_sha256_before_environment_reset": {
+            "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+            "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+            "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+            "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+          }
+        },
+        "observation": {
+          "actor_ground_truth_access": false,
+          "base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+          "critic_sha256": "61a0551adbdf4fd6d36cd04ae28638698ae5e959be10e638754230f4890b5145",
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "oracle13_sha256": "176894c176f6f6fa93a8eb22ade2b0e905f26a2b9eb9451454a9303251230027",
+          "policy_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc"
+        },
+        "reference_controller": null,
+        "terminal": {
+          "criteria": {
+            "depth": true,
+            "dwell": false,
+            "forbidden_contact": true,
+            "force": true,
+            "grasp_live_and_proven": true,
+            "independent_evaluator_terminal": false,
+            "lateral": false,
+            "orientation": false
+          },
+          "evaluator_source": "simulator_ground_truth_independent",
+          "evaluator_version": "task-evaluator-v1+environment-cross-check",
+          "metrics": {
+            "actual_depth_m": 0.012424394350337733,
+            "forbidden_contact": 0.0,
+            "force_peak_n": 3.89973783493042,
+            "grasp_both": 1.0,
+            "lateral_error_m": 9.34864685920099e-05,
+            "orientation_error_rad": 0.010426415913436196
+          },
+          "success": false,
+          "terminal_timestamp_s": 24.000001907348633,
+          "termination_reason": "episode_timeout",
+          "valid": true
+        },
+        "terminal_phase": "insert",
+        "trace": {
+          "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/27-fresh-08-multi64.jsonl",
+          "sha256": "a487d799bb925d4f08f90690df2f7d9471d8dd86ecb0286a82574382b5e4cdcc"
+        }
+      },
+      "index": 27,
+      "initial_base79_sha256": "4385b1a743234b204cebc6fd0bf58d5ef67bb9ea6510113b527d4816aaca71cc",
+      "method": "multi64"
+    }
+  ],
+  "status": "running"
+}

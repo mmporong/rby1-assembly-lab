@@ -1,0 +1,15 @@
+{
+  "decision": "APPROVE",
+  "role": "code-reviewer",
+  "scope": "derived plotting/action-scale code; actual full evaluation and rendered outputs pending",
+  "reviewed_sha256": {
+    "diagnose_training.py": "f6d384e864d63c471b3e5aa21196c70de168a395f08a496cd4fc434884a19c1f",
+    "plot_results.py": "8428296e2ee2ccd56a9716362013aa1fa80b2d1cd0682eda03e5b1f6ba12467a"
+  },
+  "pyright_errors": 0,
+  "pyright_warnings": 0,
+  "early_training_recalculation_passed": true,
+  "mismatched_transition_sha_rejected": true,
+  "three_frozen_configs_verified": true,
+  "causal_claims": false
+}

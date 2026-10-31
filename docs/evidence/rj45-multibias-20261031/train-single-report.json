@@ -1,0 +1,449 @@
+{
+  "actor_parameter_sha256_after": "bca21c6ba9fe04945ab8cf9e2182560082666c4c41cf32b9b40a45764fa185a7",
+  "actor_parameter_sha256_before": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276",
+  "bias_cases": [
+    {
+      "base_seed": 20261128,
+      "calibration_case_seed": 66384148,
+      "case_id": "anchor",
+      "rotation_vector_entry_rad": [
+        0.0017766417004168034,
+        -0.003810248104855418,
+        -0.0010570123558863997
+      ],
+      "translation_entry_m": [
+        6.795803346903995e-05,
+        0.00012224896636325866,
+        -5.2392562793102115e-05
+      ]
+    }
+  ],
+  "checkpoint": {
+    "eligible_for_evaluation": true,
+    "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/train-single/final_checkpoint.pt",
+    "sha256": "86c7e9ecf4949f1b45398fa243876f1e270e399013e8fe6cda508e3794d822c8",
+    "update": 64
+  },
+  "claims": {
+    "effect_proven": false,
+    "final_policy": false,
+    "generalization_proven": false
+  },
+  "contract": {
+    "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/contract.json",
+    "sha256": "5f91ce18fa0d1351250f34463b6f39f4b114597e8bb1b200ba9d77a2cd7c8e77"
+  },
+  "diagnostic_checkpoint": {
+    "eligible_for_selection": false,
+    "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/train-single/diagnostic_checkpoint_0032.pt",
+    "sha256": "9bf278847ba1e232cf306cb3d0520289aaf197697934afa79dc03a0ec6b42e4b"
+  },
+  "execution": {
+    "deadline_utc": "2026-10-31T10:50:52Z",
+    "elapsed_wall_s_before_close": 1756.4769316410002
+  },
+  "initialization": {
+    "actor": {
+      "common_79d_projection_sha256": "e3184012a85d4bdc9e8e7350825fc5b845db96fedbce83bff5b68beaa8ebc9b0",
+      "extra_columns_trainable": false,
+      "mode": "standard79",
+      "oracle_extra_13_columns_zero": true,
+      "output_layer_zero": true,
+      "seed": 20261123,
+      "state_sha256": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276"
+    },
+    "critic": {
+      "actor_input_width_independent": true,
+      "device": "cuda:0",
+      "resettable_module_count": 4,
+      "seed": 20261122,
+      "state_sha256": "308caed04d04cd357411d89f0dd62410a3a20002e9c2afaed9aac04d07b0258d"
+    },
+    "optimizer_sha256": "353ee19c0827e3f57588b440cc2c298165db57129068c476e0a42f9fa5ebb138",
+    "rng": {
+      "numpy": true,
+      "physics_seed_unchanged": 20261128,
+      "python": true,
+      "seed": 20261121,
+      "state_sha256": {
+        "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+        "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+        "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+        "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+      },
+      "torch_cpu": true,
+      "torch_cuda_all_available_devices": true
+    },
+    "zero_actor": {
+      "action_sha256": "0c86a59899dd0b55221d72d55f03cd1bdd1777604fc229e308eced2df3e5f69c",
+      "action_shape": [
+        3,
+        6
+      ],
+      "mean_action_all_zero": true,
+      "mode": "standard79",
+      "noise": {
+        "maximum": 0.10000000149011612,
+        "mean": 0.10000000149011612,
+        "minimum": 0.10000000149011612,
+        "shape": [
+          6
+        ]
+      },
+      "sample_rows": 3
+    }
+  },
+  "learning_executed": true,
+  "origin_protocol": {
+    "file_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/origin-protocol.json",
+    "payload": {
+      "budget_and_stop": {
+        "absolute_deadline_utc": "2026-10-31T01:30:00Z",
+        "budget_admission": {
+          "budget_cap_usd": 700.0,
+          "external_guard_minutes": 75,
+          "locally_verified": true,
+          "new_run_reservation_usd": 12.0,
+          "private_evidence_sha256": "80d4767917e8eb82a4121d4984356a30003bf0196c5033ba4ffe7e30ceeb0209"
+        },
+        "external_guard_minutes": 75,
+        "historical_reservation_not_invoice": true,
+        "mode_wall_time_limit_s": {
+          "oracle92": 1800.0,
+          "reference": 300.0,
+          "standard79": 1800.0,
+          "zero": 300.0
+        },
+        "new_run_reservation_usd": 12.0
+      },
+      "diagnostic_scope": {
+        "dev_and_final_unopened": true,
+        "not_final_policy": true,
+        "not_generalization_evidence": true,
+        "promotion_rule": "if zero succeeds, this condition cannot be promoted as evidence of a non-trivial RL contribution",
+        "required_modes": [
+          "zero",
+          "reference",
+          "standard79",
+          "oracle92"
+        ],
+        "single_fixed_train_condition": true
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "environment_index": 0,
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "num_envs": 1,
+        "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+        "split": "train"
+      },
+      "frozen_inputs": {
+        "archived_runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bank_source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+        "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+        "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+        "runtime_source_file_sha256": {
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+          "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+          "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+          "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+          "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+          "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+          "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+          "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+          "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+          "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+          "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+          "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+          "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+          "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+          "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+          "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+          "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+          "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+          "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+          "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+          "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+          "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+          "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+          "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+        },
+        "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "observation_groups": {
+        "ground_truth_usage": "oracle13 is diagnostic actor input only in oracle92; both learning modes use critic92",
+        "oracle92": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 92
+          },
+          "policy": [
+            "policy"
+          ]
+        },
+        "standard79": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "policy": [
+            "policy"
+          ]
+        }
+      },
+      "physics_contract": {
+        "evaluation": "G2 independent geometry/contact/nine-substep verifier",
+        "evaluations": "deterministic pre-training and final-checkpoint episodes; zero/reference each one episode",
+        "execution_device": "cuda:0",
+        "task_reward_action_termination": "unchanged archived runtime"
+      },
+      "ppo": {
+        "actor_initialization_seed": 20261123,
+        "checkpoint_selection": "preregistered final checkpoint only",
+        "critic_initialization_seed": 20261122,
+        "diagnostic_intermediate_checkpoint_updates": [
+          8,
+          16,
+          24
+        ],
+        "distinguished_from_prior_campaign": "single_env_128x32_fixed_condition_not_256_env_x32",
+        "entropy_coefficient": 0.005,
+        "evaluation_seed": 20261124,
+        "gamma": 0.995,
+        "implementation": "rsl-rl-lib==3.0.1 OnPolicyRunner/PPO unchanged",
+        "initial_noise_std": 0.1,
+        "intermediate_checkpoint_policy": "diagnostic recovery artifacts only; never eligible for promotion or selection",
+        "interpretation": "32 updates/4096 transitions is a learnability diagnostic, not effect proof",
+        "lambda": 0.95,
+        "learning_rate": 0.0003,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 1,
+        "policy_training_seed": 20261121,
+        "rollout_steps": 128,
+        "schedule": "fixed",
+        "training_rng_reset_seed": 20261121,
+        "transitions": 4096,
+        "updates": 32,
+        "zero_actor_output": true
+      },
+      "schema_name": "rj45_oracle_ppo_probe_v1",
+      "source_sha256": {
+        "adapter": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+        "g2_physics_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+        "runner": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+        "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+      },
+      "timing": {
+        "active_horizon_s": 24.0,
+        "control_decimation": 8,
+        "control_hz": 30,
+        "physics_hz": 240
+      }
+    },
+    "payload_sha256": "43ac1dfb48347b59bfb91a2e100b8d8c28f3f76628a31b9aae2e395259e2c06f"
+  },
+  "phase": "train-single",
+  "reset_count": 12,
+  "reset_count_by_case": {
+    "anchor": 12
+  },
+  "runtime_import_origins": {
+    "rby1_assembly": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py",
+    "rby1_assembly.contact_loads": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py",
+    "rby1_assembly.contact_manifolds": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py",
+    "rby1_assembly.contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py",
+    "rby1_assembly.control_math": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py",
+    "rby1_assembly.dataset": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/dataset.py",
+    "rby1_assembly.evaluation": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/evaluation.py",
+    "rby1_assembly.experiment_contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py",
+    "rby1_assembly.hand_collision": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py",
+    "rby1_assembly.hand_contact_monitor": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py",
+    "rby1_assembly.held_grasp": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py",
+    "rby1_assembly.isaac_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py",
+    "rby1_assembly.parallel_contact_evidence": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py",
+    "rby1_assembly.recording": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/recording.py",
+    "rby1_assembly.rj45_bc": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc.py",
+    "rby1_assembly.rj45_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py",
+    "rby1_assembly.rj45_grasp_generation": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py",
+    "rby1_assembly.rj45_task": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py",
+    "rby1_assembly.rj45_training": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py",
+    "rby1_assembly.rj45_training_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py"
+  },
+  "schema_name": "rj45_multibias_probe_v1",
+  "source_binding": {
+    "ablation_helper": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/evaluate_rj45_frozen_ablation.py",
+      "sha256": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b"
+    },
+    "adapter": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/src/rby1_assembly/rj45_oracle_diagnostic.py",
+      "sha256": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100"
+    },
+    "g2_helper": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/run_rj45_g2_physics_probe.py",
+      "sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42"
+    },
+    "origin_protocol": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/origin-protocol.json",
+      "sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef"
+    },
+    "replay_helper": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/record_rj45_oracle_probe.py",
+      "sha256": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd"
+    },
+    "runner": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/run_rj45_oracle_ppo_probe.py",
+      "sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1"
+    },
+    "runtime_manifest": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/configs/rj45-oracle-runtime-104721a.json",
+      "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+    }
+  },
+  "status": "completed",
+  "training_pool": [
+    {
+      "base_seed": 20261128,
+      "calibration_case_seed": 66384148,
+      "case_id": "anchor",
+      "episode_index": 1,
+      "grasp_id": "rj45-train-02",
+      "source": "training-pool",
+      "split": "train"
+    }
+  ],
+  "training_rng": {
+    "numpy": true,
+    "physics_seed_unchanged": 20261128,
+    "python": true,
+    "seed": 20261121,
+    "state_sha256": {
+      "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+      "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+      "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+      "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+    },
+    "torch_cpu": true,
+    "torch_cuda_all_available_devices": true
+  },
+  "transitions": {
+    "by_case": {
+      "anchor": {
+        "active_valid": 8072,
+        "terminal": 11,
+        "transitions": 8192
+      }
+    },
+    "first_active_base79": {
+      "anchor": {
+        "sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+        "values": [
+          0.016464238986372948,
+          -0.42312589287757874,
+          -0.052547648549079895,
+          0.9999977946281433,
+          0.015518326312303543,
+          -0.20519204437732697,
+          0.12840621173381805,
+          -0.48077237606048584,
+          0.23018525540828705,
+          -0.37070661783218384,
+          -0.5256827473640442,
+          0.5241769552230835,
+          0.516779899597168,
+          0.4085480868816376,
+          -0.3574497103691101,
+          -0.3373448848724365,
+          0.3512722849845886,
+          -0.581346869468689,
+          -0.6299213767051697,
+          0.27789220213890076,
+          -0.25937071442604065,
+          -0.00010171638132305816,
+          -6.50059591862373e-05,
+          -9.468127245781943e-05,
+          9.106316429097205e-05,
+          9.43956765695475e-05,
+          5.322258402884472e-06,
+          1.721867374726571e-05,
+          0.0016521613579243422,
+          -0.00028644761187024415,
+          -0.002799757057800889,
+          0.0022572753950953484,
+          -0.002364323940128088,
+          0.004498745780438185,
+          -0.00429801270365715,
+          0.18510401248931885,
+          0.4721299409866333,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          -0.4113236963748932,
+          1.0,
+          -0.05487203970551491,
+          0.014787913300096989,
+          0.0010967255802825093,
+          0.0024835269432514906,
+          0.0006000201101414859,
+          0.0002543131704442203,
+          -0.00042120617581531405,
+          -0.06810029596090317,
+          -0.0007947286358103156,
+          -0.03637472912669182,
+          0.03732840344309807,
+          -0.030684472993016243,
+          0.05280177295207977,
+          -0.03979802504181862,
+          1.0
+        ]
+      }
+    },
+    "total_transitions": 8192
+  },
+  "updates": 64
+}

@@ -1,0 +1,202 @@
+{
+  "absolute_tip_pose_offset_not_integrated_delta": true,
+  "dense_lateral_scale_m": 0.0005,
+  "dense_lateral_scale_over_strict_tolerance": 10.0,
+  "dense_progress_pose_source": "GT relative object pose; calibration bias is applied to estimator/control, not the reward potential",
+  "interpretation": {
+    "estimator_reward_coordinate_bug_confirmed": false,
+    "exploration_scale_as_cause_proven": false,
+    "next_test_hypothesis": "compare initial exploration scale while holding initialization, conditions, reward, action bounds, data budget and final checkpoint selection fixed",
+    "no_hyperparameter_changed_in_this_run": true,
+    "nominal_sigma_is_a_command_distribution_scale_not_measured_end_effector_error": true,
+    "training_distribution_effect_proven": false
+  },
+  "nominal_initial_gaussian_sigma_normalized": 0.1,
+  "nominal_translation_sigma_over_lateral_tolerance": 3.0,
+  "nominal_unclipped_rotation_sigma_rad": 0.0026179938779914945,
+  "nominal_unclipped_translation_sigma_m": 0.00015000000000000001,
+  "reward_parameters": {
+    "action_delta_penalty": 0.0001,
+    "angle_scale_rad": 0.017453292519943295,
+    "depth_scale_m": 0.012,
+    "failure_penalty": 3.0,
+    "force_penalty": 0.01,
+    "force_scale_n": 8.0,
+    "lateral_scale_m": 0.0005,
+    "normalized_error_cap": 20.0,
+    "success_bonus": 10.0
+  },
+  "rotation_bound_rad": 0.026179938779914945,
+  "schema": "rj45_multibias_training_diagnostics_v1",
+  "strict_lateral_tolerance_m": 5e-05,
+  "strict_lateral_tolerance_provenance": "project-defined evaluation criterion; not a manufacturer specification",
+  "training": {
+    "train-multi": {
+      "active_valid_rows": 7994,
+      "applied_action_axes": [
+        {
+          "axis": 0,
+          "normalized_mean": -0.001152732795896195,
+          "normalized_population_std": 0.09848732254546885,
+          "physical_mean": -1.7290991938442924e-06,
+          "physical_population_std": 0.00014773098381820328,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 1,
+          "normalized_mean": -0.008023259263124919,
+          "normalized_population_std": 0.11640339861373696,
+          "physical_mean": -1.203488889468738e-05,
+          "physical_population_std": 0.00017460509792060545,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 2,
+          "normalized_mean": -0.0005467245093335821,
+          "normalized_population_std": 0.10727901347067001,
+          "physical_mean": -8.200867640003732e-07,
+          "physical_population_std": 0.00016091852020600503,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 3,
+          "normalized_mean": 0.011751492017996613,
+          "normalized_population_std": 0.09655816428732418,
+          "physical_mean": 0.00030765334160381047,
+          "physical_population_std": 0.0025278868297431167,
+          "physical_unit": "rad"
+        },
+        {
+          "axis": 4,
+          "normalized_mean": 0.0028397845217173244,
+          "normalized_population_std": 0.10213885205330368,
+          "physical_mean": 7.43453849267096e-05,
+          "physical_population_std": 0.0026739888938062803,
+          "physical_unit": "rad"
+        },
+        {
+          "axis": 5,
+          "normalized_mean": -0.0033337042997417026,
+          "normalized_population_std": 0.10074449504288285,
+          "physical_mean": -8.7276174477577e-05,
+          "physical_population_std": 0.002637484712636118,
+          "physical_unit": "rad"
+        }
+      ],
+      "completed_episode_transition_lengths": [
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727
+      ],
+      "measured_action_std_is_not_pure_exploration_std": true,
+      "rows": 8192,
+      "terminal_step_rewards": [
+        -3.0198161602020264,
+        -3.0063672065734863,
+        -3.025075912475586,
+        -3.0307934284210205,
+        -2.9326000213623047,
+        -3.045072078704834,
+        -2.955172061920166,
+        -3.0400235652923584,
+        -3.108424425125122,
+        -2.8271968364715576,
+        -3.0694026947021484
+      ],
+      "training_success_flags_not_persisted_in_transition_log": true,
+      "unfinished_tail_transitions": 195
+    },
+    "train-single": {
+      "active_valid_rows": 8072,
+      "applied_action_axes": [
+        {
+          "axis": 0,
+          "normalized_mean": 0.01989369278225654,
+          "normalized_population_std": 0.09888456252475777,
+          "physical_mean": 2.984053917338481e-05,
+          "physical_population_std": 0.00014832684378713665,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 1,
+          "normalized_mean": 0.005393337588863423,
+          "normalized_population_std": 0.1222346011806415,
+          "physical_mean": 8.090006383295135e-06,
+          "physical_population_std": 0.00018335190177096226,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 2,
+          "normalized_mean": -0.028185097324991658,
+          "normalized_population_std": 0.10012385143691835,
+          "physical_mean": -4.227764598748749e-05,
+          "physical_population_std": 0.0001501857771553775,
+          "physical_unit": "m"
+        },
+        {
+          "axis": 3,
+          "normalized_mean": 0.023869724730662185,
+          "normalized_population_std": 0.0921558619218684,
+          "physical_mean": 0.0006249079321421578,
+          "physical_population_std": 0.0024126348233248097,
+          "physical_unit": "rad"
+        },
+        {
+          "axis": 4,
+          "normalized_mean": -0.04410561711358279,
+          "normalized_population_std": 0.10890062498532192,
+          "physical_mean": -0.0011546823558839664,
+          "physical_population_std": 0.0028510116952102037,
+          "physical_unit": "rad"
+        },
+        {
+          "axis": 5,
+          "normalized_mean": -0.01769170773794957,
+          "normalized_population_std": 0.09738643579720081,
+          "physical_mean": -0.00046316782549166727,
+          "physical_population_std": 0.0025495709271648346,
+          "physical_unit": "rad"
+        }
+      ],
+      "completed_episode_transition_lengths": [
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727,
+        727
+      ],
+      "measured_action_std_is_not_pure_exploration_std": true,
+      "rows": 8192,
+      "terminal_step_rewards": [
+        -3.0198161602020264,
+        -3.001889228820801,
+        -2.9369852542877197,
+        -3.022770881652832,
+        -2.946199893951416,
+        -3.0792319774627686,
+        -3.078155994415283,
+        -3.1527068614959717,
+        -3.1098740100860596,
+        -3.1418094635009766,
+        -2.9354867935180664
+      ],
+      "training_success_flags_not_persisted_in_transition_log": true,
+      "unfinished_tail_transitions": 195
+    }
+  },
+  "translation_bound_m": 0.0015
+}

@@ -1,0 +1,31 @@
+{
+  "deadline_utc": "2026-10-31T10:50:52Z",
+  "media_inputs": {
+    "current/configs/rj45-oracle-runtime-104721a.json": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "current/scripts/evaluate_rj45_frozen_ablation.py": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+    "current/scripts/record_rj45_oracle_probe.py": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+    "current/scripts/rj45_evaluation_video.py": "9aecdc29894dbc0ce5411663c3759bb4f5358b6ad768d44b437b9c0701d69034",
+    "current/scripts/run_rj45_g2_physics_probe.py": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "current/scripts/run_rj45_multibias_probe.py": "7035363ecbab9aa83196760a54b22ab00b2c163bb4a8b4151a825960291e0be5",
+    "current/scripts/run_rj45_oracle_ppo_probe.py": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+    "current/src/rby1_assembly/rj45_oracle_diagnostic.py": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+    "media-runner.py": "f848fa944656a290ff63098cb2ff1bf7824b37e8add39e8b84d5c95baf2e15b3",
+    "record_rj45_multibias_replay.py": "49bf950a0b466820d82b5dfec1aae6bee498c8ac0b0428f24908b387d04a4e2f"
+  },
+  "primary_audit_sha256": "d7c3e9cbbf4cf3c6766308159b27c1de23199f74661d215fbbddc0749b54776a",
+  "primary_inputs": {
+    "contract.json": "5f91ce18fa0d1351250f34463b6f39f4b114597e8bb1b200ba9d77a2cd7c8e77",
+    "current/configs/rj45-oracle-runtime-104721a.json": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "current/scripts/evaluate_rj45_frozen_ablation.py": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b",
+    "current/scripts/record_rj45_oracle_probe.py": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+    "current/scripts/run_rj45_g2_physics_probe.py": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "current/scripts/run_rj45_multibias_probe.py": "7035363ecbab9aa83196760a54b22ab00b2c163bb4a8b4151a825960291e0be5",
+    "current/scripts/run_rj45_oracle_ppo_probe.py": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+    "current/src/rby1_assembly/rj45_oracle_diagnostic.py": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+    "evaluate-report.json": "0decb95ec25d12419253369ef2f934f122f7f2e2a0fb346b3a03fb97d3d4da87",
+    "origin-protocol.json": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "train-multi-report.json": "391896cdc55c3b4a05e12b7b7adededb6a57eaede25dab770a15df3f25f2c7ef",
+    "train-multi/final_checkpoint.pt": "82a1a01c8a0c7797bc6b02a95852a42f82efd02b7d373fae7774ecb4c92792b3"
+  },
+  "schema": "rj45_multibias_media_sealed_v1"
+}

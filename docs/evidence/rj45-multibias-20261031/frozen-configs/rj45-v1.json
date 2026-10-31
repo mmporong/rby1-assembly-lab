@@ -1,0 +1,355 @@
+{
+  "schema_version": 1,
+  "task_id": "rj45-v1",
+  "scope": "RB-Y1 bimanual mechanical insertion of an RJ45 plug into a handheld LAN-adapter housing; no latch locking, cable dynamics or Ethernet-link claim",
+  "parameter_provenance": "vendor CAD/drawing dimensions plus explicitly labelled simulation-design assumptions; no hardware calibration",
+  "length_unit": "m",
+  "angle_unit": "rad",
+  "world_up_axis": "Z",
+  "insertion_axis_world": "+Y",
+  "assets": {
+    "robot": "assets/generated/tasks/rj45-v1/robot.usda",
+    "socket": "assets/generated/tasks/rj45-v1/socket.usda",
+    "plug": "assets/generated/tasks/rj45-v1/plug.usda",
+    "table": "assets/generated/tasks/rj45-v1/table.usda",
+    "build_report": "assets/generated/tasks/rj45-v1/build-report.json"
+  },
+  "frames": {
+    "socket_entry": {
+      "position_m": [
+        0,
+        -0.033,
+        0.0005075
+      ],
+      "quaternion_wxyz": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "plug_tip": {
+      "position_m": [
+        0,
+        0.01137,
+        0
+      ],
+      "quaternion_wxyz": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "left_grasp": {
+      "position_m": [
+        0,
+        0.005,
+        0.028
+      ],
+      "quaternion_wxyz": [
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    "right_grasp": {
+      "position_m": [
+        0,
+        -0.035,
+        0.012
+      ],
+      "quaternion_wxyz": [
+        0.9238795325112867,
+        0.3826834323650898,
+        0,
+        0
+      ]
+    }
+  },
+  "table": {
+    "top_height_m": 0.75,
+    "size_m": [
+      0.65,
+      0.9,
+      0.05
+    ],
+    "center_xy_m": [
+      0.6,
+      0
+    ]
+  },
+  "socket": {
+    "display_name": "portable LAN adapter with TE 5555153-1 RJ45 jack",
+    "mass_kg": 0.055,
+    "mass_source": "simulation assumption for jack plus designed enclosure, not supplier measurement",
+    "initial_position_m": [
+      0.35,
+      0.12,
+      0.761
+    ],
+    "initial_orientation_wxyz": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "outer_width_m": 0.032,
+    "outer_height_m": 0.022,
+    "length_m": 0.066,
+    "hole_width_m": 0.0119126,
+    "hole_height_m": 0.006985
+  },
+  "plug": {
+    "display_name": "drawing-derived terminated RJ45 8P8C plug, TE 5-558530 family",
+    "mass_kg": 0.004,
+    "mass_source": "simulation assumption for cable-free terminated plug, not supplier measurement",
+    "initial_position_m": [
+      0.35,
+      -0.12,
+      0.79
+    ],
+    "initial_orientation_wxyz": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "shaft_width_m": 0.01179,
+    "shaft_height_m": 0.00615,
+    "shaft_length_m": 0.0145,
+    "grip_width_m": 0.01179,
+    "grip_height_m": 0.00798,
+    "grip_length_m": 0.02274
+  },
+  "contact": {
+    "static_friction": 0.8,
+    "dynamic_friction": 0.6,
+    "restitution": 0,
+    "contact_offset_m": 2e-05,
+    "rest_offset_m": 0,
+    "solver_position_iteration_count": 24,
+    "solver_velocity_iteration_count": 0,
+    "enable_external_forces_every_iteration": true
+  },
+  "evaluation": {
+    "assembled_depth_m": 0.012,
+    "max_lateral_error_m": 5e-05,
+    "max_orientation_error_rad": 0.008726646259971648,
+    "max_contact_force_n": 25,
+    "dwell_s": 0.4,
+    "timeout_s": 120,
+    "max_depth_m": 0.013,
+    "max_relative_linear_speed_m_s": 0.005,
+    "max_relative_angular_speed_rad_s": 0.05
+  },
+  "controller": {
+    "left_gripper_grasp_magnitude_m": 0.0145,
+    "right_gripper_grasp_magnitude_m": 0.002,
+    "gripper_open_magnitude_m": 0.048,
+    "residual_translation_bound_m": 0.0015,
+    "residual_rotation_bound_rad": 0.026179938779914945,
+    "alignment_standoff_m": 0.006,
+    "insertion_target_margin_m": 0.0003,
+    "insertion_speed_m_s": 0.0015,
+    "insertion_max_tracking_lead_m": 0.0005,
+    "assembly_socket_goal_m": [
+      0.37,
+      0.05,
+      0.9
+    ],
+    "assembly_socket_goal_quaternion_wxyz": [
+      1,
+      0,
+      0,
+      0
+    ],
+    "pregrasp_timeout_s": 70,
+    "phase_timeout_s": 8,
+    "align_timeout_s": 15,
+    "insert_timeout_s": 30,
+    "pregrasp_orientation_tolerance_rad": 0.05,
+    "insertion_advance_lateral_tolerance_m": 0.0005,
+    "insertion_resume_lateral_tolerance_m": 0.00025,
+    "insertion_advance_orientation_tolerance_rad": 0.015,
+    "insertion_resume_orientation_tolerance_rad": 0.01,
+    "jam_contact_force_n": 8,
+    "grip_contact_force_n": 0.5,
+    "torso_work_joint_positions_rad": [
+      0,
+      0.9,
+      -1.8,
+      0.9,
+      0,
+      0
+    ],
+    "torso_max_joint_delta_rad": 0.015,
+    "pregrasp_clearance_joint_pos_rad": [
+      0.1,
+      0,
+      0,
+      -2.4,
+      0,
+      1.4,
+      0
+    ],
+    "pregrasp_safe_wrist_height_m": 0.98,
+    "pregrasp_waypoint_tolerance_rad": 0.08,
+    "pregrasp_torso_tolerance_rad": 0.03,
+    "initial_clearance_joint_positions_rad": [
+      0.7,
+      0,
+      0,
+      -2.1,
+      0,
+      1.4,
+      0
+    ],
+    "left_above_joint_positions_rad": [
+      -1.401307132,
+      0.96650597,
+      -1.144795829,
+      -1.882112293,
+      1.650221357,
+      1.592792715,
+      1.25041778
+    ],
+    "approach_waypoint_max_joint_delta_rad": 0.025,
+    "pregrasp_above_height_m": 0.13,
+    "waypoint_provenance": "Bounded IK from actual RB USD joint frames; FK cross-checked against PhysX traces. Elevated left and oblique45 right approach paths screened with fully open +/-48mm fingers and compound table/nest geometry. Kinematic candidates; physical validation remains separate.",
+    "right_above_joint_positions_rad": [
+      -0.890571288,
+      -1.389464923,
+      0.907748342,
+      -1.878895718,
+      -2.216244888,
+      1.023817252,
+      -0.490770811
+    ],
+    "approach_waypoint_tracking_tolerance_rad": 0.05,
+    "gripper_command_speed_m_s": 0.02,
+    "torso_reference_tracking_tolerance_rad": 0.05,
+    "nullspace_posture_gain": 0.1,
+    "nullspace_max_joint_delta_rad": 0.01,
+    "pregrasp_integral_gain": 0.25,
+    "alignment_integral_gain": 0.25
+  },
+  "reset": {
+    "position_noise_m": [
+      0.00008,
+      0.00008,
+      0
+    ]
+  },
+  "data": {
+    "observation_source": "simulator_state_with_noise",
+    "train_seed": 20261026,
+    "evaluation_seed": 910261
+  },
+  "geometry": {
+    "jack_mesh": "assets/cache/rj45/te-5555153-1-mesh.json",
+    "jack_cad_transform": {
+      "rotation_rows": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          -1,
+          0
+        ],
+        [
+          0,
+          0,
+          -1
+        ]
+      ],
+      "translation_m": [
+        0,
+        -0.031405,
+        0
+      ],
+      "scale": 1
+    },
+    "jack_source_step_sha256": "2a04f61d6f382b35df75da64210a8cc1410551a62f3d367e97513ab46a53e756",
+    "adapter_enclosure_m": {
+      "width": 0.032,
+      "length": 0.066,
+      "height": 0.022,
+      "wall": 0.0015
+    },
+    "port_guide": {
+      "entry_y_m": -0.033,
+      "main_z_range_m": [
+        -0.002985,
+        0.004
+      ],
+      "mouth_half_width_m": 0.00635,
+      "throat_half_width_m": 0.0059563,
+      "bevel_depth_m": 0.0008,
+      "cavity_depth_m": 0.0145,
+      "back_wall_m": 0.001
+    },
+    "plug_profile": {
+      "total_length_m": 0.02274,
+      "max_width_m": 0.01179,
+      "terminated_nose_height_m": 0.00615,
+      "rear_height_m": 0.00798,
+      "nose_length_m": 0.0145,
+      "contact_count": 8,
+      "contact_pitch_m": 0.00102,
+      "contact_width_m": 0.00036,
+      "contact_length_m": 0.0045,
+      "latch_visual_only": true,
+      "cable_visual_only": true
+    },
+    "pickup_nest": {
+      "world_center_m": [
+        0.35,
+        -0.11575,
+        0.7684625
+      ],
+      "size_m": [
+        0.01,
+        0.0115,
+        0.036925
+      ],
+      "top_height_m": 0.786925,
+      "top_plate": {
+        "size_m": [
+          0.018,
+          0.016,
+          0.002
+        ],
+        "rear_edge_relative_to_plug_m": -0.0015
+      },
+      "locator": {
+        "slot_width_m": 0.01209,
+        "wall_thickness_m": 0.0015,
+        "wall_height_m": 0.002,
+        "side_rail_rear_edge_relative_to_plug_m": -0.0015,
+        "front_clearance_m": 0.00015
+      },
+      "scope": "project-designed open-top pickup locator: existing support column plus a 2mm top plate, two nose side rails and a front stop; 0.15mm nominal side/front clearance restrains initial yaw and sliding while leaving upward lift free; simulation fixture, not supplier part"
+    },
+    "gripper_geometry_reference": "assets/generated/build-report.json: robot.gripper_geometry; unchanged RB default fingers",
+    "dimension_sources": {
+      "jack_outer_envelope": "TE 5555153-1 official STEP, converted by existing KiCad10 OpenCascade importer",
+      "jack_guide_envelope": "front-face coordinates extracted from TE CAD; simplified convex guide for mechanical insertion",
+      "plug_max_envelope": "TE customer drawing C-558530 revision H: 11.79mm max width,22.74mm length,6.15mm max terminated nose height,7.98mm rear height,8 contacts at1.02mm pitch",
+      "nose_length_and_contact_detail": "drawing-derived approximate segmentation; not a supplier STEP or a measured spring-contact model",
+      "adapter_enclosure_and_nest": "project-designed geometry; dimensional and mass assumptions"
+    },
+    "model_limits": [
+      "No Ethernet electrical continuity or network link simulation",
+      "No elastic latch deformation/retention validation; latch displayed in depressed/unlocked state",
+      "No contact-spring force calibration",
+      "No cable bending/tension dynamics",
+      "No robot-object attachment joint or runtime object pose overwrite"
+    ],
+    "jack_canonical_mesh_sha256": "caf85e2ba78124034327bba524c398d121b8ed74c15a5e23dd6dd3da1f4d6dba"
+  }
+}

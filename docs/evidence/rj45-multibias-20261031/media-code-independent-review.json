@@ -1,0 +1,16 @@
+{
+  "status": "approve",
+  "reviewer": "native code-reviewer multibias_code_review",
+  "scope": [
+    "scripts/record_rj45_multibias_replay.py",
+    "tests/test_record_rj45_multibias_replay.py"
+  ],
+  "files": {
+    "scripts/record_rj45_multibias_replay.py": "49bf950a0b466820d82b5dfec1aae6bee498c8ac0b0428f24908b387d04a4e2f",
+    "tests/test_record_rj45_multibias_replay.py": "408b652db76115c81616b9c3961dc18c4fa28be46806334ec93eaa2861cc5197"
+  },
+  "tests": "54 related CPU tests passed; pyright0; pycompile pass",
+  "resolved_high": "same-byte JSON and BytesIO checkpoint hashing, pinned frozen expected hashes, policy pre/post checks",
+  "runtime_media_approval": false,
+  "utc": "2026-10-31T10:08:16.696089+00:00"
+}

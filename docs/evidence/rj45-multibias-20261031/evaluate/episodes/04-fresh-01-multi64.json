@@ -1,0 +1,105 @@
+{
+  "bias": {
+    "base_seed": 20281208,
+    "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+    "enabled": true,
+    "episode_index": [
+      1
+    ],
+    "episode_stride": 1000003,
+    "level": 0,
+    "rotation_vector_entry_rad": [
+      [
+        1.7988479157793336e-05,
+        0.00013803849287796766,
+        2.174604787796852e-06
+      ]
+    ],
+    "sampling_event": "once_per_environment_reset_before_calibration",
+    "stream_offset": 45123017,
+    "translation_entry_m": [
+      [
+        -5.780487117590383e-05,
+        -2.45838987211755e-06,
+        0.00010334836406400427
+      ]
+    ]
+  },
+  "case": {
+    "base_seed": 20281208,
+    "calibration_case_seed": 66404228,
+    "case_id": "fresh-01",
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "source": "policy-unseen",
+    "split": "train"
+  },
+  "evaluation": {
+    "action_boundary_fraction_over_active": 0.0,
+    "action_boundary_rows": 0,
+    "active_rows": 708,
+    "classification": "valid_failure",
+    "evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "observation": {
+      "actor_ground_truth_access": false,
+      "base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+      "critic_sha256": "863eee149550b3fc12e37c6f229d2ac8a45a92b6148d26b9a1f041abcec35f8a",
+      "dimensions": {
+        "critic": 92,
+        "policy": 79
+      },
+      "oracle13_sha256": "74c21a1c7d22bdff3cdae29f9cd95632ba80e6b0c22bc63e9ce84f5125f3db38",
+      "policy_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002"
+    },
+    "reference_controller": null,
+    "terminal": {
+      "criteria": {
+        "depth": true,
+        "dwell": false,
+        "forbidden_contact": true,
+        "force": true,
+        "grasp_live_and_proven": true,
+        "independent_evaluator_terminal": false,
+        "lateral": false,
+        "orientation": true
+      },
+      "evaluator_source": "simulator_ground_truth_independent",
+      "evaluator_version": "task-evaluator-v1+environment-cross-check",
+      "metrics": {
+        "actual_depth_m": 0.012349407612209633,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.911933660507202,
+        "grasp_both": 1.0,
+        "lateral_error_m": 6.233393888705056e-05,
+        "orientation_error_rad": 0.0009440686807236769
+      },
+      "success": false,
+      "terminal_timestamp_s": 24.000001907348633,
+      "termination_reason": "episode_timeout",
+      "valid": true
+    },
+    "terminal_phase": "insert",
+    "trace": {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate/traces/04-fresh-01-multi64.jsonl",
+      "sha256": "4dd55622ba39242a904be20e0463bf1c365ea9fc6ba7ed0928c1ad182c3e1cf6"
+    }
+  },
+  "index": 4,
+  "initial_base79_sha256": "52a260dd9d1218b5ab26c4cccb233a63085975102d2c706dc5cede5dadc4b002",
+  "method": "multi64"
+}

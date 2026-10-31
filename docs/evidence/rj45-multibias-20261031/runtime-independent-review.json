@@ -1,0 +1,39 @@
+{
+  "approved_scopes": [
+    "actual training/evaluation artifacts and original weights",
+    "raw replay media and source lineage",
+    "project README/contribution plan/evidence README prior to final media links",
+    "comparison and exposure figures",
+    "exact Brev STOPPED and guard inactive/not-found closure"
+  ],
+  "facts": {
+    "effect_proven": false,
+    "evaluations_valid": 27,
+    "final_checkpoint_iteration_field": 63,
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "instance_status": "STOPPED",
+    "multiseed_candidate": false,
+    "raw_video_fps": 60,
+    "raw_video_frames": {
+      "multi64": 760,
+      "zero": 1454
+    }
+  },
+  "limits": [
+    "only one training seed and one train grasp; no final split or sim-to-real result",
+    "no independent before/after inventory of other VM/volumes; closure statement is execution record"
+  ],
+  "pending_scopes": [
+    "derived presentation video",
+    "final public manifest",
+    "final git delivery"
+  ],
+  "reviewer": "native verifier multibias_final_verifier",
+  "schema": "rj45_multibias_runtime_independent_review_v1",
+  "status": "pass_partial_scope",
+  "utc": "2026-10-31T10:26:51.658428+00:00"
+}

@@ -1,0 +1,14 @@
+{
+  "checks": {
+    "actor_parameter_sha256_before": true,
+    "first_active_anchor_base79": true,
+    "initialization.actor": true,
+    "initialization.critic": true,
+    "initialization.optimizer_sha256": true,
+    "initialization.rng": true,
+    "initialization.zero_actor": true,
+    "same_transition_budget": true,
+    "training_rng": true
+  },
+  "status": "pass"
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "rj45_multibias_scope_v1",
+  "recorded_at_utc": "2026-10-31T08:09:58.064109+00:00",
+  "raw_report_modified": false,
+  "policy_actor_dim": 79,
+  "critic_dim": 92,
+  "policy_inputs": "simulation estimated state proxy, not RGB-D images or measured real sensors",
+  "policy_action": "INSERT-phase right-hand six-dimensional tip residual",
+  "scripted_components": [
+    "left support",
+    "approach and held initialization",
+    "insertion progress",
+    "supervisory transitions",
+    "overload stop and retreat"
+  ],
+  "train_grasp": "rj45-train-02 only",
+  "case_split_field": "train refers to held-grasp-bank split; policy-unseen calibration cases are separated by source and seed",
+  "varied_factor": "episode-constant calibration bias",
+  "unchanged_factors": [
+    "frozen runtime and geometry",
+    "physics 240Hz/control30Hz",
+    "reward",
+    "action range",
+    "initial actor/critic/optimizer",
+    "training seed",
+    "strict success criteria"
+  ],
+  "physical_scene": "one fresh scene per training arm; one shared evaluation scene",
+  "physx_reseeded_between_cases": false,
+  "evaluation_rng_seed": 20261124,
+  "physics_seed_unchanged_legacy_field": "anchor argument 20261128 recorded by runner, not evidence of PhysX reseeding",
+  "rotation_schedule": "episode-cyclic, not equal transition counts; actual exposure logged",
+  "final64_only": true,
+  "diagnostic32_is_not_a_candidate": true,
+  "training_seed_count": 1,
+  "effect_proven": false,
+  "dev_and_final_grasp_bank_splits_opened": false,
+  "camera_or_sim_to_real_validation": false,
+  "pre_evaluation_provenance_limit": "helper writes complete raw pre-evaluation trace but does not include the evaluation payload in training report; trace structure and recovered byte hashes are audited without claiming a missing report SHA"
+}

@@ -1,0 +1,58 @@
+{
+  "evidence": {
+    "audit_sha256": "d7c3e9cbbf4cf3c6766308159b27c1de23199f74661d215fbbddc0749b54776a",
+    "builder_sha256": "bdc96d7f174adf9cde3b9baac4b85725f0b7e5d70e5bcc18c04a463b5370341f",
+    "cpu_subtests": 307,
+    "cpu_tests": 833,
+    "document_links_valid": 104,
+    "file_manifest_records_verified": 177,
+    "file_manifest_sha256": "313d0ad611633f4ed10a9aadc7fcfc19ecc5aa6501c6f2401e58e73d4eb92bd0",
+    "guard_timer_service": "not-found/inactive/dead",
+    "instance": "STOPPED",
+    "media_manifest_records_verified": 8,
+    "media_manifest_sha256": "42033f5cdbe3a859e3f521232923330c793a38c4953b2ddd615c327d13a5cd8c",
+    "metric_clock_and_causal_dwell_errors": 0,
+    "metric_events_verified": 2214,
+    "presentation": {
+      "bytes": 2878436,
+      "duration_s": 26.233333,
+      "fps": 60,
+      "frames": 1574,
+      "height": 1080,
+      "sha256": "62ad1698803830f048a8678f0f0983ff3f08cbbea5b1df87bc1e141a47ab7b3c",
+      "width": 1920
+    },
+    "public_reconstruction": {
+      "provenance_absolute_paths_differ_but_source_sha_and_facts_match": true,
+      "required_input_files": 10,
+      "video_ass_background_thumbnail_byte_identical": true
+    }
+  },
+  "limits": [
+    "one training seed and one train grasp; final split unopened",
+    "fresh05 selected after outcomes for illustrative new physics replay, not benchmark statistics",
+    "other VM/volume nonmutation is an execution record; no independent before-after full inventory"
+  ],
+  "pending_delivery": [
+    "local commit",
+    "push origin main",
+    "remote SHA comparison"
+  ],
+  "result": {
+    "effect_proven": false,
+    "final_policy": false,
+    "followup_multiseed_candidate": false,
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "generalization_proven": false
+  },
+  "reviewer": "native multibias_final_verifier",
+  "reviewer_role": "verifier",
+  "schema": "rj45_multibias_final_independent_review_v1",
+  "scope": "actual artifacts, public reconstruction, final media and docs, exact Brev closure before commit",
+  "utc": "2026-10-31T10:34:32.115475+00:00",
+  "verdict": "pass"
+}

@@ -1,0 +1,10 @@
+{
+  "bootstrap_sha256": "b7a7319f99c4e9e6cf5e972964ad5891d2e65b2c13187f5527bdebffaeffc439",
+  "contract_sha256": "91e81ad2bcec6006b12420e1a0489cb536ce0345495d3b93cb304a637e6b13c2",
+  "deadline_utc": "2026-10-31T10:50:52Z",
+  "helper_sha256": "26063d1de61eff7722519d9d92bfe018aa6e9912d50276fd63e5873c4e766543",
+  "launch_sha256": "82821057926aa29f46e63b172c1a2a7dfc6535f5adf8878abd44ad3a48b63324",
+  "members": 14,
+  "packet_manifest_sha256": "a3ba501327d6fafbcf3d256a2a8cad5fc44fa650756177f42d9e957cec8f653e",
+  "payload_sha256": "bc04233a684b0069f3bf86620fafb1a117fb5fd5e4de970dd74dddc64695186e"
+}

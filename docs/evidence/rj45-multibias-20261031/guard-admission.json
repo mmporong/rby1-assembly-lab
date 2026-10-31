@@ -1,0 +1,10 @@
+{
+  "status": "armed_before_start",
+  "unit": "rby1-multibias-stop-20261031a",
+  "deadline_utc": "2026-10-31T10:50:52Z",
+  "instance_id": "pyf1b9s0a",
+  "instance_name": "rby1-oracle-crusoe-20261031a",
+  "timer_show": "NextElapseUSecRealtime=Sat 2026-10-31 19:50:52 KST\nActiveState=active\n",
+  "service_show": "ExecStart={ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /home/lim/rby1-assembly-lab/scripts/stop_brev_instance.py --org mmporong-3ec75d-5yzu --instance-id pyf1b9s0a --instance-name rby1-oracle-crusoe-20261031a ; ignore_errors=no ; start_time=[n/a] ; stop_time=[n/a] ; pid=0 ; code=(null) ; status=0/0 }\n",
+  "independent_review": "APPROVE"
+}

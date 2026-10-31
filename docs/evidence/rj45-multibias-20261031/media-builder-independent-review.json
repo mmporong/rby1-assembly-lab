@@ -1,0 +1,21 @@
+{
+  "actual_frames_validated": 2214,
+  "ass_frame_membership_errors": 0,
+  "causal_dwell_errors": 0,
+  "issues": 0,
+  "py_compile": "pass",
+  "pyright_errors": 0,
+  "pyright_warnings": 0,
+  "reviewer": "native code-reviewer multibias_code_review",
+  "scope": "derived media builder code and actual recovered input validation; full rendered output pending",
+  "sha256": "bdc96d7f174adf9cde3b9baac4b85725f0b7e5d70e5bcc18c04a463b5370341f",
+  "status": "approve",
+  "tamper_cases_rejected": [
+    "clock",
+    "control offset",
+    "evidence SHA",
+    "lineage",
+    "validity flag"
+  ],
+  "utc": "2026-10-31T10:28:42.534499+00:00"
+}

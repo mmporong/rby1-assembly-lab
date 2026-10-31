@@ -1,0 +1,11 @@
+{
+  "effect_proven": false,
+  "elapsed_s": 7270.26962798,
+  "followup_multiseed_candidate": false,
+  "fresh8_successes": {
+    "multi64": 3,
+    "single64": 2,
+    "zero": 2
+  },
+  "status": "completed"
+}

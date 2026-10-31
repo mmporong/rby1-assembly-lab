@@ -1,0 +1,17 @@
+{
+  "decision": "APPROVE",
+  "role": "code-reviewer",
+  "scope": "zero-transition instrumentation repair",
+  "recorded_at_utc": "2026-10-31T08:06:03.366455+00:00",
+  "helper_sha256": "7035363ecbab9aa83196760a54b22ab00b2c163bb4a8b4151a825960291e0be5",
+  "test_sha256": "2402ff503257109d19757084fd0c60718c233445db35dc62a633a2c534ea01d7",
+  "frozen_training_source_sha256": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+  "raw_observation_cache_matches_policy_input": true,
+  "clone_before_step_and_auto_reset": true,
+  "targeted_tests_passed": 14,
+  "related_tests_passed": 58,
+  "subtests_passed": 10,
+  "pyright_errors": 0,
+  "unchanged_physics_reward_seeds_and_deadline": true,
+  "post_evidence_audit_review": "separate pending"
+}

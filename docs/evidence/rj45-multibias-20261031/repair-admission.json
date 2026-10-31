@@ -1,0 +1,18 @@
+{
+  "schema": "rj45_multibias_instrumentation_repair_v1",
+  "recorded_at_utc": "2026-10-31T08:04:35.155297+00:00",
+  "invalid_archive_sha256": "49e173bf8386872c83c513dfb6e417e0a1fbbc33d1401c4cf3ffc8711290a2da",
+  "invalid_archive_bytes": 2612535,
+  "invalid_learning_transitions": 0,
+  "preflight_strict_successes": 4,
+  "invalid_learning_updates": 0,
+  "observed_error": "raw environment has no public get_observations; instrumentation failed before calling raw step",
+  "change_scope": "training telemetry reads cached observation instead of wrapper-only API; physics/reward/seed/checkpoint/evaluation budget unchanged",
+  "guard_deadline_utc": "2026-10-31T10:50:52Z",
+  "same_instance_same_reservation": true,
+  "performance_based_replacement": false,
+  "repaired_helper_sha256": "7035363ecbab9aa83196760a54b22ab00b2c163bb4a8b4151a825960291e0be5",
+  "repaired_test_sha256": "2402ff503257109d19757084fd0c60718c233445db35dc62a633a2c534ea01d7",
+  "independent_review": "APPROVE",
+  "regressions": "raw API absent; clone preserved across step mutation/reset; bad shape/NaN rejected; scoped14 and related58+10 pass"
+}

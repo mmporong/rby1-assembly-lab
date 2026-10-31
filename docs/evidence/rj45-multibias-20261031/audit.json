@@ -1,0 +1,1222 @@
+{
+  "claims": {
+    "effect_proven": false,
+    "final_policy": false,
+    "generalization_proven": false
+  },
+  "contract_identity": {
+    "evaluation_cases": [
+      {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-anchor",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281208,
+        "calibration_case_seed": 66404228,
+        "case_id": "fresh-01",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281216,
+        "calibration_case_seed": 66404236,
+        "case_id": "fresh-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281224,
+        "calibration_case_seed": 66404244,
+        "case_id": "fresh-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281232,
+        "calibration_case_seed": 66404252,
+        "case_id": "fresh-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281248,
+        "calibration_case_seed": 66404268,
+        "case_id": "fresh-06",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281256,
+        "calibration_case_seed": 66404276,
+        "case_id": "fresh-07",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      {
+        "base_seed": 20281264,
+        "calibration_case_seed": 66404284,
+        "case_id": "fresh-08",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      }
+    ],
+    "preflight_cases": [
+      {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "case_id": "anchor",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-pool",
+        "split": "train"
+      },
+      {
+        "base_seed": 20271208,
+        "calibration_case_seed": 66394228,
+        "case_id": "train-02",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-pool",
+        "split": "train"
+      },
+      {
+        "base_seed": 20271216,
+        "calibration_case_seed": 66394236,
+        "case_id": "train-03",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-pool",
+        "split": "train"
+      },
+      {
+        "base_seed": 20271224,
+        "calibration_case_seed": 66394244,
+        "case_id": "train-04",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "training-pool",
+        "split": "train"
+      }
+    ],
+    "training": {
+      "action_dim": 6,
+      "actor_initialization_seed": 20261123,
+      "actor_observation_dim": 79,
+      "checkpoint_selection": "final64_only_no_outcome_selection",
+      "critic_initialization_seed": 20261122,
+      "critic_observation_dim": 92,
+      "diagnostic_checkpoint_updates": [
+        32
+      ],
+      "eligible_checkpoint_updates": [
+        64
+      ],
+      "evaluation_seed": 20261124,
+      "final_checkpoint_update": 64,
+      "held_bank_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+      "mode": "standard79",
+      "multi_pool": [
+        20261128,
+        20271208,
+        20271216,
+        20271224
+      ],
+      "num_envs": 1,
+      "policy_training_seed": 20261121,
+      "right_arm_only": true,
+      "rollout_steps": 128,
+      "single_pool": [
+        20261128
+      ],
+      "transitions": 8192,
+      "updates": 64
+    }
+  },
+  "evaluation": {
+    "case_count": 9,
+    "common_evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "effect_proven": false,
+    "episode_count": 27,
+    "failure_criteria": {
+      "dwell": 20,
+      "independent_evaluator_terminal": 20,
+      "lateral": 19,
+      "orientation": 2
+    },
+    "followup_multiseed_candidate": false,
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "paired": {
+      "multi64_vs_single64": {
+        "losses": 1,
+        "ties": 5,
+        "wins": 2
+      },
+      "multi64_vs_zero": {
+        "losses": 0,
+        "ties": 7,
+        "wins": 1
+      }
+    },
+    "paired_conditions_identical": true,
+    "trace_integrity": [
+      {
+        "compressed_sha256": "e11c1cfbfa84720dc97252374c4974079a61ae163e4409a30c1184bec7496d7c",
+        "compressed_size": 833184,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/01-anchor-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "c65da1b3f242be5e07ac765342a3b1d1f824eb5bfb41ef420f4f7392bfaadcc3",
+        "uncompressed_size": 4167229
+      },
+      {
+        "compressed_sha256": "9b4b4e55f573661f744969a4ef9d6f369ff80936344aff825a80aebdcb358617",
+        "compressed_size": 838129,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/02-anchor-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "1d249055280676700f2c635a74a6d3c784d7c172bd02ed1a00f64c7027d7c6b0",
+        "uncompressed_size": 4183677
+      },
+      {
+        "compressed_sha256": "1b92651833d7d79a4830823c0e38379d586cf0ce4eb33b91a4329183d2b3c221",
+        "compressed_size": 744445,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/03-anchor-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b",
+        "uncompressed_size": 3722382
+      },
+      {
+        "compressed_sha256": "8ab46a24bae3d74e819be40456ba4370e0eec725fd28342cd35756eeb5b61f56",
+        "compressed_size": 814852,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/04-fresh-01-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "4dd55622ba39242a904be20e0463bf1c365ea9fc6ba7ed0928c1ad182c3e1cf6",
+        "uncompressed_size": 4115524
+      },
+      {
+        "compressed_sha256": "932524d3d8658bb0f9a1087209d121068b39e73e0bb8aab8296e1db18e67f40b",
+        "compressed_size": 722329,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/05-fresh-01-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "068f0845abaf7746cab6ee81666d64c08376f246f54c6890b3cf7741f023856e",
+        "uncompressed_size": 3682717
+      },
+      {
+        "compressed_sha256": "e7f82b5a2374da1db5d56340bd1379302854fa298265c8a0e1bed9598854ff7e",
+        "compressed_size": 811065,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/06-fresh-01-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "fa354da5866867035323308e81990fc7a3bbe67f4e53a6966cd335e6e1615b8c",
+        "uncompressed_size": 4099574
+      },
+      {
+        "compressed_sha256": "5c5a8865e3440c201007e468fc1bb7bcd5327420ac557fd24f904d7a175b80ec",
+        "compressed_size": 449715,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/07-fresh-02-zero.jsonl.gz",
+        "rows": 443,
+        "uncompressed_sha256": "5a08d93b1d10d308a2d96d7590c884bbd9d634d84289d51d65e18b236e915d72",
+        "uncompressed_size": 2190506
+      },
+      {
+        "compressed_sha256": "44907083a6ac1b376392a2fcb0ab9419891e78893b18d3434ec86d38011550dc",
+        "compressed_size": 821266,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/08-fresh-02-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "e10c98ce9c06c7933cded613911ecbedc84815a2f097ef6e74208db7387dadfe",
+        "uncompressed_size": 4129934
+      },
+      {
+        "compressed_sha256": "fa2f7b1d575a080c5e70ce14ed931483292f2dd39155f505a2bf81c7f19897a0",
+        "compressed_size": 480069,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/09-fresh-02-multi64.jsonl.gz",
+        "rows": 416,
+        "uncompressed_sha256": "1681e2473172b0d45c1f4030637738a66db1a6ee53cd38fea9aa7c08fad4ac63",
+        "uncompressed_size": 2302838
+      },
+      {
+        "compressed_sha256": "13682984e23c5af1de68854f264c09e334e5db32586290b04eab8258bef25e0a",
+        "compressed_size": 857348,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/10-fresh-03-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "60812db48c2043f4ca07dde851029d3c8b31bd53824f623d7109b47acafc87e8",
+        "uncompressed_size": 4165602
+      },
+      {
+        "compressed_sha256": "cb27fcec52f0afa18a8dd675d00513548a0deca2c70c5211aa6b3f1fe48edec4",
+        "compressed_size": 848642,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/11-fresh-03-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "005a7995ada9ffc7aa250a5edcfb37999d761ce6a8e7c5cbbfb6b7f786c03658",
+        "uncompressed_size": 4191568
+      },
+      {
+        "compressed_sha256": "ee544068b405df703826e875767c1ca646567580f2c42e9ce7a1abe9931cd7ed",
+        "compressed_size": 741248,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/12-fresh-03-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "5540322345a21293a4508b4c44024a9e98123e4abcf918763852683410409aa6",
+        "uncompressed_size": 3732442
+      },
+      {
+        "compressed_sha256": "806e25dc32f80f7e226c7a2fbac23059e88bcfa8e9be0a6b9871f128c0a24125",
+        "compressed_size": 493025,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/13-fresh-04-multi64.jsonl.gz",
+        "rows": 413,
+        "uncompressed_sha256": "3bf8fb32a0e14b5f671a15d5855f7646f8b4c74f72d44f0125baaec034d7ee17",
+        "uncompressed_size": 2316116
+      },
+      {
+        "compressed_sha256": "3611c0f46c0ddd230b100e7d7b1a1a202da8dd70db648db57abf7338201590eb",
+        "compressed_size": 547747,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/14-fresh-04-zero.jsonl.gz",
+        "rows": 518,
+        "uncompressed_sha256": "f61c62b88b88894e60e592da760f292adcb5dc3747228acb68d514ac399aec87",
+        "uncompressed_size": 2609122
+      },
+      {
+        "compressed_sha256": "80ac0747bdabb6c35ea7a3b5e71cd072675fb27290c1783fffd8a75221f1493a",
+        "compressed_size": 488797,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/15-fresh-04-single64.jsonl.gz",
+        "rows": 408,
+        "uncompressed_sha256": "a1264905ebf07756cb7a82bfd7b79c10f636e9c31c5f521c085b5c50f82a8219",
+        "uncompressed_size": 2281645
+      },
+      {
+        "compressed_sha256": "279a169b85c944bbb2493d06f57b601844ccdc53d31a910c5795dc5386b72717",
+        "compressed_size": 697399,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/16-fresh-05-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "3c755b26be79dc345055d6b1c53b3671b4caf85dadcf3290282a90d36058a92b",
+        "uncompressed_size": 3641431
+      },
+      {
+        "compressed_sha256": "22659d629785cea62b440611289b381458b3454074c107d4f969490a4a647d1e",
+        "compressed_size": 834098,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/17-fresh-05-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "25f430cee788fe87a371a27f6c40dddf4a20cb3378d58dc1f7f2fda8907687c3",
+        "uncompressed_size": 4148490
+      },
+      {
+        "compressed_sha256": "1f2a602cdc7f357ab18c307d29b6dab8d4f557187554ee0fb3daa0c430a025e6",
+        "compressed_size": 446671,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/18-fresh-05-multi64.jsonl.gz",
+        "rows": 381,
+        "uncompressed_sha256": "5a11d7ec97ec1a69ec174b283b2a9f98b8a12a8c2c8f28e875a1c537be46c6ce",
+        "uncompressed_size": 2133925
+      },
+      {
+        "compressed_sha256": "81b3ece42d869699716cce77cb8b6c69299864e6d96e303e0aaa1a6e87d46d06",
+        "compressed_size": 858527,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/19-fresh-06-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "bc612461bb9512e4cbb9fbe6a7523ecf41d076cd290a0288424f9fc9812e9e50",
+        "uncompressed_size": 4167240
+      },
+      {
+        "compressed_sha256": "78dc04a95d59e656209371998df687c4c8dc9f751f78b1f545b110be06752317",
+        "compressed_size": 850065,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/20-fresh-06-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "4ba670418b1468cc5c93783713eda1bef2033e926afdbee19dcbb1a157ab477a",
+        "uncompressed_size": 4192257
+      },
+      {
+        "compressed_sha256": "4d27e66cb9c77e585a8ba292768e6ab8515b8d98a198c502e500fa86ab6ba1af",
+        "compressed_size": 736861,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/21-fresh-06-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "607e6e3eff4589d7f03c2d437b35649dee07bf8c30cca7987dad41b282d28aa7",
+        "uncompressed_size": 3729959
+      },
+      {
+        "compressed_sha256": "eea5cdae57e3221eba6271dd4ee4ccfb338c9fce06e2a74c5afa6211528b0387",
+        "compressed_size": 830066,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/22-fresh-07-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "5d17d72ac34103f377651096230f86c6025765753bf1d0f4ae142dc823079edf",
+        "uncompressed_size": 4151443
+      },
+      {
+        "compressed_sha256": "ba735363cb5d6937c41be6672dfb62615a4c47bc4fe9a2df9a309881ac9901ba",
+        "compressed_size": 736652,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/23-fresh-07-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "72dc17793ec80faf55865ea5090d3ceafd4a179462287812c08afc46603c84dd",
+        "uncompressed_size": 3703909
+      },
+      {
+        "compressed_sha256": "1b2d667ba887e010b0e194f1e2d5a2c4f21f85297e09fc9366d4295c0a82f5c6",
+        "compressed_size": 827975,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/24-fresh-07-single64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "109c5bc66b8e91f8dd50a7fa1f17fad2c1c8b48533b9d782b55807f1b3042488",
+        "uncompressed_size": 4145120
+      },
+      {
+        "compressed_sha256": "9191f2baacbc3ec8065f634f526f692a149d875dd891ca573437d1533f953941",
+        "compressed_size": 754330,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/25-fresh-08-zero.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "1c30590b8384634f76049df5c8b47e982976e9a1e824780c95eead7d08fee7ce",
+        "uncompressed_size": 3695964
+      },
+      {
+        "compressed_sha256": "14e249f4395951e12ab356f74c78390845a1dede9cae6f8aaff1fddea613140b",
+        "compressed_size": 508699,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/26-fresh-08-single64.jsonl.gz",
+        "rows": 418,
+        "uncompressed_sha256": "e77f95d00d694b554def2d7d17d9e9db669a067b701a7329dfff489398c25560",
+        "uncompressed_size": 2352898
+      },
+      {
+        "compressed_sha256": "bcb22200bb5fc29dd8b94b3bbc41ea479b2bb1d6311b786424386fa2519626ce",
+        "compressed_size": 843959,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/evaluate/traces/27-fresh-08-multi64.jsonl.gz",
+        "rows": 728,
+        "uncompressed_sha256": "a487d799bb925d4f08f90690df2f7d9471d8dd86ecb0286a82574382b5e4cdcc",
+        "uncompressed_size": 4149881
+      }
+    ],
+    "zero_success_multi_failure_count": 0
+  },
+  "preflight": {
+    "ranking_eligible": true,
+    "strict_successes": 4,
+    "traces": [
+      {
+        "compressed_sha256": "4c318231df62a75a7aa7dc53282609f5d2f9385fc640ecd5cb1f5c5ec914de17",
+        "compressed_size": 403286,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/preflight/traces/01-anchor-reference.jsonl.gz",
+        "rows": 375,
+        "uncompressed_sha256": "6ab57af20977d1069d86e85be8bb50802ff41b8528c9132a05c9d06b32b7ee78",
+        "uncompressed_size": 2143069
+      },
+      {
+        "compressed_sha256": "8d5e0b67847fbe3dc9446f156164131bc3abcbfadda85a44dad582fd65492c4f",
+        "compressed_size": 436563,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/preflight/traces/02-train-02-reference.jsonl.gz",
+        "rows": 406,
+        "uncompressed_sha256": "eb07c2028b55668617f834f9db4e19f31e4c369d1650de0e5b5d29f8ec6707dd",
+        "uncompressed_size": 2313316
+      },
+      {
+        "compressed_sha256": "e12730ab7f691ae35bfd79a2903e6745a4712866199fc401b99a3ec9da6cf656",
+        "compressed_size": 435901,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/preflight/traces/03-train-03-reference.jsonl.gz",
+        "rows": 410,
+        "uncompressed_sha256": "290124d6b94314b4faba86af1b0b0d6d16f9d8055ab5595e4896e770fb3c0962",
+        "uncompressed_size": 2327147
+      },
+      {
+        "compressed_sha256": "66694ec43a6bf7cdde14a4d07eec6680dbac9241e35fbc3d4021a1d62d54fbdc",
+        "compressed_size": 438475,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/preflight/traces/04-train-04-reference.jsonl.gz",
+        "rows": 409,
+        "uncompressed_sha256": "7c8e5438554a2ae9f4f0613f7f04712f0fd6a410babcd79cf9e7fbd2fb332437",
+        "uncompressed_size": 2331395
+      }
+    ]
+  },
+  "ranking_allowed": true,
+  "schema_name": "rj45_multibias_evidence_audit_v1",
+  "source_lineage": {
+    "contract_sha256": "5f91ce18fa0d1351250f34463b6f39f4b114597e8bb1b200ba9d77a2cd7c8e77",
+    "helper_sha256": "7035363ecbab9aa83196760a54b22ab00b2c163bb4a8b4151a825960291e0be5",
+    "public_contract_path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/contract.json",
+    "source_binding": {
+      "ablation_helper": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/evaluate_rj45_frozen_ablation.py",
+        "sha256": "e23d6dfc2f4e31bb8c54f119d3655d18d63d3df4e5eea2f00812ce72ce39af1b"
+      },
+      "adapter": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/src/rby1_assembly/rj45_oracle_diagnostic.py",
+        "sha256": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100"
+      },
+      "g2_helper": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/run_rj45_g2_physics_probe.py",
+        "sha256": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42"
+      },
+      "origin_protocol": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/origin-protocol.json",
+        "sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef"
+      },
+      "replay_helper": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/record_rj45_oracle_probe.py",
+        "sha256": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd"
+      },
+      "runner": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/scripts/run_rj45_oracle_ppo_probe.py",
+        "sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1"
+      },
+      "runtime_manifest": {
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/current/configs/rj45-oracle-runtime-104721a.json",
+        "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+      }
+    }
+  },
+  "status": "pass",
+  "training": {
+    "multi64": {
+      "checkpoint": {
+        "eligible_for_evaluation": true,
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/train-multi/final_checkpoint.pt",
+        "sha256": "82a1a01c8a0c7797bc6b02a95852a42f82efd02b7d373fae7774ecb4c92792b3",
+        "update": 64
+      },
+      "initialization": {
+        "actor": {
+          "common_79d_projection_sha256": "e3184012a85d4bdc9e8e7350825fc5b845db96fedbce83bff5b68beaa8ebc9b0",
+          "extra_columns_trainable": false,
+          "mode": "standard79",
+          "oracle_extra_13_columns_zero": true,
+          "output_layer_zero": true,
+          "seed": 20261123,
+          "state_sha256": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276"
+        },
+        "critic": {
+          "actor_input_width_independent": true,
+          "device": "cuda:0",
+          "resettable_module_count": 4,
+          "seed": 20261122,
+          "state_sha256": "308caed04d04cd357411d89f0dd62410a3a20002e9c2afaed9aac04d07b0258d"
+        },
+        "optimizer_sha256": "353ee19c0827e3f57588b440cc2c298165db57129068c476e0a42f9fa5ebb138",
+        "rng": {
+          "numpy": true,
+          "physics_seed_unchanged": 20261128,
+          "python": true,
+          "seed": 20261121,
+          "state_sha256": {
+            "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+            "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+            "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+            "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+          },
+          "torch_cpu": true,
+          "torch_cuda_all_available_devices": true
+        },
+        "zero_actor": {
+          "action_sha256": "0c86a59899dd0b55221d72d55f03cd1bdd1777604fc229e308eced2df3e5f69c",
+          "action_shape": [
+            3,
+            6
+          ],
+          "mean_action_all_zero": true,
+          "mode": "standard79",
+          "noise": {
+            "maximum": 0.10000000149011612,
+            "mean": 0.10000000149011612,
+            "minimum": 0.10000000149011612,
+            "shape": [
+              6
+            ]
+          },
+          "sample_rows": 3
+        }
+      },
+      "pre_evaluation_trace": {
+        "classification": "valid_failure",
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+        "lineage_limit": "the helper did not preserve this pre-evaluation payload or trace SHA in the training report",
+        "recovery_manifest": {
+          "available": true,
+          "manifest": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/file-manifest.json",
+          "relative_path": "train-multi/pre-evaluation.jsonl.gz",
+          "verified": true
+        },
+        "trace_integrity": {
+          "compressed_sha256": "1b92651833d7d79a4830823c0e38379d586cf0ce4eb33b91a4329183d2b3c221",
+          "compressed_size": 744445,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-multi/pre-evaluation.jsonl.gz",
+          "rows": 728,
+          "uncompressed_sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b",
+          "uncompressed_size": 3722382
+        }
+      },
+      "resets": {
+        "by_case": {
+          "anchor": 3,
+          "train-02": 3,
+          "train-03": 3,
+          "train-04": 3
+        },
+        "count": 12,
+        "integrity": {
+          "compressed_sha256": "d3e83b02d7510581b27045d589cb430065d4e55dc4c6943c7fe91b37311c8444",
+          "compressed_size": 597,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-multi/resets.jsonl.gz",
+          "rows": 12,
+          "uncompressed_sha256": "4d5e2f9810ae8b790aec64a2313f2ac6bfccf4813e255f00fb3691055ec958ce",
+          "uncompressed_size": 4352
+        }
+      },
+      "training_rng": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261121,
+        "state_sha256": {
+          "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+          "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+          "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+          "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+        },
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "transitions": {
+        "counts": {
+          "anchor": {
+            "active_valid": 2151,
+            "terminal": 3,
+            "transitions": 2181
+          },
+          "train-02": {
+            "active_valid": 2127,
+            "terminal": 3,
+            "transitions": 2181
+          },
+          "train-03": {
+            "active_valid": 2118,
+            "terminal": 3,
+            "transitions": 2181
+          },
+          "train-04": {
+            "active_valid": 1598,
+            "terminal": 2,
+            "transitions": 1649
+          }
+        },
+        "first_active_base79": {
+          "anchor": {
+            "sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+            "values": [
+              0.016464238986372948,
+              -0.42312589287757874,
+              -0.052547648549079895,
+              0.9999977946281433,
+              0.015518326312303543,
+              -0.20519204437732697,
+              0.12840621173381805,
+              -0.48077237606048584,
+              0.23018525540828705,
+              -0.37070661783218384,
+              -0.5256827473640442,
+              0.5241769552230835,
+              0.516779899597168,
+              0.4085480868816376,
+              -0.3574497103691101,
+              -0.3373448848724365,
+              0.3512722849845886,
+              -0.581346869468689,
+              -0.6299213767051697,
+              0.27789220213890076,
+              -0.25937071442604065,
+              -0.00010171638132305816,
+              -6.50059591862373e-05,
+              -9.468127245781943e-05,
+              9.106316429097205e-05,
+              9.43956765695475e-05,
+              5.322258402884472e-06,
+              1.721867374726571e-05,
+              0.0016521613579243422,
+              -0.00028644761187024415,
+              -0.002799757057800889,
+              0.0022572753950953484,
+              -0.002364323940128088,
+              0.004498745780438185,
+              -0.00429801270365715,
+              0.18510401248931885,
+              0.4721299409866333,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              -0.4113236963748932,
+              1.0,
+              -0.05487203970551491,
+              0.014787913300096989,
+              0.0010967255802825093,
+              0.0024835269432514906,
+              0.0006000201101414859,
+              0.0002543131704442203,
+              -0.00042120617581531405,
+              -0.06810029596090317,
+              -0.0007947286358103156,
+              -0.03637472912669182,
+              0.03732840344309807,
+              -0.030684472993016243,
+              0.05280177295207977,
+              -0.03979802504181862,
+              1.0
+            ]
+          },
+          "train-02": {
+            "sha256": "e5f7e0b7cc621def7c48c624d15baa8ec9ead3afce2cfd96c5834bbfb0b433c2",
+            "values": [
+              -0.03016730397939682,
+              -0.5113859176635742,
+              -0.04912860691547394,
+              1.0,
+              0.006413214839994907,
+              0.007983899675309658,
+              -0.021920468658208847,
+              -0.48079004883766174,
+              0.2301885187625885,
+              -0.37071266770362854,
+              -0.5257107615470886,
+              0.5241799354553223,
+              0.5167801976203918,
+              0.4085799753665924,
+              -0.35499393939971924,
+              -0.33817675709724426,
+              0.3491685092449188,
+              -0.582643449306488,
+              -0.6284099221229553,
+              0.27776145935058594,
+              -0.2603413462638855,
+              7.37822410883382e-05,
+              0.00021657721663359553,
+              -4.3625961552606896e-05,
+              -0.00014096571248956025,
+              9.983222844311967e-05,
+              -3.249511428293772e-05,
+              2.961359678010922e-05,
+              0.003688433673232794,
+              0.0005060747498646379,
+              -0.004781815689057112,
+              -0.0003072455292567611,
+              0.0027716532349586487,
+              0.002372561953961849,
+              -0.0018506231717765331,
+              0.1850854754447937,
+              0.4720986783504486,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              -0.5046497583389282,
+              1.0,
+              -0.05290111154317856,
+              0.017758211120963097,
+              0.001633167383261025,
+              5.563100421568379e-05,
+              0.0006516774883493781,
+              -0.00015497209096793085,
+              -0.00028610232402570546,
+              -0.04724264517426491,
+              0.007379055488854647,
+              -0.057053569704294205,
+              0.010494392365217209,
+              0.023043157532811165,
+              0.03051757998764515,
+              -0.014195840805768967,
+              1.0
+            ]
+          },
+          "train-03": {
+            "sha256": "9ab017e918f850cb0d8cba9a9474e4ad7bdef33df008eaed57c42535d7c43acd",
+            "values": [
+              -0.02289099432528019,
+              -0.5133211016654968,
+              -0.018614305183291435,
+              0.9999999403953552,
+              0.024410339072346687,
+              0.0013946978142485023,
+              -0.038204483687877655,
+              -0.48077285289764404,
+              0.23022837936878204,
+              -0.3707134425640106,
+              -0.5257285237312317,
+              0.5241815447807312,
+              0.5167655348777771,
+              0.4085748791694641,
+              -0.3534902334213257,
+              -0.33859139680862427,
+              0.34822455048561096,
+              -0.5836100578308105,
+              -0.6276714205741882,
+              0.27663275599479675,
+              -0.26063597202301025,
+              0.0002561577712185681,
+              0.00033510991488583386,
+              3.0281486033345573e-05,
+              -9.930171654559672e-05,
+              0.00010037776519311592,
+              -0.0001020575436996296,
+              -0.00028744785231538117,
+              0.001856860937550664,
+              0.0024121087044477463,
+              -0.004388967528939247,
+              0.0014654836850240827,
+              0.0026783400680869818,
+              0.0037587760016322136,
+              -0.0015477749984711409,
+              0.18505756556987762,
+              0.4721607267856598,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              -0.510830819606781,
+              1.0,
+              -0.05102952569723129,
+              0.018978120759129524,
+              0.0024477641563862562,
+              0.00042915347148664296,
+              0.0006556511507369578,
+              -0.0009059906587935984,
+              -0.0036517782136797905,
+              -0.06637971103191376,
+              0.02715190500020981,
+              -0.052785877138376236,
+              0.029130779206752777,
+              0.021970273926854134,
+              0.04504720866680145,
+              -0.011016925796866417,
+              1.0
+            ]
+          },
+          "train-04": {
+            "sha256": "28b0f6428102ba14154a7db51faff928243aef62d85b2d862ef36ec1727a96db",
+            "values": [
+              -0.034450702369213104,
+              -0.5085121393203735,
+              -0.0502215176820755,
+              1.0,
+              0.003824724582955241,
+              0.008122694678604603,
+              -0.01642472669482231,
+              -0.4807896316051483,
+              0.23018276691436768,
+              -0.3707122206687927,
+              -0.5257039070129395,
+              0.5241796970367432,
+              0.5167801380157471,
+              0.4085790812969208,
+              -0.3552916347980499,
+              -0.3382261097431183,
+              0.3494458496570587,
+              -0.582592785358429,
+              -0.6286600232124329,
+              0.2777651250362396,
+              -0.2604624330997467,
+              1.1904055554623483e-06,
+              0.00014317406748887151,
+              -6.081453830120154e-05,
+              -0.00014436739729717374,
+              9.656090696807951e-05,
+              1.1497526429593563e-05,
+              7.874992297729477e-05,
+              0.004112429916858673,
+              -0.00021195785666350275,
+              -0.004842770751565695,
+              -0.0008803230011835694,
+              0.002654146170243621,
+              0.0020098895765841007,
+              -0.002395289484411478,
+              0.18510042130947113,
+              0.47209835052490234,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              -0.5001379251480103,
+              1.0,
+              -0.05369584262371063,
+              0.017017127946019173,
+              0.0014464061241596937,
+              2.3841859729145654e-05,
+              0.0006159147014841437,
+              0.00032583874417468905,
+              0.0002503395371604711,
+              -0.04288356006145477,
+              -9.934107947628945e-05,
+              -0.05772511661052704,
+              0.004518032539635897,
+              0.021831195801496506,
+              0.026712816208600998,
+              -0.01989801786839962,
+              1.0
+            ]
+          }
+        },
+        "integrity": {
+          "compressed_sha256": "c9a5674f98896d20a3681cd3a9ebf49f1146e19cc8e64279c7f2b0c5bc20ff3e",
+          "compressed_size": 671580,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-multi/transitions.jsonl.gz",
+          "rows": 8192,
+          "uncompressed_sha256": "12029ea6a0ac9505bdf717f165acb0833ad498c829711db0c149bb87e40ef4ea",
+          "uncompressed_size": 3473287
+        }
+      },
+      "updates": 64,
+      "updates_integrity": {
+        "compressed_sha256": "a61552938b006ad603241bca522ae66cb797f1d35cdb5c45d924818ea6a514c9",
+        "compressed_size": 2643,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-multi/updates.jsonl.gz",
+        "rows": 64,
+        "uncompressed_sha256": "e588f45ed52fa9b06fb0dde86696d35f39c28fd7a82119508e8d7fc0d7dd4d74",
+        "uncompressed_size": 18927
+      }
+    },
+    "paired_initialization": {
+      "actor_parameter_sha256_before": true,
+      "first_active_anchor_base79": true,
+      "initialization.actor": true,
+      "initialization.critic": true,
+      "initialization.optimizer_sha256": true,
+      "initialization.rng": true,
+      "initialization.zero_actor": true,
+      "training_rng": true
+    },
+    "single64": {
+      "checkpoint": {
+        "eligible_for_evaluation": true,
+        "path": "/home/ubuntu/workspace/rby1-multibias-20261031b/train-single/final_checkpoint.pt",
+        "sha256": "86c7e9ecf4949f1b45398fa243876f1e270e399013e8fe6cda508e3794d822c8",
+        "update": 64
+      },
+      "initialization": {
+        "actor": {
+          "common_79d_projection_sha256": "e3184012a85d4bdc9e8e7350825fc5b845db96fedbce83bff5b68beaa8ebc9b0",
+          "extra_columns_trainable": false,
+          "mode": "standard79",
+          "oracle_extra_13_columns_zero": true,
+          "output_layer_zero": true,
+          "seed": 20261123,
+          "state_sha256": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276"
+        },
+        "critic": {
+          "actor_input_width_independent": true,
+          "device": "cuda:0",
+          "resettable_module_count": 4,
+          "seed": 20261122,
+          "state_sha256": "308caed04d04cd357411d89f0dd62410a3a20002e9c2afaed9aac04d07b0258d"
+        },
+        "optimizer_sha256": "353ee19c0827e3f57588b440cc2c298165db57129068c476e0a42f9fa5ebb138",
+        "rng": {
+          "numpy": true,
+          "physics_seed_unchanged": 20261128,
+          "python": true,
+          "seed": 20261121,
+          "state_sha256": {
+            "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+            "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+            "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+            "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+          },
+          "torch_cpu": true,
+          "torch_cuda_all_available_devices": true
+        },
+        "zero_actor": {
+          "action_sha256": "0c86a59899dd0b55221d72d55f03cd1bdd1777604fc229e308eced2df3e5f69c",
+          "action_shape": [
+            3,
+            6
+          ],
+          "mean_action_all_zero": true,
+          "mode": "standard79",
+          "noise": {
+            "maximum": 0.10000000149011612,
+            "mean": 0.10000000149011612,
+            "minimum": 0.10000000149011612,
+            "shape": [
+              6
+            ]
+          },
+          "sample_rows": 3
+        }
+      },
+      "pre_evaluation_trace": {
+        "classification": "valid_failure",
+        "initial_base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+        "lineage_limit": "the helper did not preserve this pre-evaluation payload or trace SHA in the training report",
+        "recovery_manifest": {
+          "available": true,
+          "manifest": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/file-manifest.json",
+          "relative_path": "train-single/pre-evaluation.jsonl.gz",
+          "verified": true
+        },
+        "trace_integrity": {
+          "compressed_sha256": "1b92651833d7d79a4830823c0e38379d586cf0ce4eb33b91a4329183d2b3c221",
+          "compressed_size": 744445,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-single/pre-evaluation.jsonl.gz",
+          "rows": 728,
+          "uncompressed_sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b",
+          "uncompressed_size": 3722382
+        }
+      },
+      "resets": {
+        "by_case": {
+          "anchor": 12
+        },
+        "count": 12,
+        "integrity": {
+          "compressed_sha256": "195055a037bb2e9ddfd0f17e4a7f468668fb356f1278fc62e50663c8e2e93fb8",
+          "compressed_size": 321,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-single/resets.jsonl.gz",
+          "rows": 12,
+          "uncompressed_sha256": "876f79cbe64abdf107bbc5d50de7d8e27e3c142e62574311a05ee69deae9acc4",
+          "uncompressed_size": 4310
+        }
+      },
+      "training_rng": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261121,
+        "state_sha256": {
+          "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+          "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+          "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+          "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+        },
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "transitions": {
+        "counts": {
+          "anchor": {
+            "active_valid": 8072,
+            "terminal": 11,
+            "transitions": 8192
+          }
+        },
+        "first_active_base79": {
+          "anchor": {
+            "sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+            "values": [
+              0.016464238986372948,
+              -0.42312589287757874,
+              -0.052547648549079895,
+              0.9999977946281433,
+              0.015518326312303543,
+              -0.20519204437732697,
+              0.12840621173381805,
+              -0.48077237606048584,
+              0.23018525540828705,
+              -0.37070661783218384,
+              -0.5256827473640442,
+              0.5241769552230835,
+              0.516779899597168,
+              0.4085480868816376,
+              -0.3574497103691101,
+              -0.3373448848724365,
+              0.3512722849845886,
+              -0.581346869468689,
+              -0.6299213767051697,
+              0.27789220213890076,
+              -0.25937071442604065,
+              -0.00010171638132305816,
+              -6.50059591862373e-05,
+              -9.468127245781943e-05,
+              9.106316429097205e-05,
+              9.43956765695475e-05,
+              5.322258402884472e-06,
+              1.721867374726571e-05,
+              0.0016521613579243422,
+              -0.00028644761187024415,
+              -0.002799757057800889,
+              0.0022572753950953484,
+              -0.002364323940128088,
+              0.004498745780438185,
+              -0.00429801270365715,
+              0.18510401248931885,
+              0.4721299409866333,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              -0.4113236963748932,
+              1.0,
+              -0.05487203970551491,
+              0.014787913300096989,
+              0.0010967255802825093,
+              0.0024835269432514906,
+              0.0006000201101414859,
+              0.0002543131704442203,
+              -0.00042120617581531405,
+              -0.06810029596090317,
+              -0.0007947286358103156,
+              -0.03637472912669182,
+              0.03732840344309807,
+              -0.030684472993016243,
+              0.05280177295207977,
+              -0.03979802504181862,
+              1.0
+            ]
+          }
+        },
+        "integrity": {
+          "compressed_sha256": "834930684baa43c0db33ebdbd84d42689d5ddfef1f5d86c2dc2746a1cf32fce2",
+          "compressed_size": 672376,
+          "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-single/transitions.jsonl.gz",
+          "rows": 8192,
+          "uncompressed_sha256": "8faa29f8d73c936e66d82c1027485d620c76c987f811e349f8ceebccf850fdf0",
+          "uncompressed_size": 3471874
+        }
+      },
+      "updates": 64,
+      "updates_integrity": {
+        "compressed_sha256": "970c90357d40921429ac0cc40b490c0d3eff4ae06104f5c7d81050bae0ccb3c0",
+        "compressed_size": 2664,
+        "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/train-single/updates.jsonl.gz",
+        "rows": 64,
+        "uncompressed_sha256": "56cab8b7c9a42ab2f1229c62fcebe8612830331cf2810ee6262f0c5ebd2114cf",
+        "uncompressed_size": 18937
+      }
+    }
+  }
+}

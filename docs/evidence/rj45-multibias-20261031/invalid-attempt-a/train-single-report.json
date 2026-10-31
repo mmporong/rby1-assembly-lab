@@ -1,0 +1,33 @@
+{
+  "claims": {
+    "effect_proven": false,
+    "generalization_proven": false,
+    "ranking_allowed": false
+  },
+  "error": {
+    "message": "'FixedConditionRby1Rj45OracleDiagnosticEnv_standard' object has no attribute 'get_observations'",
+    "type": "AttributeError"
+  },
+  "failure_stage": "train-single",
+  "partial_artifacts": [
+    {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031a/train-single/ppo_logs/events.out.tfevents.1793433763.brev-pyf1b9s0a.6172.0",
+      "sha256": "30c2cb980d93b41546e07a65dc55f9cf92450a16db5b2fa3c7dae8ebf20484b1"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031a/train-single/pre-evaluation.jsonl",
+      "sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031a/train-single/resets.jsonl",
+      "sha256": "94b0e18f8f7d69bed52402ff049f6bda9745bfbef2f04c197034df79b93b5f58"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-multibias-20261031a/train-single/transitions.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "phase": "train-single",
+  "schema_name": "rj45_multibias_probe_v1",
+  "status": "invalid"
+}
