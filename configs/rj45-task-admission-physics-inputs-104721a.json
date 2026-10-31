@@ -1,0 +1,102 @@
+{
+  "cache_assets": [
+    {
+      "asset_id": "rby1_model_m_v1_2",
+      "relative_path": "assets/cache/rby1/model_v_1_2_m.usd",
+      "sha256": "d72d5e97fded5d4e6e5f59d0248753d3ba7814d00b6bf7eeee9652ac265f069a",
+      "size_bytes": 19381526
+    },
+    {
+      "asset_id": "rb_gripper_left",
+      "relative_path": "assets/cache/rby1/gripper/rb_gripper_left.usd",
+      "sha256": "ee22e7b280d07aee12f2c22ec686160ac9675200125eae80d0b3fe4948fb3a09",
+      "size_bytes": 392628
+    },
+    {
+      "asset_id": "rb_gripper_right",
+      "relative_path": "assets/cache/rby1/gripper/rb_gripper_right.usd",
+      "sha256": "e0aa0f79b4f8c85392a7e7055be5f4adb12c95d28affd1de2a4a425199b0b967",
+      "size_bytes": 392648
+    }
+  ],
+  "current_source_paths": [
+    "scripts/smoke_rj45_comparison_isaac.py",
+    "scripts/run_rj45_task_admission.py",
+    "src/rby1_assembly/rj45_comparison_env.py",
+    "src/rby1_assembly/rj45_task_admission_env.py",
+    "src/rby1_assembly/rj45_comparison_providers.py",
+    "src/rby1_assembly/rj45_task_admission.py"
+  ],
+  "generated_asset_sha256": {
+    "plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+    "robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+    "scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+    "socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+    "table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d"
+  },
+  "generated_robot_references": [
+    "assets/cache/rby1/model_v_1_2_m.usd",
+    "assets/cache/rby1/gripper/rb_gripper_left.usd",
+    "assets/cache/rby1/gripper/rb_gripper_right.usd"
+  ],
+  "headless_physics_geometry_closure": {
+    "authored_property": "Shader.info:mdl:sourceAsset",
+    "cache_roots": 3,
+    "extra_resolved_assets": 0,
+    "full_render_shader_closure_proven": false,
+    "scope": "headless_physics_geometry_only",
+    "self_layers_per_root": 1,
+    "unresolved_authored_asset": "OmniPBR.mdl"
+  },
+  "held_proof_required_source_and_config_sha256": {
+    "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+    "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+    "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  },
+  "physics_inputs": {
+    "assets/cache/rby1/gripper/rb_gripper_left.usd": "ee22e7b280d07aee12f2c22ec686160ac9675200125eae80d0b3fe4948fb3a09",
+    "assets/cache/rby1/gripper/rb_gripper_right.usd": "e0aa0f79b4f8c85392a7e7055be5f4adb12c95d28affd1de2a4a425199b0b967",
+    "assets/cache/rby1/model_v_1_2_m.usd": "d72d5e97fded5d4e6e5f59d0248753d3ba7814d00b6bf7eeee9652ac265f069a",
+    "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+    "assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+    "assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+    "assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+    "assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+    "assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+    "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+    "configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+    "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
+  },
+  "required_physics_relative_paths": [
+    "assets/cache/rby1/gripper/rb_gripper_left.usd",
+    "assets/cache/rby1/gripper/rb_gripper_right.usd",
+    "assets/cache/rby1/model_v_1_2_m.usd",
+    "assets/generated/tasks/rj45-v1/build-report.json",
+    "assets/generated/tasks/rj45-v1/plug.usda",
+    "assets/generated/tasks/rj45-v1/robot.usda",
+    "assets/generated/tasks/rj45-v1/scene.usda",
+    "assets/generated/tasks/rj45-v1/socket.usda",
+    "assets/generated/tasks/rj45-v1/table.usda",
+    "configs/assets.json",
+    "configs/rj45-training-target-offset-v1.json",
+    "configs/runtime.json",
+    "configs/tasks/rj45-v1.json"
+  ],
+  "runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "runtime_core_manifest": {
+    "relative_path": "configs/rj45-oracle-runtime-104721a.json",
+    "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+  },
+  "schema_name": "rj45_task_admission_physics_inputs_v1",
+  "selected_cache_graph_sha256": "6a0e5381b263b8537ecec7015442e63a4becd1adbd35a973165a1f2441cc56fe",
+  "trusted_training_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+  "verification_contract": {
+    "completion_requires_endmatch": true,
+    "current_attempt_retroactively_completed": false,
+    "end_missing_scientific_completion": false,
+    "identity_missing_status": "unverifiable_start",
+    "verify_after_any_child_exit": true
+  }
+}

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -20,6 +21,17 @@ CONFIG = json.loads(
         encoding="utf-8"
     )
 )
+
+
+def _file_sha(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _current_source_hashes(root: Path) -> dict[str, str]:
+    return {
+        relative: _file_sha(root / relative)
+        for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS
+    }
 
 
 def test_full_plan_runs_tuning18_before_admission72() -> None:
@@ -587,6 +599,143 @@ def test_sigint_writes_interrupted_report_and_preserves_exit_contract(
     assert report["requested_process_exit_code"] == 2
     assert report["claims"]["task_admission_completed"] is False
     assert report["run_identity"] is None
+
+
+def test_cpu_end_verifier_marks_missing_identity_unverifiable(tmp_path: Path) -> None:
+    output = tmp_path / "missing-identity"
+    result = RUNNER.verify_after_child_exit(
+        output_dir=output,
+        runtime_root=tmp_path / "runtime",
+        current_root=SCRIPT.parents[1],
+    )
+    assert result["status"] == "unverifiable_start"
+    assert result["scientific_completion_allowed"] is False
+    assert (output / "physics-input-end-verification.json").is_file()
+
+
+def test_cpu_end_verifier_survives_reportless_child_crash_and_blocks_mutation(
+    tmp_path: Path,
+) -> None:
+    current = SCRIPT.parents[1]
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    runtime_input = runtime / "input.usd"
+    runtime_input.write_text("stable\n", encoding="utf-8")
+    manifest_path = tmp_path / "physics-manifest.json"
+    manifest_path.write_text("{}\n", encoding="utf-8")
+    normalized = {
+        "runtime": {"input.usd": _file_sha(runtime_input)},
+        "current": _current_source_hashes(current),
+    }
+    snapshot = {
+        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
+        "normalized_sha256": normalized,
+        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(
+            normalized
+        ),
+        "manifest": {
+            "path": str(manifest_path),
+            "sha256": _file_sha(manifest_path),
+        },
+        "selected_cache_graph_sha256": "b" * 64,
+    }
+    matched_output = tmp_path / "matched"
+    matched_output.mkdir()
+    (matched_output / "run-identity.json").write_text(
+        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+    )
+    matched = RUNNER.verify_after_child_exit(
+        output_dir=matched_output,
+        runtime_root=runtime,
+        current_root=current,
+    )
+    assert matched["status"] == "matched"
+    assert matched["scientific_completion_allowed"] is True
+    assert not (matched_output / "report.json").exists()
+    assert RUNNER.verify_after_child_exit(
+        output_dir=matched_output,
+        runtime_root=runtime,
+        current_root=current,
+    )["sha256"] == matched["sha256"]
+
+    runtime_input.write_text("mutated\n", encoding="utf-8")
+    blocked_output = tmp_path / "blocked"
+    blocked_output.mkdir()
+    (blocked_output / "run-identity.json").write_text(
+        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+    )
+    blocked = RUNNER.verify_after_child_exit(
+        output_dir=blocked_output,
+        runtime_root=runtime,
+        current_root=current,
+    )
+    assert blocked["status"] == "input_mutation_blocked"
+    assert blocked["scientific_completion_allowed"] is False
+    assert blocked["changed"] == ["runtime/input.usd"]
+    assert not (blocked_output / "report.json").exists()
+
+
+def test_cpu_end_verifier_rejects_changed_validator_before_import(tmp_path: Path) -> None:
+    source_root = SCRIPT.parents[1]
+    current = tmp_path / "current"
+    for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS:
+        destination = current / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((source_root / relative).read_bytes())
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    runtime_input = runtime / "input.usd"
+    runtime_input.write_text("stable\n", encoding="utf-8")
+    manifest_path = tmp_path / "physics-manifest.json"
+    manifest_path.write_text("{}\n", encoding="utf-8")
+    normalized = {
+        "runtime": {"input.usd": _file_sha(runtime_input)},
+        "current": _current_source_hashes(current),
+    }
+    snapshot = {
+        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
+        "normalized_sha256": normalized,
+        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(normalized),
+        "manifest": {"path": str(manifest_path), "sha256": _file_sha(manifest_path)},
+        "selected_cache_graph_sha256": "b" * 64,
+    }
+    output = tmp_path / "malicious-validator"
+    output.mkdir()
+    (output / "run-identity.json").write_text(
+        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+    )
+    marker = tmp_path / "validator-imported"
+    validator = current / RUNNER.END_VALIDATOR_RELATIVE
+    validator.write_text(
+        f"from pathlib import Path\nPath({str(marker)!r}).write_text('imported')\n"
+        "def verify_physics_input_end(*args):\n"
+        "    return {'status': 'matched', 'matched': True}\n",
+        encoding="utf-8",
+    )
+    result = RUNNER.verify_after_child_exit(
+        output_dir=output, runtime_root=runtime, current_root=current
+    )
+    assert result["status"] == "input_mutation_blocked"
+    assert result["scientific_completion_allowed"] is False
+    assert "current source changed" in result["error"]["message"]
+    assert not marker.exists()
+
+
+@pytest.mark.parametrize(
+    "value",
+    [Path("../physics.json"), Path("configs/other.json"), Path("/tmp/physics.json")],
+)
+def test_physics_manifest_path_rejects_override_and_escape(
+    tmp_path: Path, value: Path
+) -> None:
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="fixed project-relative"):
+        RUNNER._physics_input_manifest_path(value, tmp_path)
+
+
+def test_physics_manifest_path_accepts_only_fixed_relative_path(tmp_path: Path) -> None:
+    assert RUNNER._physics_input_manifest_path(
+        RUNNER.PHYSICS_INPUT_MANIFEST_RELATIVE, tmp_path
+    ) == (tmp_path / RUNNER.PHYSICS_INPUT_MANIFEST_RELATIVE).resolve()
 
 
 def test_episode_lifecycle_stops_timeline_then_creates_fresh_stage() -> None:

@@ -28,6 +28,19 @@ EXPECTED_IDS = tuple(f"rj45-train-{index:02d}" for index in range(1, 9))
 EXPECTED_FIXED_INDICES = {"rj45-train-02": 1, "rj45-train-05": 4, "rj45-train-03": 2}
 MAX_DEVELOPMENT_EPISODES = 90
 TASK_ADMISSION_ENVIRONMENT_SEED = 20261121
+PHYSICS_INPUT_SNAPSHOT_SCHEMA = "rj45_task_admission_physics_input_snapshot_v1"
+PHYSICS_INPUT_MANIFEST_RELATIVE = Path(
+    "configs/rj45-task-admission-physics-inputs-104721a.json"
+)
+END_VALIDATOR_RELATIVE = "scripts/smoke_rj45_comparison_isaac.py"
+EXPECTED_CURRENT_SOURCE_PATHS = {
+    END_VALIDATOR_RELATIVE,
+    "scripts/run_rj45_task_admission.py",
+    "src/rby1_assembly/rj45_comparison_env.py",
+    "src/rby1_assembly/rj45_task_admission_env.py",
+    "src/rby1_assembly/rj45_comparison_providers.py",
+    "src/rby1_assembly/rj45_task_admission.py",
+}
 SMOKE_PLAN = (
     ("tuning", "rj45-train-03", "tx-positive", "classical_force_search", 1, "A"),
     ("admission", "rj45-train-02", "tx-positive", "zero", 1, None),
@@ -173,6 +186,7 @@ def _write_run_identity(
             for ordinal, row in enumerate(prepared["plan"], start=1)
         ],
         "provenance": _provenance(prepared, runtime),
+        "physics_input_start": prepared.get("physics_input_snapshot"),
     }
     _atomic_immutable_json(path, payload)
     return {"path": str(path), "sha256": _sha256(path)}
@@ -496,12 +510,29 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--current-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--physics-input-manifest",
+        type=Path,
+        default=PHYSICS_INPUT_MANIFEST_RELATIVE,
+    )
+    parser.add_argument("--verify-after-child-exit", action="store_true")
     parser.add_argument("--playback-actions", type=Path, default=Path("docs/evidence/rj45-frozen-ablation-20261031/source-actions.json"))
     parser.add_argument("--smoke-only", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--headless", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--device", choices=("cuda:0",), default="cuda:0")
     return parser
+
+
+def _physics_input_manifest_path(value: Path, current_root: Path) -> Path:
+    if value.is_absolute() or value != PHYSICS_INPUT_MANIFEST_RELATIVE:
+        raise AdmissionRunBlocked(
+            "physics input manifest must use the fixed project-relative path"
+        )
+    path = (current_root.resolve() / value).resolve()
+    if not path.is_relative_to(current_root.resolve()):
+        raise AdmissionRunBlocked("physics input manifest escapes current root")
+    return path
 
 
 def _prepare(args: argparse.Namespace) -> dict[str, Any]:
@@ -534,6 +565,9 @@ def _prepare(args: argparse.Namespace) -> dict[str, Any]:
     canonical_sha = _canonical_json_sha256(canonical_payload, newline=True)
     if playback.get("canonical_sha256") != canonical_sha:
         raise AdmissionRunBlocked("playback canonical action SHA mismatch")
+    physics_manifest = _physics_input_manifest_path(
+        args.physics_input_manifest, current_root
+    )
     import importlib.util
     smoke_path = current_root / "scripts/smoke_rj45_comparison_isaac.py"
     spec = importlib.util.spec_from_file_location("rby1_admission_frozen_validator", smoke_path)
@@ -544,6 +578,9 @@ def _prepare(args: argparse.Namespace) -> dict[str, Any]:
     spec.loader.exec_module(validator)
     manifest_path = current_root / "configs/rj45-oracle-runtime-104721a.json"
     runtime_snapshot = validator.validate_runtime_snapshot(runtime_root, manifest_path)
+    physics_input_snapshot = validator.validate_physics_input_snapshot(
+        runtime_root, current_root, physics_manifest
+    )
     return {
         "runtime_root": runtime_root,
         "current_root": current_root,
@@ -556,6 +593,8 @@ def _prepare(args: argparse.Namespace) -> dict[str, Any]:
         "runtime_validator": validator,
         "runtime_manifest": manifest_path,
         "runtime_snapshot": runtime_snapshot,
+        "physics_input_manifest": physics_manifest,
+        "physics_input_snapshot": physics_input_snapshot,
     }
 
 
@@ -573,6 +612,11 @@ def _load_runtime(prepared: Mapping[str, Any]):
     task = load_rj45_task(runtime_root / "configs/tasks/rj45-v1.json")
     bank_path = runtime_root / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
     bank, proof = load_verified_held_grasp_bank(runtime_root, task, bank_path, "train", allow_final=False)
+    prepared["runtime_validator"].validate_held_proof_physics_binding(
+        proof,
+        prepared["physics_input_snapshot"],
+        prepared["physics_input_manifest"],
+    )
     if bank_source_contract_sha256(proof) != EXPECTED_BANK_SOURCE_SHA256:
         raise AdmissionRunBlocked("held-bank source contract mismatch")
     indices = validate_bank_contract(proof, prepared["config"])
@@ -618,6 +662,7 @@ def _provenance(prepared, runtime):
         "current_source_sha256": {name: _sha256(path) for name, path in source_paths.items()},
         "frozen_input_sha256": {str(path): digest for path, digest in runtime["frozen_hashes"].items()},
         "runtime_import_origins": _assert_runtime_import_origins(prepared["runtime_root"]),
+        "physics_input_snapshot": prepared.get("physics_input_snapshot"),
     }
 
 
@@ -951,12 +996,127 @@ def _failure_report(
             "enforce_wall_clock_timeout": True,
             "heartbeat_path": str(progress_path),
             "native_hang_resolution_claimed": False,
+            "verify_after_any_child_exit": True,
+            "completion_requires_endmatch": True,
+            "identity_missing_status": "unverifiable_start",
+            "end_missing_scientific_completion": False,
         },
         "claims": {
             "task_admission_completed": False,
             "rl_pilot_admitted": False,
         },
     }
+
+
+def _validate_end_snapshot_before_validator(
+    start: Mapping[str, Any], current_root: Path
+) -> Path:
+    """Authenticate the stored snapshot and validator bytes without importing it."""
+
+    if start.get("schema_name") != PHYSICS_INPUT_SNAPSHOT_SCHEMA:
+        raise AdmissionRunBlocked("physics input start snapshot schema mismatch")
+    normalized = start.get("normalized_sha256")
+    if not isinstance(normalized, dict) or set(normalized) != {"runtime", "current"}:
+        raise AdmissionRunBlocked("physics input start snapshot map is invalid")
+    if (
+        _canonical_json_sha256(normalized)
+        != start.get("normalized_sha256_canonical_sha256")
+    ):
+        raise AdmissionRunBlocked("physics input start snapshot canonical SHA mismatch")
+    for namespace in ("runtime", "current"):
+        mapping = normalized.get(namespace)
+        if not isinstance(mapping, dict) or not mapping:
+            raise AdmissionRunBlocked(
+                f"physics input start snapshot {namespace} map is invalid"
+            )
+        for relative, digest in mapping.items():
+            if (
+                not isinstance(relative, str)
+                or not relative
+                or Path(relative).is_absolute()
+                or ".." in Path(relative).parts
+                or relative != Path(relative).as_posix()
+                or "\\" in relative
+                or not isinstance(digest, str)
+                or len(digest) != 64
+                or any(character not in "0123456789abcdef" for character in digest)
+            ):
+                raise AdmissionRunBlocked(
+                    f"physics input start snapshot {namespace} entry is invalid"
+                )
+    current_map = normalized["current"]
+    if set(current_map) != EXPECTED_CURRENT_SOURCE_PATHS:
+        raise AdmissionRunBlocked("physics input start snapshot current source set differs")
+    current_root = current_root.resolve()
+    for relative in sorted(EXPECTED_CURRENT_SOURCE_PATHS):
+        path = (current_root / relative).resolve()
+        if not path.is_relative_to(current_root) or not path.is_file():
+            raise AdmissionRunBlocked(f"current source is missing before end check: {relative}")
+        if _sha256(path) != current_map[relative]:
+            raise AdmissionRunBlocked(f"current source changed before end check: {relative}")
+    return current_root / END_VALIDATOR_RELATIVE
+
+
+def verify_after_child_exit(
+    *, output_dir: Path, runtime_root: Path, current_root: Path
+) -> dict[str, Any]:
+    """Write a CPU-only end check that remains callable after a child crash."""
+
+    output_dir = output_dir.resolve()
+    destination = output_dir / "physics-input-end-verification.json"
+    identity_path = output_dir / "run-identity.json"
+    if not identity_path.is_file():
+        result = {
+            "schema_name": "rj45_task_admission_physics_input_end_verification_v1",
+            "status": "unverifiable_start",
+            "matched": False,
+            "scientific_completion_allowed": False,
+            "run_identity": None,
+        }
+    else:
+        identity = _json(identity_path)
+        start = identity.get("physics_input_start")
+        try:
+            if not isinstance(start, dict):
+                raise AdmissionRunBlocked("run identity has no physics input start snapshot")
+            validator_path = _validate_end_snapshot_before_validator(
+                start, current_root.resolve()
+            )
+            import importlib.util
+
+            spec = importlib.util.spec_from_file_location(
+                "rby1_admission_end_validator", validator_path
+            )
+            if spec is None or spec.loader is None:
+                raise AdmissionRunBlocked("cannot load CPU end validator")
+            validator = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = validator
+            spec.loader.exec_module(validator)
+            result = validator.verify_physics_input_end(
+                start, runtime_root.resolve(), current_root.resolve()
+            )
+            result["scientific_completion_allowed"] = result["matched"]
+        except Exception as error:
+            result = {
+                "schema_name": "rj45_task_admission_physics_input_end_verification_v1",
+                "status": "input_mutation_blocked",
+                "matched": False,
+                "scientific_completion_allowed": False,
+                "error": {"type": type(error).__name__, "message": str(error)},
+            }
+        result["run_identity"] = {
+            "path": str(identity_path),
+            "sha256": _sha256(identity_path),
+        }
+    if destination.exists():
+        existing = _json(destination)
+        if existing != result:
+            raise AdmissionRunBlocked(
+                "existing physics end verification differs from the current CPU check"
+            )
+    else:
+        _atomic_immutable_json(destination, result)
+    return {**result, "path": str(destination), "sha256": _sha256(destination)}
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -969,6 +1129,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     faulthandler.enable()
     faulthandler.dump_traceback_later(60, repeat=True)
     try:
+        if args.verify_after_child_exit:
+            verification = verify_after_child_exit(
+                output_dir=args.output_dir,
+                runtime_root=args.runtime_root,
+                current_root=args.current_root,
+            )
+            print(json.dumps(verification, sort_keys=True, allow_nan=False))
+            return 0 if verification["matched"] else 2
         if report_path.exists():
             raise FileExistsError(f"report already exists: {report_path}")
         prepared = _prepare(args)
@@ -991,6 +1159,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         ).app
         runtime = _load_runtime(prepared)
         run_identity = _write_run_identity(args.output_dir, prepared, runtime)
+        if "physics_input_snapshot" in prepared:
+            pre_env_verification = prepared["runtime_validator"].verify_physics_input_end(
+                prepared["physics_input_snapshot"],
+                prepared["runtime_root"],
+                prepared["current_root"],
+            )
+            if not pre_env_verification["matched"]:
+                raise AdmissionRunBlocked("physics inputs changed before first environment")
         rows: list[dict[str, Any]] = []
         episodes_path = args.output_dir / "episodes-progress.jsonl"
         _replace_json(
@@ -1178,12 +1354,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         prepared["runtime_validator"].validate_runtime_snapshot(
             prepared["runtime_root"], prepared["runtime_manifest"]
         )
+        end_verification = None
+        if "physics_input_snapshot" in prepared:
+            end_verification = verify_after_child_exit(
+                output_dir=args.output_dir,
+                runtime_root=prepared["runtime_root"],
+                current_root=prepared["current_root"],
+            )
+            if not end_verification["matched"]:
+                raise AdmissionRunBlocked("physics input end verification did not match")
         if args.smoke_only:
             report = {
                 "status": "smoke_completed",
                 "smoke_only": True,
                 "provenance": _provenance(prepared, runtime),
                 "run_identity": run_identity,
+                "physics_input_end_verification": end_verification,
                 "episodes": rows,
                 "claims": {
                     "task_admission_completed": False,
@@ -1227,6 +1413,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "smoke_only": False,
                 "provenance": _provenance(prepared, runtime),
                 "run_identity": run_identity,
+                "physics_input_end_verification": end_verification,
                 "tuning_selection": asdict(protocol.selection),
                 "classical_seal": classical_seal_json,
                 "baseline_artifact_seal": asdict(baseline_seal),
