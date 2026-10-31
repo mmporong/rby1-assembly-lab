@@ -32,6 +32,9 @@ PHYSICS_INPUT_SNAPSHOT_SCHEMA = "rj45_task_admission_physics_input_snapshot_v1"
 PHYSICS_INPUT_MANIFEST_RELATIVE = Path(
     "configs/rj45-task-admission-physics-inputs-104721a.json"
 )
+ISOLATED_CAMPAIGN_SCHEMA = "rj45-task-admission-isolated-campaign-v1"
+ISOLATED_WORKER_SPEC_SCHEMA = "rj45-task-admission-isolated-worker-spec-v1"
+ISOLATED_WORKER_IDENTITY_SCHEMA = "rj45-task-admission-isolated-worker-identity-v1"
 END_VALIDATOR_RELATIVE = "scripts/smoke_rj45_comparison_isaac.py"
 EXPECTED_CURRENT_SOURCE_PATHS = {
     END_VALIDATOR_RELATIVE,
@@ -134,6 +137,8 @@ def _persist_episode_row(
     candidate_id: str | None,
     episode: Mapping[str, Any],
     run_identity: Mapping[str, str],
+    *,
+    campaign_sha256: str | None = None,
 ) -> Path:
     """Persist one complete runner row before any progress acknowledgement."""
 
@@ -153,16 +158,16 @@ def _persist_episode_row(
                 f"episode row source identity mismatch for ordinal {ordinal}: {key}"
             )
     path = output_dir / "episode-rows" / f"{ordinal:03d}.json"
-    _atomic_immutable_json(
-        path,
-        {
+    payload = {
             "schema_name": "rj45-task-admission-episode-row-v1",
             "ordinal": ordinal,
             "source_identity": identity,
             "run_identity_sha256": run_identity["sha256"],
             "episode": episode,
-        },
-    )
+        }
+    if campaign_sha256 is not None:
+        payload["campaign_sha256"] = campaign_sha256
+    _atomic_immutable_json(path, payload)
     return path
 
 
@@ -516,12 +521,253 @@ def _parser() -> argparse.ArgumentParser:
         default=PHYSICS_INPUT_MANIFEST_RELATIVE,
     )
     parser.add_argument("--verify-after-child-exit", action="store_true")
+    parser.add_argument("--worker-spec", type=Path)
+    parser.add_argument("--expected-worker-spec-sha256")
     parser.add_argument("--playback-actions", type=Path, default=Path("docs/evidence/rj45-frozen-ablation-20261031/source-actions.json"))
     parser.add_argument("--smoke-only", action="store_true")
     parser.add_argument("--validate-only", action="store_true")
     parser.add_argument("--headless", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--device", choices=("cuda:0",), default="cuda:0")
     return parser
+
+
+def _plan_record(ordinal: int, row: Sequence[Any]) -> dict[str, Any]:
+    return {
+        "ordinal": ordinal,
+        "stage": row[0],
+        "grasp_id": row[1],
+        "case_id": row[2],
+        "method_id": row[3],
+        "slot": row[4],
+        "candidate_id": row[5],
+    }
+
+
+def _prevalidate_worker_validator(
+    args: argparse.Namespace, current_root: Path
+) -> None:
+    """Authenticate the validator from the campaign before `_prepare` imports it."""
+
+    if args.worker_spec is None and args.expected_worker_spec_sha256 is None:
+        return
+    if args.worker_spec is None or args.expected_worker_spec_sha256 is None:
+        raise AdmissionRunBlocked("worker spec path and expected SHA must be provided together")
+    spec_path = args.worker_spec.resolve()
+    if _sha256(spec_path) != args.expected_worker_spec_sha256:
+        raise AdmissionRunBlocked("worker spec SHA mismatch before validator import")
+    spec = _json(spec_path)
+    campaign_path = Path(str(spec.get("campaign_identity_path", ""))).resolve()
+    campaign_sha = spec.get("campaign_sha256")
+    if not campaign_path.is_file() or _sha256(campaign_path) != campaign_sha:
+        raise AdmissionRunBlocked("worker campaign SHA mismatch before validator import")
+    campaign = _json(campaign_path)
+    if campaign.get("schema_name") != ISOLATED_CAMPAIGN_SCHEMA:
+        raise AdmissionRunBlocked("worker campaign schema mismatch before validator import")
+    start = campaign.get("physics_input_start")
+    if not isinstance(start, dict):
+        raise AdmissionRunBlocked("worker campaign snapshot missing before validator import")
+    _validate_end_snapshot_before_validator(start, current_root.resolve())
+
+
+def _validate_worker_spec(
+    args: argparse.Namespace, prepared: Mapping[str, Any]
+) -> dict[str, Any] | None:
+    if args.worker_spec is None and args.expected_worker_spec_sha256 is None:
+        return None
+    if args.worker_spec is None or args.expected_worker_spec_sha256 is None:
+        raise AdmissionRunBlocked("worker spec path and expected SHA must be provided together")
+    if args.smoke_only or args.validate_only or args.verify_after_child_exit:
+        raise AdmissionRunBlocked("worker mode cannot be combined with another execution mode")
+    spec_path = args.worker_spec.resolve()
+    if _sha256(spec_path) != args.expected_worker_spec_sha256:
+        raise AdmissionRunBlocked("worker spec SHA mismatch")
+    spec = _json(spec_path)
+    if spec.get("schema_name") != ISOLATED_WORKER_SPEC_SCHEMA:
+        raise AdmissionRunBlocked("worker spec schema mismatch")
+    campaign_path = Path(str(spec.get("campaign_identity_path", ""))).resolve()
+    campaign_sha = spec.get("campaign_sha256")
+    if not isinstance(campaign_sha, str) or _sha256(campaign_path) != campaign_sha:
+        raise AdmissionRunBlocked("worker campaign identity SHA mismatch")
+    campaign = _json(campaign_path)
+    if campaign.get("schema_name") != ISOLATED_CAMPAIGN_SCHEMA:
+        raise AdmissionRunBlocked("worker campaign identity schema mismatch")
+    if campaign.get("purpose") != spec.get("purpose"):
+        raise AdmissionRunBlocked("worker campaign purpose mismatch")
+    if campaign.get("environment_seed") != TASK_ADMISSION_ENVIRONMENT_SEED:
+        raise AdmissionRunBlocked("worker campaign environment seed mismatch")
+    if campaign.get("config") != {
+        "path": str(prepared["config_path"]),
+        "sha256": _sha256(prepared["config_path"]),
+    }:
+        raise AdmissionRunBlocked("worker campaign config binding mismatch")
+    if campaign.get("playback_actions") != {
+        "path": str(prepared["playback_path"]),
+        "sha256": _sha256(prepared["playback_path"]),
+        "canonical_sha256": prepared["playback_canonical_sha256"],
+    }:
+        raise AdmissionRunBlocked("worker campaign playback binding mismatch")
+    expected_plan = [
+        _plan_record(ordinal, row)
+        for ordinal, row in enumerate(prepared["plan"], start=1)
+    ]
+    if campaign.get("execution_plan") != expected_plan:
+        raise AdmissionRunBlocked("worker campaign execution plan differs")
+    campaign_snapshot = campaign.get("physics_input_start")
+    current_snapshot = prepared.get("physics_input_snapshot")
+    if not isinstance(campaign_snapshot, dict) or not isinstance(current_snapshot, dict):
+        raise AdmissionRunBlocked("worker campaign physics snapshot is missing")
+    if (
+        campaign_snapshot.get("normalized_sha256_canonical_sha256")
+        != current_snapshot.get("normalized_sha256_canonical_sha256")
+        or campaign_snapshot.get("manifest") != current_snapshot.get("manifest")
+    ):
+        raise AdmissionRunBlocked("worker campaign physics inputs changed")
+    rows = spec.get("rows")
+    if not isinstance(rows, list) or not 1 <= len(rows) <= 12:
+        raise AdmissionRunBlocked("worker chunk must contain 1 through 12 rows")
+    ordinals = [row.get("ordinal") for row in rows if isinstance(row, dict)]
+    if (
+        len(ordinals) != len(rows)
+        or any(type(ordinal) is not int for ordinal in ordinals)
+        or ordinals != list(range(ordinals[0], ordinals[0] + len(ordinals)))
+    ):
+        raise AdmissionRunBlocked("worker chunk ordinals must be contiguous")
+    for record in rows:
+        ordinal = record["ordinal"]
+        if type(ordinal) is not int or ordinal < 1 or ordinal > len(expected_plan):
+            raise AdmissionRunBlocked("worker chunk ordinal is outside the campaign")
+        if record != expected_plan[ordinal - 1]:
+            raise AdmissionRunBlocked(f"worker row {ordinal} differs from campaign plan")
+    purpose = spec.get("purpose")
+    if purpose == "formal_campaign":
+        allowed = ((1, 6), (7, 12), (13, 18), (19, 30), (31, 42), (43, 54), (55, 66), (67, 78), (79, 90))
+        if (ordinals[0], ordinals[-1]) not in allowed:
+            raise AdmissionRunBlocked("worker formal chunk boundary differs")
+    elif purpose == "diagnostic_nonadjudicative":
+        if ordinals != [33]:
+            raise AdmissionRunBlocked("diagnostic worker must contain only ordinal 33")
+    else:
+        raise AdmissionRunBlocked("worker purpose is invalid")
+    selected = spec.get("selected_classical_candidate")
+    needs_selected = any(
+        record["stage"] == "admission"
+        and record["method_id"] == "classical_force_search"
+        for record in rows
+    )
+    if needs_selected and selected not in {"A", "B", "C"}:
+        raise AdmissionRunBlocked("admission worker has no sealed classical candidate")
+    if not needs_selected and selected is not None:
+        raise AdmissionRunBlocked("tuning worker cannot receive a selected candidate")
+    tuning_binding = spec.get("tuning_seal")
+    if purpose == "formal_campaign" and ordinals[0] >= 19:
+        if not isinstance(tuning_binding, dict):
+            raise AdmissionRunBlocked("admission worker has no tuning seal binding")
+        tuning_path = Path(str(tuning_binding.get("path", ""))).resolve()
+        if not tuning_path.is_file() or _sha256(tuning_path) != tuning_binding.get("sha256"):
+            raise AdmissionRunBlocked("admission worker tuning seal SHA mismatch")
+        tuning = _json(tuning_path)
+        if (
+            tuning.get("episode_count") != 18
+            or tuning.get("campaign_sha256") != campaign_sha
+            or tuning.get("classical_seal", {}).get("selected_candidate_id") != selected
+            or tuning.get("selection", {}).get("candidate_id") != selected
+        ):
+            raise AdmissionRunBlocked("admission worker candidate differs from tuning seal")
+    elif tuning_binding is not None:
+        raise AdmissionRunBlocked("non-admission worker cannot receive a tuning seal")
+    return {
+        "path": spec_path,
+        "sha256": args.expected_worker_spec_sha256,
+        "campaign_path": campaign_path,
+        "campaign_sha256": campaign_sha,
+        "purpose": purpose,
+        "rows": rows,
+        "selected_classical_candidate": selected,
+    }
+
+
+def _write_worker_start_identity(
+    output_dir: Path,
+    prepared: Mapping[str, Any],
+    worker: Mapping[str, Any],
+) -> dict[str, str]:
+    path = output_dir / "run-identity.json"
+    payload = {
+        "schema_name": ISOLATED_WORKER_IDENTITY_SCHEMA,
+        "environment_seed": TASK_ADMISSION_ENVIRONMENT_SEED,
+        "purpose": worker["purpose"],
+        "campaign_identity": {
+            "path": str(worker["campaign_path"]),
+            "sha256": worker["campaign_sha256"],
+        },
+        "worker_spec": {"path": str(worker["path"]), "sha256": worker["sha256"]},
+        "execution_plan": worker["rows"],
+    }
+    _atomic_immutable_json(path, payload)
+    return {"path": str(path), "sha256": _sha256(path)}
+
+
+def _write_worker_attestation(
+    output_dir: Path,
+    prepared: Mapping[str, Any],
+    runtime: Mapping[str, Any],
+    worker: Mapping[str, Any],
+) -> dict[str, str]:
+    path = output_dir / "worker-attestation.json"
+    payload = {
+        "schema_name": "rj45-task-admission-isolated-worker-attestation-v1",
+        "campaign_sha256": worker["campaign_sha256"],
+        "worker_spec_sha256": worker["sha256"],
+        "runtime_versions": runtime["runtime_versions"],
+        "runtime_import_origins": _assert_runtime_import_origins(
+            prepared["runtime_root"]
+        ),
+        "current_module_origins": {
+            name: str(Path(module.__file__).resolve())
+            for name, module in runtime["modules"].items()
+        },
+        "frozen_input_sha256": {
+            str(path): digest for path, digest in runtime["frozen_hashes"].items()
+        },
+        "held_bank_identity": {
+            "manifest_sha256": runtime["proof"].get("manifest_sha256"),
+            "selected_grasp_ids": runtime["proof"].get("selected_grasp_ids"),
+            "selected_artifact_sha256": runtime["proof"].get(
+                "selected_artifact_sha256"
+            ),
+            "source_contract_sha256": EXPECTED_BANK_SOURCE_SHA256,
+        },
+    }
+    current_src = (prepared["current_root"] / "src").resolve()
+    if any(
+        not Path(path).is_relative_to(current_src)
+        for path in payload["current_module_origins"].values()
+    ):
+        raise AdmissionRunBlocked("current worker module import escaped current root")
+    _atomic_immutable_json(path, payload)
+    return {"path": str(path), "sha256": _sha256(path)}
+
+
+def _validate_worker_episode_rows(
+    rows: Sequence[Mapping[str, Any]],
+    records: Sequence[Mapping[str, Any]],
+    *,
+    selected_classical_candidate: str | None,
+) -> None:
+    if len(rows) != len(records):
+        raise AdmissionRunBlocked("worker episode count differs from its spec")
+    for row, record in zip(rows, records, strict=True):
+        ordinal = record["ordinal"]
+        for key in ("stage", "grasp_id", "case_id", "method_id", "slot"):
+            if row.get(key) != record[key]:
+                raise AdmissionRunBlocked(f"worker row {ordinal} identity mismatch: {key}")
+        expected_candidate = record["candidate_id"]
+        if record["method_id"] == "classical_force_search" and expected_candidate is None:
+            expected_candidate = selected_classical_candidate
+        if row.get("candidate_id") != expected_candidate:
+            raise AdmissionRunBlocked(f"worker row {ordinal} candidate binding mismatch")
+        if row.get("execution_error") is not None or row.get("terminal_complete") is not True:
+            raise AdmissionRunBlocked(f"worker row {ordinal} is not terminal-complete")
 
 
 def _physics_input_manifest_path(value: Path, current_root: Path) -> Path:
@@ -1057,6 +1303,28 @@ def _validate_end_snapshot_before_validator(
     return current_root / END_VALIDATOR_RELATIVE
 
 
+def _physics_start_from_identity(identity: Mapping[str, Any]) -> Mapping[str, Any]:
+    start = identity.get("physics_input_start")
+    if isinstance(start, dict):
+        return start
+    if identity.get("schema_name") != ISOLATED_WORKER_IDENTITY_SCHEMA:
+        raise AdmissionRunBlocked("run identity has no physics input start snapshot")
+    campaign_binding = identity.get("campaign_identity")
+    if not isinstance(campaign_binding, dict):
+        raise AdmissionRunBlocked("worker identity has no campaign binding")
+    campaign_path = Path(str(campaign_binding.get("path", ""))).resolve()
+    campaign_sha = campaign_binding.get("sha256")
+    if not campaign_path.is_file() or _sha256(campaign_path) != campaign_sha:
+        raise AdmissionRunBlocked("worker campaign identity SHA mismatch at end check")
+    campaign = _json(campaign_path)
+    if campaign.get("schema_name") != ISOLATED_CAMPAIGN_SCHEMA:
+        raise AdmissionRunBlocked("worker campaign identity schema mismatch at end check")
+    start = campaign.get("physics_input_start")
+    if not isinstance(start, dict):
+        raise AdmissionRunBlocked("worker campaign has no physics input start snapshot")
+    return start
+
+
 def verify_after_child_exit(
     *, output_dir: Path, runtime_root: Path, current_root: Path
 ) -> dict[str, Any]:
@@ -1075,10 +1343,8 @@ def verify_after_child_exit(
         }
     else:
         identity = _json(identity_path)
-        start = identity.get("physics_input_start")
         try:
-            if not isinstance(start, dict):
-                raise AdmissionRunBlocked("run identity has no physics input start snapshot")
+            start = _physics_start_from_identity(identity)
             validator_path = _validate_end_snapshot_before_validator(
                 start, current_root.resolve()
             )
@@ -1126,6 +1392,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     progress_path = args.output_dir / "progress.json"
     simulation_app = None
     run_identity: dict[str, str] | None = None
+    worker: dict[str, Any] | None = None
     faulthandler.enable()
     faulthandler.dump_traceback_later(60, repeat=True)
     try:
@@ -1139,7 +1406,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0 if verification["matched"] else 2
         if report_path.exists():
             raise FileExistsError(f"report already exists: {report_path}")
+        _prevalidate_worker_validator(args, args.current_root.resolve())
         prepared = _prepare(args)
+        worker = _validate_worker_spec(args, prepared)
+        if worker is not None:
+            run_identity = _write_worker_start_identity(
+                args.output_dir, prepared, worker
+            )
         if args.validate_only:
             _atomic_json(
                 report_path,
@@ -1158,7 +1431,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             {"headless": args.headless, "device": args.device}
         ).app
         runtime = _load_runtime(prepared)
-        run_identity = _write_run_identity(args.output_dir, prepared, runtime)
+        worker_attestation = None
+        if worker is None:
+            run_identity = _write_run_identity(args.output_dir, prepared, runtime)
+        else:
+            worker_attestation = _write_worker_attestation(
+                args.output_dir, prepared, runtime, worker
+            )
+        assert run_identity is not None
         if "physics_input_snapshot" in prepared:
             pre_env_verification = prepared["runtime_validator"].verify_physics_input_end(
                 prepared["physics_input_snapshot"],
@@ -1179,11 +1459,22 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
         completed_count = 0
 
-        def execute(plan_rows, *, selected_classical_candidate=None, fatal_on_error=False):
+        def execute(
+            plan_rows,
+            *,
+            selected_classical_candidate=None,
+            fatal_on_error=False,
+            global_ordinals=None,
+        ):
             nonlocal completed_count
             produced = []
-            for plan_row in plan_rows:
-                ordinal = completed_count + 1
+            if global_ordinals is None:
+                global_ordinals = range(
+                    completed_count + 1, completed_count + len(plan_rows) + 1
+                )
+            if len(plan_rows) != len(global_ordinals):
+                raise AdmissionRunBlocked("plan rows and global ordinals differ")
+            for ordinal, plan_row in zip(global_ordinals, plan_rows, strict=True):
                 candidate_id = plan_row[5]
                 if plan_row[3] == "classical_force_search" and candidate_id is None:
                     candidate_id = selected_classical_candidate
@@ -1247,6 +1538,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                     candidate_id,
                     episode,
                     run_identity,
+                    campaign_sha256=(
+                        None if worker is None else worker["campaign_sha256"]
+                    ),
                 )
                 produced.append(episode)
                 completed_count = ordinal
@@ -1279,6 +1573,67 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             return produced
 
+        if worker is not None:
+            records = worker["rows"]
+            ordinals = [record["ordinal"] for record in records]
+            plan_rows = [prepared["plan"][ordinal - 1] for ordinal in ordinals]
+            rows = execute(
+                plan_rows,
+                selected_classical_candidate=worker["selected_classical_candidate"],
+                fatal_on_error=True,
+                global_ordinals=ordinals,
+            )
+            _validate_worker_episode_rows(
+                rows,
+                records,
+                selected_classical_candidate=worker["selected_classical_candidate"],
+            )
+            for path, expected in runtime["frozen_hashes"].items():
+                if _sha256(path) != expected:
+                    raise AdmissionRunBlocked(
+                        f"frozen held-bank input changed during worker: {path}"
+                    )
+            prepared["runtime_validator"].validate_runtime_snapshot(
+                prepared["runtime_root"], prepared["runtime_manifest"]
+            )
+            end_verification = verify_after_child_exit(
+                output_dir=args.output_dir,
+                runtime_root=prepared["runtime_root"],
+                current_root=prepared["current_root"],
+            )
+            if not end_verification["matched"]:
+                raise AdmissionRunBlocked("worker physics input end verification did not match")
+            row_records = []
+            for ordinal in ordinals:
+                path = args.output_dir / "episode-rows" / f"{ordinal:03d}.json"
+                row_records.append(
+                    {"ordinal": ordinal, "path": str(path), "sha256": _sha256(path)}
+                )
+            chunk_report = {
+                "schema_name": "rj45-task-admission-isolated-chunk-report-v1",
+                "status": "worker_completed",
+                "purpose": worker["purpose"],
+                "campaign_sha256": worker["campaign_sha256"],
+                "worker_spec_sha256": worker["sha256"],
+                "run_identity": run_identity,
+                "worker_attestation": worker_attestation,
+                "physics_input_end_verification": end_verification,
+                "episode_rows": row_records,
+                "claims": {
+                    "task_admission_completed": False,
+                    "physics_success_proven": False,
+                },
+            }
+            _atomic_json(args.output_dir / "chunk-report.json", chunk_report)
+            _replace_json(
+                progress_path,
+                {
+                    "phase": "worker_completed",
+                    "completed_episodes": len(rows),
+                    "global_ordinals": ordinals,
+                },
+            )
+            return 0
         if args.smoke_only:
             rows = execute(prepared["plan"])
             _validate_smoke_rows(rows)
