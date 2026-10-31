@@ -1,0 +1,405 @@
+{
+  "schema_name": "rj45_comparison_task_admission_v1",
+  "status": "g1_cpu_prelaunch_approved_isaac_task_admission_smoke_not_run",
+  "purpose": "Admit a fixed-calibration-bias held-grasp RJ45 task to a short PPO/SAC pilot without claiming a physical initial-error envelope or learning effect.",
+  "claims": {
+    "manipulation": "episode_fixed_calibration_bias_on_two_verified_held_grasps",
+    "bias_magnitudes_are_external_measured_requirements": false,
+    "bias_magnitudes_are_development_exploration_values": true,
+    "reuse_bias_cases_in_G3": false,
+    "physical_initial_pose_error_sweep": false,
+    "success_range_curve_proven": false,
+    "success_range_curve_stage": "G3_multiple_sealed_magnitudes",
+    "g0_pass_implies_learning_effect": false,
+    "existing_and_g1_results_are_development_only": true,
+    "reuse_in_future_sealed_final": false
+  },
+  "runtime": {
+    "runtime_config": "configs/runtime.json",
+    "task_config": "configs/tasks/rj45-v1.json",
+    "training_config": "configs/rj45-training-target-offset-v1.json",
+    "isaac_sim": "5.1.0",
+    "isaac_lab": "2.3.0",
+    "isaac_lab_distribution_metadata": "0.47.2",
+    "isaac_lab_version_semantics": "2.3.0_is_the_pinned_release_name_and_0.47.2_is_the_installed_distribution_metadata",
+    "physics_hz": 240,
+    "control_hz": 30,
+    "finite_horizon": true,
+    "active_horizon_s": 24.0
+  },
+  "archive": {
+    "runtime_root_cli_argument": "--runtime-root",
+    "held_bank_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+    "held_bank_exists_in_current_local_repository": false,
+    "loader_api": "rby1_assembly.held_grasp.load_verified_held_grasp_bank(runtime_root, task, bank_path, 'train', allow_final=False)",
+    "expected_train_count": 8,
+    "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+    "source_contract_verification_api": "rby1_assembly.held_grasp.bank_source_contract_sha256(proof)",
+    "expected_ordered_ids": [
+      "rj45-train-01",
+      "rj45-train-02",
+      "rj45-train-03",
+      "rj45-train-04",
+      "rj45-train-05",
+      "rj45-train-06",
+      "rj45-train-07",
+      "rj45-train-08"
+    ],
+    "fixed_id_to_index": {
+      "rj45-train-02": 1,
+      "rj45-train-05": 4
+    },
+    "selection_api": "load_all_8_then_validate_proof_then_resolve_index_by_exact_id_then_pass_bank[index]_as_held_state"
+  },
+  "environment_factory": {
+    "training_factory": "rby1_assembly.rj45_training_env.make_rj45_training_env_type",
+    "comparison_factory": "rby1_assembly.rj45_comparison_env.make_rj45_comparison_env_type",
+    "task_admission_factory": "rby1_assembly.rj45_task_admission_env.make_rj45_task_admission_env_type",
+    "explicit_bias_injection_api": "make_rj45_task_admission_env_type(base_comparison_cls, *, requested_translation_bias_entry_m, requested_rotation_bias_entry_rad, held_grasp_id, held_grasp_index, held_artifact_sha256)",
+    "development_runner": "scripts/run_rj45_task_admission.py",
+    "development_runner_status": "implemented_cpu_prelaunch_approved_isaac_smoke_not_run",
+    "runtime_request_applied_absolute_tolerance": 1e-09,
+    "required_new_applied_held_telemetry": [
+      "applied_held_grasp_id",
+      "applied_held_grasp_index",
+      "applied_held_artifact_sha256"
+    ],
+    "prefreeze_snapshot_hook": "after_held_warmup_stability_pass_immediately_before_calling__freeze_training_estimator",
+    "prefreeze_snapshot_note": "bias_is_already_sampled_at_reset_but_has_no_control_effect_before_freeze",
+    "prefreeze_signed_gt_fields": [
+      "translation_socket_entry_m_xyz",
+      "shortest_rotation_vector_socket_entry_rad_xyz"
+    ],
+    "prefreeze_equivalence_group": "same_held_grasp_across_all_bias_method_and_slot",
+    "prefreeze_max_translation_delta_norm_m": 0.00001,
+    "prefreeze_max_rotation_geodesic_delta_rad": 0.0008726646259971648,
+    "insert_transition_snapshot_hook": "after_base_advance_phases_changes_align_to_insert_before_residual_action_application",
+    "insert_transition_signed_gt_fields": [
+      "translation_socket_entry_m_xyz",
+      "shortest_rotation_vector_socket_entry_rad_xyz",
+      "depth_m",
+      "lateral_error_m",
+      "orientation_error_rad"
+    ],
+    "insert_transition_equivalence_group": "same_held_grasp_and_same_bias_case_across_method_and_slot",
+    "insert_transition_max_translation_delta_norm_m": 0.00001,
+    "insert_transition_max_rotation_geodesic_delta_rad": 0.0008726646259971648,
+    "cross_bias_insert_transition_comparison": "record_as_realized_treatment_alignment_error_no_equivalence_gate",
+    "snapshot_gt_available_to_fair_providers": false,
+    "equivalence_threshold_provenance": "preregistered_simulation_design_margin_not_external_measurement"
+  },
+  "shared_control_contract": {
+    "actor_observation_dim": 79,
+    "critic_observation_dim": 79,
+    "fair_provider_api": "reset()->state; act(observation79,state)->(normalized_right6,next_state)",
+    "fair_provider_external_inputs": ["observation79", "provider_owned_state"],
+    "fair_provider_forbidden_inputs": [
+      "env_object",
+      "env_extras",
+      "evaluator_ground_truth",
+      "known_calibration_bias",
+      "simulator_object_pose"
+    ],
+    "case_id_and_sign_owner": "runner_only",
+    "diagnostic_oracle_api": "separate_registry_wraps_environment_with_rby1_assembly.rj45_teacher_runtime.make_rj45_teacher_env_type_and_submits_zero_external_action",
+    "residual_action_dim": 6,
+    "residual_action_scope": "right_arm_insert_tip_offset_only",
+    "left_arm": "scripted_support",
+    "translation_bound_m": 0.0015,
+    "rotation_bound_rad": 0.026179938779914945,
+    "invalid_active_proxy": "absorbing_counted_failure"
+  },
+  "first_insert_transition_action_contract": {
+    "base_order": "_advance_phases_then_action_application",
+    "prior_align_observation_policy_active": false,
+    "first_valid_insert_observation_available_before_transition_action": false,
+    "required_fair_provider_physical_action": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    "snapshot_timing": "after_align_to_insert_phase_transition_before_action_application",
+    "required_telemetry": [
+      "requested_action_6d",
+      "bounded_action_6d",
+      "actual_applied_action_6d",
+      "actual_applied_tip_target_offset_entry_6d",
+      "actual_applied_action_is_exact_zero"
+    ],
+    "zero_gate": "actual_applied_action_6d_and_actual_applied_tip_target_offset_entry_6d_are_both_exact_zero",
+    "existing_executed_transition_mask_scope": "reward_only_and_not_reused_for_physical_action_because_schema1_valid_step_count_can_drop_the_action_after_the_first_valid_insert_observation",
+    "required_adapter_change": "comparison physical mask = current active & cached_last_policy_observation_valid & estimator_valid",
+    "required_cpu_contract_cases": [
+      "align_to_insert_transition_actual_action_and_tip_offset_are_zero",
+      "action_immediately_after_first_valid_insert_observation_is_applied_normally"
+    ],
+    "implementation_status": "implemented_cpu_contract_passed_isaac_smoke_not_run"
+  },
+  "observation79_schema": {
+    "indexing": "zero_based_half_open",
+    "estimated_relative_position": {"slice": [0, 3], "si_multiplier": [0.001, 0.012, 0.001]},
+    "estimated_relative_quaternion_w": {"slice": [3, 4], "si_multiplier": 1.0},
+    "estimated_relative_quaternion_xyz": {"slice": [4, 7], "si_multiplier": 0.008726646259971648},
+    "arm_joint_position": {"slice": [7, 21], "si_multiplier": 3.141592653589793},
+    "arm_joint_velocity": {"slice": [21, 35], "si_multiplier": 3.141592653589793},
+    "grip_force": {"slice": [35, 37], "si_multiplier": 8.0},
+    "entry_filtered_net_force_3d": {"slice": [37, 40], "si_multiplier": 8.0},
+    "command_depth": {"slice": [62, 63], "si_multiplier": 0.012},
+    "insertion_advance": {"slice": [63, 64], "si_multiplier": 1.0},
+    "joint_reference_error": {"slice": [64, 78], "si_multiplier": 0.03}
+  },
+  "force_semantics": {
+    "actor_entry_force": "filtered_net_3d_vector_obs_37_40_times_8N",
+    "actor_entry_force_norm": "euclidean_norm_of_filtered_net_3d_vector",
+    "evaluator_25N": "independent_max_over_gripper_contact_peaks_and_sum_of_absolute_pair_normal_load_peak",
+    "same_measurement_claim_forbidden": true
+  },
+  "unchanged_success_contract": {
+    "assembled_depth_m": 0.012,
+    "max_lateral_error_m": 0.00005,
+    "max_orientation_error_rad": 0.008726646259971648,
+    "max_contact_force_n": 25.0,
+    "dwell_s": 0.4,
+    "max_relative_linear_speed_m_s": 0.005,
+    "max_relative_angular_speed_rad_s": 0.05
+  },
+  "held_grasps": [
+    {"grasp_id": "rj45-train-02", "verified_index": 1, "artifact_sha256": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5"},
+    {"grasp_id": "rj45-train-05", "verified_index": 4, "artifact_sha256": "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7"}
+  ],
+  "bias_coordinate_frame": "socket_entry",
+  "bias_cases": [
+    {"case_id": "tx-positive", "error_family": "position_x", "pair": "tx", "sign": 1, "translation_bias_entry_m": [0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tx-negative", "error_family": "position_x", "pair": "tx", "sign": -1, "translation_bias_entry_m": [-0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tz-positive", "error_family": "position_z", "pair": "tz", "sign": 1, "translation_bias_entry_m": [0.0, 0.0, 0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tz-negative", "error_family": "position_z", "pair": "tz", "sign": -1, "translation_bias_entry_m": [0.0, 0.0, -0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "rx-positive", "error_family": "orientation_x", "pair": "rx", "sign": 1, "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.003490658503988659, 0.0, 0.0]},
+    {"case_id": "rx-negative", "error_family": "orientation_x", "pair": "rx", "sign": -1, "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [-0.003490658503988659, 0.0, 0.0]}
+  ],
+  "methods": [
+    {"id": "zero", "fair_baseline": true, "slots_per_case": 2, "action_provider": "constant_zero"},
+    {
+      "id": "mean_constant",
+      "fair_baseline": true,
+      "slots_per_case": 1,
+      "action_provider": "fixed_normalized_right6",
+      "normalized_right6": [0.034892102401539844, -0.010848934130210961, -0.041849699608244736, 0.03485121803133042, -0.07816294091497804, -0.02233053562947764],
+      "source_trace_gzip_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+      "raw_source_trace_sha256_check": "source_trace_gzip_sha256_equals_3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+      "canonical_method_artifact_sha256_field": "BaselineArtifactSeal.mean_constant_artifact_sha256",
+      "canonical_method_artifact_payload": {
+        "source_trace_gzip_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+        "method": "mean_constant",
+        "normalized_right6": [0.034892102401539844, -0.010848934130210961, -0.041849699608244736, 0.03485121803133042, -0.07816294091497804, -0.02233053562947764]
+      },
+      "required_runtime_applied_artifact_sha_match": "BaselineArtifactSeal.mean_constant_artifact_sha256"
+    },
+    {
+      "id": "open_loop_playback",
+      "fair_baseline": true,
+      "slots_per_case": 1,
+      "action_provider": "fixed_existing_development_trace",
+      "source_trace_gzip_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+      "raw_source_trace_sha256_check": "source_trace_gzip_sha256_equals_3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+      "selected_rows": 364,
+      "tail": "hold_final_action",
+      "canonical_method_artifact_sha256_field": "BaselineArtifactSeal.playback_artifact_sha256",
+      "canonical_method_artifact_payload": {
+        "source_trace_gzip_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+        "method": "open_loop_playback",
+        "selected_rows": 364,
+        "tail": "hold_final_action"
+      },
+      "required_runtime_applied_artifact_sha_match": "BaselineArtifactSeal.playback_artifact_sha256"
+    },
+    {
+      "id": "classical_force_search",
+      "fair_baseline": true,
+      "slots_per_case": 1,
+      "action_provider": "rby1_assembly.rj45_comparison_providers.make_fair_provider(classical_force_search, classical_candidate_id=sealed_candidate_id)",
+      "claim_before_tuning": "designed_untuned_classical_candidate",
+      "strong_baseline_claim_requires_sealed_tuning": true,
+      "provider_inputs": "observation79_and_provider_owned_state_only",
+      "controller": {
+        "position_gain": 0.8,
+        "rotation_gain": 0.8,
+        "controlled_translation_axes": ["x", "z"],
+        "controlled_rotation_axes": ["x", "z"],
+        "stall_ticks": 6,
+        "stall_depth_delta_per_tick_m": 0.00002,
+        "search_trigger_entry_force_norm_n": 8.0,
+        "lateral_force_direction_threshold_n": 0.25,
+        "search_direction_order": ["initial", "rotate_plus_90", "opposite", "rotate_minus_90"],
+        "ticks_per_search_direction": 6,
+        "search_radius_step_m": 0.00015,
+        "search_radius_max_m": 0.0006,
+        "advance_recovery_ticks": 3,
+        "zero_action_entry_force_norm_n": 20.0,
+        "hard_stop_evaluator_force_n": 25.0,
+        "translation_vector_projection_bound_m": 0.0015,
+        "rotation_vector_projection_bound_rad": 0.026179938779914945,
+        "final_component_clip": [-1.0, 1.0],
+        "known_bias_access": false
+      }
+    },
+    {
+      "id": "oracle_gt_reference",
+      "fair_baseline": false,
+      "diagnostic_only": true,
+      "slots_per_case": 1,
+      "action_provider": "scripts.run_rj45_task_admission._make_env wraps rby1_assembly.rj45_teacher_runtime.make_rj45_teacher_env_type and submits zero external action",
+      "privileged_gt_pose_access": true,
+      "privileged_inputs": [
+        "actual_socket_pose_world",
+        "actual_plug_pose_world",
+        "actual_right_ee_pose_world",
+        "frozen_estimated_plug_to_ee_transform",
+        "committed_command_depth"
+      ],
+      "known_bias_inverse_shortcut_forbidden": true,
+      "active_phase": "insert_only",
+      "preinsert_action": "zero",
+      "existing_runtime_wrapper": "rby1_assembly.rj45_teacher_runtime.make_rj45_teacher_env_type",
+      "virtual_target_formula": "G_true * F_actual * inverse(F_hat)",
+      "action_function": "rby1_assembly.rj45_teacher.teacher_tip_target_action",
+      "same_command_depth_baseline_and_virtual_target": true,
+      "tip_frame_composition": "compose plug_tip_local with baseline and virtual body targets",
+      "delta_frame": "socket_entry",
+      "rotation_delta": "shortest_principal_rotation_vector",
+      "translation_vector_projection_bound_m": 0.0015,
+      "rotation_vector_projection_bound_rad": 0.026179938779914945,
+      "bounding_order": "divide_by_bounds_then_component_clip_then_each_3d_vector_norm_projection",
+      "composition": "existing_absolute_tip_target_hook",
+      "accumulation": "none_recompute_from_current_gt_each_30Hz_tick",
+      "allowed_use": "feasibility_only_excluded_from_fair_superiority_comparison"
+    }
+  ],
+  "classical_tuning": {
+    "status": "required_before_strong_baseline_claim_and_admit_rl_pilot",
+    "independent_grasp_id": "rj45-train-03",
+    "independent_grasp_verified_index": 2,
+    "bias_cases": "same_six_signed_values_but_tuning_only_never_G3_or_final",
+    "candidate_count": 3,
+    "episodes_per_candidate": 6,
+    "maximum_episode_count_separate_from_admission": 18,
+    "candidates": [
+      {"id": "A", "position_gain": 0.8, "rotation_gain": 0.8, "force_trigger_n": 8.0, "search_step_m": 0.00015},
+      {"id": "B", "position_gain": 1.0, "rotation_gain": 0.8, "force_trigger_n": 6.0, "search_step_m": 0.0001},
+      {"id": "C", "position_gain": 0.6, "rotation_gain": 1.0, "force_trigger_n": 8.0, "search_step_m": 0.0002}
+    ],
+    "eligibility": "zero_hard_and_forbidden_contact_episodes",
+    "selection_order": [
+      "maximum_success_count",
+      "minimum_evaluator_force_p95",
+      "minimum_completion_time_median",
+      "lexicographic_candidate_id"
+    ],
+    "performance_target_successes": 4,
+    "out_of": 6,
+    "target_miss_policy": "preserve_result_no_new_candidate",
+    "required_pre_admission_seal": [
+      "selected_controller_config_sha256",
+      "tuning_report_sha256",
+      "applied_controller_sha256"
+    ],
+    "selected_controller_config_canonicalization": "exact_controller_canonical_config",
+    "required_runtime_sha_equality": "applied_controller_sha256_equals_selected_controller_config_sha256"
+  },
+  "observability": {
+    "source_method": "zero_slot1_and_slot2_only",
+    "zero_slot1_role": "12_case_success_and_headroom_denominator",
+    "zero_slot2_role": "repeat_noise_only_excluded_from_performance_denominator",
+    "alignment": "first_30Hz_tick_where_entry_filtered_net_force_norm_is_at_least_0.25N",
+    "window_samples": 13,
+    "window_transitions": 12,
+    "window_seconds": 0.4,
+    "feature_slices": [[7, 40], [63, 78]],
+    "feature_dimension": 48,
+    "feature_space": "normalized_observation79",
+    "run_summary": "per_dimension_median_over_13_aligned_samples",
+    "signed_distance": "l2(median_positive_slot1,median_negative_slot1)",
+    "repeat_noise": "max(l2(positive_slot1,positive_slot2),l2(negative_slot1,negative_slot2),epsilon)",
+    "epsilon": 1e-06,
+    "absolute_distance_floor": 0.05,
+    "minimum_signal_to_repeat_noise_ratio": 2.0,
+    "minimum_passing_axes_per_grasp": 2,
+    "axes_per_grasp": 3,
+    "no_contact_or_fewer_than_13_samples": "unobservable_axis",
+    "ground_truth_and_estimated_relative_pose_excluded": true
+  },
+  "execution": {
+    "grasp_count": 2,
+    "bias_case_count_per_grasp": 6,
+    "case_count": 12,
+    "provider_count": 5,
+    "slots_per_case": 6,
+    "slot_explanation": "zero has two slots; each of the other four providers has one",
+    "maximum_episode_count": 72,
+    "separate_classical_tuning_maximum_episode_count": 18,
+    "combined_development_maximum_episode_count": 90,
+    "no_case_replacement": true,
+    "no_tolerance_relaxation": true,
+    "no_outcome_condition_adjustment": true,
+    "rendering": false,
+    "output_split": "development",
+    "future_sealed_final_reuse_forbidden": true
+  },
+  "result_state_machine": {
+    "states": ["invalid_contract", "infeasible_or_unobservable", "valid_stop_no_headroom", "valid_hard_sparse", "valid_stop_insufficient_structured_headroom", "admit_rl_pilot"],
+    "invalid_contract": "Any archive/hash/id-index/new-applied-held-telemetry/request-applied/pre-freeze-reset-equivalence/same-bias-insert-transition-equivalence/first-insert-physical-zero/provider-authority/classical-constant-playback-applied-artifact-sha/finite-value/72-slot contract failure.",
+    "infeasible_or_unobservable": "Reference is below 10/12 or below 5/6 on either grasp, has any hard/forbidden contact, or observability fails.",
+    "valid_stop_no_headroom": "A fair non-learning method is at least 10/12 successful and that method has zero hard/forbidden contacts across all 12 episodes; only this state means no overall-success-rate headroom.",
+    "valid_hard_sparse": "Reference and observability pass but zero slot1 is 0 or 1 out of 12.",
+    "valid_stop_insufficient_structured_headroom": "Every fair non-learning method is below 10/12 and zero slot1 is 2..9/12, but one or more of two headroom cases, two signed pairs, position-and-orientation coverage, or both-grasp coverage is missing. This does not mean no overall-success-rate headroom. The current development condition does not support the specified RL comparison entry structure: do not start the pilot, preserve the result, and do not change conditions post hoc.",
+    "admit_rl_pilot": "Classical tuning is sealed and all contracts pass; zero slot1 is 2..9/12; classical, constant and playback are each below 10/12; at least two headroom cases and two signed-pair requirements pass.",
+    "v2_rule": "Never create harder v2 conditions to evade a classical win; v2 requires a contract/instrumentation correction or a distinct scientific question and preserves v1."
+  },
+  "admission_gate": {
+    "oracle_gt_reference_minimum_successes": 10,
+    "oracle_gt_reference_minimum_successes_per_grasp": 5,
+    "maximum_reference_hard_or_forbidden_contact_episodes": 0,
+    "zero_slot1_admit_success_range_inclusive": [2, 9],
+    "zero_slot2_in_performance_denominator": false,
+    "safe_nonlearning_no_headroom_successes": 10,
+    "required_artifact_sha_checks": [
+      "classical_applied_controller_equals_selected_exact_controller_canonical_config",
+      "classical_tuning_report_is_sealed",
+      "raw_source_trace_gzip_sha256_equals_fixed_expected_sha256",
+      "mean_constant_applied_artifact_equals_canonical_method_artifact",
+      "open_loop_playback_applied_artifact_equals_canonical_method_artifact"
+    ],
+    "minimum_headroom_cases_all_fair_nonlearning_fail_reference_succeeds": 2,
+    "minimum_signed_pairs_zero_both_fail_reference_both_succeed": 2,
+    "signed_pairs_must_span_error_kinds": ["position", "orientation"],
+    "signed_pairs_must_span_both_grasps": true
+  },
+  "post_admission": {
+    "next_step": "short_equal_experience_ppo_sac_pilot",
+    "training_seed_count": "seal_after_pilot",
+    "G3_magnitude_envelope": "new_sealed_contract_after_pilot",
+    "future_final_case_count": "seal_after_pilot",
+    "effect_margin": "seal_after_pilot",
+    "safety_noninferiority_margin": "seal_after_pilot",
+    "confidence_interval_method": "seal_after_pilot"
+  },
+  "implementation_gates": {
+    "runner": "implemented_cpu_prelaunch_approved",
+    "provider_registry": "implemented_make_fair_provider",
+    "explicit_bias_injector": "implemented_make_rj45_task_admission_env_type",
+    "applied_held_identity_telemetry": "implemented_cpu_tested",
+    "prefreeze_signed_gt_snapshot": "implemented_cpu_tested",
+    "insert_transition_signed_gt_snapshot": "implemented_cpu_tested",
+    "first_insert_actual_applied_action_telemetry": "implemented_cpu_tested",
+    "executed_transition_physical_action_mask": "implemented_comparison_cached_last_policy_observation_valid_mask_cpu_tested",
+    "cpu_contract_tests": "passed_as_part_of_75_test_integrated_cpu_suite",
+    "independent_reviews": {
+      "g0_verifier": "PASS",
+      "g1_core_architect": "CLEAR",
+      "g1_runner_cpu_prelaunch": "APPROVE"
+    },
+    "isaac_smoke": "not_run"
+  },
+  "historical_evidence": [
+    "docs/evidence/rj45-comparison-g0-20261101/README.md",
+    "docs/evidence/rj45-multibias-20261031/README.md",
+    "docs/evidence/rj45-frozen-ablation-20261031/README.md",
+    "docs/evidence/rj45-oracle-condition-20261031/README.md"
+  ]
+}
