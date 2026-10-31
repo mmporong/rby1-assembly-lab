@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "purpose": "설치 환경과 실험 원본을 보존하며 재다운로드 가능한 캐시 정리",
+  "observed_at_utc": "2026-10-31T11:58:57.422733+00:00",
+  "before": {
+    "/home": {
+      "size": 67916726272,
+      "used": 65053982720,
+      "available": 2149953536,
+      "percent": "97%"
+    },
+    "/data": {
+      "size": 141343342592,
+      "used": 134990696448,
+      "available": 6335868928,
+      "percent": "96%"
+    },
+    "/": {
+      "size": 101162582016,
+      "used": 79037898752,
+      "available": 16938586112,
+      "percent": "83%"
+    }
+  },
+  "after": {
+    "/home": {
+      "size": 67916726272,
+      "used": 63205474304,
+      "available": 3998461952,
+      "percent": "95%"
+    },
+    "/data": {
+      "size": 141343342592,
+      "used": 134990696448,
+      "available": 6335868928,
+      "percent": "96%"
+    },
+    "/": {
+      "size": 101162582016,
+      "used": 79055482880,
+      "available": 16921001984,
+      "percent": "83%"
+    }
+  },
+  "home_available_increase_bytes": 1848508416,
+  "measurement_note": "df 전후 스냅샷 차이이며 동시에 실행 중인 다른 프로세스의 디스크 사용 변동이 포함될 수 있다",
+  "actions": [
+    {
+      "command": [
+        "uv",
+        "cache",
+        "clean"
+      ],
+      "returncode": 0,
+      "completed_at": "2026-10-31T11:58:16.715726+00:00",
+      "stdout": "",
+      "stderr": "Clearing cache at: $HOME/.cache/uv\nRemoved 48010 files (1.6GiB)\n"
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "pip",
+        "cache",
+        "purge"
+      ],
+      "returncode": 0,
+      "completed_at": "2026-10-31T11:58:16.910078+00:00",
+      "stdout": "Files removed: 54\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "npm",
+        "cache",
+        "clean",
+        "--force"
+      ],
+      "returncode": 0,
+      "completed_at": "2026-10-31T11:58:17.190412+00:00",
+      "stdout": "",
+      "stderr": "npm warn using --force Recommended protections disabled.\n"
+    }
+  ],
+  "scope": [
+    "$HOME/.cache/uv",
+    "$HOME/.cache/pip",
+    "$HOME/.npm/_cacache"
+  ],
+  "preserved": [
+    "설치된 가상환경",
+    "실험 데이터와 체크포인트",
+    "원본 영상과 회수 아카이브",
+    "사용 중인 앱 데이터베이스와 세션 기록",
+    "Conda 패키지 캐시",
+    "npm _npx 환경"
+  ],
+  "verification": {
+    "external_uv_cache_symlinks": 0,
+    "tracked_files_verified_before_record_update": 817,
+    "tracked_mismatch": [],
+    "recovery_archive_sha256_match": true,
+    "numpy": "1.26.0",
+    "h5py": "3.14.0",
+    "project_import": "ok",
+    "npx_preserved": true
+  },
+  "private_execution_records": "$HOME/rby1-assembly-lab/artifacts/maintenance/storage-reclaim-20261031/"
+}
