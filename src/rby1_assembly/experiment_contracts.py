@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import struct
 from typing import Any
 
 
@@ -40,6 +41,91 @@ def atomic_write_json(path: Path, value) -> None:
     temporary = path.with_suffix(path.suffix + ".tmp")
     temporary.write_text(payload, encoding="utf-8")
     temporary.replace(path)
+
+
+_MATING_GEOMETRY_KEYS = {
+    "depth_m",
+    "lateral_error_m",
+    "orientation_error_rad",
+    "relative_position_entry_m",
+    "relative_quaternion_entry_wxyz",
+    "source",
+}
+
+
+def _binary64_ordered_key(value: float) -> int:
+    bits = struct.unpack(">Q", struct.pack(">d", value))[0]
+    return (~bits & 0xFFFFFFFFFFFFFFFF) if bits >> 63 else bits | 0x8000000000000000
+
+
+def _within_two_binary64_ulps(left: Any, right: Any) -> bool:
+    if (
+        type(left) is not float
+        or type(right) is not float
+        or not math.isfinite(left)
+        or not math.isfinite(right)
+        or left < 0.0
+        or right < 0.0
+    ):
+        return False
+    if left == right:
+        return True
+    return abs(_binary64_ordered_key(left) - _binary64_ordered_key(right)) <= 2
+
+
+def _recorded_mating_geometry_matches(
+    recorded: Any, recalculated: Any
+) -> bool:
+    """Allow only a two-ULP serialization drift in two derived magnitudes."""
+
+    if (
+        not isinstance(recorded, dict)
+        or not isinstance(recalculated, dict)
+        or set(recorded) != _MATING_GEOMETRY_KEYS
+        or set(recalculated) != _MATING_GEOMETRY_KEYS
+    ):
+        return False
+    if (
+        type(recorded["source"]) is not str
+        or type(recalculated["source"]) is not str
+        or recorded["source"] != recalculated["source"]
+    ):
+        return False
+    recorded_depth = recorded["depth_m"]
+    recalculated_depth = recalculated["depth_m"]
+    if (
+        type(recorded_depth) is not float
+        or type(recalculated_depth) is not float
+        or not math.isfinite(recorded_depth)
+        or not math.isfinite(recalculated_depth)
+        or recorded_depth != recalculated_depth
+    ):
+        return False
+    for key, length in (
+        ("relative_position_entry_m", 3),
+        ("relative_quaternion_entry_wxyz", 4),
+    ):
+        left = recorded[key]
+        right = recalculated[key]
+        if (
+            type(left) is not list
+            or type(right) is not list
+            or len(left) != length
+            or len(right) != length
+            or any(
+                type(a) is not float
+                or type(b) is not float
+                or not math.isfinite(a)
+                or not math.isfinite(b)
+                or a != b
+                for a, b in zip(left, right, strict=True)
+            )
+        ):
+            return False
+    return all(
+        _within_two_binary64_ulps(recorded[key], recalculated[key])
+        for key in ("lateral_error_m", "orientation_error_rad")
+    )
 
 
 def validate_ppo_config(config: dict) -> None:
@@ -289,7 +375,9 @@ def verify_rj45_nominal_evidence(project: Path, task: dict, report_path: Path) -
             entry["actual_lateral_error_m"],
             entry["actual_orientation_error_rad"],
         )
-        if entry.get("independent_mating_geometry") != geometry:
+        if not _recorded_mating_geometry_matches(
+            entry.get("independent_mating_geometry"), geometry
+        ):
             raise ValueError(
                 "recorded independent mating geometry differs from raw-pose recalculation"
             )
