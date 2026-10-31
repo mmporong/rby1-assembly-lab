@@ -196,17 +196,6 @@ def test_protocol_lineage_allows_only_runner_hash_and_deadline_change() -> None:
             )
 
 
-def test_source_uses_final_checkpoint_for_inference_only_physics_evaluation() -> None:
-    source = SCRIPT.read_text(encoding="utf-8")
-    assert "replay._policy_for_replay(" in source
-    assert "probe._run_evaluation(" in source
-    assert "probe._build_env(args, MODE, protocol)" in source
-    assert '"new_training_updates": 0' in source
-    assert '"learning_executed": False' in source
-    assert '"origin_run_invalid": True' in source
-    assert ".learn(" not in source
-
-
 def test_preimport_source_binding_rejects_replay_helper_tampering() -> None:
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)

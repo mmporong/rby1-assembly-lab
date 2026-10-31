@@ -1,0 +1,21 @@
+{
+  "observed_at_utc": "2026-10-31T01:37:04.210080+00:00",
+  "stop": {
+    "instance_id": "pyf1b9s0a",
+    "instance_name": "rby1-oracle-crusoe-20261031a",
+    "ok": true,
+    "polls": 3,
+    "status": "stopped"
+  },
+  "fresh_inventory_status": "STOPPED",
+  "task_stop_timers_and_services": "all exact task units inactive or unloaded",
+  "active_owned_processes": [],
+  "remote_gpu_processes_before_stop": [],
+  "all_completed_run_and_media_archives_retrieved_and_sha_verified": true,
+  "cloud_instances_deleted": false,
+  "old_project_volumes_preserved": true,
+  "shared_new_reservation_usd": 12,
+  "project_budget_cap_usd": 700,
+  "invoice_or_account_balance_claimed": false,
+  "prior_deadline_only_contingency": "ineligible and unused after original oracle run invalid"
+}

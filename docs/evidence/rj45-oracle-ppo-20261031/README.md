@@ -25,7 +25,7 @@
 - 계획은 zero, reference, oracle92, standard79 순서였다. 학습 군마다 32 update·4,096 transition을 예정했으나 두 학습 군 모두 시작하지 않았다.
 - 원래 runner가 실제 `TerminalEvaluation`에 없는 `completion_time_s`와 `failure_reasons`를 읽었다. 첫 필드에서 `AttributeError`가 발생했다.
 - Isaac 앱의 `close()`가 종료 코드 0을 발생시켜 내부 실패 코드 2를 덮었다. 외부 batch는 reference 보고서의 누락된 `evaluation`을 읽다가 코드 1로 끝났다.
-- 현재 runner는 `TerminalEvaluation.as_dict()`의 실제 계약으로 저장하고, 앱 정리 후에도 실패 코드를 보존한다. 실제 dataclass 직렬화와 가짜 앱의 `SystemExit(0)`을 재현하는 테스트를 추가했다. 수정 버전의 물리 재실행은 아직 하지 않았다.
+- runner는 `TerminalEvaluation.as_dict()`의 실제 계약으로 저장하고, Python의 `SystemExit(0)`이 내부 실패 반환값을 덮지 않도록 수정했다. 실제 dataclass 직렬화와 가짜 앱 종료를 재현하는 테스트를 추가했다. [후속 실행](../rj45-oracle-condition-20261031/README.md)에서는 Kit 네이티브 종료 경로가 프로세스 코드 0을 내는 경우도 확인했다. 따라서 외부 배치는 종료 코드와 보고서의 `status == completed`를 모두 검사한다. 이 문서의 첫 실행 두 건은 계속 invalid로 보존한다.
 
 ## 구현한 진단 도구
 

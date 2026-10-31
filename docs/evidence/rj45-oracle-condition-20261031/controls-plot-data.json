@@ -1,0 +1,26 @@
+{
+  "scope": "one train condition; no generalization or effect estimate",
+  "warmup_rows": "excluded; original episode timestamps preserved",
+  "threshold_source_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+  "lateral_limit_um": 50.0,
+  "traces": {
+    "zero": {
+      "trace": "zero-trace.jsonl.gz",
+      "compressed_sha256": "af39ac8924635b2eacea28588cdb7817d0a7f9183442e486c424bbaea0774f69",
+      "raw_sha256": "1ebc1abbd311ccefbe3b6a5ec937d9f62d6f5541084b72885c6a71c6607fd0fd",
+      "active_rows": 717,
+      "classification": "valid_failure",
+      "last_lateral_error_um": 87.49515761276632,
+      "last_depth_mm": 12.19391092200214
+    },
+    "reference": {
+      "trace": "reference-trace.jsonl.gz",
+      "compressed_sha256": "4c318231df62a75a7aa7dc53282609f5d2f9385fc640ecd5cb1f5c5ec914de17",
+      "raw_sha256": "6ab57af20977d1069d86e85be8bb50802ff41b8528c9132a05c9d06b32b7ee78",
+      "active_rows": 364,
+      "classification": "valid_success",
+      "last_lateral_error_um": 2.630654738952233,
+      "last_depth_mm": 12.29522349339148
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "expectation": {
+    "expected_mismatches": 0,
+    "matched": true
+  },
+  "full_train_bank_verification": {
+    "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "passed": true,
+    "selected_count": 8,
+    "selected_grasp_ids": [
+      "rj45-train-01",
+      "rj45-train-02",
+      "rj45-train-03",
+      "rj45-train-04",
+      "rj45-train-05",
+      "rj45-train-06",
+      "rj45-train-07",
+      "rj45-train-08"
+    ],
+    "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0"
+  },
+  "geometry_replay": {
+    "dict_exact_mismatches": 0,
+    "eligible_rows_checked": 1360,
+    "field_mismatch_counts": {},
+    "first_mismatch": null,
+    "max_abs_delta": {
+      "depth_m": 0.0,
+      "lateral_error_m": 0.0,
+      "orientation_error_rad": 0.0
+    },
+    "max_ulp_delta_nonnegative": {
+      "depth_m": 0,
+      "lateral_error_m": 0,
+      "orientation_error_rad": 0
+    }
+  },
+  "host": {
+    "machine": "x86_64",
+    "node": "lim-ASUS-TUF-Gaming-A16-FA608UH-FA608UH",
+    "processor": "x86_64",
+    "python": "3.11.15"
+  },
+  "inputs": {
+    "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "project_root": "/home/lim/rby1-assembly-lab/artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028/extracted",
+    "report_sha256": "1f671c6119f68fbe8a4b2a41f7ec3218ee829c8dd25db22786cf24f5993a4fb0",
+    "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "trace_sha256": "2a42e006358b4dc6eb380f5976452d4ef45684be83c67a7df7e9c9bafc7f66c0"
+  },
+  "runtime": {
+    "NPY_DISABLE_CPU_FEATURES": "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL",
+    "OPENBLAS_CORETYPE": "Zen",
+    "cpu_features": {
+      "AVX2": true,
+      "AVX512F": false,
+      "FMA3": true
+    },
+    "numpy": "1.26.0"
+  },
+  "schema_name": "rj45_bank_geometry_cpu_reproduction_v1",
+  "scope": "CPU-only replay of frozen train-bank evidence; no Isaac Sim or physics"
+}

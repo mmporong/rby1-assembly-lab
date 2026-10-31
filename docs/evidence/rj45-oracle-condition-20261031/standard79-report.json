@@ -1,0 +1,1378 @@
+{
+  "claims": {
+    "final_policy": false,
+    "heldout_generalization": false,
+    "reinforcement_learning_effect_proven": false,
+    "single_fixed_condition_learnability_diagnostic": true
+  },
+  "execution_device": "cuda:0",
+  "execution_guard": {
+    "absolute_deadline_utc": "2026-10-31T01:30:00Z",
+    "elapsed_wall_s_before_close": 1066.9053498919998,
+    "external_stop_guard_required": true,
+    "mode_wall_time_limit_s": 1800.0
+  },
+  "final_evaluation": {
+    "action_boundary_fraction_over_active": 0.0,
+    "action_boundary_rows": 0,
+    "active_rows": 364,
+    "classification": "valid_success",
+    "evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "observation": {
+      "actor_ground_truth_access": false,
+      "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+      "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+      "dimensions": {
+        "critic": 92,
+        "policy": 79
+      },
+      "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+      "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+    },
+    "reference_controller": null,
+    "terminal": {
+      "criteria": {
+        "depth": true,
+        "dwell": true,
+        "forbidden_contact": true,
+        "force": true,
+        "grasp_live_and_proven": true,
+        "independent_evaluator_terminal": true,
+        "lateral": true,
+        "orientation": true
+      },
+      "evaluator_source": "simulator_ground_truth_independent",
+      "evaluator_version": "task-evaluator-v1+environment-cross-check",
+      "metrics": {
+        "actual_depth_m": 0.012163298783499771,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.7777652740478516,
+        "grasp_both": 1.0,
+        "lateral_error_m": 2.8004151161271907e-05,
+        "orientation_error_rad": 0.0021418305847776234
+      },
+      "success": true,
+      "terminal_timestamp_s": 12.233333587646484,
+      "termination_reason": "independent_success",
+      "valid": true
+    },
+    "terminal_phase": "done",
+    "trace": {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/final_evaluation.jsonl",
+      "sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4"
+    }
+  },
+  "fixed_condition": {
+    "base_seed": 20261128,
+    "calibration_case_seed": 66384148,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1,
+    "num_envs": 1,
+    "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+    "split": "train"
+  },
+  "frozen_input_sha256": {
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-01.json": "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-02.json": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-03.json": "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-04.json": "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-05.json": "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-06.json": "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-07.json": "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-08.json": "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/report.json": "5ed9a32c686a864b10303a9a9c14d440bf9fbe3ed0d7a4e9debe57204abd66a3",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261211/trace.jsonl": "f0caf62e4e5067faee24e7511d8e3d8c774ba32ff664cac314f99d3a265bb218",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/report.json": "1f671c6119f68fbe8a4b2a41f7ec3218ee829c8dd25db22786cf24f5993a4fb0",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261212/trace.jsonl": "2a42e006358b4dc6eb380f5976452d4ef45684be83c67a7df7e9c9bafc7f66c0",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/report.json": "153d91544e1cd8a14fa8422a499b82937f2d4f89e4c8588696f6e83f5ef6bcd5",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261213/trace.jsonl": "ccd18efb9b0cd1b62cae672eab07a0163f187e855b33a5c0571e4952df1d96ae",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/report.json": "4774f5e16d5e13bd409544c23de39b349c4779068cb116b723fa5b525ff31b2b",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261214/trace.jsonl": "74dfa78c47077320ce1596db00ba5b5101aacd1b9f754225986edcbc45dddbff",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/report.json": "68d1ba092a42e0b516b89e8521802b30af483343b84b5b1d61063d5e2ca9e630",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261215/trace.jsonl": "0f46423047916003ec2080fdbb571c7f98fa9a34d490d081621d50e3c191b476",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/report.json": "ccdfe4d7ac324ea8ed586638215a468305eb60f0f9c9d4f9fe0399c5943c5fbf",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261216/trace.jsonl": "a640c07ffcbee8097323de9e445e1f2f7a3e999e76baebb4747cdeee97e35b9b",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/report.json": "819503312b0b725124330b68756c5938965e3f8d782ba2d2ef910d16ab5e3b7b",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261217/trace.jsonl": "72906316824ede712a24f29a7d5bc899e9a626ea26e7ee3f2d53db975bbfc046",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/report.json": "57e528b89232b4617071f37a106a6cd064886de37be675d537df32c227acf4f7",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/seed-20261218/trace.jsonl": "38c0be65e43db7a12411f33d2fe4fc40c3a1cb5aa674d1ffe28350e772914d9f",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/assets/generated/tasks/rj45-v1/table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/rj45-training-target-offset-v1.json": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d",
+    "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/current/configs/rj45-oracle-runtime-104721a.json": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/current/scripts/run_rj45_g2_physics_probe.py": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+    "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/current/scripts/run_rj45_oracle_ppo_probe.py": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+    "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/current/src/rby1_assembly/rj45_oracle_diagnostic.py": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+    "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/protocol.json": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef"
+  },
+  "input_revalidation": {
+    "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "bank_source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+    "generated_asset_sha256": {
+      "plug.usda": "a5de73a569df4da2a87436e214bdcc07208dddb42b0bfbc67787d514aa3529a9",
+      "robot.usda": "797282bdb19982fdf629cc87478d2a4edee218b8744d82d75aca326979ea222c",
+      "scene.usda": "8e2ab75f09330b6523035f6ec1e1f49e163fafbd99026666926dd0466bfa9328",
+      "socket.usda": "d0f436ca28bbe2091377681e44320558061fd60311fa0f5f6dbac7fba8197c64",
+      "table.usda": "5322a534792245b63f8975f0aea319813b3e10436c07778f8d9c52c23ea7e58d"
+    },
+    "held_bank_dependency_count": 26,
+    "runtime_source_file_count": 35
+  },
+  "inputs_unchanged": true,
+  "learning": {
+    "actor_parameter_sha256_after": "12e641184cf28cb01b55ebbf0487ef20ed16972e813195df64898872d26ca055",
+    "actor_parameter_sha256_before": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276",
+    "actor_parameters_changed": true,
+    "checkpoint": {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/final_checkpoint.pt",
+      "sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02"
+    },
+    "critic_initialization": {
+      "actor_input_width_independent": true,
+      "device": "cuda:0",
+      "resettable_module_count": 4,
+      "seed": 20261122,
+      "state_sha256": "308caed04d04cd357411d89f0dd62410a3a20002e9c2afaed9aac04d07b0258d"
+    },
+    "environment_training_report": {
+      "action_application_description": "tip target pose offset INSERT-only",
+      "action_application_mode": "absolute_tip_pose_target_insert_only",
+      "action_application_telemetry": {
+        "component_order": [
+          "tx",
+          "ty",
+          "tz",
+          "rx",
+          "ry",
+          "rz"
+        ],
+        "field": "applied_tip_target_offset_entry_6d",
+        "frame": "socket_entry",
+        "inactive_rows": "all_zeros",
+        "units": [
+          "m",
+          "m",
+          "m",
+          "rad",
+          "rad",
+          "rad"
+        ]
+      },
+      "action_mode": "right_only_6d",
+      "calibration_bias": {
+        "base_seed": 20261128,
+        "case_seed_formula": "base_seed + stream_offset + episode_index * episode_stride + env_id",
+        "enabled": true,
+        "episode_index": [
+          1
+        ],
+        "episode_stride": 1000003,
+        "level": 0,
+        "rotation_vector_entry_rad": [
+          [
+            0.0017766417004168034,
+            -0.003810248104855418,
+            -0.0010570123558863997
+          ]
+        ],
+        "sampling_event": "once_per_environment_reset_before_calibration",
+        "stream_offset": 45123017,
+        "translation_entry_m": [
+          [
+            6.795803346903995e-05,
+            0.00012224896636325866,
+            -5.2392562793102115e-05
+          ]
+        ]
+      },
+      "camera_observation_claim": false,
+      "diagnostic_observation_mode": "standard",
+      "ground_truth_in_policy_observation": false,
+      "ground_truth_usage": "scripted_setup_control_and_safety_then_reward_and_independent_evaluation_only",
+      "held_controller_initialization": "reconstruct_completed_setup_path_for_new_alignment_episode",
+      "held_grasp_bank": {
+        "artifact_sha256": [
+          "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+          "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+          "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+          "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+          "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+          "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+          "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+          "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea"
+        ],
+        "grasp_ids": [
+          "rj45-train-01",
+          "rj45-train-02",
+          "rj45-train-03",
+          "rj45-train-04",
+          "rj45-train-05",
+          "rj45-train-06",
+          "rj45-train-07",
+          "rj45-train-08"
+        ],
+        "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "selected_index_by_environment": [
+          1
+        ],
+        "split": "train"
+      },
+      "held_grasp_reset": true,
+      "held_reset_staging": {
+        "contact_free_validation": {
+          "finger_force_n": [
+            [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "forbidden_load_n": [
+            0.0
+          ],
+          "insertion_force_world_n": [
+            [
+              0.0,
+              0.0,
+              0.0
+            ]
+          ],
+          "insertion_load_n": [
+            0.0
+          ],
+          "passed": [
+            false
+          ],
+          "raw_contact_count": [
+            [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          ],
+          "raw_contact_count_order": [
+            "left_l1",
+            "left_l2",
+            "right_r1",
+            "right_r2",
+            "insertion"
+          ],
+          "requirement": "finite_and_exactly_zero_before_restore"
+        },
+        "control_steps": 1,
+        "enabled": true,
+        "method": "one_noncontact_control_step_then_exact_recorded_state_restore",
+        "object_positions_local_m": [
+          [
+            0.8,
+            0.8,
+            2.5
+          ],
+          [
+            1.0,
+            0.8,
+            2.5
+          ]
+        ],
+        "provenance": {
+          "defined_at": "2026-10-26",
+          "source": "simulation_design_assumption",
+          "unit": "m",
+          "valid_for": "Fixed-base RB-Y1 M v1.2 held-state initialization in the current table scene; requires contact-free verification before recorded-state restoration"
+        },
+        "scope": "episode_initialization_before_policy_activation_only",
+        "state_write_gate": "policy_inactive_only"
+      },
+      "held_warmup_peaks_n": {
+        "forbidden": [
+          0.0
+        ],
+        "grip": [
+          0.0
+        ],
+        "insertion": [
+          0.0
+        ]
+      },
+      "learned_recovery": false,
+      "learned_scope": "pre_portal_alignment_and_insertion",
+      "mass_randomization": false,
+      "object_pose_ground_truth_in_policy_observation": false,
+      "policy_action_dimension": 6,
+      "policy_active_phases": [
+        "insert"
+      ],
+      "policy_observation_contract": {
+        "inactive_rows": "all_zeros",
+        "persistent_calibration_bias_field_indices": null,
+        "policy_active_field_index": 78,
+        "policy_active_field_value_when_valid": 1.0,
+        "validity_extra": "policy_observation_valid"
+      },
+      "policy_observation_dimension": 79,
+      "policy_observation_source": "joint_encoder_frozen_grasp_estimator_with_episode_fixed_calibration_bias",
+      "privileged_diagnostic_observation": null,
+      "privileged_simulation_latent_in_policy_observation": false,
+      "reward_profile": {
+        "reward_discount_factor": null,
+        "reward_horizon_semantics": "legacy_finite_horizon",
+        "reward_potential_type": "normalized_pose",
+        "reward_profile_id": "a0_legacy_pose_v1",
+        "reward_shaping_mode": "undiscounted_difference"
+      }
+    },
+    "executed": true,
+    "initialization": {
+      "common_79d_projection_sha256": "e3184012a85d4bdc9e8e7350825fc5b845db96fedbce83bff5b68beaa8ebc9b0",
+      "extra_columns_trainable": false,
+      "mode": "standard79",
+      "oracle_extra_13_columns_zero": true,
+      "output_layer_zero": true,
+      "seed": 20261123,
+      "state_sha256": "aea5b745dae111553c8bbe81268862082e807b405553bf37bb1e4b1032751276"
+    },
+    "initialization_rng_reset": {
+      "numpy": true,
+      "physics_seed_unchanged": 20261128,
+      "python": true,
+      "seed": 20261121,
+      "torch_cpu": true,
+      "torch_cuda_all_available_devices": true
+    },
+    "initialization_rng_state_sha256": {
+      "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+      "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+      "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+      "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+    },
+    "optimizer_initial_state_sha256": "353ee19c0827e3f57588b440cc2c298165db57129068c476e0a42f9fa5ebb138",
+    "policy_std_after": {
+      "maximum": 0.12653638422489166,
+      "mean": 0.10077623650431633,
+      "minimum": 0.08616353571414948,
+      "shape": [
+        6
+      ]
+    },
+    "policy_std_before": {
+      "maximum": 0.10000000149011612,
+      "mean": 0.10000000149011612,
+      "minimum": 0.10000000149011612,
+      "shape": [
+        6
+      ]
+    },
+    "post_constructor_fixed_condition_resets": 10,
+    "rng": {
+      "numpy": true,
+      "physics_seed_unchanged": 20261128,
+      "python": true,
+      "seed": 20261121,
+      "torch_cpu": true,
+      "torch_cuda_all_available_devices": true
+    },
+    "training_start_rng": {
+      "numpy": true,
+      "physics_seed_unchanged": 20261128,
+      "python": true,
+      "seed": 20261121,
+      "state_sha256": {
+        "numpy": "9dd9bab25bde02bc7f91a707b866d118f1e19167e290fac9729aa43f6cc9b7f8",
+        "python": "abc096951d56bcbf4b8344421301bf42f16a7f14e0a824ece1ab887906a390d1",
+        "torch_cpu": "8a5e639edfaf47d2544c1ab458b9e0005bb3e08005468451334dad3b6dfc258d",
+        "torch_cuda": "acb9e83fcbdfcef0b32a697c76743ee750075025630d4058be9f42a2e82db8c2"
+      },
+      "torch_cpu": true,
+      "torch_cuda_all_available_devices": true
+    },
+    "update_metrics": [
+      {
+        "metrics": {
+          "entropy": -5.302636528015137,
+          "surrogate": -0.014819520339369775,
+          "value_function": 0.016588165238499642
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 1
+      },
+      {
+        "metrics": {
+          "entropy": -5.311627197265625,
+          "surrogate": -0.012297799438238144,
+          "value_function": 0.01093338020145893
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 2
+      },
+      {
+        "metrics": {
+          "entropy": -5.3305388450622555,
+          "surrogate": -0.008060556277632714,
+          "value_function": 0.021063822135329247
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 3
+      },
+      {
+        "metrics": {
+          "entropy": -5.3508460998535154,
+          "surrogate": -0.004729914665222168,
+          "value_function": 0.01786416433751583
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 4
+      },
+      {
+        "metrics": {
+          "entropy": -5.364876174926758,
+          "surrogate": -0.005346674099564552,
+          "value_function": 0.02209014482796192
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 5
+      },
+      {
+        "metrics": {
+          "entropy": -5.383594036102295,
+          "surrogate": -0.015269799530506134,
+          "value_function": 0.6840946316719055
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 6
+      },
+      {
+        "metrics": {
+          "entropy": -5.382316970825196,
+          "surrogate": -0.006839117594063282,
+          "value_function": 0.02053462266921997
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 7
+      },
+      {
+        "diagnostic_checkpoint": {
+          "eligible_for_selection": false,
+          "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/diagnostic_checkpoint_0008.pt",
+          "sha256": "50a844a45b499c2022beb8657b4e0cc2d3f04b06236bdd7166b2946333566af1"
+        },
+        "metrics": {
+          "entropy": -5.386566066741944,
+          "surrogate": -0.013783791661262512,
+          "value_function": 0.008863505534827709
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 8
+      },
+      {
+        "metrics": {
+          "entropy": -5.396978569030762,
+          "surrogate": -0.0032054677605628966,
+          "value_function": 0.01567596960812807
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 9
+      },
+      {
+        "metrics": {
+          "entropy": -5.397336864471436,
+          "surrogate": -0.014842560887336731,
+          "value_function": 0.021030135825276373
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 10
+      },
+      {
+        "metrics": {
+          "entropy": -5.389623928070068,
+          "surrogate": -0.009250220470130443,
+          "value_function": 0.014777790755033493
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 11
+      },
+      {
+        "metrics": {
+          "entropy": -5.390049648284912,
+          "surrogate": -0.009298790991306306,
+          "value_function": 0.6173723697662353
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 12
+      },
+      {
+        "metrics": {
+          "entropy": -5.376384639739991,
+          "surrogate": -0.008634130656719207,
+          "value_function": 0.02592020817101002
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 13
+      },
+      {
+        "metrics": {
+          "entropy": -5.376730251312256,
+          "surrogate": -0.01478576585650444,
+          "value_function": 0.017365080118179322
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 14
+      },
+      {
+        "metrics": {
+          "entropy": -5.387100124359131,
+          "surrogate": -0.004534573853015899,
+          "value_function": 0.02458753138780594
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 15
+      },
+      {
+        "diagnostic_checkpoint": {
+          "eligible_for_selection": false,
+          "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/diagnostic_checkpoint_0016.pt",
+          "sha256": "de8ebf2ef26e2c028561d836fc2d9569d0b967a7182d74b6ba4925960cc83d5e"
+        },
+        "metrics": {
+          "entropy": -5.3899696350097654,
+          "surrogate": -0.013558276370167733,
+          "value_function": 0.030748826265335084
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 16
+      },
+      {
+        "metrics": {
+          "entropy": -5.386599063873291,
+          "surrogate": -0.01858450323343277,
+          "value_function": 0.023337597399950026
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 17
+      },
+      {
+        "metrics": {
+          "entropy": -5.394938659667969,
+          "surrogate": -0.016500891372561454,
+          "value_function": 0.21737608909606934
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 18
+      },
+      {
+        "metrics": {
+          "entropy": -5.3956249237060545,
+          "surrogate": -0.0022696029394865037,
+          "value_function": 0.02060316167771816
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 19
+      },
+      {
+        "metrics": {
+          "entropy": -5.401916408538819,
+          "surrogate": -0.010786299407482148,
+          "value_function": 0.018530809506773948
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 20
+      },
+      {
+        "metrics": {
+          "entropy": -5.414456176757812,
+          "surrogate": -0.008805368095636368,
+          "value_function": 0.020531846210360527
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 21
+      },
+      {
+        "metrics": {
+          "entropy": -5.417707061767578,
+          "surrogate": -0.009372678399086,
+          "value_function": 0.020648211240768433
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 22
+      },
+      {
+        "metrics": {
+          "entropy": -5.416031360626221,
+          "surrogate": -0.008975127339363098,
+          "value_function": 0.49709362387657163
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 23
+      },
+      {
+        "diagnostic_checkpoint": {
+          "eligible_for_selection": false,
+          "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/diagnostic_checkpoint_0024.pt",
+          "sha256": "b9be0ddf791e303b2fe919685c69b86f1bb90547bd07f47f530cd8e510b92cec"
+        },
+        "metrics": {
+          "entropy": -5.407868099212647,
+          "surrogate": -0.009211446344852447,
+          "value_function": 0.015125611424446106
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 24
+      },
+      {
+        "metrics": {
+          "entropy": -5.406747817993164,
+          "surrogate": -0.0162460632622242,
+          "value_function": 0.03293179497122765
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 25
+      },
+      {
+        "metrics": {
+          "entropy": -5.3936412811279295,
+          "surrogate": -0.007864745520055293,
+          "value_function": 0.03722776770591736
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 26
+      },
+      {
+        "metrics": {
+          "entropy": -5.377863502502441,
+          "surrogate": -0.021656888723373412,
+          "value_function": 0.040229132026433946
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 27
+      },
+      {
+        "metrics": {
+          "entropy": -5.3642504692077635,
+          "surrogate": -0.015690483897924424,
+          "value_function": 0.026155954226851463
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 28
+      },
+      {
+        "metrics": {
+          "entropy": -5.355448532104492,
+          "surrogate": -0.007989228516817094,
+          "value_function": 0.3070234000682831
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 29
+      },
+      {
+        "metrics": {
+          "entropy": -5.348959922790527,
+          "surrogate": -0.006510673463344574,
+          "value_function": 0.024784125760197638
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 30
+      },
+      {
+        "metrics": {
+          "entropy": -5.339398193359375,
+          "surrogate": -0.01345057673752308,
+          "value_function": 0.016806270740926266
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 31
+      },
+      {
+        "metrics": {
+          "entropy": -5.319490051269531,
+          "surrogate": -0.0028391845524311067,
+          "value_function": 0.02219301201403141
+        },
+        "parameter_finiteness": {
+          "actor_parameters": 8,
+          "actor_scalars": 119942,
+          "critic_parameters": 8,
+          "critic_scalars": 122625
+        },
+        "rollout_targets": {
+          "advantages": 128,
+          "returns": 128
+        },
+        "update": 32
+      }
+    ],
+    "updates": 32,
+    "updates_trace": {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/updates.jsonl",
+      "sha256": "11743fdef8ecdf98e7793cf1e3046c64d1333ead56f1f24f7f057570b387c807"
+    },
+    "zero_actor_contract": {
+      "action_sha256": "0c86a59899dd0b55221d72d55f03cd1bdd1777604fc229e308eced2df3e5f69c",
+      "action_shape": [
+        3,
+        6
+      ],
+      "mean_action_all_zero": true,
+      "mode": "standard79",
+      "noise": {
+        "maximum": 0.10000000149011612,
+        "mean": 0.10000000149011612,
+        "minimum": 0.10000000149011612,
+        "shape": [
+          6
+        ]
+      },
+      "sample_rows": 3
+    },
+    "zero_actor_output": true
+  },
+  "mode": "standard79",
+  "pre_evaluation": {
+    "action_boundary_fraction_over_active": 0.0,
+    "action_boundary_rows": 0,
+    "active_rows": 717,
+    "classification": "valid_failure",
+    "evaluation_rng": {
+      "seeded": {
+        "numpy": true,
+        "physics_seed_unchanged": 20261128,
+        "python": true,
+        "seed": 20261124,
+        "torch_cpu": true,
+        "torch_cuda_all_available_devices": true
+      },
+      "state_sha256_before_environment_reset": {
+        "numpy": "2b9083fbb667f15f630bbd6267b7bcd786cdb324924efa83aa15a5e91b55417e",
+        "python": "b67c41d631cf4def0ba20ddacd98029286f4eb3254fbf1c6191274049c9ada7a",
+        "torch_cpu": "c93c7dd4c12d37daa51c3c912416d4a1217a076d895bdfd9e1d24f149dfcd102",
+        "torch_cuda": "e0f4c21c5c14ccf84b249e0400487e75c47a62b59403870a0d102a21e8189784"
+      }
+    },
+    "observation": {
+      "actor_ground_truth_access": false,
+      "base79_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43",
+      "critic_sha256": "646af70c2e0153351da558ed5fa1820b911df3405007e85d433bb1d430560bc4",
+      "dimensions": {
+        "critic": 92,
+        "policy": 79
+      },
+      "oracle13_sha256": "ee1f49c18092454210b270e97fb3b6c1333c34ff858544bcd229d5e142d89eca",
+      "policy_sha256": "3b98c23eea9431823cdaf743f999e20f72ef60e97d3cfae53ac17400f751eb43"
+    },
+    "reference_controller": null,
+    "terminal": {
+      "criteria": {
+        "depth": true,
+        "dwell": false,
+        "forbidden_contact": true,
+        "force": true,
+        "grasp_live_and_proven": true,
+        "independent_evaluator_terminal": false,
+        "lateral": false,
+        "orientation": true
+      },
+      "evaluator_source": "simulator_ground_truth_independent",
+      "evaluator_version": "task-evaluator-v1+environment-cross-check",
+      "metrics": {
+        "actual_depth_m": 0.01219391092200214,
+        "forbidden_contact": 0.0,
+        "force_peak_n": 3.777498960494995,
+        "grasp_both": 1.0,
+        "lateral_error_m": 8.749515761276632e-05,
+        "orientation_error_rad": 0.005260984545356934
+      },
+      "success": false,
+      "terminal_timestamp_s": 24.000001907348633,
+      "termination_reason": "episode_timeout",
+      "valid": true
+    },
+    "terminal_phase": "insert",
+    "trace": {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/results/20261128/standard79/pre_evaluation.jsonl",
+      "sha256": "3f4a5d5d6111c0b6bc0a1168e8bd2c3969630c45b4c0824fa62039cfe674eb9b"
+    }
+  },
+  "protocol": {
+    "file_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/protocol.json",
+    "payload": {
+      "budget_and_stop": {
+        "absolute_deadline_utc": "2026-10-31T01:30:00Z",
+        "budget_admission": {
+          "budget_cap_usd": 700.0,
+          "external_guard_minutes": 75,
+          "locally_verified": true,
+          "new_run_reservation_usd": 12.0,
+          "private_evidence_sha256": "80d4767917e8eb82a4121d4984356a30003bf0196c5033ba4ffe7e30ceeb0209"
+        },
+        "external_guard_minutes": 75,
+        "historical_reservation_not_invoice": true,
+        "mode_wall_time_limit_s": {
+          "oracle92": 1800.0,
+          "reference": 300.0,
+          "standard79": 1800.0,
+          "zero": 300.0
+        },
+        "new_run_reservation_usd": 12.0
+      },
+      "diagnostic_scope": {
+        "dev_and_final_unopened": true,
+        "not_final_policy": true,
+        "not_generalization_evidence": true,
+        "promotion_rule": "if zero succeeds, this condition cannot be promoted as evidence of a non-trivial RL contribution",
+        "required_modes": [
+          "zero",
+          "reference",
+          "standard79",
+          "oracle92"
+        ],
+        "single_fixed_train_condition": true
+      },
+      "fixed_condition": {
+        "base_seed": 20261128,
+        "calibration_case_seed": 66384148,
+        "environment_index": 0,
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "grasp_index": 1,
+        "num_envs": 1,
+        "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+        "split": "train"
+      },
+      "frozen_inputs": {
+        "archived_runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+        "bank_manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+        "bank_source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",
+        "runtime_config_sha256": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+        "runtime_manifest_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+        "runtime_source_file_sha256": {
+          "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+          "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+          "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+          "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+          "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+          "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+          "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+          "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+          "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+          "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+          "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+          "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+          "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+          "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+          "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+          "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+          "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+          "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+          "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+          "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+          "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+          "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+          "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+          "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+          "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+          "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+          "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+          "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+          "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+          "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+          "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+          "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+          "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+          "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+          "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+        },
+        "task_config_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+        "training_config_sha256": "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
+      },
+      "observation_groups": {
+        "ground_truth_usage": "oracle13 is diagnostic actor input only in oracle92; both learning modes use critic92",
+        "oracle92": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 92
+          },
+          "policy": [
+            "policy"
+          ]
+        },
+        "standard79": {
+          "critic": [
+            "critic"
+          ],
+          "dimensions": {
+            "critic": 92,
+            "policy": 79
+          },
+          "policy": [
+            "policy"
+          ]
+        }
+      },
+      "physics_contract": {
+        "evaluation": "G2 independent geometry/contact/nine-substep verifier",
+        "evaluations": "deterministic pre-training and final-checkpoint episodes; zero/reference each one episode",
+        "execution_device": "cuda:0",
+        "task_reward_action_termination": "unchanged archived runtime"
+      },
+      "ppo": {
+        "actor_initialization_seed": 20261123,
+        "checkpoint_selection": "preregistered final checkpoint only",
+        "critic_initialization_seed": 20261122,
+        "diagnostic_intermediate_checkpoint_updates": [
+          8,
+          16,
+          24
+        ],
+        "distinguished_from_prior_campaign": "single_env_128x32_fixed_condition_not_256_env_x32",
+        "entropy_coefficient": 0.005,
+        "evaluation_seed": 20261124,
+        "gamma": 0.995,
+        "implementation": "rsl-rl-lib==3.0.1 OnPolicyRunner/PPO unchanged",
+        "initial_noise_std": 0.1,
+        "intermediate_checkpoint_policy": "diagnostic recovery artifacts only; never eligible for promotion or selection",
+        "interpretation": "32 updates/4096 transitions is a learnability diagnostic, not effect proof",
+        "lambda": 0.95,
+        "learning_rate": 0.0003,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 1,
+        "policy_training_seed": 20261121,
+        "rollout_steps": 128,
+        "schedule": "fixed",
+        "training_rng_reset_seed": 20261121,
+        "transitions": 4096,
+        "updates": 32,
+        "zero_actor_output": true
+      },
+      "schema_name": "rj45_oracle_ppo_probe_v1",
+      "source_sha256": {
+        "adapter": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100",
+        "g2_physics_helper": "128a48fabee86b239bedc3db70e244b2a08d052dfc4221a86e4180360294fa42",
+        "runner": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+        "runtime_manifest": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+      },
+      "timing": {
+        "active_horizon_s": 24.0,
+        "control_decimation": 8,
+        "control_hz": 30,
+        "physics_hz": 240
+      }
+    },
+    "payload_sha256": "43ac1dfb48347b59bfb91a2e100b8d8c28f3f76628a31b9aae2e395259e2c06f"
+  },
+  "runtime_import_origins": {
+    "rby1_assembly": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/__init__.py",
+    "rby1_assembly.contact_loads": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_loads.py",
+    "rby1_assembly.contact_manifolds": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contact_manifolds.py",
+    "rby1_assembly.contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/contracts.py",
+    "rby1_assembly.control_math": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/control_math.py",
+    "rby1_assembly.experiment_contracts": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/experiment_contracts.py",
+    "rby1_assembly.hand_collision": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_collision.py",
+    "rby1_assembly.hand_contact_monitor": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/hand_contact_monitor.py",
+    "rby1_assembly.held_grasp": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/held_grasp.py",
+    "rby1_assembly.isaac_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/isaac_env.py",
+    "rby1_assembly.parallel_contact_evidence": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/parallel_contact_evidence.py",
+    "rby1_assembly.rj45_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_env.py",
+    "rby1_assembly.rj45_grasp_generation": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_grasp_generation.py",
+    "rby1_assembly.rj45_task": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_task.py",
+    "rby1_assembly.rj45_training": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training.py",
+    "rby1_assembly.rj45_training_env": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/src/rby1_assembly/rj45_training_env.py"
+  },
+  "runtime_manifest": {
+    "file_sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2",
+    "git_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+    "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision4/current/configs/rj45-oracle-runtime-104721a.json",
+    "source_file_count": 35,
+    "source_file_sha256": {
+      "src/rby1_assembly/__init__.py": "cfc72ff457c7716ac539f87d0c3545f458fea4329a59483836a6d7431a16e317",
+      "src/rby1_assembly/assets.py": "e79d21f82e238ed5153789aa3e5dc3463bab815d8560391e582762065610299c",
+      "src/rby1_assembly/command_faults.py": "32acc6c78e57efc3ae45c99f5e61a0f8814ff2fd16c31e9dee8c36bbb8ab296a",
+      "src/rby1_assembly/contact_loads.py": "36892f3e0dd81d2f2900b6b4133abb024ca18f1ec66755000fc9e0f1e191eff7",
+      "src/rby1_assembly/contact_manifolds.py": "26fe7928b059348457a71821a4ce83a231c5f40609212e9bfbd06d30ec88d32e",
+      "src/rby1_assembly/contracts.py": "3f67c34f7f00b7a94e101b4b3bfd4c9fe77935ad070128c7bde7d24fcfb9a89e",
+      "src/rby1_assembly/control_math.py": "f13e5253a193d9fd74e0719673d16f7c9457f56a1bdef2b33e7c2846df2f656c",
+      "src/rby1_assembly/dataset.py": "a9c022a4eca74b59580275879ce47836edb99b11cdcbcea89f05e010ae27a5a5",
+      "src/rby1_assembly/evaluation.py": "e44ac003516e34216141bc4d53305e3b3e9d565104d8e8d5abe342feb3a88870",
+      "src/rby1_assembly/experiment_contracts.py": "af2604a07ddf047846715ddb06474af5981a09d54961492552c7bf43772daf65",
+      "src/rby1_assembly/hand_collision.py": "82d2596a2b5cd26c17a1f6f1838ace76543d6e96261238ed423cdb207d116a00",
+      "src/rby1_assembly/hand_contact_monitor.py": "a72b054c4983b01068d44c572f046821d88c03dc646de7421502be0e190378f7",
+      "src/rby1_assembly/held_grasp.py": "c0e816debcf17e0a213411df40297f0de08f04a22f11dd0d8f6de9e6b155aeda",
+      "src/rby1_assembly/isaac_env.py": "e0a4d465d649e32c69cd82b09bd2fade61292abbb4e694f3e727df52fbb4341a",
+      "src/rby1_assembly/parallel_contact_evidence.py": "a5f1213f9a78d3e6654c7fa787a7d4fbfa8e3bd29c856186b89afe6f6f23bb36",
+      "src/rby1_assembly/parallel_training_video.py": "583b9c9823e1d05786d202bd27127a18e48f43d9de8b88e8116cc62cb3f3762f",
+      "src/rby1_assembly/recording.py": "74b5ce202ab2e9280f56eb4132658a8b462953ad11990b7cedf1240e19db6dbd",
+      "src/rby1_assembly/rj45_bank_generation.py": "6dee97fbf0f803b65c13d373fd05907c9ad0b48438890579b04336a06d5c073e",
+      "src/rby1_assembly/rj45_bc.py": "19cd2fa7df24bf3b7dd7896a468b340aaf49b290e3f28d5c6abeddc436bd39f4",
+      "src/rby1_assembly/rj45_bc_training.py": "15ed4852e7e9f5ddb106b61f2998b5cf784d7e828a4ff0dea55abfd3883e7c0f",
+      "src/rby1_assembly/rj45_env.py": "82e024cfd9606be46d5dbdbf1c3a90acc8e5affd8440b00594b04e45b7f0e967",
+      "src/rby1_assembly/rj45_grasp_generation.py": "83babc79141155123aff6689adf7daf0ee92515f290643357caa631978c2ab64",
+      "src/rby1_assembly/rj45_scene.py": "4bf360f1df8ef42501ae86644413bf4e267cad75f00d06fed3e35b23d5efcf85",
+      "src/rby1_assembly/rj45_support_ablation.py": "c51b7d3966976ed2a76cf84655c0838631ee5896dc4cbf5d032c45dc6e865de8",
+      "src/rby1_assembly/rj45_task.py": "554968c1ade0115f49b8ec2fedc641c459778d9c61405473993f9e78a2204f86",
+      "src/rby1_assembly/rj45_teacher.py": "7a76ff4156719ad9a96271d9a1c71e85b02f7ff342864ee9483365b1124c3a36",
+      "src/rby1_assembly/rj45_teacher_collection.py": "5566ea62693de259224cdc379ab6c96589e822330e8ffb85d4470230aea8a766",
+      "src/rby1_assembly/rj45_teacher_dataset.py": "7c69a6df26246a2c3f00ceb4783d1c15de79f6642d0e8eb42a23b1405dbb8e23",
+      "src/rby1_assembly/rj45_teacher_runtime.py": "229b29cfdc166ee211be5b33b6bb4a0a961a8f06eb06c550a2a201953555aa03",
+      "src/rby1_assembly/rj45_training.py": "cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180",
+      "src/rby1_assembly/rj45_training_env.py": "ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c",
+      "src/rby1_assembly/run_provenance.py": "ac9b634599836d18a54fe088fa66b116ed15a23c5e82b8514e946d7894846c50",
+      "src/rby1_assembly/scene.py": "705f55bc2e54b2c7e07fce8018135c4ab7d9a78ec5c73b95efd0cb00bd80246a",
+      "src/rby1_assembly/training_telemetry.py": "4180228fb0e0bed9be3d7f43c011c772e5079822ded568bef9238abde57ec5ba",
+      "src/rby1_assembly/video_capture.py": "33fce5c580832c4f68fb0bd83c4d373249541ac74d10b0e4c4fca94b46053f0d"
+    }
+  },
+  "runtime_versions": {
+    "h5py": "3.14.0",
+    "isaaclab": "0.47.2",
+    "isaaclab-rl": "0.4.4",
+    "isaacsim": "5.1.0.0",
+    "numpy": "1.26.0",
+    "rsl-rl-lib": "3.0.1",
+    "torch": "2.7.0+cu128"
+  },
+  "schema_name": "rj45_oracle_ppo_probe_v1",
+  "status": "completed"
+}

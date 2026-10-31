@@ -1,0 +1,11 @@
+{
+  "scope": "one fresh patched-source oracle32; no resume/checkpoint selection",
+  "phase": {
+    "started_utc": "2026-10-31T01:04:33Z",
+    "finished_utc": "2026-10-31T01:22:26Z",
+    "raw_exit": 0,
+    "validated_exit": 0
+  },
+  "retrieved_archive_sha256": "47befd5f16371aeae34f4ca024bfe4c612212dfd24ead5a07a726684a52c9c6c",
+  "remote_sha_match": true
+}

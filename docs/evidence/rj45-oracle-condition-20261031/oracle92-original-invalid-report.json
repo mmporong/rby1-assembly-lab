@@ -1,0 +1,52 @@
+{
+  "claims": {
+    "final_policy": false,
+    "reinforcement_learning_effect_proven": false
+  },
+  "error": {
+    "message": "Inplace update to inference tensor outside InferenceMode is not allowed.You can make a clone to get a normal tensor before doing inplace update.See https://github.com/pytorch/rfcs/pull/17 for more details.",
+    "type": "RuntimeError"
+  },
+  "failure_stage": "physics_and_learning",
+  "mode": "oracle92",
+  "partial_artifacts": [
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/diagnostic_checkpoint_0008.pt",
+      "sha256": "f70152daf989e9cd4562c612a0286ed7e8aa8cc6c2f49b181034e1fe462bc44c"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/diagnostic_checkpoint_0016.pt",
+      "sha256": "01f7baea4020a9207fd45e915234525d1f5e0c6ee10ecefface58ae42668962b"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/diagnostic_checkpoint_0024.pt",
+      "sha256": "fa12877501c9ec1b6099e4d31425a2000352a6f5e0c3e415d95447c53ae9cae9"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/final_checkpoint.pt",
+      "sha256": "61d18147a2fdf3f88c947dbf2fc9fca8e79ea51fd0cd4fb21113c7e98381c774"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/ppo_logs/events.out.tfevents.1793406246.brev-pyf1b9s0a.11145.0",
+      "sha256": "1a1f8b970ec6334341b846872b83aab4957dc06db18f35063c72b0b7a87df1ea"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/ppo_logs/model_0.pt",
+      "sha256": "cfad878cfe3e9d94bd202011c923a081dc76b45e8b56ae5875721b0b33ddebfc"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/ppo_logs/model_31.pt",
+      "sha256": "5ab272ee6e3a63a468cb794056bb233a412e263a2ee68b1be76540f2cc52e1fc"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/pre_evaluation.jsonl",
+      "sha256": "cb4f6de3c23752d833d4695e3b03250a7fcf1069a2189954f0366bdd4608f582"
+    },
+    {
+      "path": "/home/ubuntu/workspace/rby1-oracle-condition-20261031/revision3/results/20261128/oracle92/updates.jsonl",
+      "sha256": "37bcde643165e3dc7c2476f6320fac69168fdc2c63640b8806d5a2013cb1eab3"
+    }
+  ],
+  "schema_name": "rj45_oracle_ppo_probe_v1",
+  "status": "invalid"
+}

@@ -1,0 +1,6 @@
+{
+  "script_sha256": "2dec3a190514db25a6dcb3bc4dd860a08726dd02c50ffe41677fcb5085a02c79",
+  "preregistered_at_utc": "2026-10-31T01:01:02.546711+00:00",
+  "primary_final_outcomes_not_observed": true,
+  "failure_policy": "incomplete; no replacement or rerun"
+}

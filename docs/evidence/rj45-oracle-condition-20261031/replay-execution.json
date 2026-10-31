@@ -1,0 +1,26 @@
+{
+  "scope": "new physical replay, excluded from training and benchmark counts",
+  "runs": [
+    {
+      "mode": "zero",
+      "started_utc": "2026-10-31T01:22:27Z",
+      "finished_utc": "2026-10-31T01:28:20Z",
+      "raw_exit": 0,
+      "validated_exit": 0
+    },
+    {
+      "mode": "standard79",
+      "started_utc": "2026-10-31T01:28:20Z",
+      "finished_utc": "2026-10-31T01:30:35Z",
+      "raw_exit": 0,
+      "validated_exit": 0
+    }
+  ],
+  "retrieved_archive_sha256": "57c2cc2d0925c747f13ef8f9d22e3b1452530883e9cfbbedf154597e595f5954",
+  "remote_sha_match": true,
+  "remote_batch_finished_utc": "2026-10-31T01:30:35Z",
+  "outer_ssh_transport_exit": 255,
+  "transport_exit_observed_after_verified_instance_stop": true,
+  "transport_exit_not_used_as_mode_or_media_success_evidence": true,
+  "transport_exit_cause_not_separately_diagnosed": true
+}

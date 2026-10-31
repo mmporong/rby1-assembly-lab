@@ -1,0 +1,98 @@
+{
+  "status": "primary_pair_verified",
+  "checks": {
+    "standard79_completed_full_run": true,
+    "standard79_durable_updates": true,
+    "standard79_final_trace": true,
+    "standard79_actor_updated": true,
+    "oracle92_completed_full_run": true,
+    "oracle92_durable_updates": true,
+    "oracle92_final_trace": true,
+    "oracle92_actor_updated": true,
+    "common79_actor_initialization": true,
+    "critic92_initialization": true,
+    "optimizer_initialization": true,
+    "initialization_rng": true,
+    "training_rng": true,
+    "zero_initial_actor": true,
+    "fixed_condition": true,
+    "runtime_versions": true,
+    "end_input_revalidation": true,
+    "protocol_only_deadline_differs": true
+  },
+  "failures": [],
+  "runs": {
+    "standard79": {
+      "report_sha256": "aa8f890b0e337f8a35c76839cc8b21148b2e2b24051346009f1133e73e42bd92",
+      "updates": 32,
+      "transitions": 4096,
+      "before": "valid_failure",
+      "after": "valid_success",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012163298783499771,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.7777652740478516,
+          "grasp_both": 1.0,
+          "lateral_error_m": 2.8004151161271907e-05,
+          "orientation_error_rad": 0.0021418305847776234
+        },
+        "success": true,
+        "terminal_timestamp_s": 12.233333587646484,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02"
+    },
+    "oracle92": {
+      "report_sha256": "1fc7a90f1560b767d1076b4105adcfe622117d002eb9fdeedb5a55d4a5e38c10",
+      "updates": 32,
+      "transitions": 4096,
+      "before": "valid_failure",
+      "after": "valid_success",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012113108825793143,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.7777340412139893,
+          "grasp_both": 1.0,
+          "lateral_error_m": 3.1670378512582666e-05,
+          "orientation_error_rad": 0.0021397849297583155
+        },
+        "success": true,
+        "terminal_timestamp_s": 12.066667556762695,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "checkpoint_sha256": "61d18147a2fdf3f88c947dbf2fc9fca8e79ea51fd0cd4fb21113c7e98381c774"
+    }
+  },
+  "scope": "one seed, one selected train condition; invalid ancestor and checkpoint recovery excluded",
+  "reinforcement_learning_effect_proven": false,
+  "heldout_generalization": false,
+  "no_substitution_or_rerun_on_audit_failure": true
+}

@@ -1,0 +1,15 @@
+{
+  "claims": {
+    "final_policy": false,
+    "reinforcement_learning_effect_proven": false
+  },
+  "error": {
+    "message": "recorded independent mating geometry differs from raw-pose recalculation",
+    "type": "ValueError"
+  },
+  "failure_stage": "physics_and_learning",
+  "mode": "zero",
+  "partial_artifacts": [],
+  "schema_name": "rj45_oracle_ppo_probe_v1",
+  "status": "invalid"
+}

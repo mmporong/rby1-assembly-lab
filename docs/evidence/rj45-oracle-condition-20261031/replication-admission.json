@@ -1,0 +1,41 @@
+{
+  "schema": "rj45_patched_source_pair_replication_v1",
+  "preregistered_at_utc": "2026-10-31T00:54:05.647379+00:00",
+  "standard79_final_outcome_not_observed": true,
+  "checkpoint_recovery_outcome_not_observed": true,
+  "reason": "primary comparison requires fully completed reports from the same patched source, including runtime actor/critic initialization hashes missing from the invalid ancestor report",
+  "action": "one unconditional fresh oracle92 32-update run after standard79 and fixed-checkpoint recovery; never resume original checkpoint; retain all prior artifacts",
+  "primary_comparison": [
+    "revision4 standard79 fresh32",
+    "revision5 oracle92 fresh32"
+  ],
+  "invalid_ancestor_and_recovery_role": "postmortem/checkpoint recovery only, excluded from primary comparison and independent seed count",
+  "run_regardless_of_prior_success_or_failure": "regardless of valid performance outcomes; runtime-invalid standard79 blocks the comparison",
+  "source_sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1",
+  "base_seed": 20261128,
+  "train_grasp": "rj45-train-02",
+  "updates": 32,
+  "transitions": 4096,
+  "actor_critic_initialization_and_training_evaluation_seeds_unchanged": true,
+  "reward_action_success_physics_unchanged": true,
+  "checkpoint_selection": "fixed final32 only; no best/diagnostic selection",
+  "require_comparison_audit": [
+    "common79 actor initialization hash match",
+    "critic92 initialization hash match",
+    "optimizer initial state match",
+    "initialization and training RNG hashes match",
+    "same fixed condition and runtime/source hashes"
+  ],
+  "same_instance_id": "pyf1b9s0a",
+  "new_instances": 0,
+  "shared_total_reservation_usd": 12,
+  "budget_cap_usd": 700,
+  "deadline_utc": "2026-10-31T01:45:00Z",
+  "required_external_guard_window_minutes_max": 75,
+  "prerequisites": [
+    "standard79 report completed with32 updates and valid final evaluation (success or failure)",
+    "checkpoint-recovery command terminated; its success/failure never selects replication",
+    "no active probe/recovery GPU process",
+    "new exact-instance stop guard active and sufficient time before absolute deadline"
+  ]
+}

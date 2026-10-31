@@ -1,0 +1,152 @@
+{
+  "status": "single_condition_learnability_verified",
+  "fixed_condition": {
+    "base_seed": 20261128,
+    "calibration_case_seed": 66384148,
+    "environment_index": 0,
+    "episode_index": 1,
+    "grasp_id": "rj45-train-02",
+    "grasp_index": 1,
+    "num_envs": 1,
+    "reset_contract": "constructor_episode_0_then_every_explicit_reset_restores_episode_1",
+    "split": "train"
+  },
+  "runs": {
+    "zero": {
+      "classification": "valid_failure",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": false,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": false,
+          "lateral": false,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.01219391092200214,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.777498960494995,
+          "grasp_both": 1.0,
+          "lateral_error_m": 8.749515761276632e-05,
+          "orientation_error_rad": 0.005260984545356934
+        },
+        "success": false,
+        "terminal_timestamp_s": 24.000001907348633,
+        "termination_reason": "episode_timeout",
+        "valid": true
+      },
+      "updates": 0
+    },
+    "reference": {
+      "classification": "valid_success",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012295223493391481,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.7776153087615967,
+          "grasp_both": 1.0,
+          "lateral_error_m": 2.630654738952233e-06,
+          "orientation_error_rad": 1.2120858463621022e-05
+        },
+        "success": true,
+        "terminal_timestamp_s": 12.233333587646484,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "updates": 0
+    },
+    "standard79": {
+      "classification": "valid_success",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012163298783499771,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.7777652740478516,
+          "grasp_both": 1.0,
+          "lateral_error_m": 2.8004151161271907e-05,
+          "orientation_error_rad": 0.0021418305847776234
+        },
+        "success": true,
+        "terminal_timestamp_s": 12.233333587646484,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "updates": 32
+    },
+    "oracle92": {
+      "classification": "valid_success",
+      "terminal": {
+        "criteria": {
+          "depth": true,
+          "dwell": true,
+          "forbidden_contact": true,
+          "force": true,
+          "grasp_live_and_proven": true,
+          "independent_evaluator_terminal": true,
+          "lateral": true,
+          "orientation": true
+        },
+        "evaluator_source": "simulator_ground_truth_independent",
+        "evaluator_version": "task-evaluator-v1+environment-cross-check",
+        "metrics": {
+          "actual_depth_m": 0.012113108825793143,
+          "forbidden_contact": 0.0,
+          "force_peak_n": 3.7777340412139893,
+          "grasp_both": 1.0,
+          "lateral_error_m": 3.1670378512582666e-05,
+          "orientation_error_rad": 0.0021397849297583155
+        },
+        "success": true,
+        "terminal_timestamp_s": 12.066667556762695,
+        "termination_reason": "independent_success",
+        "valid": true
+      },
+      "updates": 32
+    }
+  },
+  "primary_pair_audit": "primary_pair_verified",
+  "primary_learning_transitions_per_mode": 4096,
+  "primary_learning_updates_per_mode": 32,
+  "extra_invalid_ancestor_updates_preserved": 32,
+  "checkpoint_recovery_new_updates": 0,
+  "claims": {
+    "standard_policy_failed_before_and_succeeded_after": true,
+    "multiple_condition_improvement_proven": false,
+    "state_feedback_learning_proven": false,
+    "observation_sufficiency_proven": false,
+    "algorithm_superiority_proven": false,
+    "heldout_evaluated": false,
+    "sim_to_real_verified": false,
+    "bimanual_policy_learned": false
+  },
+  "next_discriminating_comparison": "constant residual versus learned feedback on unused fixed development bias cases, with paired nonlearning baseline and multiple training seeds; final remains sealed"
+}

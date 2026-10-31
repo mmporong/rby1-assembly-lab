@@ -1,0 +1,24 @@
+{
+  "schema": "rj45_fixed_checkpoint_replay_filming_v1",
+  "recorded_at_utc": "2026-10-31T01:13:39.202224+00:00",
+  "scope": "two fresh replay films, not benchmark or training evidence",
+  "modes": [
+    "zero",
+    "standard79"
+  ],
+  "single_attempt_each": true,
+  "prerequisite": "fresh oracle full run completed valid; no concurrent physics job; >=1170s before fixed guard",
+  "deadline_utc": "2026-10-31T01:45:00Z",
+  "timeout_s_per_mode": 480,
+  "physics_hz": 240,
+  "fps": 60,
+  "render_stride": 4,
+  "queue_sha256": "d7de3879d18c6a86b040f7a746144e53c1cd33335b2d4af059c0bb3eec46480b",
+  "replay_helper_sha256": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd",
+  "recorder_sha256": "9aecdc29894dbc0ce5411663c3759bb4f5358b6ad768d44b437b9c0701d69034",
+  "same_instance_id": "pyf1b9s0a",
+  "new_instance_count": 0,
+  "shared_reservation_usd": 12,
+  "checkpoint_sha256": "935496bd8f6e8c0e53c151cbb497f7a0bcfb9768dd18e65de3874c6841583c02",
+  "requires_probe_outcome_agreement_for_representative_media": true
+}

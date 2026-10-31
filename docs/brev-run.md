@@ -67,6 +67,17 @@ Crusoe 기본 이미지에는 Isaac Sim이 요구하는 `libGLU.so.1`이 없어 
 
 근거: [Isaac Sim Python 설치](https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html), [Isaac Lab 2.3 설치](https://isaac-sim.github.io/IsaacLab/v2.3.0/source/setup/installation/pip_installation.html). Lab의 RSL-RL 버전은 고정 source revision의 `source/isaaclab_rl/setup.py`를 기준으로 한다.
 
+## 과거 파지 근거의 CPU 계산 호환성
+
+동결된 `104721a` runtime과 train bank를 다른 CPU에서 재검증할 때는 NumPy 버전만 같아도 파생 기하값의 마지막 비트가 달라질 수 있다. EPYC 9254에서 과거 EPYC 7R13의 기록을 검증할 때 다음 설정으로 계산 경로를 맞췄다. Python을 시작하기 전에 적용한다.
+
+```bash
+export OPENBLAS_CORETYPE=Zen
+export NPY_DISABLE_CPU_FEATURES=AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL
+```
+
+이 설정은 원본·임계값을 바꾸지 않고 과거 근거를 재현하기 위한 것이다. 모든 환경에 필요한 기본 설정으로 해석하지 않는다. 기본 환경의 1,360행 중 573개 exact mismatch가 통합 설정에서 0개가 됐고, 전체 train bank 로더도 통과했다. 설정과 적용 시각은 실행 패킷에 남기며, 새 실행에서도 bank 검증을 통과해야 물리를 시작한다. [재현 스크립트와 비교 근거](evidence/rj45-oracle-condition-20261031/compatibility.md)를 참조한다.
+
 ## 확인한 실행 범위
 
 2026-10-25 전용 L40S에서 패키지 사전 검사, `pip check`, CUDA 텐서 연산, Isaac Sim·PhysX 장면 로딩과 RTX 렌더링을 확인했다. 당시 로컬 Python 3.11 + USD 검사와 Torch 기반 제어·접촉 계산 검사를 통과했다. 새 변경의 검증에는 현재 소스에서 테스트를 다시 실행한다.

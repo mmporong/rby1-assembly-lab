@@ -1,0 +1,44 @@
+{
+  "scope": "one train condition; no generalization or effect estimate",
+  "warmup_rows": "excluded; original episode timestamps preserved",
+  "threshold_source_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+  "lateral_limit_um": 50.0,
+  "traces": {
+    "zero": {
+      "trace": "zero-trace.jsonl.gz",
+      "compressed_sha256": "af39ac8924635b2eacea28588cdb7817d0a7f9183442e486c424bbaea0774f69",
+      "raw_sha256": "1ebc1abbd311ccefbe3b6a5ec937d9f62d6f5541084b72885c6a71c6607fd0fd",
+      "active_rows": 717,
+      "classification": "valid_failure",
+      "last_lateral_error_um": 87.49515761276632,
+      "last_depth_mm": 12.19391092200214
+    },
+    "reference": {
+      "trace": "reference-trace.jsonl.gz",
+      "compressed_sha256": "4c318231df62a75a7aa7dc53282609f5d2f9385fc640ecd5cb1f5c5ec914de17",
+      "raw_sha256": "6ab57af20977d1069d86e85be8bb50802ff41b8528c9132a05c9d06b32b7ee78",
+      "active_rows": 364,
+      "classification": "valid_success",
+      "last_lateral_error_um": 2.630654738952233,
+      "last_depth_mm": 12.29522349339148
+    },
+    "oracle92": {
+      "trace": "oracle92-trace.jsonl.gz",
+      "compressed_sha256": "ad145a55193a60b818c4f6ae962093cd2f4ad561428bf361427e9f9c5a893942",
+      "raw_sha256": "15671de8a8fb16b433e24e202a605fea742375e9c4a6b1075271ca9b2e009a67",
+      "active_rows": 359,
+      "classification": "valid_success",
+      "last_lateral_error_um": 31.670378512582666,
+      "last_depth_mm": 12.113108825793143
+    },
+    "standard79": {
+      "trace": "standard79-trace.jsonl.gz",
+      "compressed_sha256": "3ef8a4456bdfedec12996d1f78a6dc2736347a771be53137cab4263353920f59",
+      "raw_sha256": "1809f9092b53133ffece991da0c0daf0d07a083878d0bf1927b431d294fbe9e4",
+      "active_rows": 364,
+      "classification": "valid_success",
+      "last_lateral_error_um": 28.004151161271906,
+      "last_depth_mm": 12.163298783499771
+    }
+  }
+}

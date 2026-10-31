@@ -1,0 +1,15 @@
+{
+  "schema": "rj45_cpu_math_compatibility_v1",
+  "environment": {
+    "OPENBLAS_CORETYPE": "Zen",
+    "NPY_DISABLE_CPU_FEATURES": "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL"
+  },
+  "why": "restore original EPYC7R13 NumPy/OpenBLAS rounding on EPYC9254; no geometry threshold or source changes",
+  "preregistered_at_utc": "2026-10-31T00:14:19.335364+00:00",
+  "required_cpu_gate": {
+    "train02_eligible_rows": 1360,
+    "exact_geometry_mismatches": 0,
+    "full_train_bank_grasps": 8
+  },
+  "deadline_utc": "2026-10-31T01:03:24Z"
+}

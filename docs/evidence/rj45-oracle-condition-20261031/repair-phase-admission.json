@@ -1,0 +1,28 @@
+{
+  "schema": "rj45_inference_context_repair_phase_v1",
+  "preregistered_at_utc": "2026-10-31T00:43:31.320518+00:00",
+  "original_run_status": "invalid; retain report and all artifacts",
+  "original_protocol_sha256": "5c6dff5a338994ae67cd64fb36ee702656371b9fbfa392e0edf66053741bd0d0",
+  "original_runner_sha256": "81baf2e56473a6dc8dbcaabb59cccd0af3614a4c6c7553e8a632541bc149e735",
+  "original_completed_updates": 32,
+  "fixed_final_checkpoint_sha256": "61d18147a2fdf3f88c947dbf2fc9fca8e79ea51fd0cd4fb21113c7e98381c774",
+  "fixed_updates_trace_sha256": "37bcde643165e3dc7c2476f6320fac69168fdc2c63640b8806d5a2013cb1eab3",
+  "source_fix": "whole evaluation reset and step in torch.inference_mode; no physics/reward/action/success/seed changes",
+  "new_protocol_sha256": "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+  "execution_order": [
+    "standard79 fresh 32 updates, fixed seed20261128",
+    "oracle92 evaluation only, exact original final checkpoint, no learning"
+  ],
+  "oracle_relearning_permitted": false,
+  "checkpoint_selection": "fixed original final32 only; no diagnostic/intermediate/best selection",
+  "standard_already_executed_updates": 0,
+  "new_evaluation_outcomes_not_observed": true,
+  "prior_deadline_only_contingency": "not eligible, not used because oracle original run invalid",
+  "same_instance_id": "pyf1b9s0a",
+  "shared_total_reservation_usd": 12,
+  "budget_cap_usd": 700,
+  "deadline_utc": "2026-10-31T01:30:00Z",
+  "new_guard_verified_active": true,
+  "new_instance_count": 0,
+  "cpu_compatibility_env_unchanged": true
+}

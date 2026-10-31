@@ -1,0 +1,24 @@
+{
+  "scope": "patched standard training and fixed original-checkpoint recovery; timestamps from preserved wrapper files",
+  "phases": {
+    "standard": {
+      "started_utc": "2026-10-31T00:45:00Z",
+      "finished_utc": "2026-10-31T01:02:47Z",
+      "raw_exit": 0,
+      "validated_exit": 0
+    },
+    "recovery": {
+      "started_utc": "2026-10-31T01:02:49Z",
+      "finished_utc": "2026-10-31T01:04:32Z",
+      "raw_exit": 0,
+      "validated_exit": 0
+    }
+  },
+  "retrieved_archive": {
+    "sha256": "f72a7b88b34c399840aa08ec90fabc6c98566b15d4fbd9b2eedc64184044dd6b",
+    "remote_sha_match": true
+  },
+  "new_instance_count_during_repair": 0,
+  "invalid_ancestor_retained": true,
+  "recovery_is_primary_pair_member": false
+}

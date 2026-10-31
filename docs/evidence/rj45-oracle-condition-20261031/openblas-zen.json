@@ -1,0 +1,97 @@
+{
+  "expectation": {
+    "expected_mismatches": 384,
+    "matched": true
+  },
+  "full_train_bank_verification": null,
+  "geometry_replay": {
+    "dict_exact_mismatches": 384,
+    "eligible_rows_checked": 1360,
+    "field_mismatch_counts": {
+      "orientation_error_rad": 384
+    },
+    "first_mismatch": {
+      "control_step": 1,
+      "delta": {
+        "depth_m": 0.0,
+        "lateral_error_m": 0.0,
+        "orientation_error_rad": 1.0842021724855044e-19
+      },
+      "recalculated": {
+        "depth_m": -0.1956078699422073,
+        "lateral_error_m": 0.028492364320368585,
+        "orientation_error_rad": 0.0007914530997118109,
+        "relative_position_entry_m": [
+          -3.6973846242460695e-06,
+          -0.1956078699422073,
+          0.02849236408046829
+        ],
+        "relative_quaternion_entry_wxyz": [
+          0.9999998808624183,
+          2.499523216696172e-06,
+          -5.745686100667534e-07,
+          0.00039571821230595866
+        ],
+        "source": "numpy_recalculation_from_recorded_raw_object_poses"
+      },
+      "recorded": {
+        "depth_m": -0.1956078699422073,
+        "lateral_error_m": 0.028492364320368585,
+        "orientation_error_rad": 0.0007914530997118108,
+        "relative_position_entry_m": [
+          -3.6973846242460695e-06,
+          -0.1956078699422073,
+          0.02849236408046829
+        ],
+        "relative_quaternion_entry_wxyz": [
+          0.9999998808624183,
+          2.499523216696172e-06,
+          -5.745686100667534e-07,
+          0.00039571821230595866
+        ],
+        "source": "numpy_recalculation_from_recorded_raw_object_poses"
+      },
+      "timestamp_s": 0.03333333507180214,
+      "ulp_delta_nonnegative": {
+        "depth_m": 0,
+        "lateral_error_m": 0,
+        "orientation_error_rad": 1
+      }
+    },
+    "max_abs_delta": {
+      "depth_m": 0.0,
+      "lateral_error_m": 0.0,
+      "orientation_error_rad": 2.7755575615628914e-17
+    },
+    "max_ulp_delta_nonnegative": {
+      "depth_m": 0,
+      "lateral_error_m": 0,
+      "orientation_error_rad": 1
+    }
+  },
+  "host": {
+    "machine": "x86_64",
+    "node": "lim-ASUS-TUF-Gaming-A16-FA608UH-FA608UH",
+    "processor": "x86_64",
+    "python": "3.11.15"
+  },
+  "inputs": {
+    "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+    "project_root": "/home/lim/rby1-assembly-lab/artifacts/archive/20261031/cloud/retrieved-4c-bank-generation-v2-20261028/extracted",
+    "report_sha256": "1f671c6119f68fbe8a4b2a41f7ec3218ee829c8dd25db22786cf24f5993a4fb0",
+    "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "trace_sha256": "2a42e006358b4dc6eb380f5976452d4ef45684be83c67a7df7e9c9bafc7f66c0"
+  },
+  "runtime": {
+    "NPY_DISABLE_CPU_FEATURES": null,
+    "OPENBLAS_CORETYPE": "Zen",
+    "cpu_features": {
+      "AVX2": true,
+      "AVX512F": true,
+      "FMA3": true
+    },
+    "numpy": "1.26.0"
+  },
+  "schema_name": "rj45_bank_geometry_cpu_reproduction_v1",
+  "scope": "CPU-only replay of frozen train-bank evidence; no Isaac Sim or physics"
+}

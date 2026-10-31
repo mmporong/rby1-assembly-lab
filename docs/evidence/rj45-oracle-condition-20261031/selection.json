@@ -1,0 +1,49 @@
+{
+  "schema": "rj45_train_condition_selection_v1",
+  "preregistered_at_utc": "2026-10-30T23:40:58.809970+00:00",
+  "absolute_deadline_utc": "2026-10-31T01:03:24Z",
+  "seed_order": [
+    20261128,
+    20261136,
+    20261144
+  ],
+  "fixed_grasp": "rj45-train-02",
+  "split": "train",
+  "selection_rule": "first valid_failure of zero, followed by valid_success of reference; stop if invalid/reference failure; if all zero succeed no learning",
+  "learning_order": [
+    "oracle92",
+    "standard79"
+  ],
+  "updates_per_mode": 32,
+  "transitions_per_mode": 4096,
+  "physics_reward_actions_thresholds_unchanged": true,
+  "not_effect_or_generalization_proof": true,
+  "budget_admission": {
+    "budget_cap_usd": 700.0,
+    "new_run_reservation_usd": 12.0,
+    "external_guard_minutes": 75,
+    "private_evidence_sha256": "80d4767917e8eb82a4121d4984356a30003bf0196c5033ba4ffe7e30ceeb0209",
+    "locally_verified": true
+  },
+  "external_guard_unit": "rby1-oracle-fallback-stop-20261031a",
+  "external_guard_verified_active": true,
+  "protocol_sha256": {
+    "20261128": "5c6dff5a338994ae67cd64fb36ee702656371b9fbfa392e0edf66053741bd0d0",
+    "20261136": "ab5b774425274c47e92b97b7ff149de422481958796b75c470bde3df7d09eda1",
+    "20261144": "eda9e624f3993d07df3ee9dd0faa9fb94f880d47a1549edfadea02fce8425be1"
+  },
+  "batch_sha256": "fff3938617da1cf7f1ebbd8ef092ab543987846465f0550c7bda77dccb531ebb",
+  "fallback_provider": "crusoe",
+  "original_attempt_failed_before_physics": true,
+  "instance_name": "rby1-oracle-crusoe-20261031a",
+  "source_revision": "revision2_durable_update_trace_diagnostic_weights_only",
+  "intermediate_checkpoint_use": "recovery/inference only; iter metadata is not a resume counter; never selected as final",
+  "revision": "revision3_cpu_math_compatibility_only",
+  "compatibility_preregistered_at_utc": "2026-10-31T00:14:19.335364+00:00",
+  "cpu_compatibility_environment": {
+    "OPENBLAS_CORETYPE": "Zen",
+    "NPY_DISABLE_CPU_FEATURES": "AVX512F,AVX512CD,AVX512_SKX,AVX512_CLX,AVX512_CNL,AVX512_ICL"
+  },
+  "prior_attempt": "revision2 zero invalid before environment construction; no learning",
+  "frozen_sources_protocols_thresholds_unchanged": true
+}

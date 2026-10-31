@@ -1,0 +1,33 @@
+{
+  "verified_at_utc": "2026-10-31T01:39:38.185006+00:00",
+  "unit_tests": {
+    "command": "PYTHONPATH=src .venv/bin/python -m pytest -q tests",
+    "passed": 771,
+    "subtests_passed": 307,
+    "exit": 0,
+    "log_sha256": "53ea4ede834619bbce3297b7453f39c9f9cd457d017e76c19e9dd3a4348ac966"
+  },
+  "media_integration_tests": {
+    "command": "python3 -m pytest -q checks/test_export_rj45_oracle_media_e2e.py",
+    "passed": 2,
+    "exit": 0,
+    "log_sha256": "8d0874d56aff5efde82c3c15c74030ec4fe6fa3cc7b9d57d49178bc2f48dfcee"
+  },
+  "primary_pair_audit": {
+    "status": "primary_pair_verified",
+    "passed_checks": 18,
+    "failures": []
+  },
+  "compile_bash_syntax_diff_and_local_links": "pass",
+  "independent_review": {
+    "role": "code-reviewer",
+    "verdict": "APPROVE",
+    "issues": 0
+  },
+  "baseline_unrelated_checks_suite_not_claimed": true,
+  "media_targeted_after_lf_serialization": {
+    "command": "python3 -m pytest -q tests/test_export_rj45_oracle_media.py tests/test_export_rj45_policy_media.py checks/test_export_rj45_oracle_media_e2e.py",
+    "passed": 23,
+    "exit": 0
+  }
+}

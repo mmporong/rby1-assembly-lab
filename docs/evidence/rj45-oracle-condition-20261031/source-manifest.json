@@ -1,0 +1,41 @@
+{
+  "runtime_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "source_archives_and_helpers": {
+    "record_rj45_oracle_probe.py.gz": {
+      "compressed_sha256": "04659710a5d80cd01c857f7a444ba9db4e17e33bd2409ba9a1637bc3fa1c1064",
+      "raw_sha256": "46bc89c708afb4ebb664a488e734b121364c9505462200aeddebc73186410bcd"
+    },
+    "run_rj45_oracle_ppo_probe.py.gz": {
+      "compressed_sha256": "aab8d67688511e7846dea7fa6ad683fd4d3474cc5ddc93a24bd0ae339e021a92",
+      "raw_sha256": "81baf2e56473a6dc8dbcaabb59cccd0af3614a4c6c7553e8a632541bc149e735"
+    },
+    "evaluate_rj45_oracle_checkpoint.py.gz": {
+      "compressed_sha256": "6818cb1275febf205ac5f04b4274536670b12f59505016ca107f2dac89247973",
+      "raw_sha256": "22f19393b4d6848f6449208f35622a999cde4c58cf42a8896a4e1b232cfb2b12"
+    },
+    "run_rj45_oracle_ppo_probe-patched.py.gz": {
+      "compressed_sha256": "ac508c1ef95dcfa5d0532f0de67283f673d55468dd3a7ce0bdecf8a741fa9bce",
+      "raw_sha256": "132918ca01fa831bb6f703b4cc2aa1d2d9bd73085459a8964495b37e3ef177f1"
+    },
+    "scripts/export_rj45_oracle_media.py": {
+      "sha256": "3a56587dcfbbaa116394b1a86b759dd5fb43348508c301ee832787cae137292d"
+    },
+    "scripts/export_rj45_policy_media.py": {
+      "sha256": "786714066f91863507224a9a30a54344ca00331284034ae797e53e2af00f9419"
+    },
+    "scripts/rj45_evaluation_video.py": {
+      "sha256": "9aecdc29894dbc0ce5411663c3759bb4f5358b6ad768d44b437b9c0701d69034"
+    },
+    "src/rby1_assembly/rj45_oracle_diagnostic.py": {
+      "sha256": "3523687acf7b78ee212f7472329cbc7a3248ec03f451d433fb2d271d6dc42100"
+    },
+    "configs/rj45-oracle-runtime-104721a.json": {
+      "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+    }
+  },
+  "audit_script_sha256": "2dec3a190514db25a6dcb3bc4dd860a08726dd02c50ffe41677fcb5085a02c79",
+  "task_sha256": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+  "bank_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
+  "private_checkpoint_files_retained_in_local_archives": true,
+  "preserved_driver_log_raw_sha256": "dda129d77bfafbea116b00bb5fd4c3f874fa3127b23214ce5e2a0ca9e5bdb353"
+}
