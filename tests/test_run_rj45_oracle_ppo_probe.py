@@ -22,6 +22,16 @@ SPEC.loader.exec_module(RUNNER)
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def valid_budget_admission() -> dict[str, object]:
+    return {
+        "budget_cap_usd": 700.0,
+        "new_run_reservation_usd": 12.0,
+        "external_guard_minutes": 75.0,
+        "private_evidence_sha256": "a" * 64,
+        "locally_verified": True,
+    }
+
+
 class OraclePpoProbeTests(unittest.TestCase):
     def test_actual_terminal_evaluation_serializes_through_dataclass_contract(self) -> None:
         try:
@@ -74,8 +84,12 @@ class OraclePpoProbeTests(unittest.TestCase):
         isaaclab_app_module.AppLauncher = FakeAppLauncher
         protocol_record = {
             "payload": {
+                "fixed_condition": {"base_seed": RUNNER.BASE_SEED},
                 "budget_and_stop": {
-                    "absolute_deadline_utc": "2099-01-01T00:00:00Z"
+                    "absolute_deadline_utc": "2099-01-01T00:00:00Z",
+                    "mode_wall_time_limit_s": {
+                        "zero": RUNNER.CONTROL_MODE_WALL_S
+                    },
                 }
             }
         }
@@ -120,6 +134,7 @@ class OraclePpoProbeTests(unittest.TestCase):
             self.assertEqual(payload["observation_groups"]["standard79"]["dimensions"], {"policy": 79, "critic": 92})
             self.assertEqual(payload["observation_groups"]["oracle92"]["dimensions"], {"policy": 92, "critic": 92})
             self.assertEqual(payload["fixed_condition"]["calibration_case_seed"], 66384140)
+            self.assertEqual(payload["fixed_condition"]["base_seed"], RUNNER.BASE_SEED)
             self.assertEqual(payload["fixed_condition"]["split"], "train")
             self.assertEqual(payload["fixed_condition"]["grasp_id"], "rj45-train-02")
             self.assertEqual(payload["frozen_inputs"]["runtime_manifest_sha256"], RUNNER.EXPECTED_RUNTIME_MANIFEST_SHA256)
@@ -127,7 +142,203 @@ class OraclePpoProbeTests(unittest.TestCase):
             self.assertEqual(payload["budget_and_stop"]["combined_conservative_reservation_usd"], 699.31822)
             self.assertIsNone(payload["budget_and_stop"]["absolute_deadline_utc"])
             self.assertEqual(payload["physics_contract"]["execution_device"], "cuda:0")
+            self.assertEqual(
+                payload["ppo"]["diagnostic_intermediate_checkpoint_updates"],
+                [8, 16, 24],
+            )
+            self.assertIn(
+                "never eligible",
+                payload["ppo"]["intermediate_checkpoint_policy"],
+            )
+            self.assertEqual(
+                payload["budget_and_stop"]["mode_wall_time_limit_s"],
+                {
+                    "zero": 300.0,
+                    "reference": 300.0,
+                    "standard79": 1800.0,
+                    "oracle92": 1800.0,
+                },
+            )
             self.assertIn("32 updates/4096 transitions", payload["ppo"]["interpretation"])
+
+    def test_update_jsonl_is_durable_before_a_later_failure(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            trace = Path(directory) / "updates.jsonl"
+            first = {
+                "update": 8,
+                "metrics": {"loss": 0.25},
+                "diagnostic_checkpoint": {
+                    "path": "diagnostic_checkpoint_0008.pt",
+                    "sha256": "b" * 64,
+                    "eligible_for_selection": False,
+                },
+            }
+            RUNNER.append_jsonl_record(trace, first)
+            try:
+                raise TimeoutError("later training timeout")
+            except TimeoutError:
+                pass
+            self.assertTrue(trace.is_file())
+            rows = [
+                json.loads(line)
+                for line in trace.read_text(encoding="utf-8").splitlines()
+            ]
+            self.assertEqual(rows, [first])
+
+            with self.assertRaisesRegex(
+                RUNNER.OraclePpoProbeError, "not finite JSON"
+            ):
+                RUNNER.append_jsonl_record(
+                    trace, {"update": 9, "loss": float("nan")}
+                )
+            self.assertEqual(
+                len(trace.read_text(encoding="utf-8").splitlines()), 1
+            )
+
+    def test_alternate_train_seed_roundtrips_and_tampering_fails_closed(self) -> None:
+        alternate_seed = RUNNER.BASE_SEED + 8
+        expected_calibration = alternate_seed + (
+            RUNNER.CALIBRATION_CASE_SEED - RUNNER.BASE_SEED
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            protocol = Path(directory) / "protocol.json"
+            RUNNER.write_protocol(
+                protocol,
+                ROOT,
+                updates=32,
+                base_seed=alternate_seed,
+                budget_admission=valid_budget_admission(),
+            )
+            digest = RUNNER.file_sha256(protocol)
+            validated = RUNNER.validate_protocol(protocol, digest, ROOT)
+            fixed = validated["payload"]["fixed_condition"]
+            self.assertEqual(fixed["base_seed"], alternate_seed)
+            self.assertEqual(fixed["calibration_case_seed"], expected_calibration)
+            self.assertEqual(fixed["environment_index"], 0)
+            self.assertEqual(fixed["episode_index"], 1)
+            self.assertEqual(fixed["grasp_id"], "rj45-train-02")
+            budget = validated["payload"]["budget_and_stop"]
+            self.assertEqual(budget["new_run_reservation_usd"], 12.0)
+            self.assertEqual(budget["external_guard_minutes"], 75.0)
+            self.assertEqual(budget["budget_admission"], valid_budget_admission())
+            self.assertTrue(budget["historical_reservation_not_invoice"])
+            self.assertNotIn("prior_conservative_reservation_usd", budget)
+            self.assertNotIn("combined_conservative_reservation_usd", budget)
+
+            tampered = validated["payload"]
+            tampered["fixed_condition"]["grasp_id"] = "rj45-train-03"
+            protocol.write_text(json.dumps(tampered), encoding="utf-8")
+            with self.assertRaisesRegex(RUNNER.OraclePpoProbeError, "payload changed"):
+                RUNNER.validate_protocol(
+                    protocol, RUNNER.file_sha256(protocol), ROOT
+                )
+
+            calibration_protocol = Path(directory) / "calibration-protocol.json"
+            RUNNER.write_protocol(
+                calibration_protocol,
+                ROOT,
+                updates=32,
+                base_seed=alternate_seed,
+                budget_admission=valid_budget_admission(),
+            )
+            calibration_payload = json.loads(
+                calibration_protocol.read_text(encoding="utf-8")
+            )
+            calibration_payload["fixed_condition"]["calibration_case_seed"] += 1
+            calibration_protocol.write_text(
+                json.dumps(calibration_payload), encoding="utf-8"
+            )
+            with self.assertRaisesRegex(RUNNER.OraclePpoProbeError, "payload changed"):
+                RUNNER.validate_protocol(
+                    calibration_protocol,
+                    RUNNER.file_sha256(calibration_protocol),
+                    ROOT,
+                )
+
+            self.assertEqual(
+                RUNNER.seed_policy_rng(
+                    RUNNER.POLICY_TRAINING_SEED, physics_seed=alternate_seed
+                )["physics_seed_unchanged"],
+                alternate_seed,
+            )
+            self.assertEqual(
+                RUNNER.reset_evaluation_rng(
+                    "cpu", physics_seed=alternate_seed
+                )["seeded"]["physics_seed_unchanged"],
+                alternate_seed,
+            )
+
+    def test_budget_admission_rejects_tampering_excess_and_invalid_types(self) -> None:
+        cases = []
+        extra = valid_budget_admission()
+        extra["unexpected"] = 1
+        cases.append((extra, "keys"))
+        over_cap = valid_budget_admission()
+        over_cap["budget_cap_usd"] = 701.0
+        cases.append((over_cap, "cap"))
+        over_reservation = valid_budget_admission()
+        over_reservation["new_run_reservation_usd"] = 12.01
+        cases.append((over_reservation, "reservation"))
+        over_guard = valid_budget_admission()
+        over_guard["external_guard_minutes"] = 75.01
+        cases.append((over_guard, "guard"))
+        bad_digest = valid_budget_admission()
+        bad_digest["private_evidence_sha256"] = "G" * 64
+        cases.append((bad_digest, "digest"))
+        not_verified = valid_budget_admission()
+        not_verified["locally_verified"] = 1
+        cases.append((not_verified, "locally verified"))
+        nonfinite = valid_budget_admission()
+        nonfinite["new_run_reservation_usd"] = float("nan")
+        cases.append((nonfinite, "finite"))
+        for admission, message in cases:
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(RUNNER.OraclePpoProbeError, message):
+                    RUNNER.protocol_payload(ROOT, budget_admission=admission)
+
+        with tempfile.TemporaryDirectory() as directory:
+            protocol = Path(directory) / "protocol.json"
+            RUNNER.write_protocol(
+                protocol,
+                ROOT,
+                updates=32,
+                budget_admission=valid_budget_admission(),
+            )
+            payload = json.loads(protocol.read_text(encoding="utf-8"))
+            payload["budget_and_stop"]["new_run_reservation_usd"] = 11.0
+            protocol.write_text(json.dumps(payload), encoding="utf-8")
+            with self.assertRaisesRegex(RUNNER.OraclePpoProbeError, "payload changed"):
+                RUNNER.validate_protocol(
+                    protocol, RUNNER.file_sha256(protocol), ROOT
+                )
+
+    def test_base_seed_validation_rejects_bool_negative_and_non_bank_stride(self) -> None:
+        for invalid in (True, -8, RUNNER.BASE_SEED + 1):
+            with self.subTest(invalid=invalid):
+                with self.assertRaisesRegex(
+                    RUNNER.OraclePpoProbeError, "nonnegative exact int divisible by 8"
+                ):
+                    RUNNER.protocol_payload(ROOT, base_seed=invalid)
+
+    def test_mode_specific_time_guard_uses_control_and_learning_limits(self) -> None:
+        protocol = RUNNER.protocol_payload(ROOT)
+        limits = protocol["budget_and_stop"]["mode_wall_time_limit_s"]
+        self.assertEqual(limits["zero"], RUNNER.CONTROL_MODE_WALL_S)
+        self.assertEqual(limits["reference"], RUNNER.CONTROL_MODE_WALL_S)
+        self.assertEqual(limits["standard79"], RUNNER.LEARNING_MODE_WALL_S)
+        self.assertEqual(limits["oracle92"], RUNNER.LEARNING_MODE_WALL_S)
+        for mode in RUNNER.MODES:
+            args = types.SimpleNamespace(
+                execution_started_monotonic=10.0,
+                execution_mode_wall_s=limits[mode],
+                execution_deadline_epoch=10_000.0,
+            )
+            with (
+                mock.patch.object(RUNNER.time, "monotonic", return_value=10.0 + limits[mode] + 0.1),
+                mock.patch.object(RUNNER.time, "time", return_value=0.0),
+            ):
+                with self.assertRaisesRegex(TimeoutError, "wall-time"):
+                    RUNNER.assert_execution_time(args)
 
     def test_protocol_tamper_and_source_drift_fail_closed(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

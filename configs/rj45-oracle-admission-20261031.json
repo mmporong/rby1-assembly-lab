@@ -1,0 +1,7 @@
+{
+  "budget_cap_usd": 700.0,
+  "new_run_reservation_usd": 12.0,
+  "external_guard_minutes": 75,
+  "private_evidence_sha256": "80d4767917e8eb82a4121d4984356a30003bf0196c5033ba4ffe7e30ceeb0209",
+  "locally_verified": true
+}

@@ -34,6 +34,7 @@ EVALUATION_SEED = 20261124
 ENVIRONMENT_INDEX = 0
 EPISODE_INDEX = 1
 CALIBRATION_CASE_SEED = 66384140
+CALIBRATION_CASE_SEED_OFFSET = CALIBRATION_CASE_SEED - BASE_SEED
 GRASP_INDEX = 1
 GRASP_ID = "rj45-train-02"
 PHYSICS_HZ = 240
@@ -55,7 +56,8 @@ EXPECTED_TRAINING_SHA256 = "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5
 EXPECTED_RUNTIME_CONFIG_SHA256 = "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a"
 EXPECTED_RUNTIME_MANIFEST_SHA256 = "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
 EXPECTED_RUNTIME_SOURCE_FILE_COUNT = 35
-MAX_SINGLE_MODE_WALL_S = 300.0
+CONTROL_MODE_WALL_S = 300.0
+LEARNING_MODE_WALL_S = 1800.0
 MODES = ("zero", "reference", "standard79", "oracle92")
 LEARNING_MODES = ("standard79", "oracle92")
 
@@ -114,6 +116,20 @@ def _atomic_write_new(path: Path, payload: Mapping[str, Any]) -> None:
     temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
     temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     os.rename(temporary, path)
+
+
+def append_jsonl_record(path: Path, payload: Mapping[str, Any]) -> None:
+    try:
+        encoded = json.dumps(
+            payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+        )
+    except (TypeError, ValueError) as error:
+        raise OraclePpoProbeError("JSONL update record is not finite JSON") from error
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as stream:
+        stream.write(encoded + "\n")
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def serialize_terminal_evaluation(terminal: Any) -> dict[str, Any]:
@@ -183,14 +199,66 @@ def _deadline_epoch(value: str | None) -> float | None:
     return datetime.fromisoformat(normalized[:-1] + "+00:00").timestamp()
 
 
+def validate_budget_admission(value: Mapping[str, Any]) -> dict[str, Any]:
+    required = {
+        "budget_cap_usd",
+        "new_run_reservation_usd",
+        "external_guard_minutes",
+        "private_evidence_sha256",
+        "locally_verified",
+    }
+    if not isinstance(value, Mapping) or set(value) != required:
+        raise OraclePpoProbeError("budget admission keys are invalid")
+
+    def finite_nonnegative_number(name: str) -> float | int:
+        candidate = value[name]
+        if (
+            isinstance(candidate, bool)
+            or not isinstance(candidate, (int, float))
+            or not math.isfinite(candidate)
+            or candidate < 0
+        ):
+            raise OraclePpoProbeError(
+                f"budget admission {name} must be a finite nonnegative number"
+            )
+        return candidate
+
+    cap = finite_nonnegative_number("budget_cap_usd")
+    reservation = finite_nonnegative_number("new_run_reservation_usd")
+    guard_minutes = finite_nonnegative_number("external_guard_minutes")
+    digest = value["private_evidence_sha256"]
+    if cap != 700.0:
+        raise OraclePpoProbeError("budget admission cap must equal 700 USD")
+    if reservation > 12.0:
+        raise OraclePpoProbeError("budget admission new-run reservation exceeds 12 USD")
+    if guard_minutes > 75.0:
+        raise OraclePpoProbeError("budget admission external guard exceeds 75 minutes")
+    if (
+        not isinstance(digest, str)
+        or len(digest) != 64
+        or any(character not in "0123456789abcdef" for character in digest)
+    ):
+        raise OraclePpoProbeError(
+            "budget admission private evidence digest must be 64 lowercase hex characters"
+        )
+    if value["locally_verified"] is not True:
+        raise OraclePpoProbeError("budget admission must be locally verified")
+    return dict(value)
+
+
 def protocol_payload(
     current_root: Path,
     *,
     updates: int = DEFAULT_UPDATES,
     deadline_utc: str | None = None,
+    base_seed: int = BASE_SEED,
+    budget_admission: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     if not MIN_UPDATES <= updates <= MAX_UPDATES:
         raise OraclePpoProbeError(f"updates must be in [{MIN_UPDATES}, {MAX_UPDATES}]")
+    if type(base_seed) is not int or base_seed < 0 or base_seed % 8 != 0:
+        raise OraclePpoProbeError("base_seed must be a nonnegative exact int divisible by 8")
+    calibration_case_seed = base_seed + CALIBRATION_CASE_SEED_OFFSET
     runner = Path(__file__).resolve()
     adapter = current_root / "src/rby1_assembly/rj45_oracle_diagnostic.py"
     g2_helper = current_root / "scripts/run_rj45_g2_physics_probe.py"
@@ -214,6 +282,33 @@ def protocol_payload(
     ):
         raise OraclePpoProbeError("runtime source manifest identity changed")
     deadline_utc = _normalize_deadline_utc(deadline_utc)
+    mode_wall_time_limit_s = {
+        "zero": CONTROL_MODE_WALL_S,
+        "reference": CONTROL_MODE_WALL_S,
+        "standard79": LEARNING_MODE_WALL_S,
+        "oracle92": LEARNING_MODE_WALL_S,
+    }
+    if budget_admission is None:
+        budget_and_stop = {
+            "budget_cap_usd": 700.0,
+            "prior_conservative_reservation_usd": 696.31822,
+            "additional_reservation_usd": 3.0,
+            "combined_conservative_reservation_usd": 699.31822,
+            "conservative_rate_usd_per_hour": 8.0,
+            "mode_wall_time_limit_s": mode_wall_time_limit_s,
+            "requires_external_stop_guard": True,
+            "absolute_deadline_utc": deadline_utc,
+        }
+    else:
+        admission = validate_budget_admission(budget_admission)
+        budget_and_stop = {
+            "new_run_reservation_usd": admission["new_run_reservation_usd"],
+            "external_guard_minutes": admission["external_guard_minutes"],
+            "budget_admission": admission,
+            "historical_reservation_not_invoice": True,
+            "mode_wall_time_limit_s": mode_wall_time_limit_s,
+            "absolute_deadline_utc": deadline_utc,
+        }
     return {
         "schema_name": SCHEMA_NAME,
         "source_sha256": {name: file_sha256(path) for name, path in paths.items()},
@@ -238,10 +333,10 @@ def protocol_payload(
             ),
         },
         "fixed_condition": {
-            "base_seed": BASE_SEED,
+            "base_seed": base_seed,
             "environment_index": ENVIRONMENT_INDEX,
             "episode_index": EPISODE_INDEX,
-            "calibration_case_seed": CALIBRATION_CASE_SEED,
+            "calibration_case_seed": calibration_case_seed,
             "grasp_index": GRASP_INDEX,
             "grasp_id": GRASP_ID,
             "split": "train",
@@ -279,6 +374,10 @@ def protocol_payload(
             "num_mini_batches": 1,
             "zero_actor_output": True,
             "checkpoint_selection": "preregistered final checkpoint only",
+            "diagnostic_intermediate_checkpoint_updates": [8, 16, 24],
+            "intermediate_checkpoint_policy": (
+                "diagnostic recovery artifacts only; never eligible for promotion or selection"
+            ),
             "interpretation": (
                 f"{updates} updates/{ROLLOUT_STEPS * updates} transitions is a "
                 "learnability diagnostic, not effect proof"
@@ -293,16 +392,7 @@ def protocol_payload(
             "evaluation": "G2 independent geometry/contact/nine-substep verifier",
             "evaluations": "deterministic pre-training and final-checkpoint episodes; zero/reference each one episode",
         },
-        "budget_and_stop": {
-            "budget_cap_usd": 700.0,
-            "prior_conservative_reservation_usd": 696.31822,
-            "additional_reservation_usd": 3.0,
-            "combined_conservative_reservation_usd": 699.31822,
-            "conservative_rate_usd_per_hour": 8.0,
-            "max_single_mode_wall_s": MAX_SINGLE_MODE_WALL_S,
-            "requires_external_stop_guard": True,
-            "absolute_deadline_utc": deadline_utc,
-        },
+        "budget_and_stop": budget_and_stop,
     }
 
 
@@ -312,9 +402,13 @@ def write_protocol(
     *,
     updates: int,
     deadline_utc: str | None = None,
+    base_seed: int = BASE_SEED,
+    budget_admission: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload = protocol_payload(
-        current_root.resolve(), updates=updates, deadline_utc=deadline_utc
+        current_root.resolve(), updates=updates, deadline_utc=deadline_utc,
+        base_seed=base_seed,
+        budget_admission=budget_admission,
     )
     _atomic_write_new(path.resolve(), payload)
     return {"path": str(path.resolve()), "file_sha256": file_sha256(path), "payload_sha256": _canonical_sha(payload)}
@@ -328,8 +422,11 @@ def validate_protocol(path: Path, expected_file_sha256: str, current_root: Path)
     if not isinstance(updates, int):
         raise OraclePpoProbeError("protocol update count is invalid")
     deadline_utc = observed.get("budget_and_stop", {}).get("absolute_deadline_utc")
+    base_seed = observed.get("fixed_condition", {}).get("base_seed")
+    budget_admission = observed.get("budget_and_stop", {}).get("budget_admission")
     expected = protocol_payload(
-        current_root, updates=updates, deadline_utc=deadline_utc
+        current_root, updates=updates, deadline_utc=deadline_utc,
+        base_seed=base_seed, budget_admission=budget_admission,
     )
     if observed != expected:
         raise OraclePpoProbeError("protocol payload changed or source hash drifted")
@@ -395,7 +492,7 @@ def verify_runtime_import_origins(runtime_root: Path) -> dict[str, str]:
 
 
 def assert_execution_time(args: argparse.Namespace) -> None:
-    if time.monotonic() - args.execution_started_monotonic > MAX_SINGLE_MODE_WALL_S:
+    if time.monotonic() - args.execution_started_monotonic > args.execution_mode_wall_s:
         raise TimeoutError("single-mode wall-time limit exceeded")
     if time.time() >= args.execution_deadline_epoch:
         raise TimeoutError("absolute UTC execution deadline exceeded")
@@ -752,7 +849,9 @@ def verify_zero_actor_contract(
     }
 
 
-def seed_policy_rng(seed: int, *, seed_cuda: bool = False) -> dict[str, Any]:
+def seed_policy_rng(
+    seed: int, *, seed_cuda: bool = False, physics_seed: int = BASE_SEED
+) -> dict[str, Any]:
     """Seed policy initialization/exploration without changing the physics seed."""
 
     import random
@@ -771,18 +870,22 @@ def seed_policy_rng(seed: int, *, seed_cuda: bool = False) -> dict[str, Any]:
         "numpy": True,
         "torch_cpu": True,
         "torch_cuda_all_available_devices": seed_cuda,
-        "physics_seed_unchanged": BASE_SEED,
+        "physics_seed_unchanged": physics_seed,
     }
 
 
-def reset_evaluation_rng(device: Any) -> dict[str, Any]:
+def reset_evaluation_rng(
+    device: Any, *, physics_seed: int = BASE_SEED
+) -> dict[str, Any]:
     """Reset every evaluation to one RNG state without changing the physics seed."""
 
     import torch
 
     torch_device = torch.device(device)
     include_cuda = torch_device.type == "cuda"
-    seeded = seed_policy_rng(EVALUATION_SEED, seed_cuda=include_cuda)
+    seeded = seed_policy_rng(
+        EVALUATION_SEED, seed_cuda=include_cuda, physics_seed=physics_seed
+    )
     return {
         "seeded": seeded,
         "state_sha256_before_environment_reset": rng_state_sha256(
@@ -904,14 +1007,20 @@ def _build_env(args: argparse.Namespace, mode: str, protocol: Mapping[str, Any])
         raise OraclePpoProbeError("ordered fixed grasp identity mismatch")
     if bank_source_contract_sha256(proof) != EXPECTED_SOURCE_CONTRACT_SHA256:
         raise OraclePpoProbeError("held-bank source contract mismatch")
-    if _calibration_bias_case_seed(BASE_SEED, 0, 1) != CALIBRATION_CASE_SEED:
+    fixed_condition = protocol["fixed_condition"]
+    base_seed = fixed_condition["base_seed"]
+    calibration_case_seed = fixed_condition["calibration_case_seed"]
+    if (
+        _calibration_bias_case_seed(base_seed, ENVIRONMENT_INDEX, EPISODE_INDEX)
+        != calibration_case_seed
+    ):
         raise OraclePpoProbeError("fixed calibration seed formula changed")
 
     cfg = Rby1AssemblyEnvCfg()
     apply_runtime_timing(cfg, runtime)
     cfg.scene.num_envs = 1
     cfg.sim.device = args.device
-    cfg.seed = BASE_SEED
+    cfg.seed = base_seed
     env_type = configure_rj45_task(cfg, task, root)
     env_type = make_rj45_training_env_type(
         env_type, training, held_bank=bank, held_bank_proof=proof,
@@ -952,7 +1061,13 @@ def _build_env(args: argparse.Namespace, mode: str, protocol: Mapping[str, Any])
     env = env_type(cfg)
     if mode in LEARNING_MODES:
         _rebind_observation_spaces(env, protocol["observation_groups"][mode]["dimensions"])
-    return env, {"task": task, "training": training, "versions": versions, "bank_proof": proof}, hashes
+    return env, {
+        "task": task,
+        "training": training,
+        "versions": versions,
+        "bank_proof": proof,
+        "physics_seed": base_seed,
+    }, hashes
 
 
 def _run_evaluation(
@@ -964,13 +1079,14 @@ def _run_evaluation(
     training: Mapping[str, Any],
     trace_path: Path,
     time_guard: Any,
+    physics_seed: int = BASE_SEED,
 ) -> dict[str, Any]:
     import numpy as np
     import torch
     from rby1_assembly.evaluation import EvaluationResult, TaskEvaluator
     from rby1_assembly.recording import reconcile_terminal_evaluation
 
-    evaluation_rng = reset_evaluation_rng(env.device)
+    evaluation_rng = reset_evaluation_rng(env.device, physics_seed=physics_seed)
     reset_result = env.reset()
     observations = reset_result[0] if isinstance(reset_result, tuple) else reset_result
     observation_proof = None
@@ -1180,7 +1296,8 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
         if args.mode in ("zero", "reference"):
             evaluation = _run_evaluation(
                 env, args.mode, None, g2, context["task"], context["training"],
-                output / "evaluation.jsonl", lambda: assert_execution_time(args)
+                output / "evaluation.jsonl", lambda: assert_execution_time(args),
+                physics_seed=context["physics_seed"],
             )
             if evaluation["classification"] == "invalid":
                 raise OraclePpoProbeError(f"{args.mode} independent evaluation is invalid")
@@ -1212,6 +1329,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             rng = seed_policy_rng(
                 int(protocol["ppo"]["policy_training_seed"]),
                 seed_cuda=str(args.device).startswith("cuda"),
+                physics_seed=context["physics_seed"],
             )
             pre_runner = OnPolicyRunner(
                 RslRlVecEnvWrapper(env, clip_actions=1.0),
@@ -1240,6 +1358,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             initialization_rng_reset = seed_policy_rng(
                 int(protocol["ppo"]["training_rng_reset_seed"]),
                 seed_cuda=str(args.device).startswith("cuda"),
+                physics_seed=context["physics_seed"],
             )
             initialization_rng_sha256 = rng_state_sha256(
                 include_cuda=str(args.device).startswith("cuda"),
@@ -1250,12 +1369,18 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             pre_policy = pre_runner.get_inference_policy(device=args.device)
             pre = _run_evaluation(
                 env, args.mode, pre_policy, g2, context["task"], context["training"],
-                output / "pre_evaluation.jsonl", lambda: assert_execution_time(args)
+                output / "pre_evaluation.jsonl", lambda: assert_execution_time(args),
+                physics_seed=context["physics_seed"],
             )
             if pre["classification"] == "invalid":
                 raise OraclePpoProbeError("pre-training independent evaluation is invalid")
             update_records: list[dict[str, Any]] = []
+            updates_trace = output / "updates.jsonl"
+            intermediate_updates = set(
+                protocol["ppo"]["diagnostic_intermediate_checkpoint_updates"]
+            )
             original_update = pre_runner.alg.update
+            logging_writer_ready = False
 
             def audited_update(*update_args, **update_kwargs):
                 assert_execution_time(args)
@@ -1267,14 +1392,36 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
                 record["parameter_finiteness"] = assert_finite_policy_parameters(
                     pre_runner.alg.policy
                 )
+                update_index = int(record["update"])
+                if update_index in intermediate_updates:
+                    if not logging_writer_ready:
+                        raise OraclePpoProbeError(
+                            "diagnostic checkpoint requested before logger/writer preparation"
+                        )
+                    diagnostic_checkpoint = (
+                        output / f"diagnostic_checkpoint_{update_index:04d}.pt"
+                    )
+                    if diagnostic_checkpoint.exists():
+                        raise OraclePpoProbeError(
+                            "diagnostic checkpoint path already exists"
+                        )
+                    pre_runner.save(str(diagnostic_checkpoint))
+                    record["diagnostic_checkpoint"] = {
+                        "path": str(diagnostic_checkpoint),
+                        "sha256": file_sha256(diagnostic_checkpoint),
+                        "eligible_for_selection": False,
+                    }
+                append_jsonl_record(updates_trace, record)
                 update_records.append(record)
                 return value
 
             pre_runner.alg.update = audited_update
             pre_runner._prepare_logging_writer()
+            logging_writer_ready = True
             training_rng = seed_policy_rng(
                 int(protocol["ppo"]["training_rng_reset_seed"]),
                 seed_cuda=str(args.device).startswith("cuda"),
+                physics_seed=context["physics_seed"],
             )
             training_rng["state_sha256"] = rng_state_sha256(
                 include_cuda=str(args.device).startswith("cuda"),
@@ -1292,7 +1439,8 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             final_policy = pre_runner.get_inference_policy(device=args.device)
             final = _run_evaluation(
                 env, args.mode, final_policy, g2, context["task"], context["training"],
-                output / "final_evaluation.jsonl", lambda: assert_execution_time(args)
+                output / "final_evaluation.jsonl", lambda: assert_execution_time(args),
+                physics_seed=context["physics_seed"],
             )
             if final["classification"] == "invalid":
                 raise OraclePpoProbeError("final independent evaluation is invalid")
@@ -1305,6 +1453,10 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
                     "training_start_rng": training_rng,
                     "updates": len(update_records),
                     "update_metrics": update_records,
+                    "updates_trace": {
+                        "path": str(updates_trace),
+                        "sha256": file_sha256(updates_trace),
+                    },
                     "initialization": initialization,
                     "critic_initialization": critic_initialization,
                     "zero_actor_contract": zero_actor_contract,
@@ -1388,7 +1540,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             },
             "inputs_unchanged": True,
             "execution_guard": {
-                "max_single_mode_wall_s": MAX_SINGLE_MODE_WALL_S,
+                "mode_wall_time_limit_s": args.execution_mode_wall_s,
                 "absolute_deadline_utc": protocol["budget_and_stop"][
                     "absolute_deadline_utc"
                 ],
@@ -1411,6 +1563,8 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--write-protocol", type=Path)
     parser.add_argument("--deadline-utc")
     parser.add_argument("--updates", type=int, default=DEFAULT_UPDATES)
+    parser.add_argument("--base-seed", type=int, default=BASE_SEED)
+    parser.add_argument("--budget-admission", type=Path)
     parser.add_argument("--runtime-root", type=Path)
     parser.add_argument("--current-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--protocol", type=Path)
@@ -1438,11 +1592,18 @@ def main(argv: list[str] | None = None) -> int:
     if not args.runtime_manifest.is_absolute():
         args.runtime_manifest = (args.current_root / args.runtime_manifest).resolve()
     if args.write_protocol is not None:
+        budget_admission = (
+            _load_json(args.budget_admission.resolve())
+            if args.budget_admission is not None
+            else None
+        )
         record = write_protocol(
             args.write_protocol,
             args.current_root,
             updates=args.updates,
             deadline_utc=args.deadline_utc,
+            base_seed=args.base_seed,
+            budget_admission=budget_admission,
         )
         print(json.dumps(record, sort_keys=True))
         return 0
@@ -1462,6 +1623,11 @@ def main(argv: list[str] | None = None) -> int:
         protocol_record = validate_protocol(
             args.protocol.resolve(), args.protocol_sha256, args.current_root
         )
+        protocol_base_seed = protocol_record["payload"]["fixed_condition"]["base_seed"]
+        if args.base_seed != protocol_base_seed:
+            raise OraclePpoProbeError(
+                "CLI base seed differs from the frozen protocol fixed condition"
+            )
         deadline_utc = protocol_record["payload"]["budget_and_stop"][
             "absolute_deadline_utc"
         ]
@@ -1475,6 +1641,9 @@ def main(argv: list[str] | None = None) -> int:
             raise OraclePpoProbeError("protocol absolute UTC deadline already expired")
         args.execution_started_monotonic = time.monotonic()
         args.execution_deadline_epoch = deadline_epoch
+        args.execution_mode_wall_s = protocol_record["payload"]["budget_and_stop"][
+            "mode_wall_time_limit_s"
+        ][args.mode]
         args.runtime_manifest_record = validate_runtime_manifest(
             args.runtime_root, args.runtime_manifest
         )
@@ -1485,7 +1654,7 @@ def main(argv: list[str] | None = None) -> int:
             previous_alarm_handler = signal.signal(signal.SIGALRM, alarm_handler)
             signal.setitimer(
                 signal.ITIMER_REAL,
-                min(MAX_SINGLE_MODE_WALL_S, remaining_s),
+                min(args.execution_mode_wall_s, remaining_s),
             )
         failure_stage = "application_launch"
         from isaaclab.app import AppLauncher
