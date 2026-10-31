@@ -61,6 +61,11 @@ class CollectorResult:
     terminated_transitions: int
     truncated_transitions: int
     absorbing_transitions: int
+    sac_random_warmup_requested: int | None
+    sac_random_warmup_effective: int
+    sac_learning_starts_requested: int | None
+    sac_learning_starts_effective: int
+    sac_first_update_after_valid_insertions: int
 
 
 def absorbing_done(terminated: torch.Tensor, truncated: torch.Tensor) -> torch.Tensor:
@@ -283,6 +288,8 @@ def make_agent(
     seed: int = 0,
     mean_initializer: str = "legacy_random",
     initial_log_std: float = -1.0,
+    sac_random_warmup_valid_transitions: int | None = None,
+    sac_learning_starts_valid_transitions: int | None = None,
 ):
     """Build PPO or SAC with identical 79D actor/critic and 6D action rights."""
 
@@ -290,8 +297,8 @@ def make_agent(
         raise ValueError("algorithm must be 'ppo' or 'sac'")
     if num_envs < 1 or rollout_steps < 1:
         raise ValueError("num_envs and rollout_steps must be positive")
-    if sac_utd_ratio <= 0:
-        raise ValueError("sac_utd_ratio must be positive")
+    if isinstance(sac_utd_ratio, bool) or not isinstance(sac_utd_ratio, (int, float)) or not math.isfinite(sac_utd_ratio) or sac_utd_ratio <= 0:
+        raise ValueError("sac_utd_ratio must be finite and positive")
     if mean_initializer not in {"legacy_random", "zero"}:
         raise ValueError("mean_initializer must be 'legacy_random' or 'zero'")
     try:
@@ -302,6 +309,27 @@ def make_agent(
         raise ValueError(
             f"initial_log_std must be finite and within [{MIN_LOG_STD}, {MAX_LOG_STD}]"
         )
+    for name, value in (
+        ("sac_random_warmup_valid_transitions", sac_random_warmup_valid_transitions),
+        ("sac_learning_starts_valid_transitions", sac_learning_starts_valid_transitions),
+    ):
+        if value is not None and (isinstance(value, bool) or not isinstance(value, int) or value < 0):
+            raise ValueError(f"{name} must be a non-negative integer or None")
+    if algorithm != "sac" and (
+        sac_random_warmup_valid_transitions is not None
+        or sac_learning_starts_valid_transitions is not None
+    ):
+        raise ValueError("SAC warmup/start controls require algorithm='sac'")
+    if algorithm == "sac":
+        if isinstance(batch_size, bool) or not isinstance(batch_size, int) or batch_size < 1:
+            raise ValueError("batch_size must be a positive integer")
+        if isinstance(replay_capacity, bool) or not isinstance(replay_capacity, int) or replay_capacity < batch_size:
+            raise ValueError("replay_capacity must be an integer at least batch_size")
+        if (
+            sac_learning_starts_valid_transitions is not None
+            and sac_learning_starts_valid_transitions < batch_size
+        ):
+            raise ValueError("sac_learning_starts_valid_transitions must be at least batch_size")
     torch.manual_seed(seed)
     observation_space, action_space = _spaces()
     GaussianActor, SquashedGaussianActor, ValueModel, CriticModel = _model_types()
@@ -386,7 +414,18 @@ def make_agent(
     agent._comparison_mean_initializer = mean_initializer
     agent._comparison_initial_log_std = float(initial_log_std)
     agent._comparison_log_std_bounds = (MIN_LOG_STD, MAX_LOG_STD)
-    agent._comparison_random_warmup_target = batch_size if algorithm == "sac" else 0
+    agent._comparison_random_warmup_requested = sac_random_warmup_valid_transitions
+    agent._comparison_learning_starts_requested = sac_learning_starts_valid_transitions
+    agent._comparison_random_warmup_target = (
+        batch_size if algorithm == "sac" and sac_random_warmup_valid_transitions is None
+        else int(sac_random_warmup_valid_transitions or 0)
+    )
+    agent._comparison_learning_starts_target = (
+        batch_size if algorithm == "sac" and sac_learning_starts_valid_transitions is None
+        else int(sac_learning_starts_valid_transitions or 0)
+    )
+    agent._comparison_random_warmup_effective = agent._comparison_random_warmup_target
+    agent._comparison_learning_starts_effective = agent._comparison_learning_starts_target
     agent._comparison_state = {
         "trajectories": [[] for _ in range(num_envs)],
         "algorithm_updates": 0,
@@ -397,6 +436,7 @@ def make_agent(
         "ppo_bootstrap_adjustments": 0,
         "sac_update_credit": 0.0,
         "replay_first_ready_at": 0,
+        "first_update_after_valid_insertions": 0,
     }
     return agent
 
@@ -574,6 +614,7 @@ def collect_bounded(
         valid_policy_transitions += valid_count
         warmup_transitions += env.num_envs - valid_count
         with torch.no_grad():
+            random_valid_count = 0
             if algorithm == "ppo":
                 actions, outputs = agent.policy.act(
                     {"observations": observations}, role="policy"
@@ -581,16 +622,34 @@ def collect_bounded(
                 values, _ = agent.value.act(
                     {"observations": observations}, role="value"
                 )
-            elif state["valid_policy_transitions"] < agent._comparison_random_warmup_target:
-                actions, outputs = agent.policy.random_act(
-                    {"observations": observations}, role="policy"
-                )
-                values = None
-                state["random_warmup_transitions"] += valid_count
             else:
-                actions, outputs = agent.policy.act(
-                    {"observations": observations}, role="policy"
+                remaining_random = max(
+                    0,
+                    agent._comparison_random_warmup_target
+                    - state["random_warmup_transitions"],
                 )
+                random_valid_count = min(remaining_random, valid_count)
+                if random_valid_count == valid_count and valid_count > 0:
+                    actions, outputs = agent.policy.random_act(
+                        {"observations": observations}, role="policy"
+                    )
+                elif random_valid_count == 0:
+                    actions, outputs = agent.policy.act(
+                        {"observations": observations}, role="policy"
+                    )
+                else:
+                    random_actions, _ = agent.policy.random_act(
+                        {"observations": observations}, role="policy"
+                    )
+                    policy_actions, outputs = agent.policy.act(
+                        {"observations": observations}, role="policy"
+                    )
+                    random_mask = torch.zeros_like(valid)
+                    valid_indexes = valid.nonzero(as_tuple=True)[0]
+                    random_mask[valid_indexes[:random_valid_count]] = True
+                    actions = torch.where(
+                        random_mask[:, None], random_actions, policy_actions
+                    )
                 values = None
             actions = torch.where(valid[:, None], actions, torch.zeros_like(actions))
         next_observation_result, rewards, terminated, truncated, infos = env.step(actions)
@@ -640,18 +699,23 @@ def collect_bounded(
                 valid=valid,
             )
             state["replay_insertions"] += inserted
+            state["random_warmup_transitions"] += random_valid_count
             if (
                 not state["replay_first_ready_at"]
                 and state["replay_insertions"] >= agent.cfg.batch_size
             ):
                 state["replay_first_ready_at"] = state["replay_insertions"]
             state["sac_update_credit"] += inserted * agent._comparison_sac_utd_ratio
-            if state["replay_insertions"] >= agent.cfg.batch_size:
+            if state["replay_insertions"] >= agent._comparison_learning_starts_target:
                 update_calls = int(state["sac_update_credit"])
             else:
                 update_calls = 0
             state["sac_update_credit"] -= update_calls
             if update_calls:
+                if not state["first_update_after_valid_insertions"]:
+                    state["first_update_after_valid_insertions"] = state[
+                        "replay_insertions"
+                    ]
                 agent.enable_models_training_mode(True)
                 for _ in range(update_calls):
                     agent.update(timestep=state["algorithm_updates"], timesteps=vector_steps)
@@ -704,6 +768,21 @@ def collect_bounded(
         terminated_transitions=terminated_count,
         truncated_transitions=truncated_count,
         absorbing_transitions=absorbing_count,
+        sac_random_warmup_requested=(
+            agent._comparison_random_warmup_requested if algorithm == "sac" else None
+        ),
+        sac_random_warmup_effective=(
+            agent._comparison_random_warmup_target if algorithm == "sac" else 0
+        ),
+        sac_learning_starts_requested=(
+            agent._comparison_learning_starts_requested if algorithm == "sac" else None
+        ),
+        sac_learning_starts_effective=(
+            agent._comparison_learning_starts_target if algorithm == "sac" else 0
+        ),
+        sac_first_update_after_valid_insertions=(
+            state["first_update_after_valid_insertions"] if algorithm == "sac" else 0
+        ),
     )
 
 

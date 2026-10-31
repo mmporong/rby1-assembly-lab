@@ -115,6 +115,30 @@ class _AlternatingSingleEnv(_SyntheticEnv):
         )
 
 
+class _StaticValidityRecordingEnv(_SyntheticEnv):
+    def __init__(self, validity):
+        super().__init__(num_envs=len(validity), horizon=100)
+        self.validity = torch.tensor(validity, dtype=torch.bool)
+        self.actions = []
+
+    def reset(self):
+        self.count.zero_()
+        return {"policy": self.obs.clone()}, {
+            "policy_observation_valid": self.validity.clone()
+        }
+
+    def step(self, actions):
+        self.actions.append(actions.detach().clone())
+        self.count += 1
+        return (
+            {"policy": self.obs.clone()},
+            torch.zeros(self.num_envs, 1),
+            torch.zeros(self.num_envs, 1, dtype=torch.bool),
+            torch.zeros(self.num_envs, 1, dtype=torch.bool),
+            {"policy_observation_valid": self.validity.clone()},
+        )
+
+
 class ComparisonContractTests(unittest.TestCase):
     def test_zero_mean_initializer_is_exact_for_all_observations(self):
         observations = torch.randn(37, OBSERVATION_DIM)
@@ -176,6 +200,132 @@ class ComparisonContractTests(unittest.TestCase):
         for value in (float("nan"), float("inf"), -5.01, 1.01, None, "invalid"):
             with self.assertRaisesRegex(ValueError, "initial_log_std"):
                 make_agent("sac", num_envs=1, initial_log_std=value)
+
+    def test_sac_warmup_and_learning_start_contract_rejects_invalid_values(self):
+        for name, value in (
+            ("sac_random_warmup_valid_transitions", True),
+            ("sac_random_warmup_valid_transitions", -1),
+            ("sac_random_warmup_valid_transitions", 1.5),
+            ("sac_learning_starts_valid_transitions", False),
+            ("sac_learning_starts_valid_transitions", -1),
+        ):
+            with self.assertRaisesRegex(ValueError, name):
+                make_agent("sac", num_envs=1, **{name: value})
+        with self.assertRaisesRegex(ValueError, "at least batch_size"):
+            make_agent("sac", num_envs=1, batch_size=4, sac_learning_starts_valid_transitions=3)
+        with self.assertRaisesRegex(ValueError, "replay_capacity"):
+            make_agent("sac", num_envs=1, batch_size=8, replay_capacity=7)
+        for value in (0.0, float("nan"), float("inf"), True):
+            with self.assertRaisesRegex(ValueError, "sac_utd_ratio"):
+                make_agent("sac", num_envs=1, sac_utd_ratio=value)
+        with self.assertRaisesRegex(ValueError, "require algorithm='sac'"):
+            make_agent("ppo", num_envs=1, sac_random_warmup_valid_transitions=0)
+
+    def test_sac_partial_random_warmup_uses_policy_for_remaining_valid_rows(self):
+        agent = make_agent(
+            "sac",
+            num_envs=4,
+            batch_size=4,
+            replay_capacity=32,
+            sac_random_warmup_valid_transitions=2,
+            sac_learning_starts_valid_transitions=100,
+        )
+        agent.policy.random_act = lambda inputs, role="": (
+            torch.full((4, ACTION_DIM), 0.75), {}
+        )
+        agent.policy.act = lambda inputs, role="": (
+            torch.full((4, ACTION_DIM), -0.25), {}
+        )
+        env = _StaticValidityRecordingEnv([True, False, True, True])
+        result = collect_bounded(
+            agent,
+            env,
+            algorithm="sac",
+            vector_steps=1,
+            require_policy_validity=True,
+        )
+        expected = torch.tensor([0.75, 0.0, 0.75, -0.25])[:, None].expand(-1, ACTION_DIM)
+        self.assertTrue(torch.equal(env.actions[0], expected))
+        self.assertEqual(result.random_warmup_transitions, 2)
+        self.assertEqual(result.valid_policy_transitions, 3)
+        self.assertEqual(result.replay_insertions, 3)
+        self.assertEqual(result.algorithm_updates, 0)
+
+    def test_sac_zero_random_warmup_collects_stochastic_policy_without_update(self):
+        agent = make_agent(
+            "sac",
+            num_envs=4,
+            batch_size=4,
+            replay_capacity=32,
+            mean_initializer="zero",
+            sac_random_warmup_valid_transitions=0,
+            sac_learning_starts_valid_transitions=100,
+        )
+        agent.policy.random_act = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("random_act must not be called")
+        )
+        env = _StaticValidityRecordingEnv([True, True, True, True])
+        result = collect_bounded(agent, env, algorithm="sac", vector_steps=1)
+        self.assertEqual(result.random_warmup_transitions, 0)
+        self.assertTrue(torch.any(env.actions[0] != 0.0))
+        self.assertEqual(result.replay_insertions, 4)
+        self.assertEqual(result.algorithm_updates, 0)
+        self.assertEqual(result.sac_random_warmup_requested, 0)
+        self.assertEqual(result.sac_random_warmup_effective, 0)
+        self.assertEqual(result.sac_learning_starts_requested, 100)
+        self.assertEqual(result.sac_learning_starts_effective, 100)
+
+    def test_sac_delayed_start_backfills_valid_transition_credit(self):
+        agent = make_agent(
+            "sac",
+            num_envs=4,
+            batch_size=4,
+            replay_capacity=64,
+            seed=13,
+            sac_random_warmup_valid_transitions=0,
+            sac_learning_starts_valid_transitions=12,
+        )
+        before = parameter_vector(agent)
+        first = collect_bounded(
+            agent, _SyntheticEnv(num_envs=4, horizon=100), algorithm="sac", vector_steps=2
+        )
+        middle = parameter_vector(agent)
+        self.assertEqual(first.replay_insertions, 8)
+        self.assertEqual(first.replay_first_ready_at, 4)
+        self.assertEqual(first.algorithm_updates, 0)
+        self.assertEqual(first.sac_first_update_after_valid_insertions, 0)
+        self.assertTrue(torch.equal(before, middle))
+        second = collect_bounded(
+            agent, _SyntheticEnv(num_envs=4, horizon=100), algorithm="sac", vector_steps=1
+        )
+        after = parameter_vector(agent)
+        self.assertEqual(second.replay_insertions, 4)
+        self.assertEqual(second.algorithm_updates, 12)
+        self.assertEqual(second.optimizer_steps, 36)
+        self.assertEqual(second.sac_first_update_after_valid_insertions, 12)
+        self.assertTrue(torch.any(middle != after))
+        self.assertTrue(finite_losses(agent))
+
+    def test_sac_invalid_rows_do_not_advance_random_warmup_counter(self):
+        agent = make_agent(
+            "sac",
+            num_envs=2,
+            batch_size=2,
+            replay_capacity=16,
+            sac_random_warmup_valid_transitions=2,
+            sac_learning_starts_valid_transitions=10,
+        )
+        result = collect_bounded(
+            agent,
+            _MixedValidityEnv(num_envs=2, horizon=100),
+            algorithm="sac",
+            vector_steps=3,
+            require_policy_validity=True,
+        )
+        self.assertEqual(result.transitions, 6)
+        self.assertEqual(result.valid_policy_transitions, 3)
+        self.assertEqual(result.random_warmup_transitions, 2)
+        self.assertEqual(result.replay_insertions, 3)
 
     def test_absorbing_timeout_and_gae_do_not_bootstrap_reset_observation(self):
         rewards = torch.tensor([[[1.0]], [[2.0]]])
@@ -429,6 +579,11 @@ class ComparisonContractTests(unittest.TestCase):
                 self.assertEqual(result.replay_size, 64)
                 self.assertEqual(result.replay_first_ready_at, 16)
                 self.assertEqual(result.random_warmup_transitions, 16)
+                self.assertIsNone(result.sac_random_warmup_requested)
+                self.assertEqual(result.sac_random_warmup_effective, 16)
+                self.assertIsNone(result.sac_learning_starts_requested)
+                self.assertEqual(result.sac_learning_starts_effective, 16)
+                self.assertEqual(result.sac_first_update_after_valid_insertions, 16)
                 self.assertEqual(result.algorithm_updates, 64)
                 self.assertEqual(result.optimizer_steps, 192)
                 policy_steps = {
