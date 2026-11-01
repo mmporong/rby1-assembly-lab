@@ -84,7 +84,11 @@
     "report_path": null,
     "report_sha256": null,
     "campaign_path": null,
-    "campaign_sha256": null
+    "campaign_sha256": null,
+    "finished_path": null,
+    "finished_sha256": null,
+    "supervisor_validation_path": null,
+    "supervisor_validation_sha256": null
   },
   "inputs": {
     "runtime_root": "/opt/homedata/rby1-storage/immutable-inputs/rj45-runtime-1517fbf",
