@@ -1,6 +1,6 @@
 # RB-Y1 Isaac Lab 양팔 조립·병렬 강화학습 포트폴리오 계획
 
-상태: 2026-11-01 기준 **G0 완료, G1 formal 90회 native 물리 실행 완료·coordinator 중단으로 G1 미완료, G2 실행기 CPU 통합 완료·본학습 미시작**이다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 경로는 Isaac GPU smoke를 통과했다. G1의 첫 full90은 32/90에서 native signal로 중단됐고 최종 판정에 쓰지 않는다. 그 뒤 새 formal campaign은 tuning 18회와 admission 72회, 합계 90회의 native 물리 실행을 끝냈고 9개 worker의 raw row·source·end-input·cleanup 계약은 통과했다. 다만 최종 coordinator가 `rby1_current_rj45_task_admission` module alias `KeyError`로 중단돼 원본 report는 생성되지 않았고 execution contract는 `false`다. G1 task admission과 RL pilot 진입은 완료되지 않았다.
+상태: 2026-11-01 기준 **G0 완료, G1 formal 90회 native 물리 실행 완료·coordinator 중단으로 G1 미완료, G1 접촉 진단 도구 구현·8개 native 진단 미실행, G2 실행기 CPU 통합 완료·본학습 미시작**이다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 경로는 Isaac GPU smoke를 통과했다. G1의 첫 full90은 32/90에서 native signal로 중단됐고 최종 판정에 쓰지 않는다. 그 뒤 새 formal campaign은 tuning 18회와 admission 72회, 합계 90회의 native 물리 실행을 끝냈고 9개 worker의 raw row·source·end-input·cleanup 계약은 통과했다. 다만 최종 coordinator가 `rby1_current_rj45_task_admission` module alias `KeyError`로 중단돼 원본 report는 생성되지 않았고 execution contract는 `false`다. G1 task admission과 RL pilot 진입은 완료되지 않았다.
 
 ## 1. 결정과 프로젝트 주제
 
@@ -30,7 +30,7 @@
 
 - 런타임과 로봇 출처는 `configs/runtime.json`에 고정돼 있다. Python 3.11, Isaac Sim 5.1.0, Isaac Lab 2.3 release 계열과 `isaaclab` 배포판 metadata 0.47.2, Torch 2.7.0/cu128, RSL-RL 3.0.1, RB-Y1 M v1.2 USD다. 이전 MuJoCo 기획의 별도 SB3 2.9.2/Torch 2.8 후보를 여기에 자동 적용하거나 환경을 업그레이드하지 않는다.
 - `docs/assets-and-data.md`와 `src/rby1_assembly/scene.py`에 USD 출처·hash·의존성 감사, 기본 gripper collider 보완과 mount 기록이 있다. 기존 보완 자체를 새 성과로 세지 않는다.
-- `docs/rj45-task.md`와 독립 평가기에 파지·리프트·삽입 깊이·정렬·힘·속도·dwell 계약이 있다. TE 도면/CAD를 참고한 rigid 모델이며 인증 mating pair, 실제 삽입력, 탭 탄성·케이블 장력·전기 연결 성과는 아니다. 50µm 횡오차는 프로젝트 기준이다.
+- `docs/rj45-task.md`와 독립 평가기에 파지·리프트·삽입 깊이·정렬·힘·속도·dwell 계약이 있다. 시각 형상은 TE 도면/CAD를 참고했고 collision은 도면 기반 근사다. latch·spring을 포함하지 않은 rigid 모델이며 인증 mating pair, 실제 삽입력, 케이블 장력·전기 연결 성과는 아니다. 50µm 횡오차는 프로젝트 기준이다.
 - `docs/evidence/rj45-refinement-20261028/scale-results/README.md`에 단일 GPU의 64/128/256환경 처리량 223.39/460.75/868.43 transitions/s가 있다. 렌더링 없이 update당 8,192전이를 맞춘 수집·갱신 측정이다. 환경별 rollout 길이도 바뀌었으므로 성공률 개선이나 순수한 병렬화 인과로 해석하지 않는다.
 - 최근 `docs/evidence/rj45-multibias-20261031/README.md`의 single2/8, multi3/8, zero2/8은 1seed 진단이며 RL 개선 근거로 승격하지 않는다.
 
@@ -42,8 +42,8 @@
 | gate | 현재 상태 | 완료 근거 또는 남은 조건 |
 |---|---|---|
 | G0 공통 실행 경로 | 완료 | 4환경 PPO/SAC GPU smoke, 유한 손실과 비영 파라미터 변화, 독립 verifier PASS |
-| G1 task admission | native 90회 완료·G1 미완료 | 9개 worker의 18 tuning+72 admission 실행과 raw/source/end/cleanup 계약은 통과. 최종 coordinator module alias `KeyError`로 원본 report 미생성·execution contract 실패 |
-| G2 반복 학습 | 실행기 통합·본학습 미시작 | 4환경×3 waves 경로와 PPO/SAC 공정성 계약을 구현. 설정은 `frozen:false`인 draft이며 3 training seed, 예산·update 수·warmup을 동결해야 함 |
+| G1 task admission | native 90회 완료·G1 미완료 | 기존 producer는 coordinator 중단으로 실패 상태. 접촉 진단 도구의 CPU 계약은 통과했지만 새 8개 native 진단은 아직 실행하지 않음 |
+| G2 반복 학습 | 실행기·G1 gate 통합·본학습 미시작 | 4환경×3 waves 경로와 PPO/SAC 공정성 계약을 구현. 미래 producer의 report·campaign·finished·supervisor 증명을 같은 job에서 요구하며, 설정은 `frozen:false`인 draft |
 | G3 봉인 평가 | 미완료 | 독립 조건·seed·CI·안전 비열등 기준을 실행 전에 봉인해야 함 |
 | 영상·게시물 | 미완료 | G2/G3 결과와 실패 근거를 연결한 미디어가 필요 |
 
@@ -81,6 +81,10 @@ actor, classical controller, 단계 전이는 같은 encoder/FK·자세/접촉 p
 
 module alias 의존성을 명시적으로 주입하도록 수정한 `ed1a375`는 독립 대상 CPU 테스트 86개를 통과했다. 수정은 원본 90회 실행이나 과학 상태를 바꾸지 않았고 native campaign을 재실행하지 않았다. 수치 검증·dual-root 입력 보완·G2 장기 실행기를 포함한 이전 대표 CPU 통합 범위의 330 PASS·126 subtests는 저장소 전체 테스트 수가 아니다. 순차 worker 실행도 병렬 환경 학습이 아니다.
 
+새 비판정 접촉 진단기는 train-02의 zero `tx±·tz±·rx±` 6조건과 oracle GT `tz±` 2조건을 ordinal 1~8로 고정한다. 매 제어 step에서 물리 적용 전 `observation79`와 provider가 낸 normalized right 6D command를 저장하고, 물리 적용 뒤에는 tip-target 6D와 내부 requested·bounded expanded 12D를 구분해 남긴다. post-physics 물리값은 삽입 합력 벡터·norm, 접촉쌍 absolute normal-load sum, 좌우 grip contact proxy를 별도 필드로 기록한다. terminal 행은 auto-reset 뒤 상태가 아니라 `pre_autoreset_terminal_snapshot`을 사용한다.
+
+진단 시작과 종료에서 active runtime import origin을 대조하고, current 6개와 runner·admission runner·trace·runtime recording·dataset을 합친 source 11개, held-bank 의존 입력 26개를 다시 확인한다. 독립 G1 CPU 검증 58개는 active runtime 50개·historical evidence 50개·current 6개의 snapshot과 native Isaac import 부재를 확인했고, 관련 7개 파일의 통합 검증 180개도 통과했다. 이 검증은 도구와 계약의 CPU 재현성 근거다. 8개 native 물리 진단은 아직 실행하지 않았으며 원본 90회 producer 실패, `task_admission_completed=false`, `rl_pilot_admitted=false`, 본학습 미시작 상태를 바꾸지 않는다. 회수 뒤 VM은 `STOPPED` 상태다.
+
 ### G2 — 공정한 학습과 봉인 평가
 
 사전등록 규칙으로 선택한 목표 미달 고전 힘 제어, base+zero residual, PPO, SAC를 같은 조건으로 비교한다. classical은 같은 추정값과 행동 한도 안의 결정적 PD/force-limited search·후퇴/재정렬이다. PPO/SAC의 policy·critic 관측 권한과 전처리는 맞추고, 알고리즘 고유 구조 차이는 기록한다. 튜닝 조건 접근과 trial/계산 예산도 동등하게 제한한다.
@@ -88,6 +92,8 @@ module alias 의존성을 명시적으로 주입하도록 수정한 `ed1a375`는
 train / pilot-tuning / sealed-final의 condition·grasp·reset seed·snapshot hash를 분리한다. 파지는 정책 비의존 수용 규칙으로 생성하고 정책별 사후 선별을 금지한다. pilot은 3 training seed부터 시작하고 최종은 최소5 seed와 실측 분산에 따른 독립 평가 수를 실행 전에 동결한다. pilot 데이터는 최종 효과 추정에 재사용하지 않는다.
 
 현재 G2 long runner는 조건별 4환경을 3 waves로 배치하고 PPO·SAC에 같은 조건 순서와 환경 seed를 준다. CPU 계약 검수는 거쳤지만 `configs/rj45-comparison-pilot-v1.json`은 `frozen:false`, `draft_requires_scientific_freeze`다. 3 training seed와 정확한 전이·rollout·replay·warmup·UTD 수치는 아직 선정하지 않았다. 현재 파일의 cycle, wave step, raw transition 숫자는 후보값이며 승인된 예산이 아니다. G1이 `admit_rl_pilot`로 완료되고 설정을 동결하기 전에는 본학습을 시작하지 않는다.
+
+G2 gate는 G1 raw 90행을 CPU에서 다시 계산하고, exact formal report와 campaign identity, `finished.json`, supervisor validation을 같은 producer job root에서 검증한다. `finished.json`은 supervisor validation·formal report·campaign의 세 SHA edge를 모두 닫아야 하며, source binding과 producer abort 부재도 시작·종료 snapshot에 포함한다. 독립 CPU 테스트 64개가 이 fail-closed 경로와 native module 비import를 확인했다. 미래 positive producer가 이 필드를 작성해야 하며, 원본 report가 없고 execution contract가 실패한 현재 historical 90회는 G2가 소비하지 않는다.
 
 주 비교는 같은 환경 경험 수다. 업데이트·UTD/replay/warmup·wall-clock·VRAM·GPU-hour를 함께 기록하고 같은 계산시간 비교는 보조 결과로 둔다. 최종 checkpoint 선택, 실용 성공률 차이 경계·안전 비열등 margin·CI·다중비교 방법은 final 실행 전에 수치 고정한다. classical/zero를 training seed 수만큼 복제해 표본을 늘리지 않는다. 성공률·끼임·힘 제한 초과·완료 시간·미사용 조건 결과를 원 report에서 재생성한다. 불확정/우월성 미입증/우월성 지지를 구분한다.
 

@@ -1,6 +1,6 @@
 # RJ45 비교 과제 학습 진입 조건
 
-상태: **formal 90회 native 물리 실행 완료, coordinator 중단으로 G1 미완료**. source `2e1f926` packet의 첫 full90 32회는 최종 판정에 쓰지 않았다. 새 formal campaign은 tuning 18회와 admission 72회를 모두 실행했고, 9개 worker의 90개 row가 terminal-complete·execution-error-none이었으며 raw/source/end-input/cleanup 계약을 통과했다. 최종 coordinator는 worker-style module alias `rby1_current_rj45_task_admission`이 없어 `KeyError`로 중단됐다. 원본 `report.json`은 생성되지 않았고 supervisor execution contract는 `false`다. `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지하며 G2 본학습은 시작하지 않았다. 결과 회수 뒤 실행 환경은 `STOPPED`, 종료 guard는 closed로 확인했다.
+상태: **formal 90회 native 물리 실행 완료, coordinator 중단으로 G1 미완료, 8개 비판정 접촉 진단은 도구만 구현하고 native 미실행**. source `2e1f926` packet의 첫 full90 32회는 최종 판정에 쓰지 않았다. 새 formal campaign은 tuning 18회와 admission 72회를 모두 실행했고, 9개 worker의 90개 row가 terminal-complete·execution-error-none이었으며 raw/source/end-input/cleanup 계약을 통과했다. 최종 coordinator는 worker-style module alias `rby1_current_rj45_task_admission`이 없어 `KeyError`로 중단됐다. 원본 `report.json`은 생성되지 않았고 supervisor execution contract는 `false`다. `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지하며 G2 본학습은 시작하지 않았다. 결과 회수 뒤 실행 환경은 `STOPPED`, 종료 guard는 closed로 확인했다.
 
 ## 검증 범위
 
@@ -134,6 +134,27 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --purpose formal_campaign
 ```
 
+### 접촉 원인 분리용 8개 비판정 진단
+
+새 `scripts/diagnose_rj45_contact_isaac.py`는 held bank의 `rj45-train-02`만 사용한다. ordinal 1~6은 zero의 `tx-positive`, `tx-negative`, `tz-positive`, `tz-negative`, `rx-positive`, `rx-negative`이고, ordinal 7~8은 `oracle_gt_reference`의 `tz-positive`, `tz-negative`다. 실행마다 출력 디렉터리를 새로 만들며 `diagnostic_only=true`, `task_admission_completed=false`, `rl_pilot_admitted=false`를 기록한다.
+
+```bash
+cd "$HOME/rby1-assembly-lab"
+OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/diagnose_rj45_contact_isaac.py \
+  --ordinal <1-8> \
+  --runtime-root <동결-active-runtime-root> \
+  --evidence-root <동결-historical-evidence-root> \
+  --current-root "$PWD" \
+  --output-dir artifacts/rj45-contact-diagnostic-<ordinal>-<새-ID> \
+  --headless --device cuda:0
+```
+
+각 tick은 물리 step 전의 `policy_observation79`, provider의 `commanded_normalized_action6`, policy timestamp·validity·phase와 물리 step 후의 현재 training snapshot·물리 상태를 한 행으로 묶는다. 후자의 action은 `current_requested_expanded_residual_action12`, `current_applied_bounded_expanded_action12`, `current_applied_tip_target_offset_entry6`로 나눠 6D 공정 명령, 12D 내부 양팔 표현, 물리에 적용된 오른팔 tip offset을 혼동하지 않는다. terminal 행은 auto-reset 뒤 live env가 아니라 `pre_autoreset_terminal_snapshot`에서 읽는다.
+
+접촉량도 구분한다. `insertion_net_force_world_n`과 그 norm은 합력 벡터이고, `insertion_normal_load_sum_n`은 접촉쌍 absolute normal-load 합계이며 합력 norm 이상이어야 한다. `grip_contact_proxy_n`은 좌우 파지 접촉 proxy 2개다. 이 값은 기존 공식 성공 기준이나 observability의 filtered entry force 정의를 바꾸지 않는다.
+
+실행 전후에는 current source 6개와 diagnostic runner·admission runner·trace·runtime recording·dataset을 합친 source 11개, held-bank 의존 입력 26개, active runtime import origin의 시작·종료 일치를 검사한다. CPU 독립 검증 58개는 active runtime 50개·historical evidence 50개·current 6개 snapshot, source 11개와 bank 26개, native Isaac module 비import를 확인했다. 관련 7개 파일 통합 검증 180개도 통과했다. 이 수치는 도구 계약 검증이며 native 물리 결과가 아니다. 8개 case는 아직 native 실행하지 않았고 기존 90회 결과·CPU negative 판정·headroom 미입증 상태를 대체하지 않는다.
+
 ## formal 90회 실행 결과와 판정 경계
 
 9개 worker가 tuning 18회와 admission 72회를 실행했다. 90개 row가 모두 terminal-complete이고 execution error가 없었으며, worker·external verifier exit 0, source·end-input 일치, process-group cleanup을 통과했다. 최종 coordinator는 `rby1_current_rj45_task_admission` module alias 조회에서 `KeyError`로 중단됐다. 이 때문에 원본 `report.json`은 생성되지 않았고 supervisor execution contract는 `false`다. 실행 계약 실패를 물리 90회 종료로 소급해 성공 처리하지 않는다.
@@ -141,6 +162,8 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
 회수한 원본 90회는 변경하지 않았다. 원본 protocol에 worker-style module alias만 복원한 독립 CPU 진단은 `infeasible_or_unobservable`을 반환했다. slot 1 safe success count는 `oracle_gt_reference` 12/12, `zero` 6/12, `mean_constant` 2/12, `open_loop_playback` 1/12, `classical_force_search` 6/12였다. reference는 성공과 안전 gate를 통과했지만, 두 grasp 모두 tx만 observable이었다. tz·rx는 고정한 0.25 N contact sample이 없어 grasp당 observable axis가 1/3이었고 최소 2/3 gate를 통과하지 못했다. recovered row만으로는 contact sample 미검출의 물리적 원인을 구분할 수 없으며, 사전등록 feature·threshold·window·gate를 사후 조정하지 않았다.
 
 이 CPU 진단은 회수 row의 내적 일관성과 alias 복원 후 판정기가 반환할 상태를 보여준다. 원본 producer report, supervisor 계약 통과, G1 완료, RL pilot 승인, final held-out 평가를 입증하지 않는다. module alias 의존성을 명시적으로 주입하도록 수정한 `ed1a375`는 독립 대상 CPU 테스트 86개를 통과했지만, native campaign을 재실행하지 않았고 원본 과학 상태도 바꾸지 않았다.
+
+G2 진입 gate는 raw 90행을 CPU에서 재계산한 formal report, campaign identity, `finished.json`, supervisor validation을 한 producer job root에서 함께 검증한다. `finished.json`에는 `supervisor_validation_sha256`, `formal_report_sha256`, `campaign_sha256` 세 binding이 모두 있어야 하고, supervisor proof도 같은 report·campaign과 exact 90행, `admit_rl_pilot`을 가리켜야 한다. report·campaign·finished·supervisor와 G1 CPU source는 시작·종료 snapshot에 포함하며 producer abort artifact가 생기면 실패한다. 이 fail-closed 경로는 독립 CPU 테스트 64개를 통과했고 native module을 import하지 않았다. 미래 positive producer가 이 필드를 작성해야 하며, 원본 report가 없고 supervisor execution contract가 실패한 현재 historical 90회는 G2 입력으로 사용할 수 없다. `configs/rj45-comparison-pilot-v1.json`도 `frozen:false`이므로 본학습은 계속 막힌다.
 
 attempt-C는 환경 생성 전에 `cfg.seed`가 없어서 세 번 모두 중단됐다. 이는 물리 또는 제어 결과가 아니라 구성 실패다. 실패 기록은 보존했고, attempt-D에서는 모든 case·method·slot에 같은 nonnegative integer seed `20261121`을 factory 호출 전에 전달하고 provenance에 기록했다. runner SHA-256은 `2f5483ee2c11cd8deb8b9bd87c2b1ddc1c10e912d1b21ece6eec1fe3af96a0f8`이다. 독립 검증은 3/3 terminal, 실행 계획, 144,686개 유한 수치, bias·held identity·최초 action 계약, 동결 runtime hash 35개를 확인했다. VM은 결과 회수 뒤 `STOPPED`로 확인됐다. 실행 창 비용 `0.7288 USD`는 시간과 단가를 곱한 추정치이며 청구액이 아니다. G0 완료 근거는 [`docs/evidence/rj45-comparison-g0-20261101/README.md`](evidence/rj45-comparison-g0-20261101/README.md)에 보존한다.
 
