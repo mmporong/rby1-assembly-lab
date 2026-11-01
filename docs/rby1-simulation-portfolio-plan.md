@@ -1,6 +1,6 @@
 # RB-Y1 Isaac Lab 양팔 조립·병렬 강화학습 포트폴리오 계획
 
-상태: 2026-11-01 기준 **G0 완료, G1 격리 실행 경로 CPU 검증 완료·실제 GPU 재진단 대기**다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 실행 경로는 실제 Isaac GPU smoke를 통과했고, G1의 3-episode Isaac 사전 검증도 계약 3/3으로 통과했다. 후속 full90은 tuning 18회와 admission 14회, 합계 32/90을 원자적으로 보존한 뒤 native signal로 중단됐다. 물리 입력 봉인과 fresh-process 격리 보완은 CPU 검증을 마쳤지만 실제 diagnostic 33과 새 full90은 실행하지 않았다. G1 완료, RL pilot 진입, main training, 강화학습 효과와 게시 준비는 아직 확정되지 않았다.
+상태: 2026-11-01 기준 **G0 완료, G1 새 formal 90회 격리 검증 진행 중, G2 실행기 CPU 통합 완료**다. 기존 커밋 `a279c1d`의 MuJoCo 복귀안을 대체한다. G0 공통 PPO/SAC 경로는 Isaac GPU smoke를 통과했다. G1의 첫 full90은 tuning 18회와 admission 14회를 보존한 뒤 native signal로 중단됐고, 이 32회는 최종 판정에 쓰지 않는다. 이후 새 process의 diagnostic ordinal 33 한 건이 실행·종료·유한값·출처·정리·입력 종료 계약을 통과했지만 `mean_constant`는 실패했고 native 중단 원인 해결은 입증하지 못했다. 기존 32회와 diagnostic 1회를 재사용하지 않는 새 formal campaign이 별도 경로에서 실행 중이며 최종 판정은 미확정이다. G2는 장기 실행기와 CPU 계약만 통합됐고 설정 동결과 본학습은 시작하지 않았다.
 
 ## 1. 결정과 프로젝트 주제
 
@@ -42,8 +42,8 @@
 | gate | 현재 상태 | 완료 근거 또는 남은 조건 |
 |---|---|---|
 | G0 공통 실행 경로 | 완료 | 4환경 PPO/SAC GPU smoke, 유한 손실과 비영 파라미터 변화, 독립 verifier PASS |
-| G1 task admission | CPU 보완 검증 완료·GPU 재실행 대기 | 3-episode 사전 검증은 계약 3/3 통과. 첫 full90은 32/90에서 native signal로 중단. 입력 봉인·fresh-process coordinator는 171개 관련 CPU 테스트와 독립 검수를 통과했지만 diagnostic 33과 새 full90은 미실행 |
-| G2 반복 학습 | 미완료 | G1 admission 뒤 같은 경험 예산의 PPO/SAC pilot과 반복 학습 필요 |
+| G1 task admission | formal 90회 격리 검증 진행 중 | 첫 full90의 32회는 재사용하지 않음. diagnostic ordinal 33 한 건은 계약 PASS·task failure로 종료. 새 campaign의 최종 판정은 미확정 |
+| G2 반복 학습 | 실행기 통합·본학습 미시작 | 4환경×3 waves 경로와 PPO/SAC 공정성 계약을 구현. 설정은 `frozen:false`인 draft이며 3 training seed, 예산·update 수·warmup을 동결해야 함 |
 | G3 봉인 평가 | 미완료 | 독립 조건·seed·CI·안전 비열등 기준을 실행 전에 봉인해야 함 |
 | 영상·게시물 | 미완료 | G2/G3 결과와 실패 근거를 연결한 미디어가 필요 |
 
@@ -71,13 +71,17 @@ actor, classical controller, 단계 전이는 같은 encoder/FK·자세/접촉 p
 
 환경 수를 늘릴 때 교차 환경 접촉, reset 독립성, 종료 후 상태, 접촉 buffer 용량과 누락을 검사한다. 처리량·VRAM·GPU 사용량과 유효 episode 수를 함께 기록한다. 실제 시뮬레이션을 여러 환경으로 배치한 영상은 원 run과 연결하고 복제 편집으로 대신하지 않는다.
 
-현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. 통합 CPU suite 79개, G1 core architect CLEAR, runner CPU prelaunch APPROVE를 확인했고, [3-episode Isaac 사전 검증](evidence/rj45-task-admission-smoke-20261101/README.md)은 계약 3/3으로 통과했다. source `2e1f926`의 full90은 tuning 18회와 admission 14회까지 보존한 뒤 exit `-11`로 끝났고 full report는 생성되지 않았다. 이 중단은 학습 실패나 방법 성능으로 집계하지 않으며 native `SIGSEGV` 원인은 아직 확정하지 않았다. [중단 근거](evidence/rj45-task-admission-interrupted-20261101/README.md)를 보존한 채 물리 입력 48개와 held-bank 입력 26개를 구분해 봉인하고, CPU coordinator가 최대 12 episode씩 9개 fresh process chunk를 순차 실행하는 격리 경로를 구현했다. 관련 CPU 테스트 171개와 code review·science review를 통과했지만 diagnostic 33과 새 full90은 아직 실행하지 않았다. 기존 32회와 섞지 않은 새 campaign만 전체 G1 판정에 사용한다. 이 순차 chunk 실행은 병렬 환경 학습이 아니다.
+현재 `scripts/run_rj45_task_admission.py`, `make_fair_provider`, `make_rj45_task_admission_env_type`, classical/constant/playback seal과 G1 판정기는 구현돼 있다. active runtime의 core 35개는 `1517fbf`로 갱신됐고, historical `104721a` root는 과거 trace·proof 검증에만 쓴다. 두 root의 task config는 bytes와 parsed value가 같아야 하며 Python module은 active runtime에서만 import한다. core 35개 중 변경된 `experiment_contracts.py`는 raw pose에서 파생된 `lateral_error_m`·`orientation_error_rad` 직렬화 차이만 2 binary64 ULP까지 허용한다. `depth_m`, 원본 상대 위치·quaternion, source와 물리 판정 tolerance는 기존 exact/성공 규칙을 유지한다. 현재 입력 namespace는 active runtime 50개, historical evidence 50개, current 6개, bank 26개이며 active code로 train bank 8개를 의미 검증한다.
+
+첫 full90은 tuning 18회와 admission 14회까지 보존한 뒤 exit `-11`로 끝났고 full report는 생성되지 않았다. native `SIGSEGV` 원인은 확정되지 않았다. 새 process의 ordinal 33 한 건은 terminal·finite·provenance·cleanup·end-input 계약을 통과했고, `mean_constant`는 실패했으며 727×79 관측을 남겼다. 벽시계 시간은 약 222.4초였고 회수 archive SHA-256은 `d584eca81b627eef1b1a1d4511472db0d35373ee9145a5c4e384b309469e2234`다. 회수 뒤 VM `STOPPED`와 종료 guard closed를 확인했다. 이 한 건은 task admission, RL 효과, native 중단 원인 해결의 근거가 아니다. 기존 32회와 diagnostic 1회를 제외한 새 formal 90회 격리 검증이 진행 중이며 최종 판정은 미확정이다. 수치 검증·dual-root 입력 보완·G2 장기 실행기를 포함한 대표 CPU 통합 범위는 330 PASS·126 subtests를 통과했으며 저장소 전체 테스트 수가 아니다. 이 순차 chunk 실행은 병렬 환경 학습이 아니다.
 
 ### G2 — 공정한 학습과 봉인 평가
 
-강한 고전 힘 제어, base+zero residual, PPO, SAC를 같은 조건으로 비교한다. classical은 같은 추정값과 행동 한도 안의 결정적 PD/force-limited search·후퇴/재정렬이다. PPO/SAC의 policy·critic 관측 권한과 전처리는 맞추고, 알고리즘 고유 구조 차이는 기록한다. 튜닝 조건 접근과 trial/계산 예산도 동등하게 제한한다.
+사전등록 규칙으로 선택한 목표 미달 고전 힘 제어, base+zero residual, PPO, SAC를 같은 조건으로 비교한다. classical은 같은 추정값과 행동 한도 안의 결정적 PD/force-limited search·후퇴/재정렬이다. PPO/SAC의 policy·critic 관측 권한과 전처리는 맞추고, 알고리즘 고유 구조 차이는 기록한다. 튜닝 조건 접근과 trial/계산 예산도 동등하게 제한한다.
 
 train / pilot-tuning / sealed-final의 condition·grasp·reset seed·snapshot hash를 분리한다. 파지는 정책 비의존 수용 규칙으로 생성하고 정책별 사후 선별을 금지한다. pilot은 3 training seed부터 시작하고 최종은 최소5 seed와 실측 분산에 따른 독립 평가 수를 실행 전에 동결한다. pilot 데이터는 최종 효과 추정에 재사용하지 않는다.
+
+현재 G2 long runner는 조건별 4환경을 3 waves로 배치하고 PPO·SAC에 같은 조건 순서와 환경 seed를 준다. CPU 계약 검수는 거쳤지만 `configs/rj45-comparison-pilot-v1.json`은 `frozen:false`, `draft_requires_scientific_freeze`다. 3 training seed와 정확한 전이·rollout·replay·warmup·UTD 수치는 아직 선정하지 않았다. 현재 파일의 cycle, wave step, raw transition 숫자는 후보값이며 승인된 예산이 아니다. G1이 `admit_rl_pilot`로 완료되고 설정을 동결하기 전에는 본학습을 시작하지 않는다.
 
 주 비교는 같은 환경 경험 수다. 업데이트·UTD/replay/warmup·wall-clock·VRAM·GPU-hour를 함께 기록하고 같은 계산시간 비교는 보조 결과로 둔다. 최종 checkpoint 선택, 실용 성공률 차이 경계·안전 비열등 margin·CI·다중비교 방법은 final 실행 전에 수치 고정한다. classical/zero를 training seed 수만큼 복제해 표본을 늘리지 않는다. 성공률·끼임·힘 제한 초과·완료 시간·미사용 조건 결과를 원 report에서 재생성한다. 불확정/우월성 미입증/우월성 지지를 구분한다.
 
@@ -97,11 +101,11 @@ MuJoCo–PhysX 전체 task 정합, 실물 식별·Sim-to-Real, 유연 케이블,
 
 ## 6. 자원·검증·완료 경계
 
-계획 단계와 G0 구현·검증·GPU smoke는 끝났다. G1 full90은 32/90에서 native signal로 중단됐고 target은 `2026-10-31T18:02:26.445379Z`에 `STOPPED`로 확인됐다. 13,800초 process timeout은 만료되지 않았으며 로그의 `Timeout (0:01:00)!`은 60초 traceback heartbeat다. native 중단 원인은 아직 확정하지 않았다. 프로젝트의 GPU 인스턴스는 한 대만 사용하며 전체 실험은 사용자가 정한 700 USD 한도 안에서 관리한다. `6 USD`와 `7.50 USD`는 각각 G0와 중단된 G1 실행의 예약 상한이며 실제 청구액이 아니다. G2 실행 예산은 승인되지 않았고 새 training은 시작하지 않았다. 비용·프로세스·실행 결과는 기술 기록에 남기되 비공개 계정·청구 자료는 문서와 게시물에 넣지 않는다.
+계획 단계와 G0 구현·검증·GPU smoke는 끝났다. G1의 첫 full90은 32/90에서 native signal로 중단됐고, 회수 뒤 실행 환경 종료를 확인했다. 후속 diagnostic 한 건도 회수·검증 뒤 실행 환경과 종료 guard가 닫힌 상태다. native 중단 원인은 아직 확정하지 않았다. 후속 실행은 사용자가 승인한 잔여 예산과 실행별 상한 안에서만 진행한다. 정확한 예산·예약·종료 상태는 비추적 운영 기록을 정본으로 삼고, 공개 문서에는 개인 크레딧·조직·인스턴스·청구 자료를 기록하지 않는다. G2 본학습은 시작하지 않았다.
 
 렌더 없는 학습과 촬영은 분리한다. home과 `/data`의 실제 peak 여유를 검사하고 원본을 삭제해 조건을 억지로 맞추지 않는다. 사용하지 않는 GPU·프로세스는 작업 후 종료한다. G0 target은 `2026-10-31T16:04:21.816443Z`에 `STOPPED`로 확인됐고 종료 guard의 timer와 service는 모두 `inactive/not-found`였다. 결과 회수도 완료됐다. 후속 실행 전에는 구체 자원 상태를 런타임에서 다시 확인한다.
 
-문서 검증은 기존 근거 대조, 공식 지원 기능과 현재 구현 구분, 수정 diff, 별도 verifier 검수로 수행한다. G0의 실제 Isaac 결과와 provenance는 확인됐다. G1의 강한 classical·learnability gate와 G2/G3의 반복·봉인 평가를 통과하기 전에는 PPO/SAC 차이, 성공 범위 확대, 접촉력 안전성을 입증했다고 게시하지 않는다. MuJoCo 복귀안의 기술스택·새 MJCF 파일 계획은 활성 후속 작업에서 제외한다.
+문서 검증은 기존 근거 대조, 공식 지원 기능과 현재 구현 구분, 수정 diff, 별도 verifier 검수로 수행한다. G0의 실제 Isaac 결과와 provenance는 확인됐다. G1 task-admission·learnability gate와 G2/G3의 반복·봉인 평가를 통과하기 전에는 PPO/SAC 차이, 성공 범위 확대, 접촉력 안전성을 입증했다고 게시하지 않는다. MuJoCo 복귀안의 기술스택·새 MJCF 파일 계획은 활성 후속 작업에서 제외한다.
 
 ## 근거
 
