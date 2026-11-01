@@ -1,0 +1,502 @@
+{
+  "completed_verified": 8,
+  "cases": [
+    {
+      "case": {
+        "case_id": "tx-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 727,
+      "last_gt": {
+        "actual_depth_m": 0.012312461235560844,
+        "lateral_error_m": 8.804981331141105e-05,
+        "orientation_error_rad": 0.0032998984697574256
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 726,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 4.4537032116171577e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 7,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4806571006774902,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.004976837001879752,
+          "depth_max_m": 0.044414410211673916
+        },
+        "insert": {
+          "rows": 720,
+          "max_net_force_n": 0.8618912888791171,
+          "max_normal_load_n": 1.1172586679458618,
+          "grip_max_n": [
+            1.6933242082595825,
+            3.996156692504883
+          ],
+          "depth_min_m": -0.004909458708642555,
+          "depth_max_m": 0.012353102718351763
+        }
+      },
+      "trace_sha256": "25853b859ba549c9952ee4fbdcb5bcb3b2d6947eed450f1e291139852582e21d"
+    },
+    {
+      "case": {
+        "case_id": "tx-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 13.600000381469727,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 415,
+      "last_gt": {
+        "actual_depth_m": 0.012320230506991941,
+        "lateral_error_m": 4.811567394879502e-05,
+        "orientation_error_rad": 0.007732375932637796
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 414,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 3.910909959249642e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4809199571609497,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.006106688201269798,
+          "depth_max_m": 0.044414410211673916
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.616652062738875,
+          "max_normal_load_n": 0.616652250289917,
+          "grip_max_n": [
+            1.7885276079177856,
+            4.010837078094482
+          ],
+          "depth_min_m": 0.012320230506991941,
+          "depth_max_m": 0.012320230506991941
+        },
+        "insert": {
+          "rows": 397,
+          "max_net_force_n": 0.7411402406858317,
+          "max_normal_load_n": 0.7411404848098755,
+          "grip_max_n": [
+            1.8500736951828003,
+            4.093058109283447
+          ],
+          "depth_min_m": -0.006159235948234746,
+          "depth_max_m": 0.012347800014438023
+        }
+      },
+      "trace_sha256": "2b0c7eab1c9f8545c9c4ef88e9d35ce9194e2e285c4a2e015b8802203dab77ac"
+    },
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 727,
+      "last_gt": {
+        "actual_depth_m": 0.012303014123662559,
+        "lateral_error_m": 0.00011880867398498309,
+        "orientation_error_rad": 5.141173370725617e-06
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 726,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 4.647508479085668e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 18,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4811043739318848,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.006133219448630281,
+          "depth_max_m": 0.044414410211673916
+        },
+        "insert": {
+          "rows": 709,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810173511505127,
+            3.7777841091156006
+          ],
+          "depth_min_m": -0.006158774911347059,
+          "depth_max_m": 0.012347529761337968
+        }
+      },
+      "trace_sha256": "714a2d9fb55b74221674483547c37e2b50eb2d0fc2b7cddc4773346d2ee3c5ff"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 727,
+      "last_gt": {
+        "actual_depth_m": 0.012300115967545685,
+        "lateral_error_m": 0.00012009515280448901,
+        "orientation_error_rad": 3.072318451340271e-06
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 726,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 5.18893978990169e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4808833599090576,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.006105254789264845,
+          "depth_max_m": 0.044414410211673916
+        },
+        "insert": {
+          "rows": 710,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810222387313843,
+            3.777695894241333
+          ],
+          "depth_min_m": -0.006158342491140073,
+          "depth_max_m": 0.012347461745429238
+        }
+      },
+      "trace_sha256": "6d30e70c50e51b3e08fba40cd58e4646fcd60bb382db4cb4b06b116bfc95cc45"
+    },
+    {
+      "case": {
+        "case_id": "rx-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 13.200000762939453,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 403,
+      "last_gt": {
+        "actual_depth_m": 0.01229490674051959,
+        "lateral_error_m": 1.6298555362018382e-05,
+        "orientation_error_rad": 0.003493539651564909
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 402,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 5.549314411709867e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4808626174926758,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.0060130528073096936,
+          "depth_max_m": 0.044414410211673916
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4808039665222168,
+            3.7771270275115967
+          ],
+          "depth_min_m": 0.01229490674051959,
+          "depth_max_m": 0.01229490674051959
+        },
+        "insert": {
+          "rows": 385,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810230731964111,
+            3.777693033218384
+          ],
+          "depth_min_m": -0.006075716182590241,
+          "depth_max_m": 0.012344070233305731
+        }
+      },
+      "trace_sha256": "cd14252c24e66bd033817c7843bfc78fbe4a1d833f995f6fede5c49e29998fbb"
+    },
+    {
+      "case": {
+        "case_id": "rx-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "zero",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ]
+      },
+      "terminal": {
+        "completion_time_s": 13.40000057220459,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 409,
+      "last_gt": {
+        "actual_depth_m": 0.012296023710545946,
+        "lateral_error_m": 1.9461801473083087e-05,
+        "orientation_error_rad": 0.0034860318910772104
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 408,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 5.586936127899289e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 20,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4808086156845093,
+            3.777406930923462
+          ],
+          "depth_min_m": -0.006218270503424321,
+          "depth_max_m": 0.044414410211673916
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4806324243545532,
+            3.777520179748535
+          ],
+          "depth_min_m": 0.012296023710545946,
+          "depth_max_m": 0.012296023710545946
+        },
+        "insert": {
+          "rows": 388,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810043573379517,
+            3.7776737213134766
+          ],
+          "depth_min_m": -0.006164268983185735,
+          "depth_max_m": 0.012346299601646512
+        }
+      },
+      "trace_sha256": "e508f8dc876d3c458966d59fecec5e4028f0894af2aaa051f3acbc94f20b06cb"
+    },
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "oracle_gt_reference",
+        "provider_inputs": []
+      },
+      "terminal": {
+        "completion_time_s": 13.000000953674316,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 397,
+      "last_gt": {
+        "actual_depth_m": 0.01232757372943782,
+        "lateral_error_m": 5.934451531767678e-06,
+        "orientation_error_rad": 1.2540069757863807e-05
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 396,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 4.33516135998728e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 18,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4811043739318848,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.006133219448630281,
+          "depth_max_m": 0.044414410211673916
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4804518222808838,
+            3.7772209644317627
+          ],
+          "depth_min_m": 0.01232757372943782,
+          "depth_max_m": 0.01232757372943782
+        },
+        "insert": {
+          "rows": 378,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810293912887573,
+            3.7775847911834717
+          ],
+          "depth_min_m": -0.006159169695449949,
+          "depth_max_m": 0.012345680158953064
+        }
+      },
+      "trace_sha256": "7112edcf5a1ec3fce98987ac7a9ed71c0b3e5b1c83ad4c3f1eb089b81704e85f"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "oracle_gt_reference",
+        "provider_inputs": []
+      },
+      "terminal": {
+        "completion_time_s": 13.266667366027832,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 405,
+      "last_gt": {
+        "actual_depth_m": 0.01229584109010936,
+        "lateral_error_m": 3.128019033877187e-06,
+        "orientation_error_rad": 1.0419519174254097e-05
+      },
+      "reported_mismatch_rows": 0,
+      "legacy_mismatch_rows": 404,
+      "max_reported_delta": {
+        "actual_depth_m": 5.432001293215194e-09,
+        "lateral_error_m": 6.64819061191313e-08,
+        "orientation_error_rad": 4.089436891396647e-07
+      },
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4808833599090576,
+            3.777388572692871
+          ],
+          "depth_min_m": -0.006105254789264845,
+          "depth_max_m": 0.044414410211673916
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4806430339813232,
+            3.7774243354797363
+          ],
+          "depth_min_m": 0.01229584109010936,
+          "depth_max_m": 0.01229584109010936
+        },
+        "insert": {
+          "rows": 387,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0,
+          "grip_max_n": [
+            1.4810163974761963,
+            3.777657985687256
+          ],
+          "depth_min_m": -0.006159307298641649,
+          "depth_max_m": 0.012345963728793936
+        }
+      },
+      "trace_sha256": "f159cdaa7e9c06240da7cc9bc3b2bee507f5768ef68e2a1c015906913242e428"
+    }
+  ]
+}

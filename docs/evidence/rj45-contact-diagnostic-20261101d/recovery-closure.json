@@ -1,0 +1,14 @@
+{
+  "at_utc": "2026-11-01T07:24:29.611931+00:00",
+  "recovery_verified": true,
+  "independent_trace_review": "PASS",
+  "gpu": {
+    "at_utc": "2026-11-01T07:24:19.463002+00:00",
+    "id": "pyf1b9s0a",
+    "name": "rby1-oracle-crusoe-20261031a",
+    "status": "STOPPED"
+  },
+  "guard": "Id=rby1-contact-diagnostic-stop-20261101d.timer\nActiveState=inactive\nSubState=dead\n\nId=rby1-contact-diagnostic-stop-20261101d.service\nActiveState=inactive\nSubState=dead\n",
+  "initial_stop_helper": "stop_not_confirmed_after_8_polls; subsequent_exact_status_STOPPED",
+  "balance_queried": false
+}

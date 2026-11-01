@@ -1,0 +1,16 @@
+{
+  "archive": "/opt/homedata/rby1-storage/transport/rby1-contact-diagnostic-20261101d-recovery.tar.gz",
+  "archive_bytes": 3052829,
+  "archive_sha256": "d120d653568cbb72cda713da1f80fd8807a219aec233fec68a2ae69562764415",
+  "regular_members": 101,
+  "payload_count": 100,
+  "uncompressed_bytes": 15834134,
+  "destination": "/opt/homedata/rby1-storage/recovered/rj45-contact-diagnostic-20261101d",
+  "native_launch_claim_sha256": "8f92d3c1c35d3cc3f86791628d0356e5755dfb95959fa605ee60719eb5ccbc85",
+  "native_admission_sha256": "615df9eab4c2108a1ea51af3f12e193f258996376dad69c3e2968b05332c60a4",
+  "safe_inventory": true,
+  "all_payloads_verified": true,
+  "all_extracted_payloads_verified": true,
+  "manifest_post_write_verified": true,
+  "scientific_adjudication": false
+}

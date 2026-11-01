@@ -1,0 +1,136 @@
+{
+  "schema_name": "rj45-contact-diagnostic-independent-completed-review-v1",
+  "reviewed_at_utc": "2026-11-01T07:23:12+00:00",
+  "reviewer": "/root/recovery_review",
+  "status": "verified",
+  "raw_job": "/opt/homedata/rby1-storage/recovered/rj45-contact-diagnostic-20261101d/job",
+  "reviewed_summary": "/home/lim/rby1-assembly-lab/.omx/evidence/rj45-contact-diagnostic-20261101d/completed-summary.json",
+  "recovery": {
+    "regular_members": 101,
+    "manifest_payloads": 100,
+    "all_manifest_sizes_and_sha256_matched": true,
+    "finished_exit_code": 0,
+    "instrumentation_collection_complete": true,
+    "completed_cases": 8,
+    "problems": []
+  },
+  "trace_v2": {
+    "cases": 8,
+    "total_rows": 4210,
+    "terminal_rows": 8,
+    "all_terminals_final": true,
+    "all_sequence_and_hash_chains_valid": true,
+    "all_sidecars_and_post_exit_verifications_matched": true,
+    "all_summary_phase_force_and_geometry_values_matched": true,
+    "reported_full_frame_geometry_mismatch_rows": 0,
+    "legacy_y_only_geometry_mismatch_rows": 4202,
+    "max_abs_reported_minus_full_frame": {
+      "actual_depth_m": 5.432001293215194e-09,
+      "lateral_error_m": 6.64819061191313e-08,
+      "orientation_error_rad": 5.586936127899289e-07
+    }
+  },
+  "outcomes": {
+    "success_total": 5,
+    "success_zero": 3,
+    "zero_cases": 6,
+    "success_oracle_gt_reference": 2,
+    "oracle_gt_reference_cases": 2,
+    "hard_contact_cases": 0,
+    "forbidden_contact_cases": 0,
+    "cases": [
+      {
+        "ordinal": 1,
+        "case_id": "tx-positive",
+        "method_id": "zero",
+        "rows": 727,
+        "success": false,
+        "max_net_force_n": 0.8618912888791171,
+        "terminal_lateral_error_m": 8.804981331141105e-05
+      },
+      {
+        "ordinal": 2,
+        "case_id": "tx-negative",
+        "method_id": "zero",
+        "rows": 415,
+        "success": true,
+        "max_net_force_n": 0.7411402406858317,
+        "terminal_lateral_error_m": 4.811567394879502e-05
+      },
+      {
+        "ordinal": 3,
+        "case_id": "tz-positive",
+        "method_id": "zero",
+        "rows": 727,
+        "success": false,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 0.00011880867398498309
+      },
+      {
+        "ordinal": 4,
+        "case_id": "tz-negative",
+        "method_id": "zero",
+        "rows": 727,
+        "success": false,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 0.00012009515280448901
+      },
+      {
+        "ordinal": 5,
+        "case_id": "rx-positive",
+        "method_id": "zero",
+        "rows": 403,
+        "success": true,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 1.6298555362018382e-05
+      },
+      {
+        "ordinal": 6,
+        "case_id": "rx-negative",
+        "method_id": "zero",
+        "rows": 409,
+        "success": true,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 1.9461801473083087e-05
+      },
+      {
+        "ordinal": 7,
+        "case_id": "tz-positive",
+        "method_id": "oracle_gt_reference",
+        "rows": 397,
+        "success": true,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 5.934451531767678e-06
+      },
+      {
+        "ordinal": 8,
+        "case_id": "tz-negative",
+        "method_id": "oracle_gt_reference",
+        "rows": 405,
+        "success": true,
+        "max_net_force_n": 0.0,
+        "terminal_lateral_error_m": 3.128019033877187e-06
+      }
+    ]
+  },
+  "active_z_probe": {
+    "design_work_may_start": true,
+    "execution_admitted": false,
+    "rationale": "Both passive zero-input tz cases failed the 50 um lateral criterion with zero insertion force/load, while both GT-reference tz cases succeeded with terminal lateral error below 6 um.",
+    "required_before_execution_review": [
+      "freeze the case-blind onset depth, probe waveform, plateau timing, and return profile",
+      "bind response fields and the 0.25 N threshold to the unchanged observation79 force contract",
+      "pre-register the distance and signal-to-noise decision rule",
+      "choose an 8-episode single-order claim or a 16-episode counterbalanced robustness claim",
+      "build and independently verify a new immutable packet"
+    ]
+  },
+  "claim_limits": {
+    "task_admission_completed": false,
+    "rl_pilot_admitted": false,
+    "active_probe_observability_proven": false,
+    "generalization_beyond_one_seed_one_grasp_and_registered_development_cases": false,
+    "legacy_y_only_mismatch_is_not_a_task_failure": true,
+    "interpretation": "The run validates non-adjudicative instrumentation and motivates a bounded active-z observability experiment. It does not establish global observability, identify a learned policy, or retroactively complete G1."
+  }
+}
