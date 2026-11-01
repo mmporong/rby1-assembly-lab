@@ -1,0 +1,100 @@
+{
+  "schema": "rj45-classical-tuning-v2",
+  "frozen": false,
+  "provider_schema": "rj45-classical-force-search-controller-v2",
+  "tuning_grasp_id": "rj45-train-03",
+  "signed_cases": [
+    "tx-positive",
+    "tx-negative",
+    "tz-positive",
+    "tz-negative",
+    "rx-positive",
+    "rx-negative"
+  ],
+  "candidate_count": 4,
+  "episodes_per_candidate": 6,
+  "tuning_episode_count": 24,
+  "candidates": [
+    {
+      "id": "V2A",
+      "position_gain": 1.0,
+      "rotation_gain": 0.8,
+      "search_step_m": 0.00005,
+      "force_trigger_n": 0.25
+    },
+    {
+      "id": "V2B",
+      "position_gain": 1.0,
+      "rotation_gain": 0.8,
+      "search_step_m": 0.0001,
+      "force_trigger_n": 0.25
+    },
+    {
+      "id": "V2C",
+      "position_gain": 1.0,
+      "rotation_gain": 0.8,
+      "search_step_m": 0.00005,
+      "force_trigger_n": 0.5
+    },
+    {
+      "id": "V2D",
+      "position_gain": 1.0,
+      "rotation_gain": 0.8,
+      "search_step_m": 0.0001,
+      "force_trigger_n": 0.5
+    }
+  ],
+  "shared_controller_contract": {
+    "control_hz": 30,
+    "search_plateau_ticks": 18,
+    "search_plateau_s": 0.6,
+    "recovery_reset_advancing_ticks": 18,
+    "stalled_trigger_ticks": 6,
+    "stall_depth_delta_m_per_tick": 0.00002,
+    "search_direction_order": [
+      "initial",
+      "rotate_plus_90",
+      "opposite",
+      "rotate_minus_90"
+    ],
+    "search_radius_max_m": 0.0006,
+    "safety_force_n": 20.0,
+    "safety_latch_is_permanent": true,
+    "translation_bound_m": 0.0015,
+    "rotation_bound_rad": 0.026179938779914945,
+    "known_bias_access": false,
+    "case_grasp_sign_ground_truth_access": false
+  },
+  "selection": {
+    "safe_eligibility": "zero_hard_and_forbidden_contact_episodes",
+    "order": [
+      "safe_eligible_only",
+      "maximum_success_count",
+      "minimum_evaluator_force_p95_n",
+      "minimum_completion_time_median_s",
+      "lexicographic_candidate_id"
+    ],
+    "strong_baseline_qualifier": {
+      "minimum_successes": 4,
+      "out_of": 6,
+      "name_only": true,
+      "does_not_gate_new_admission_baseline": true
+    },
+    "selected_safe_baseline_always_runs_new_admission": {
+      "grasp_count": 2,
+      "signed_cases_per_grasp": 6,
+      "episode_count": 12,
+      "reuse_tuning_outcomes": false
+    }
+  },
+  "design_basis": {
+    "old_search_plateau_ticks": 6,
+    "old_search_plateau_s_at_30hz": 0.2,
+    "success_dwell_s": 0.4,
+    "old_plateau_shorter_than_success_dwell": true,
+    "observed_diagnostic_force_peak_n": 0.55,
+    "old_force_trigger_range_n": [6.0, 8.0],
+    "stalled_branch_also_enters_search": true,
+    "causal_attribution": "not_established"
+  }
+}
