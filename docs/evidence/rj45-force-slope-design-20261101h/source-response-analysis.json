@@ -1,0 +1,97 @@
+{
+  "schema": "rj45-force-slope-development-basis-v1",
+  "source_archive_sha256": "2f9218e8fecb88e476690c3f39583e82663445fb2bb258656dbfbd76b0a02c1a",
+  "role": "development_design_basis_only",
+  "v2_reclassification_performed": false,
+  "counterfactual_results_available": false,
+  "results": [
+    {
+      "ordinal": 1,
+      "trace_sha256": "7f4f2debf6137e3884d689450461784f24f901c9b19c42ba118a3f68b969a1ee",
+      "report_sha256": "0eda4f758b02212d5b8c0bf5da186841dc14b2ffce60e13612abdb1a34e99d73",
+      "first_impulse_command_row": 133,
+      "response_rows": [
+        134,
+        135,
+        136,
+        137
+      ],
+      "entry_force_responses_n": [
+        [
+          0.21827304363250732,
+          0.00041398018947802484,
+          0.000389500375604257
+        ],
+        [
+          0.18023201823234558,
+          0.0003566134546417743,
+          0.00035075272899121046
+        ],
+        [
+          0.12001553922891617,
+          0.00027355438214726746,
+          0.00024883061996661127
+        ],
+        [
+          0.0589551217854023,
+          0.0001245252788066864,
+          0.00011423684190958738
+        ]
+      ],
+      "delta_abs_entry_force_x_n": -0.15931792184710503,
+      "hypothesized_ascent_direction": -1,
+      "v2_contact_waveform_index": 12,
+      "v2_contact_offset_m": 0.0003,
+      "v2_sample13_entry_force_n": [
+        -0.44474297761917114,
+        -0.0034167072735726833,
+        -0.001841179677285254
+      ]
+    },
+    {
+      "ordinal": 4,
+      "trace_sha256": "d62f7d8320e2ba40b39d9df5354d4434e28214f648bb581ce5e9efe4242bab54",
+      "report_sha256": "4281d1b1942ffb167c304baac78e539087c011ffda1a08d11655e1e717b33de0",
+      "first_impulse_command_row": 167,
+      "response_rows": [
+        168,
+        169,
+        170,
+        171
+      ],
+      "entry_force_responses_n": [
+        [
+          -0.2050575464963913,
+          -0.001059731119312346,
+          -0.0007339044823311269
+        ],
+        [
+          -0.2434178739786148,
+          -0.0015021428698673844,
+          -0.0008711035479791462
+        ],
+        [
+          -0.3301233947277069,
+          -0.0021800892427563667,
+          -0.001188531517982483
+        ],
+        [
+          -0.38343608379364014,
+          -0.002684951527044177,
+          -0.0014523500576615334
+        ]
+      ],
+      "delta_abs_entry_force_x_n": 0.17837853729724884,
+      "hypothesized_ascent_direction": 1,
+      "v2_contact_waveform_index": 3,
+      "v2_contact_offset_m": 0.00015,
+      "v2_sample13_entry_force_n": [
+        -0.7533144950866699,
+        -0.007423081900924444,
+        -0.003390948986634612
+      ]
+    }
+  ],
+  "task_admission_completed": false,
+  "rl_pilot_admitted": false
+}
