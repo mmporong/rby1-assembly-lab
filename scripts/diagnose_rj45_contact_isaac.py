@@ -110,6 +110,107 @@ def _geometry(task: Mapping[str, Any], recording: Any) -> Any:
     return recording.AssemblyGeometry(socket_entry_y_m=socket_y, plug_tip_y_m=plug_y)
 
 
+def _capture_runtime_start_attestation(
+    runner: Any, prepared: Mapping[str, Any], runtime: Mapping[str, Any]
+) -> dict[str, Any]:
+    attestation = runner._provenance(prepared, runtime)
+    required = {
+        "runtime_versions",
+        "runtime_import_origins",
+        "held_bank_proof",
+        "frozen_input_sha256",
+    }
+    if not isinstance(attestation, dict) or not required.issubset(attestation):
+        raise runner.AdmissionRunBlocked("runtime start attestation is incomplete")
+    origins = attestation["runtime_import_origins"]
+    if not isinstance(origins, dict) or not {
+        "rby1_assembly.recording",
+        "rby1_assembly.dataset",
+    }.issubset(origins):
+        raise runner.AdmissionRunBlocked(
+            "runtime recording/dataset import origins are missing at start"
+        )
+    frozen = attestation["frozen_input_sha256"]
+    if not isinstance(frozen, dict) or len(frozen) != 26:
+        raise runner.AdmissionRunBlocked(
+            "runtime start attestation must bind exactly 26 frozen bank inputs"
+        )
+    return attestation
+
+
+def _verify_frozen_bank_end(
+    runner: Any, runtime: Mapping[str, Any]
+) -> dict[str, Any]:
+    frozen = runtime.get("frozen_hashes")
+    if not isinstance(frozen, Mapping) or len(frozen) != 26:
+        raise runner.AdmissionRunBlocked(
+            "runtime frozen bank map must contain exactly 26 inputs"
+        )
+    for raw_path, expected in frozen.items():
+        path = Path(raw_path).resolve()
+        if (
+            not isinstance(expected, str)
+            or len(expected) != 64
+            or _sha256(path) != expected
+        ):
+            raise runner.AdmissionRunBlocked(
+                f"frozen held-bank input changed during diagnostic: {path}"
+            )
+    return {
+        "schema_name": "rj45-contact-diagnostic-frozen-bank-end-v1",
+        "matched": True,
+        "verified_file_count": len(frozen),
+        "source": "runtime.frozen_hashes_from_verified_held_grasp_bank_dependencies",
+    }
+
+
+def _verify_runtime_import_origins_end(
+    runner: Any,
+    prepared: Mapping[str, Any],
+    start_attestation: Mapping[str, Any],
+) -> dict[str, Any]:
+    runtime_root = Path(prepared["runtime_root"]).resolve()
+    start = start_attestation.get("runtime_import_origins")
+    if not isinstance(start, Mapping):
+        raise runner.AdmissionRunBlocked("runtime start import origins are invalid")
+    end = runner._assert_runtime_import_origins(runtime_root)
+    runtime_manifest = prepared["physics_input_snapshot"]["normalized_sha256"][
+        "runtime"
+    ]
+    late_manifest_bound: dict[str, str] = {}
+    for name, raw_path in end.items():
+        path = Path(raw_path).resolve()
+        if not path.is_relative_to(runtime_root):
+            raise runner.AdmissionRunBlocked(
+                f"runtime import escaped at diagnostic end: {name}"
+            )
+        if name in start:
+            if str(path) != start[name]:
+                raise runner.AdmissionRunBlocked(
+                    f"runtime import origin changed during diagnostic: {name}"
+                )
+            continue
+        relative = path.relative_to(runtime_root).as_posix()
+        if runtime_manifest.get(relative) != _sha256(path):
+            raise runner.AdmissionRunBlocked(
+                f"late runtime import is not bound by the physics manifest: {name}"
+            )
+        late_manifest_bound[name] = str(path)
+    missing = sorted(set(start) - set(end))
+    if missing:
+        raise runner.AdmissionRunBlocked(
+            "runtime imports disappeared during diagnostic: " + ", ".join(missing)
+        )
+    return {
+        "schema_name": "rj45-contact-diagnostic-runtime-import-end-v1",
+        "matched": True,
+        "start_origin_count": len(start),
+        "end_origin_count": len(end),
+        "late_manifest_bound_origins": late_manifest_bound,
+        "runtime_import_origins_end": end,
+    }
+
+
 def _report_failure(runner: Any, report_path: Path, error: BaseException) -> None:
     if report_path.exists():
         return
@@ -166,6 +267,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         runtime = runner._load_runtime(prepared)
         from rby1_assembly import recording
 
+        runtime_start_attestation = _capture_runtime_start_attestation(
+            runner, prepared, runtime
+        )
+
         row = DIAGNOSTIC_PLAN[args.ordinal - 1]
         writer = trace_module.JsonlTraceWriter(
             args.output_dir / "ticks.jsonl",
@@ -185,6 +290,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             step_observer=observer,
         )
         sidecar = observer.finalize()
+        frozen_bank_end = _verify_frozen_bank_end(runner, runtime)
+        runtime_import_end = _verify_runtime_import_origins_end(
+            runner, prepared, runtime_start_attestation
+        )
         end_physics = prepared["runtime_validator"].verify_physics_input_end(
             prepared["physics_input_snapshot"],
             prepared["runtime_root"],
@@ -218,6 +327,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "provenance": {
                 "runtime_commit": runner.EXPECTED_RUNTIME_COMMIT,
                 "physics_input_snapshot": prepared["physics_input_snapshot"],
+                "runtime_start_attestation": runtime_start_attestation,
+                "runtime_import_origins_end_verification": runtime_import_end,
+                "frozen_bank_end_verification": frozen_bank_end,
                 "physics_input_prelaunch_verification": pre_physics,
                 "physics_input_end_verification": end_physics,
                 "source_sha256_start": start_sources,
