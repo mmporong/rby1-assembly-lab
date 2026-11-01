@@ -34,7 +34,7 @@ class FakeEnv:
         self.poison_post_reset = poison_post_reset
 
     def _training_step_snapshot(self):
-        return self.source
+        raise AssertionError("observer read the stale pre-step teacher cache")
 
     @property
     def episode_length_buf(self):
@@ -74,15 +74,50 @@ def _observer(tmp_path: Path, *, terminal_snapshot=None, live_snapshot=None):
     )
 
 
+def _post_snapshot(
+    observation: np.ndarray,
+    *,
+    policy_timestamp: float = 1.0,
+    post_timestamp: float = 1.1,
+    action: float = 0.7,
+) -> dict:
+    return {
+        "timestamp_s": np.asarray([post_timestamp]),
+        "policy_input_observation": observation.copy(),
+        "policy_input_timestamp_s": np.asarray([policy_timestamp]),
+        "policy_input_valid": np.asarray([True]),
+        "requested_expanded_residual_action": np.full((1, 6), action),
+        "applied_bounded_residual_action": np.full((1, 6), action),
+        "applied_tip_target_offset_entry_6d": np.full((1, 6), action),
+    }
+
+
+def _capture_pre(
+    observer: ContactDiagnosticObserver,
+    env: FakeEnv,
+    observation: np.ndarray,
+    *,
+    action: float = 0.0,
+    timestamp: float = 1.0,
+) -> None:
+    observer.capture_pre(
+        env,
+        observation,
+        np.full((1, 6), action),
+        np.asarray([True]),
+        np.asarray([timestamp]),
+    )
+
+
 def test_terminal_uses_pre_reset_extras_and_never_reads_mutated_live_env(tmp_path: Path) -> None:
     observation = np.arange(79, dtype=float)[None, :]
     env = FakeEnv(_training_snapshot(observation))
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation)
     env.poison_post_reset = True
     observer.capture_post(
         env,
-        {"terminal_snapshot": {"timestamp_s": np.asarray([1.1])}},
+        {"terminal_snapshot": _post_snapshot(observation)},
         True,
     )
     sidecar = observer.finalize()
@@ -93,34 +128,44 @@ def test_terminal_uses_pre_reset_extras_and_never_reads_mutated_live_env(tmp_pat
     assert sidecar["terminal_count"] == 1
 
 
-def test_pre_step_values_are_copied_before_mutable_alias_changes(tmp_path: Path) -> None:
+def test_teacher_cache_refresh_and_current_actions_are_captured_post_step(
+    tmp_path: Path,
+) -> None:
     observation = np.arange(79, dtype=float)[None, :]
-    source = _training_snapshot(observation)
+    source = _training_snapshot(np.zeros((1, 79)), timestamp=0.5)
     env = FakeEnv(source)
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
-    source["policy_input_observation"][:] = -999.0
-    source["applied_bounded_residual_action"][:] = -999.0
+    _capture_pre(observer, env, observation, action=0.7)
+    current = _post_snapshot(observation, action=0.7)
     observer.capture_post(
         env,
-        {"terminal_snapshot": {"timestamp_s": np.asarray([1.1])}},
+        {"terminal_snapshot": current},
         True,
     )
+    current["policy_input_observation"][:] = -999.0
+    current["applied_bounded_residual_action"][:] = -999.0
     observer.finalize()
     row = json.loads((tmp_path / "ticks.jsonl").read_text().strip())
     assert row["policy_command_depth"] == 62.0
     assert row["policy_advance"] == 63.0
-    assert row["cached_applied_bounded_residual_action6"] == [0.2] * 6
+    assert row["commanded_normalized_action6"] == [0.7] * 6
+    assert row["current_requested_expanded_residual_action6"] == [0.7] * 6
+    assert row["current_applied_bounded_residual_action6"] == [0.7] * 6
+    assert row["current_applied_tip_target_offset_entry6"] == [0.7] * 6
 
 
 def test_reset_source_timestamps_are_preserved_without_fake_monotonic_fallback(tmp_path: Path) -> None:
     observation = np.zeros((1, 79))
     env = FakeEnv(_training_snapshot(observation, timestamp=2.0))
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation, timestamp=2.0)
     observer.capture_post(
         env,
-        {"terminal_snapshot": {"timestamp_s": np.asarray([1.9])}},
+        {
+            "terminal_snapshot": _post_snapshot(
+                observation, policy_timestamp=2.0, post_timestamp=1.9
+            )
+        },
         True,
     )
     observer.finalize()
@@ -131,23 +176,60 @@ def test_reset_source_timestamps_are_preserved_without_fake_monotonic_fallback(t
     assert row["observer_post_control_elapsed_s"] == 0.1
 
 
-def test_missing_frozen_source_field_fails_without_fallback(tmp_path: Path) -> None:
+def test_missing_post_step_source_field_fails_without_fallback(tmp_path: Path) -> None:
     observation = np.zeros((1, 79))
-    source = _training_snapshot(observation)
+    source = _post_snapshot(observation)
     del source["policy_input_timestamp_s"]
     observer = _observer(tmp_path)
+    env = FakeEnv({})
+    _capture_pre(observer, env, observation)
     with pytest.raises(DiagnosticTraceError, match="missing fields"):
-        observer.capture_pre(FakeEnv(source), observation, np.zeros((1, 6)))
+        observer.capture_post(env, {"terminal_snapshot": source}, True)
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    (
+        (lambda snapshot: snapshot["policy_input_observation"].fill(9.0), "caller policy"),
+        (
+            lambda snapshot: snapshot.__setitem__(
+                "policy_input_timestamp_s", np.asarray([9.0])
+            ),
+            "caller timestamp",
+        ),
+        (
+            lambda snapshot: snapshot.__setitem__(
+                "policy_input_valid", np.asarray([False])
+            ),
+            "caller validity",
+        ),
+    ),
+)
+def test_post_step_snapshot_must_be_fresh_for_the_caller_input(
+    tmp_path: Path, mutation, message: str
+) -> None:
+    observation = np.zeros((1, 79))
+    env = FakeEnv({})
+    observer = _observer(tmp_path)
+    _capture_pre(observer, env, observation)
+    snapshot = _post_snapshot(observation)
+    mutation(snapshot)
+    with pytest.raises(DiagnosticTraceError, match=message):
+        observer.capture_post(env, {"terminal_snapshot": snapshot}, True)
 
 
 def test_terminal_timestamp_source_is_required_without_live_env_fallback(tmp_path: Path) -> None:
     observation = np.zeros((1, 79))
     env = FakeEnv(_training_snapshot(observation))
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation)
     env.poison_post_reset = True
     with pytest.raises(DiagnosticTraceError, match="terminal_snapshot.timestamp_s"):
-        observer.capture_post(env, {"terminal_snapshot": {}}, True)
+        observer.capture_post(
+            env,
+            {"terminal_snapshot": _post_snapshot(observation) | {"timestamp_s": None}},
+            True,
+        )
 
 
 def test_force_vector_and_normal_load_contracts_are_checked(tmp_path: Path) -> None:
@@ -157,11 +239,11 @@ def test_force_vector_and_normal_load_contracts_are_checked(tmp_path: Path) -> N
         tmp_path,
         terminal_snapshot=lambda *_args: _physics(load=4.0),
     )
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation)
     with pytest.raises(DiagnosticTraceError, match="normal-load sum"):
         observer.capture_post(
             env,
-            {"terminal_snapshot": {"timestamp_s": np.asarray([1.1])}},
+            {"terminal_snapshot": _post_snapshot(observation)},
             True,
         )
 
@@ -170,13 +252,19 @@ def test_jsonl_hash_chain_has_one_row_per_step_and_one_terminal(tmp_path: Path) 
     observation = np.zeros((1, 79))
     env = FakeEnv(_training_snapshot(observation))
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
-    observer.capture_post(env, {"evaluation": {}}, False)
+    _capture_pre(observer, env, observation)
+    observer.capture_post(
+        env, {"terminal_snapshot": _post_snapshot(observation)}, False
+    )
     env.source = _training_snapshot(observation, timestamp=1.1)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation, timestamp=1.1)
     observer.capture_post(
         env,
-        {"terminal_snapshot": {"timestamp_s": np.asarray([1.2])}},
+        {
+            "terminal_snapshot": _post_snapshot(
+                observation, policy_timestamp=1.1, post_timestamp=1.2
+            )
+        },
         True,
     )
     sidecar = observer.finalize()
@@ -185,17 +273,17 @@ def test_jsonl_hash_chain_has_one_row_per_step_and_one_terminal(tmp_path: Path) 
     assert rows[1]["previous_row_sha256"] == rows[0]["row_sha256"]
     assert [row["terminal"] for row in rows] == [False, True]
     with pytest.raises(DiagnosticTraceError, match="order"):
-        observer.capture_pre(env, observation, np.zeros((1, 6)))
+        _capture_pre(observer, env, observation)
 
 
 def test_finalize_revalidates_stream_hashes_before_writing_sidecar(tmp_path: Path) -> None:
     observation = np.zeros((1, 79))
     env = FakeEnv(_training_snapshot(observation))
     observer = _observer(tmp_path)
-    observer.capture_pre(env, observation, np.zeros((1, 6)))
+    _capture_pre(observer, env, observation)
     observer.capture_post(
         env,
-        {"terminal_snapshot": {"timestamp_s": np.asarray([1.1])}},
+        {"terminal_snapshot": _post_snapshot(observation)},
         True,
     )
     path = tmp_path / "ticks.jsonl"

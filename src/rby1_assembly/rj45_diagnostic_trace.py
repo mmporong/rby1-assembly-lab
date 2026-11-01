@@ -167,7 +167,7 @@ class JsonlTraceWriter:
 class ContactDiagnosticObserver:
     """Capture one immutable pre-action/post-physics pair for every env step."""
 
-    _PRE_FIELDS = (
+    _POST_STEP_FIELDS = (
         ("policy_input_observation", (1, 79)),
         ("policy_input_timestamp_s", (1,)),
         ("requested_expanded_residual_action", (1, 6)),
@@ -192,27 +192,20 @@ class ContactDiagnosticObserver:
         self._terminal_seen = False
         self._control_step_dt_s: float | None = None
 
-    def capture_pre(self, env: Any, policy: Any, commanded_action: Any) -> None:
+    def capture_pre(
+        self,
+        env: Any,
+        policy: Any,
+        commanded_action: Any,
+        policy_input_valid: Any,
+        policy_input_timestamp_s: Any,
+    ) -> None:
         if self._terminal_seen or self._pending is not None:
             raise DiagnosticTraceError("pre-step capture order is invalid")
-        if not hasattr(env, "_training_step_snapshot"):
-            raise DiagnosticTraceError("environment has no frozen training-step snapshot")
-        source = env._training_step_snapshot()
-        if not isinstance(source, Mapping):
-            raise DiagnosticTraceError("training-step snapshot must be a mapping")
-        required = {name for name, _ in self._PRE_FIELDS} | {"policy_input_valid"}
-        missing = sorted(required - set(source))
-        if missing:
-            raise DiagnosticTraceError("training-step snapshot is missing fields: " + ", ".join(missing))
-        copied = {
-            name: _array(source[name], name, shape).tolist()
-            for name, shape in self._PRE_FIELDS
-        }
         observation = _array(policy, "policy", (1, 79))
-        cached_observation = np.asarray(copied["policy_input_observation"], dtype=np.float64)
-        if not np.array_equal(observation, cached_observation):
-            raise DiagnosticTraceError("policy argument differs from frozen policy input")
-        timestamp_s = float(copied["policy_input_timestamp_s"][0])
+        timestamp_s = float(
+            _scalar(policy_input_timestamp_s, "policy_input_timestamp_s")
+        )
         phase = _scalar(getattr(env, "_phase", None), "pre_phase", integer=True)
         step_dt_s = float(_scalar(getattr(env, "step_dt", None), "step_dt"))
         if step_dt_s <= 0.0:
@@ -227,22 +220,15 @@ class ContactDiagnosticObserver:
             "control_step_dt_s": step_dt_s,
             "pre_policy_timestamp_s": timestamp_s,
             "pre_phase_code": phase,
-            "policy_input_valid": _boolean(source["policy_input_valid"], "policy_input_valid"),
-            "policy_observation79": copied["policy_input_observation"][0],
-            "policy_command_depth": copied["policy_input_observation"][0][62],
-            "policy_advance": copied["policy_input_observation"][0][63],
+            "pre_policy_input_valid": _boolean(
+                policy_input_valid, "policy_input_valid"
+            ),
+            "policy_observation79": observation.tolist()[0],
+            "policy_command_depth": float(observation[0, 62]),
+            "policy_advance": float(observation[0, 63]),
             "commanded_normalized_action6": _array(
                 commanded_action, "commanded_action", (1, 6)
             ).tolist()[0],
-            "cached_requested_expanded_residual_action6": copied[
-                "requested_expanded_residual_action"
-            ][0],
-            "cached_applied_bounded_residual_action6": copied[
-                "applied_bounded_residual_action"
-            ][0],
-            "cached_applied_tip_target_offset_entry6": copied[
-                "applied_tip_target_offset_entry_6d"
-            ][0],
         }
 
     def capture_post(self, env: Any, extras: Mapping[str, Any], terminal: bool) -> None:
@@ -250,13 +236,48 @@ class ContactDiagnosticObserver:
             raise DiagnosticTraceError("post-step capture order is invalid")
         if not isinstance(extras, Mapping):
             raise DiagnosticTraceError("step extras must be a mapping")
+        raw_step = extras.get("terminal_snapshot")
+        if not isinstance(raw_step, Mapping):
+            raise DiagnosticTraceError(
+                "every post-step capture requires the pre-reset terminal_snapshot clone"
+            )
+        required = {name for name, _ in self._POST_STEP_FIELDS} | {
+            "policy_input_valid"
+        }
+        missing = sorted(required - set(raw_step))
+        if missing:
+            raise DiagnosticTraceError(
+                "post-step training snapshot is missing fields: " + ", ".join(missing)
+            )
+        current = {
+            name: _array(raw_step[name], name, shape)
+            for name, shape in self._POST_STEP_FIELDS
+        }
+        if not np.array_equal(
+            current["policy_input_observation"][0],
+            np.asarray(self._pending["policy_observation79"]),
+        ):
+            raise DiagnosticTraceError(
+                "post-step snapshot policy input differs from the caller policy"
+            )
+        if (
+            float(current["policy_input_timestamp_s"][0])
+            != self._pending["pre_policy_timestamp_s"]
+        ):
+            raise DiagnosticTraceError(
+                "post-step snapshot policy timestamp differs from the caller timestamp"
+            )
+        if (
+            _boolean(raw_step["policy_input_valid"], "policy_input_valid")
+            != self._pending["pre_policy_input_valid"]
+        ):
+            raise DiagnosticTraceError(
+                "post-step snapshot policy validity differs from the caller validity"
+            )
         if terminal:
-            raw_terminal = extras.get("terminal_snapshot")
-            if not isinstance(raw_terminal, Mapping):
-                raise DiagnosticTraceError("terminal step requires pre-reset terminal_snapshot")
             snapshot = self._terminal_snapshot_from_extras(extras, self.geometry)
             post_timestamp_s = _scalar(
-                raw_terminal.get("timestamp_s"), "terminal_snapshot.timestamp_s"
+                raw_step.get("timestamp_s"), "terminal_snapshot.timestamp_s"
             )
             source = "pre_autoreset_terminal_snapshot"
         else:
@@ -291,6 +312,15 @@ class ContactDiagnosticObserver:
             "source_timestamp_delta_s": (
                 post_timestamp_s - self._pending["pre_policy_timestamp_s"]
             ),
+            "current_requested_expanded_residual_action6": current[
+                "requested_expanded_residual_action"
+            ][0].tolist(),
+            "current_applied_bounded_residual_action6": current[
+                "applied_bounded_residual_action"
+            ][0].tolist(),
+            "current_applied_tip_target_offset_entry6": current[
+                "applied_tip_target_offset_entry_6d"
+            ][0].tolist(),
             "post_phase_name": snapshot.phase,
             "post_state_source": source,
             "terminal": bool(terminal),

@@ -1141,7 +1141,12 @@ def _episode(
                 produced, state = provider.act(sample, state)
                 action[0] = torch.as_tensor(produced, device=env.device, dtype=action.dtype)
             if step_observer is not None:
-                step_observer.capture_pre(env, policy, action)
+                policy_timestamp = getattr(
+                    env, "_training_last_policy_observation_timestamp_s", None
+                )
+                step_observer.capture_pre(
+                    env, policy, action, valid, policy_timestamp
+                )
             step = env.step(action)
             observation, _, terminated, truncated, step_extras = step
             ended = bool((terminated | truncated)[0])

@@ -31,9 +31,13 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) ->
 
     class Env:
         device = "cpu"
-        extras = {"terminal_snapshot": object()}
+        extras = {
+            "terminal_snapshot": object(),
+            "policy_observation_valid": torch.tensor([True]),
+        }
         _last_contact_proxy_n = torch.zeros((1, 2))
         _last_insertion_contact_load_n = torch.zeros(1)
+        _training_last_policy_observation_timestamp_s = torch.tensor([0.0])
 
         def reset(self):
             return {"policy": torch.zeros((1, 79))}
@@ -61,8 +65,17 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) ->
     calls = []
 
     class Observer:
-        def capture_pre(self, env, policy, action):
-            calls.append(("pre", env, policy.clone(), action.clone()))
+        def capture_pre(self, env, policy, action, valid, timestamp):
+            calls.append(
+                (
+                    "pre",
+                    env,
+                    policy.clone(),
+                    action.clone(),
+                    valid.clone(),
+                    timestamp.clone(),
+                )
+            )
 
         def capture_post(self, env, extras, terminal):
             calls.append(("post", env, extras, terminal))
