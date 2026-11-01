@@ -1,0 +1,73 @@
+{
+  "verdict": "PASS",
+  "reviewer": "meaning_media_review",
+  "reviewed_at_utc": "2026-11-01T11:53:12.344429+00:00",
+  "scope": "project purpose and limits; uncropped v3 with trace-backed alignment overlay; local preparation only",
+  "targeted_tests": 52,
+  "compileall": "pass",
+  "diff_check": "pass",
+  "video": {
+    "sha256": "b1848e6af7bd5b2f5c8219ea9049222a4ca25138fa286b40229c9265157554d1",
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "frames": 1574,
+    "duration_s": 26.233333333333334,
+    "spatial_crop": null,
+    "playback_rate": 1,
+    "robot_frame_interpolation": false,
+    "robot_frame_repetition": false
+  },
+  "overlay": {
+    "events": 8776,
+    "ASS_timing": "two-digit centiseconds; floor boundaries; ceil final deadline",
+    "frame_PTS_partition_test_frames": 1454,
+    "ghosting": false,
+    "raw_frames_SHA_checked_against": [
+      "source evidence",
+      "recovery manifest"
+    ],
+    "dwell": "causal completed 30Hz step only",
+    "initial_policy_invalid_frames_each": 22,
+    "metric_marker_clamp_max_um": 100,
+    "overall_success_not_inferred_from_lateral_only": true
+  },
+  "data": {
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "lateral_limit_um": 50,
+    "limit_provenance": "project criterion, not manufacturer assembly specification",
+    "effect_proven": false,
+    "generalization_proven": false,
+    "new_training": false,
+    "raw_replay_changed": false
+  },
+  "visual_review_timestamps_s": [
+    0.1,
+    5,
+    12.6,
+    13.2,
+    24.2,
+    25
+  ],
+  "visual_review": "both grippers, connector and workspace visible; metrics and cards readable without overlap; motion difference alone is not claimed to be obvious",
+  "caption_chars": 946,
+  "caption_failures": 0,
+  "caption_soft_length_warning": true,
+  "public_zip": {
+    "bytes": 4063238,
+    "sha256": "c1c709992fc47857b7395c37e11730f952bc9e894bf533ab3c89c973b2a2c782",
+    "entries": 6,
+    "CRC": "pass",
+    "internal_path_leak": false
+  },
+  "code_sha256": {
+    "scripts/build_rj45_publication_media.py": "4abd67c983bd40df8457152e8fcb549b688d82c1640144b773064ec304f6b6cf",
+    "scripts/rj45_publication_alignment_overlay.py": "1cc695b376dea075eb868eafa75411219c566f8b95ca742611687a295aee782e",
+    "tests/test_rj45_publication_alignment_overlay.py": "591de481fcb44b6bd28ad68ec24c5a315446fb82bb3daad8bb3b69aa93775709"
+  },
+  "external_posting_performed": false
+}

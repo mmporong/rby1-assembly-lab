@@ -363,7 +363,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--comparison-data", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--crop", nargs=4, type=int, metavar=("X", "Y", "WIDTH", "HEIGHT"))
+    parser.add_argument("--explain-alignment", action="store_true", help="Keep the full camera view and display measured alignment telemetry")
     args = parser.parse_args(argv)
+    _require(not (args.explain_alignment and args.crop), "alignment explanation uses the full camera frame")
     crop_filter = ""
     if args.crop is not None:
         x, y, width, height = args.crop
@@ -429,23 +431,42 @@ def main(argv: list[str] | None = None) -> int:
         font = ImageFont.truetype(BOLD if bold else FONT, size)
         draw.text((x, y), value, font=font, fill=color)
 
-    text(32, 18, "양손으로 RJ45 플러그 끼우기", 46, bold=True)
-    text(32, 82, "하늘색 RJ45 플러그를 흰색 LAN 어댑터에 삽입합니다. (Isaac Sim)", 29, "#526073")
+    panel_y = 140 if args.explain_alignment else 176
+    if args.explain_alignment:
+        text(32, 8, "한 손으로 잡은 어댑터에 플러그 끼우기", 40, bold=True)
+        text(32, 66, "목표: 양팔 삽입 환경을 만들고, 위치 오차를 학습으로 보정할 수 있는지 검증", 25, "#526073")
+    else:
+        text(32, 18, "양손으로 RJ45 플러그 끼우기", 46, bold=True)
+        text(32, 82, "하늘색 RJ45 플러그를 흰색 LAN 어댑터에 삽입합니다. (Isaac Sim)", 29, "#526073")
     for mode, x, label in (
         ("multi64", 24, "PPO 미세 보정"),
         ("zero", 968, "학습 보정 없음"),
     ):
         result = records[mode]["outcome"]
         color = "#14755A" if result["success"] else "#9C4438"
-        text(x + 10, 124, label, 30, bold=True)
-        draw.rounded_rectangle((x, 176, x + 928, 872), radius=15, fill="#F1F4F7")
+        text(x + 10, 102 if args.explain_alignment else 124, label, 27 if args.explain_alignment else 30, bold=True)
+        draw.rounded_rectangle((x, panel_y, x + 928, panel_y + 696), radius=15, fill="#F1F4F7")
+        if args.explain_alignment:
+            text(x + 60, 300, "정렬 기준 충족" if result["success"] else "깊이는 도달, 정렬 기준 초과", 42, color, True)
+            comparison_sign = "≤" if result["success"] else ">"
+            text(x + 60, 400, f"{result['actual_lateral_error_m'] * 1e6:.1f} µm {comparison_sign} 50 µm", 46, color, True)
+            text(x + 60, 500, "안정 상태 0.4초 유지 후 성공 종료" if result["success"] else "24초 제한까지 안정 유지 미충족", 30)
+            text(x + 60, 600, "실행 종료 후 결과 카드", 24, "#687588")
+            draw.rounded_rectangle((x + 80, 903, x + 430, 929), radius=5, fill="#DBEEE5")
+            draw.rounded_rectangle((x + 430, 903, x + 780, 929), radius=5, fill="#F3E7E4")
+            draw.line((x + 430, 895, x + 430, 937), fill="#526073", width=3)
+            text(x + 66, 874, "0", 17, "#526073")
+            text(x + 365, 874, "50 · 실험 기준", 17, "#526073")
+            text(x + 760, 874, "100 µm", 17, "#526073")
+            continue
         text(x + 60, 350, failure_label(result), 60, color, True)
         criterion = "프로젝트 평가 기준 충족" if result["success"] else "프로젝트 평가 기준 미충족"
         text(x + 60, 450, criterion, 32)
         text(x + 60, 526, f"종료 시 횡오차 {result['actual_lateral_error_m'] * 1e6:.2f} µm", 30, "#526073")
         text(x + 60, 580, f"삽입 깊이 {result['actual_depth_m'] * 1e3:.2f} mm", 30, "#526073")
         text(x + 60, 686, "실행 종료 후 결과 카드", 25, "#687588")
-    text(
+    if not args.explain_alignment:
+        text(
         32,
         901,
         "새 오차 8조건 전체 성공: "
@@ -454,21 +475,34 @@ def main(argv: list[str] | None = None) -> int:
         f"단일 오차 PPO {successes['single64']}/8",
         30,
         bold=True,
-    )
-    text(32, 956, "학습은 각 1회, 부품을 잡는 자세는 1종으로 한정했습니다. 성능 우위는 입증하지 못했습니다.", 27, "#526073")
-    text(32, 1006, "연결부가 보이도록 카메라·조명·책상색을 바꿔 재생했습니다. 원평가 통계는 유지했습니다.", 25, "#526073")
+        )
+        text(32, 956, "학습은 각 1회, 부품을 잡는 자세는 1종으로 한정했습니다. 성능 우위는 입증하지 못했습니다.", 27, "#526073")
+        text(32, 1006, "연결부가 보이도록 카메라·조명·책상색을 바꿔 재생했습니다. 원평가 통계는 유지했습니다.", 25, "#526073")
+    else:
+        text(32, 996, "종료 결과: 둘 다 깊이 12 mm 도달. 판정을 가른 항목은 정렬 오차와 안정 유지입니다.", 26, bold=True)
+        text(32, 1041, "50 µm는 프로젝트 기준 · 전체 8조건 PPO 3/8, 기본 제어 2/8 · 학습 효과 미입증 · 원속도 1배", 23, "#526073")
     background = out / "background.png"
     image.save(background)
 
     expected_frames = max(record["frames"] for record in records.values()) + RESULT_CARD_FRAMES
     duration_s = expected_frames / FPS
     output = out / "rby1-rj45-visible-comparison.mp4"
+    alignment_overlay = None
+    if args.explain_alignment:
+        from rj45_publication_alignment_overlay import build_alignment_overlay
+
+        alignment_overlay = build_alignment_overlay(root, records, out / "alignment.ass")
     filters = (
         f"[1:v]{crop_filter}scale=928:696:flags=lanczos,setsar=1,setpts=PTS-STARTPTS[left];"
         f"[2:v]{crop_filter}scale=928:696:flags=lanczos,setsar=1,setpts=PTS-STARTPTS[right];"
-        f"[0:v][left]overlay=24:176:eof_action=pass:repeatlast=0:enable='lt(t,{records['multi64']['frames'] / FPS:.9f})'[a];"
-        f"[a][right]overlay=968:176:eof_action=pass:repeatlast=0:enable='lt(t,{records['zero']['frames'] / FPS:.9f})'[v]"
+        f"[0:v][left]overlay=24:{panel_y}:eof_action=pass:repeatlast=0:enable='lt(t,{records['multi64']['frames'] / FPS:.9f})'[a];"
+        f"[a][right]overlay=968:{panel_y}:eof_action=pass:repeatlast=0:enable='lt(t,{records['zero']['frames'] / FPS:.9f})'[stage]"
     )
+    if args.explain_alignment:
+        subtitle_path = str(out / "alignment.ass").replace("'", "\\'")
+        filters += f";[stage]subtitles='{subtitle_path}'[v]"
+    else:
+        filters += ";[stage]null[v]"
     subprocess.run(
         [
             "ffmpeg",
@@ -532,7 +566,7 @@ def main(argv: list[str] | None = None) -> int:
             check=True,
         )
     provenance = {
-        "schema": "rj45_publication_composite_v2",
+        "schema": "rj45_publication_composite_v3" if args.explain_alignment else "rj45_publication_composite_v2",
         "sources": records,
         "comparison_data": {
             "path": str(comparison_path),
@@ -553,6 +587,7 @@ def main(argv: list[str] | None = None) -> int:
         "robot_frame_repetition": False,
         "spatial_crop_xywh": args.crop,
         "spatial_resampling": "Lanczos; source frame cadence preserved",
+        "alignment_overlay": alignment_overlay,
         "ended_panel": "static outcome card",
         "final_result_card_seconds": RESULT_CARD_FRAMES / FPS,
         "original_benchmark_modified": False,
