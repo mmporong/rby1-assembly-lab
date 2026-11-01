@@ -1,0 +1,229 @@
+{
+  "app_close_exit_code": null,
+  "appearance": {
+    "edit_layer": "anon:0x555b049a5e30:World0-session.usda",
+    "light_exposure": -0.4,
+    "light_intensity": 700.0,
+    "light_path": "/World/Light",
+    "physics_or_action_contract_modified": false,
+    "table_display_color_rgb": [
+      0.1,
+      0.12,
+      0.14
+    ],
+    "table_paths": [
+      "/World/envs/env_0/Table/top"
+    ]
+  },
+  "camera_center": {
+    "mode": "explicit_world",
+    "source": {
+      "bytes": 15062,
+      "path": "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a/artifacts/rj45-4c-bank-generation-v2-20261028/bank-artifacts/rj45-train-02.json",
+      "sha256": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5"
+    },
+    "world_m": [
+      0.37,
+      0.0145,
+      0.9005
+    ]
+  },
+  "camera_center_world_m": [
+    0.37,
+    0.0145,
+    0.9005
+  ],
+  "claims": {
+    "benchmark_result_replaced": false,
+    "physics_or_action_contract_modified": false,
+    "training_evidence": false
+  },
+  "completion_witness": "outer_runner_native_exit",
+  "connection_positions_at_camera_initialization": {
+    "connection_center_world_m": [
+      0.8999994039757491,
+      0.7891850126523325,
+      2.500253766151154
+    ],
+    "plug_tip_world_m": [
+      0.9999992562985457,
+      0.8113700118964253,
+      2.4999999358083573
+    ],
+    "socket_entry_world_m": [
+      0.7999995516529524,
+      0.7670000134082399,
+      2.500507596493951
+    ]
+  },
+  "connection_positions_at_preview": {
+    "connection_center_world_m": [
+      0.36994540427735734,
+      0.014537467164445532,
+      0.9004958101624907
+    ],
+    "plug_tip_world_m": [
+      0.3698920637100112,
+      0.012067799982681563,
+      0.9004877942020934
+    ],
+    "socket_entry_world_m": [
+      0.3699987448447035,
+      0.0170071343462095,
+      0.900503826122888
+    ]
+  },
+  "native_exit_record": {
+    "bytes": 21,
+    "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64-exit.json",
+    "sha256": "81868a6e94ffc0178bf833deb1c9013d9fab4ee95ddb876a5e8ec4f1d26376d2"
+  },
+  "native_process_exit_code": 0,
+  "preview_images": [
+    {
+      "camera": {
+        "eye_world_m": [
+          0.79,
+          0.1145,
+          1.1804999999999999
+        ],
+        "lookat_world_m": [
+          0.37,
+          0.0145,
+          0.9005
+        ]
+      },
+      "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/previews/camera-1.png",
+      "sha256": "fe8312232dcc5d641525ba0c6da77e0faff83b700b92a60f0a72fe3b7705b3ce"
+    },
+    {
+      "camera": {
+        "eye_world_m": [
+          0.73,
+          0.21450000000000002,
+          1.1404999999999998
+        ],
+        "lookat_world_m": [
+          0.37,
+          0.0145,
+          0.9005
+        ]
+      },
+      "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/previews/camera-2.png",
+      "sha256": "e6a8bec03ab602700e7fc70ac5ec36231fa0f541131c6c4c8e52f82429a9238a"
+    },
+    {
+      "camera": {
+        "eye_world_m": [
+          0.75,
+          -0.0655,
+          1.1205
+        ],
+        "lookat_world_m": [
+          0.37,
+          0.0145,
+          0.9005
+        ]
+      },
+      "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/previews/camera-3.png",
+      "sha256": "d915e79c1274a7bbe5a8880e48353353abab14f14d70a65edac2132a068baa67"
+    }
+  ],
+  "preview_required": true,
+  "publication_deadline_utc": "2026-11-01T12:13:00Z",
+  "schema_name": "rj45_publication_render_v1",
+  "scope": "publication visualization replay only",
+  "sealed_replay_source": {
+    "path": "/home/ubuntu/workspace/rby1-multibias-media-20261031a/record_rj45_multibias_replay.py",
+    "sha256": "49bf950a0b466820d82b5dfec1aae6bee498c8ac0b0428f24908b387d04a4e2f"
+  },
+  "sealed_report": {
+    "bytes": 26042,
+    "comparison": {
+      "classification_matches": true,
+      "initial_base79_matches": true,
+      "performance_based_rerun_allowed": false,
+      "primary_classification": "valid_success",
+      "replay_classification": "valid_success"
+    },
+    "expected_sha256": "62d1d7e140605c6d8602195ed547adec20d6f34ec781e83b1487f784dc469dbf",
+    "lineage": {
+      "case": {
+        "base_seed": 20281240,
+        "calibration_case_seed": 66404260,
+        "case_id": "fresh-05",
+        "episode_index": 1,
+        "grasp_id": "rj45-train-02",
+        "source": "policy-unseen",
+        "split": "train"
+      },
+      "checkpoint_sha256": "82a1a01c8a0c7797bc6b02a95852a42f82efd02b7d373fae7774ecb4c92792b3",
+      "classification": "valid_success",
+      "contract_sha256": "5f91ce18fa0d1351250f34463b6f39f4b114597e8bb1b200ba9d77a2cd7c8e77",
+      "initial_base79_sha256": "606d70c5bc211a439c26fb528436035f2fcdf4a60700602c151590960948895b",
+      "method": "multi64",
+      "primary_report_sha256": "0decb95ec25d12419253369ef2f934f122f7f2e2a0fb346b3a03fb97d3d4da87",
+      "selection_note": "fresh-05 was selected after the sealed benchmark for visualization only",
+      "train_report_sha256": "391896cdc55c3b4a05e12b7b7adededb6a57eaede25dab770a15df3f25f2c7ef"
+    },
+    "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/replay-report.json",
+    "sha256": "62d1d7e140605c6d8602195ed547adec20d6f34ec781e83b1487f784dc469dbf",
+    "status": "completed"
+  },
+  "sealed_run_arguments": [
+    "--mode",
+    "multi64",
+    "--runtime-root",
+    "/home/ubuntu/workspace/rby1-g2-20261031/runtime-104721a",
+    "--current-root",
+    "/home/ubuntu/workspace/rby1-multibias-media-20261031a/current",
+    "--origin-protocol",
+    "/home/ubuntu/workspace/rby1-multibias-20261031b/origin-protocol.json",
+    "--origin-protocol-sha256",
+    "a1a00452c8c7a6151844e2b3bd56d9322a2baaa6f1c4b7e9c2bb925be07959ef",
+    "--contract",
+    "/home/ubuntu/workspace/rby1-multibias-20261031b/contract.json",
+    "--contract-sha256",
+    "5f91ce18fa0d1351250f34463b6f39f4b114597e8bb1b200ba9d77a2cd7c8e77",
+    "--primary-report",
+    "/home/ubuntu/workspace/rby1-multibias-20261031b/evaluate-report.json",
+    "--primary-report-sha256",
+    "0decb95ec25d12419253369ef2f934f122f7f2e2a0fb346b3a03fb97d3d4da87",
+    "--train-report",
+    "/home/ubuntu/workspace/rby1-multibias-20261031b/train-multi-report.json",
+    "--train-report-sha256",
+    "391896cdc55c3b4a05e12b7b7adededb6a57eaede25dab770a15df3f25f2c7ef",
+    "--video",
+    "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/replay.mp4",
+    "--report",
+    "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/replay-report.json",
+    "--device",
+    "cuda:0",
+    "--acknowledge-replay-only",
+    "--checkpoint",
+    "/home/ubuntu/workspace/rby1-multibias-20261031b/train-multi/final_checkpoint.pt"
+  ],
+  "sealed_video": {
+    "bytes": 9446510,
+    "exists": true,
+    "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/multi64/replay.mp4",
+    "sha256": "21413b9a123dc737d1b7815578ed084f6ec569063522691394b84882ff69240b"
+  },
+  "selected_camera": {
+    "eye_world_m": [
+      0.75,
+      -0.0655,
+      1.1205
+    ],
+    "lookat_world_m": [
+      0.37,
+      0.0145,
+      0.9005
+    ]
+  },
+  "status": "completed",
+  "wrapper": {
+    "path": "/home/ubuntu/workspace/rby1-publication-visibility-20261101e/render_rj45_publication.py",
+    "sha256": "dbc1aeb57fb3e9e04eb5c5001d541a008fdfce9f02fc4b07413da92e26b5211a"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "bytes": 31745103,
+  "sha256": "9fa20d80b400780efa2ed24cbb8676118ed5d26e872dfbefeac128e8e90f0191",
+  "files": 31,
+  "gpu_processes": "",
+  "local_path": "/opt/homedata/rby1-storage/recovered/rj45-publication-visibility-20261101e/job",
+  "verified_files": 31,
+  "status": "pass",
+  "prior_retakes_archive": {
+    "archive_sha256": "6d637d861c371ec45f8741d4c2ce863a0471206161e82b539ca04320cffd7ac3",
+    "files_verified": 74,
+    "path": "/opt/homedata/rby1-storage/recovered/rj45-publication-visibility-20261101-abcd",
+    "pass": true
+  }
+}

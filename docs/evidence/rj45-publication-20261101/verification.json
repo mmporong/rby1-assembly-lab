@@ -1,0 +1,78 @@
+{
+  "verdict": "PASS",
+  "reviewer": "publication_verify",
+  "reviewed_at_utc": "2026-11-01T11:21:52.865719+00:00",
+  "scope": "publication material v2; no external posting",
+  "source_payload_files_verified": 31,
+  "prior_retakes_payload_files_verified": 74,
+  "original_dataset_files_unchanged": 177,
+  "composite_sha256": "665b73e95769424d261066add1a12b7e9f2aabddbc2ee478f52daa6e8c4072dd",
+  "composite_contract": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 60,
+    "frames": 1574,
+    "duration_s": 26.233333333333334
+  },
+  "initial79_and_classifications_match": true,
+  "fresh8_successes": {
+    "single64": 2,
+    "multi64": 3,
+    "zero": 2
+  },
+  "effect_proven": false,
+  "visual_validation": {
+    "multi64_timestamps_s": [
+      0.3,
+      3,
+      8,
+      12.5
+    ],
+    "zero_timestamps_s": [
+      0.3,
+      8,
+      16,
+      23.9
+    ],
+    "plug_socket_entry_contact_boundary_visible": true,
+    "right_arm_does_not_occlude_connection": true,
+    "fixture_outside_crop": true,
+    "text_clipping": false
+  },
+  "code_sha256": {
+    "scripts/render_rj45_publication.py": "dbc1aeb57fb3e9e04eb5c5001d541a008fdfce9f02fc4b07413da92e26b5211a",
+    "scripts/build_rj45_publication_media.py": "cb9d02a62e0cbb69e15ce4700b270e76847dcb26ba27f4e6f8371008e2915e6d",
+    "tests/test_render_rj45_publication.py": "f9848497a9314413bdcda4abba56669fda3cde4208b671da97fb86646d8c5501",
+    "tests/test_build_rj45_publication_media.py": "0c440e9620377298d39859168c0342b75b1f31977987d2a8cf0f1d101f97e3d5"
+  },
+  "checks": {
+    "root_targeted_tests": 48,
+    "root_test_command": ".venv/bin/python -m pytest tests/test_render_rj45_publication.py tests/test_build_rj45_publication_media.py tests/test_record_rj45_multibias_replay.py -q",
+    "root_result": "48 passed in 0.95s, including pxr session-layer test",
+    "independent_reviewer_pxrs": "reviewer Python lacked pxr; other 32 tests passed and scene contract compared with report; root venv test included it",
+    "compileall": "pass",
+    "diff_check": "pass",
+    "public_zip_exact_entries": 6,
+    "zip_test": "pass",
+    "internal_paths_in_public_zip": false,
+    "caption_chars": 988,
+    "caption_failures": 0,
+    "caption_warning": "below soft recommended length; user requested clearer explanation"
+  },
+  "operational_closure": {
+    "closed_at_utc": "2026-11-01T11:20:17.911090+00:00",
+    "instance_id": "pyf1b9s0a",
+    "instance_name": "rby1-oracle-crusoe-20261031a",
+    "observed_cloud_status": "STOPPED",
+    "guard_states": {
+      "timer": "inactive",
+      "service": "inactive"
+    },
+    "new_training": false,
+    "original_research_still_paused": true,
+    "balance_queries": 0,
+    "recovered_e_files": 31,
+    "recovered_prior_retake_files": 74,
+    "prior_stop_helper_result": "stop_not_confirmed within first 8 polls; later exact inventory observed STOPPED"
+  }
+}

@@ -1,0 +1,158 @@
+{
+  "schema": "rj45_publication_composite_v2",
+  "sources": {
+    "multi64": {
+      "video": "/opt/homedata/rby1-storage/recovered/rj45-publication-visibility-20261101e/job/multi64/replay.mp4",
+      "video_sha256": "21413b9a123dc737d1b7815578ed084f6ec569063522691394b84882ff69240b",
+      "report_sha256": "62d1d7e140605c6d8602195ed547adec20d6f34ec781e83b1487f784dc469dbf",
+      "publication_report_sha256": "316a9cbc374e9849b2fccc901e3fbe330d03559e536873d75a3dc3ef0ca38dde",
+      "frames": 760,
+      "duration_s": 12.666667,
+      "outcome": {
+        "actual_depth_m": 0.01226498931646347,
+        "actual_lateral_error_m": 3.350917904754169e-05,
+        "actual_orientation_error_rad": 0.0030886740423738956,
+        "classification": "valid_success",
+        "success": true,
+        "termination_reason": "independent_success",
+        "valid": true
+      }
+    },
+    "zero": {
+      "video": "/opt/homedata/rby1-storage/recovered/rj45-publication-visibility-20261101e/job/zero/replay.mp4",
+      "video_sha256": "9edc62593d9a4be113ab760487c8aac88c2c2bbac9a88956d1ae03f9ec7bf6d8",
+      "report_sha256": "09301cda36a7e8b700a6a39d3124ac6206c72fbcece5aaba3575bf475c664076",
+      "publication_report_sha256": "68980d55ee40cc460dd6286dea83bd55daa6224279f6e4f1e6887e7654a5f543",
+      "frames": 1454,
+      "duration_s": 24.233333,
+      "outcome": {
+        "actual_depth_m": 0.012221241369843483,
+        "actual_lateral_error_m": 6.471163942478597e-05,
+        "actual_orientation_error_rad": 0.003042487660422921,
+        "classification": "valid_failure",
+        "success": false,
+        "termination_reason": "episode_timeout",
+        "valid": true
+      }
+    }
+  },
+  "comparison_data": {
+    "path": "/home/lim/rby1-assembly-lab/docs/evidence/rj45-multibias-20261031/comparison-data.json",
+    "sha256": "5409a808c144611c7c097329ef71fdef55995b8b31430f9394ba02eb74a9cced",
+    "fresh8_successes": {
+      "multi64": 3,
+      "single64": 2,
+      "zero": 2
+    },
+    "effect_proven": false
+  },
+  "builder_sha256": "cb9d02a62e0cbb69e15ce4700b270e76847dcb26ba27f4e6f8371008e2915e6d",
+  "publication_wrapper_sha256": "dbc1aeb57fb3e9e04eb5c5001d541a008fdfce9f02fc4b07413da92e26b5211a",
+  "output": {
+    "file": "rby1-rj45-visible-comparison.mp4",
+    "sha256": "665b73e95769424d261066add1a12b7e9f2aabddbc2ee478f52daa6e8c4072dd",
+    "bytes": 4193224,
+    "contract": {
+      "width": 1920,
+      "height": 1080,
+      "fps": 60,
+      "frames": 1574,
+      "duration_s": 26.233333
+    },
+    "metadata": {
+      "streams": [
+        {
+          "index": 0,
+          "codec_name": "h264",
+          "codec_long_name": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+          "profile": "High",
+          "codec_type": "video",
+          "codec_tag_string": "avc1",
+          "codec_tag": "0x31637661",
+          "width": 1920,
+          "height": 1080,
+          "coded_width": 1920,
+          "coded_height": 1080,
+          "closed_captions": 0,
+          "film_grain": 0,
+          "has_b_frames": 2,
+          "pix_fmt": "yuv420p",
+          "level": 42,
+          "chroma_location": "left",
+          "field_order": "progressive",
+          "refs": 1,
+          "is_avc": "true",
+          "nal_length_size": "4",
+          "id": "0x1",
+          "r_frame_rate": "60/1",
+          "avg_frame_rate": "60/1",
+          "time_base": "1/15360",
+          "start_pts": 0,
+          "start_time": "0.000000",
+          "duration_ts": 402944,
+          "duration": "26.233333",
+          "bit_rate": "1272717",
+          "bits_per_raw_sample": "8",
+          "nb_frames": "1574",
+          "extradata_size": 47,
+          "disposition": {
+            "default": 1,
+            "dub": 0,
+            "original": 0,
+            "comment": 0,
+            "lyrics": 0,
+            "karaoke": 0,
+            "forced": 0,
+            "hearing_impaired": 0,
+            "visual_impaired": 0,
+            "clean_effects": 0,
+            "attached_pic": 0,
+            "timed_thumbnails": 0,
+            "non_diegetic": 0,
+            "captions": 0,
+            "descriptions": 0,
+            "metadata": 0,
+            "dependent": 0,
+            "still_image": 0
+          },
+          "tags": {
+            "language": "und",
+            "handler_name": "VideoHandler",
+            "vendor_id": "[0][0][0][0]",
+            "encoder": "Lavc60.31.102 libx264"
+          }
+        }
+      ],
+      "format": {
+        "filename": "/opt/homedata/rby1-storage/assembly-artifacts/rj45-publication-20261101/rby1-rj45-visible-comparison.mp4",
+        "nb_streams": 1,
+        "nb_programs": 0,
+        "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+        "format_long_name": "QuickTime / MOV",
+        "start_time": "0.000000",
+        "duration": "26.233333",
+        "size": "4193224",
+        "bit_rate": "1278746",
+        "probe_score": 100,
+        "tags": {
+          "major_brand": "isom",
+          "minor_version": "512",
+          "compatible_brands": "isomiso2avc1mp41",
+          "encoder": "Lavf60.16.100"
+        }
+      }
+    }
+  },
+  "robot_frame_interpolation": false,
+  "robot_frame_repetition": false,
+  "spatial_crop_xywh": [
+    384,
+    288,
+    512,
+    384
+  ],
+  "spatial_resampling": "Lanczos; source frame cadence preserved",
+  "ended_panel": "static outcome card",
+  "final_result_card_seconds": 2.0,
+  "original_benchmark_modified": false
+}

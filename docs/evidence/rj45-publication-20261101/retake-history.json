@@ -1,0 +1,28 @@
+{
+  "purpose": "user requested darker desk, lower illumination, unobscured connector view",
+  "new_training": false,
+  "benchmark_replaced": false,
+  "outcome_based_selection": false,
+  "attempts": {
+    "a": "bootstrap failed before physics; restored existing noninteractive launch environment",
+    "b": "nominal evidence verification failed before physics; restored full original numerical CPU environment without changing validator or source",
+    "c": "multi64 same initial79 and same success; camera targeted temporary reset staging position; publication post-close code did not run after native app exit",
+    "d": "both replays completed and initial79/classifications matched; visual review found camera1 still occluded adapter body; camera3 selected from previews",
+    "e": "camera3 setting frozen before final replay; both replays completed, identical initial79 and classifications; final delivery source"
+  },
+  "crop_xywh": [
+    384,
+    288,
+    512,
+    384
+  ],
+  "source_physics_hz": 240,
+  "source_control_hz": 30,
+  "source_video_fps": 60,
+  "source_video_frames": {
+    "multi64": 760,
+    "zero": 1454
+  },
+  "composite_frames": 1574,
+  "final_static_card_seconds": 2
+}
