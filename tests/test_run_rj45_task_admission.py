@@ -26,14 +26,20 @@ CONFIG = json.loads(
 )
 
 
-@pytest.mark.parametrize("active_probe,probe_phase,controlled", [(False, "done", False), (True, "done", False), (True, "probing", False), (True, "contact_window", False), (True, "returning", False), (True, "invalid_latched", False), (True, "safety_latched", False), (True, "done", True)])
-def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase, controlled) -> None:
+@pytest.mark.parametrize("active_probe,probe_phase,controlled,comparison", [
+    (False, "done", False, False), (True, "done", False, False),
+    (True, "probing", False, False), (True, "contact_window", False, False),
+    (True, "returning", False, False), (True, "invalid_latched", False, False),
+    (True, "safety_latched", False, False), (True, "done", True, False),
+    (True, "done", False, True),
+])
+def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase, controlled, comparison) -> None:
     torch = pytest.importorskip("torch")
     step_extras = {"terminal_snapshot": {"source": "pre-reset"}}
 
     class Env:
         device = "cpu"
-        cfg = SimpleNamespace(seed=494541735)
+        cfg = SimpleNamespace(seed=494541735 if controlled else RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED)
         extras = {
             "terminal_snapshot": object(),
             "policy_observation_valid": torch.tensor([True]),
@@ -112,6 +118,11 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         "diagnostic_provider_factory": Provider,
         "diagnostic_provider_attestor": lambda provider: {"diagnostic_only": True},
     } if active_probe else {})
+    if comparison:
+        options = {
+            "comparison_provider_factory": Provider,
+            "comparison_provider_attestor": lambda provider: {"comparison_only": True},
+        }
     if controlled:
         options["diagnostic_environment_seed"] = 494541735
     expected_failure = active_probe and probe_phase != "done"
@@ -119,7 +130,7 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         result = RUNNER._episode(
             prepared,
             runtime,
-            ("controlled_observability" if controlled else "diagnostic", "rj45-train-02", "tx-positive", "active_axis_probe" if controlled else "active_z_probe" if active_probe else "zero", 1, None),
+            ("classical_v2_tuning" if comparison else "controlled_observability" if controlled else "diagnostic", "rj45-train-02", "tx-positive", "classical_force_search_v2" if comparison else "active_axis_probe" if controlled else "active_z_probe" if active_probe else "zero", 1, None),
             None,
             step_observer=Observer(),
             **options,
@@ -133,8 +144,11 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
     assert seed_options == ([{"diagnostic_environment_seed": 494541735}] if controlled else [{}])
     if controlled:
         assert result["environment_seed"] == 494541735
+    if comparison:
+        assert result["validated_terminal_snapshot"] == terminal
+        assert result["environment_seed"] == RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED
     if active_probe:
-        assert result["diagnostic_provider_steps"] == [{
+        assert result["comparison_provider_steps" if comparison else "diagnostic_provider_steps"] == [{
             "step_index": 0,
             "state_before": {"phase": "waiting"},
             "state": {"phase": "done"},
@@ -173,6 +187,35 @@ def test_seed_override_cannot_mutate_formal_or_invalid_scope(stage, method, seed
 def test_controlled_episode_requires_explicit_seed_before_constructing_environment():
     with pytest.raises(RUNNER.AdmissionRunBlocked, match="explicit environment seed"):
         RUNNER._episode({}, {}, ("controlled_observability", "rj45-train-02", "tx-positive", "active_axis_probe", 1, None), None)
+
+
+@pytest.mark.parametrize("stage,method,factory,attestor", [
+    ("admission", "classical_force_search_v2", lambda: None, lambda _: {}),
+    ("classical_v2_tuning", "zero", lambda: None, lambda _: {}),
+    ("classical_v2_tuning", "classical_force_search_v2", None, lambda _: {}),
+    ("classical_v2_tuning", "classical_force_search_v2", lambda: None, None),
+    ("classical_v2_tuning", "classical_force_search_v2", None, None),
+])
+def test_classical_v2_override_cannot_enter_formal_or_implicit_path(stage, method, factory, attestor):
+    with pytest.raises(RUNNER.AdmissionRunBlocked):
+        RUNNER._episode({}, {"modules": {}}, (stage, "rj45-train-03", "tx-positive", method, 1, None), None,
+                        comparison_provider_factory=factory, comparison_provider_attestor=attestor)
+
+
+def test_comparison_and_probe_overrides_cannot_be_combined():
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="cannot be combined"):
+        RUNNER._episode({}, {"modules": {}}, ("classical_v2_tuning", "rj45-train-03", "tx-positive", "classical_force_search_v2", 1, None), None,
+                        diagnostic_provider_factory=lambda: None,
+                        comparison_provider_factory=lambda: None)
+
+
+@pytest.mark.parametrize("attestation", [{}, {"comparison_only": False}, {"comparison_only": 1}])
+def test_comparison_attestation_requires_exact_true(attestation):
+    provider = SimpleNamespace(reset=lambda: {})
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="attestation"):
+        RUNNER._episode({}, {"modules": {}}, ("classical_v2_tuning", "rj45-train-03", "tx-positive", "classical_force_search_v2", 1, None), None,
+                        comparison_provider_factory=lambda: provider,
+                        comparison_provider_attestor=lambda _: attestation)
 
 
 def _file_sha(path: Path) -> str:

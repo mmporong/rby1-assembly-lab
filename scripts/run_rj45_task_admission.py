@@ -1092,6 +1092,8 @@ def _episode(
     diagnostic_provider_factory=None,
     diagnostic_provider_attestor=None,
     diagnostic_environment_seed=None,
+    comparison_provider_factory=None,
+    comparison_provider_attestor=None,
 ):
     stage, grasp_id, case_id, method_id, slot, _ = row
     if (stage, method_id) == ("controlled_observability", "active_axis_probe") and diagnostic_environment_seed is None:
@@ -1103,7 +1105,26 @@ def _episode(
         diagnostic_provider_factory is not None
         or diagnostic_provider_attestor is not None
     )
-    if diagnostic_override:
+    comparison_override = comparison_provider_factory is not None or comparison_provider_attestor is not None
+    if diagnostic_override and comparison_override:
+        raise AdmissionRunBlocked("diagnostic and comparison provider scopes cannot be combined")
+    if comparison_override:
+        if (
+            stage not in {"classical_v2_tuning", "classical_v2_new_admission_baseline"}
+            or method_id != "classical_force_search_v2"
+            or not callable(comparison_provider_factory)
+            or not callable(comparison_provider_attestor)
+            or diagnostic_environment_seed is not None
+        ):
+            raise AdmissionRunBlocked("comparison override requires explicit classical-v2 scope")
+        provider = comparison_provider_factory()
+        state = provider.reset()
+        provider_attestation = comparison_provider_attestor(provider)
+        if not isinstance(provider_attestation, dict) or provider_attestation.get("comparison_only") is not True:
+            raise AdmissionRunBlocked("classical-v2 comparison attestation is missing")
+    elif method_id == "classical_force_search_v2":
+        raise AdmissionRunBlocked("classical-v2 requires an explicit provider and attestation")
+    elif diagnostic_override:
         permitted_scope = (stage, method_id) in {
             ("diagnostic", "active_z_probe"),
             ("controlled_observability", "active_axis_probe"),
@@ -1176,6 +1197,8 @@ def _episode(
     try:
         if diagnostic_environment_seed is not None and env.cfg.seed != diagnostic_environment_seed:
             raise AdmissionRunBlocked("constructed environment seed differs from requested diagnostic seed")
+        if comparison_override and env.cfg.seed != TASK_ADMISSION_ENVIRONMENT_SEED:
+            raise AdmissionRunBlocked("classical-v2 environment seed differs from the fixed comparison seed")
         reset = env.reset()
         observation = reset[0] if isinstance(reset, tuple) else reset
         for step_index in range(1200):
@@ -1189,11 +1212,11 @@ def _episode(
                     raise AdmissionRunBlocked("policy observation disappeared during active-z probe")
             if method_id != "oracle_gt_reference" and valid is not None and bool(valid[0]):
                 sample = policy[0].detach().cpu().numpy()
-                if diagnostic_override:
+                if diagnostic_override or comparison_override:
                     prior_provider_state = provider.state_telemetry(state)
                 produced, state = provider.act(sample, state)
                 action[0] = torch.as_tensor(produced, device=env.device, dtype=action.dtype)
-                if diagnostic_override:
+                if diagnostic_override or comparison_override:
                     diagnostic_provider_steps.append({
                         "step_index": step_index,
                         "state_before": prior_provider_state,
@@ -1256,6 +1279,9 @@ def _episode(
             "terminal_complete": True,
             "execution_error": None,
             **({"diagnostic_provider_steps": diagnostic_provider_steps} if diagnostic_override else {}),
+            **({"comparison_provider_steps": diagnostic_provider_steps,
+                "environment_seed": env.cfg.seed,
+                "validated_terminal_snapshot": terminal} if comparison_override else {}),
             **({"environment_seed": env.cfg.seed} if diagnostic_environment_seed is not None else {}),
         }
     finally:
