@@ -1033,7 +1033,13 @@ def _bias(config: Mapping[str, Any], case_id: str) -> Mapping[str, Any]:
     return next(row for row in config["bias_cases"] if row["case_id"] == case_id)
 
 
-def _make_env(prepared, runtime, row):
+def _make_env(prepared, runtime, row, *, diagnostic_environment_seed=None):
+    if diagnostic_environment_seed is not None and (
+        (row[0], row[3]) != ("controlled_observability", "active_axis_probe")
+        or type(diagnostic_environment_seed) is not int
+        or not 0 < diagnostic_environment_seed < 2**31
+    ):
+        raise AdmissionRunBlocked("environment seed override is outside controlled diagnostic scope")
     import torch
     task, bank, proof, indices, modules = (runtime[key] for key in ("task", "bank", "proof", "indices", "modules"))
     runtime_root = prepared["runtime_root"]
@@ -1051,7 +1057,7 @@ def _make_env(prepared, runtime, row):
     apply_runtime_timing(cfg, _json(runtime_root / "configs/runtime.json"))
     cfg.scene.num_envs = 1
     cfg.sim.device = "cuda:0"
-    cfg.seed = TASK_ADMISSION_ENVIRONMENT_SEED
+    cfg.seed = TASK_ADMISSION_ENVIRONMENT_SEED if diagnostic_environment_seed is None else diagnostic_environment_seed
     env_type = configure_rj45_task(cfg, task, runtime_root)
     training = load_training_config(runtime_root / "configs/rj45-training-target-offset-v1.json")
     env_type = make_rj45_training_env_type(
@@ -1085,8 +1091,11 @@ def _episode(
     step_observer=None,
     diagnostic_provider_factory=None,
     diagnostic_provider_attestor=None,
+    diagnostic_environment_seed=None,
 ):
     stage, grasp_id, case_id, method_id, slot, _ = row
+    if (stage, method_id) == ("controlled_observability", "active_axis_probe") and diagnostic_environment_seed is None:
+        raise AdmissionRunBlocked("controlled-observability requires an explicit environment seed")
     modules = runtime["modules"]
     provider = None
     state = None
@@ -1095,19 +1104,22 @@ def _episode(
         or diagnostic_provider_attestor is not None
     )
     if diagnostic_override:
+        permitted_scope = (stage, method_id) in {
+            ("diagnostic", "active_z_probe"),
+            ("controlled_observability", "active_axis_probe"),
+        }
         if (
-            stage != "diagnostic"
-            or method_id != "active_z_probe"
+            not permitted_scope
             or not callable(diagnostic_provider_factory)
             or not callable(diagnostic_provider_attestor)
         ):
-            raise AdmissionRunBlocked("provider override requires explicit active-z diagnostic scope")
+            raise AdmissionRunBlocked("provider override requires explicit diagnostic scope")
         provider = diagnostic_provider_factory()
         state = provider.reset()
         provider_attestation = diagnostic_provider_attestor(provider)
         if not isinstance(provider_attestation, dict) or not provider_attestation.get("diagnostic_only"):
             raise AdmissionRunBlocked("diagnostic provider attestation is missing")
-    elif method_id == "active_z_probe":
+    elif method_id in {"active_z_probe", "active_axis_probe"}:
         raise AdmissionRunBlocked("active-z diagnostic requires an explicit provider and attestation")
     elif method_id != "oracle_gt_reference":
         kwargs = {}
@@ -1145,11 +1157,25 @@ def _episode(
             "applied_controller_sha256": None,
             "applied_artifact_sha256": None,
         }
-    env, torch = _make_env(prepared, runtime, row)
+    if diagnostic_environment_seed is not None:
+        if (
+            not diagnostic_override
+            or (stage, method_id) != ("controlled_observability", "active_axis_probe")
+            or type(diagnostic_environment_seed) is not int
+            or not 0 < diagnostic_environment_seed < 2**31
+        ):
+            raise AdmissionRunBlocked("seed override requires controlled-observability scope and valid seed")
+        env, torch = _make_env(
+            prepared, runtime, row, diagnostic_environment_seed=diagnostic_environment_seed
+        )
+    else:
+        env, torch = _make_env(prepared, runtime, row)
     observations = []
     evaluator_force_samples_n = []
     diagnostic_provider_steps = []
     try:
+        if diagnostic_environment_seed is not None and env.cfg.seed != diagnostic_environment_seed:
+            raise AdmissionRunBlocked("constructed environment seed differs from requested diagnostic seed")
         reset = env.reset()
         observation = reset[0] if isinstance(reset, tuple) else reset
         for step_index in range(1200):
@@ -1230,6 +1256,7 @@ def _episode(
             "terminal_complete": True,
             "execution_error": None,
             **({"diagnostic_provider_steps": diagnostic_provider_steps} if diagnostic_override else {}),
+            **({"environment_seed": env.cfg.seed} if diagnostic_environment_seed is not None else {}),
         }
     finally:
         env.close()

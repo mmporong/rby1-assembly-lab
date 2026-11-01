@@ -26,13 +26,14 @@ CONFIG = json.loads(
 )
 
 
-@pytest.mark.parametrize("active_probe,probe_phase", [(False, "done"), (True, "done"), (True, "probing"), (True, "contact_window"), (True, "returning"), (True, "invalid_latched"), (True, "safety_latched")])
-def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase) -> None:
+@pytest.mark.parametrize("active_probe,probe_phase,controlled", [(False, "done", False), (True, "done", False), (True, "probing", False), (True, "contact_window", False), (True, "returning", False), (True, "invalid_latched", False), (True, "safety_latched", False), (True, "done", True)])
+def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase, controlled) -> None:
     torch = pytest.importorskip("torch")
     step_extras = {"terminal_snapshot": {"source": "pre-reset"}}
 
     class Env:
         device = "cpu"
+        cfg = SimpleNamespace(seed=494541735)
         extras = {
             "terminal_snapshot": object(),
             "policy_observation_valid": torch.tensor([True]),
@@ -92,7 +93,11 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         "timestamp_s": [0.1],
         "task_admission": {},
     }
-    monkeypatch.setattr(RUNNER, "_make_env", lambda *_args: (Env(), torch))
+    seed_options = []
+    def make_env(*_args, **kwargs):
+        seed_options.append(kwargs)
+        return Env(), torch
+    monkeypatch.setattr(RUNNER, "_make_env", make_env)
     monkeypatch.setattr(RUNNER, "_validate_terminal_snapshot", lambda _value: terminal)
     monkeypatch.setattr(RUNNER, "_reset_isaac_episode_lifecycle", lambda: None)
     runtime = {
@@ -107,12 +112,14 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         "diagnostic_provider_factory": Provider,
         "diagnostic_provider_attestor": lambda provider: {"diagnostic_only": True},
     } if active_probe else {})
+    if controlled:
+        options["diagnostic_environment_seed"] = 494541735
     expected_failure = active_probe and probe_phase != "done"
     with pytest.raises(RUNNER.AdmissionRunBlocked) if expected_failure else nullcontext():
         result = RUNNER._episode(
             prepared,
             runtime,
-            ("diagnostic", "rj45-train-02", "tx-positive", "active_z_probe" if active_probe else "zero", 1, None),
+            ("controlled_observability" if controlled else "diagnostic", "rj45-train-02", "tx-positive", "active_axis_probe" if controlled else "active_z_probe" if active_probe else "zero", 1, None),
             None,
             step_observer=Observer(),
             **options,
@@ -123,6 +130,9 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
     assert calls[1][2] is step_extras
     assert calls[1][3] is True
     assert len(result["observation_samples"]) == 1
+    assert seed_options == ([{"diagnostic_environment_seed": 494541735}] if controlled else [{}])
+    if controlled:
+        assert result["environment_seed"] == 494541735
     if active_probe:
         assert result["diagnostic_provider_steps"] == [{
             "step_index": 0,
@@ -145,6 +155,24 @@ def test_diagnostic_override_cannot_enter_formal_or_implicit_provider_path(stage
     with pytest.raises(RUNNER.AdmissionRunBlocked):
         RUNNER._episode({}, {"modules": {}}, (stage, "rj45-train-02", "tz-positive", method, 1, None), None,
                         diagnostic_provider_factory=factory, diagnostic_provider_attestor=attestor)
+
+
+@pytest.mark.parametrize("stage,method,seed", [
+    ("admission", "zero", 494541735),
+    ("diagnostic", "active_z_probe", 494541735),
+    ("controlled_observability", "active_axis_probe", 494541735.0),
+    ("controlled_observability", "active_axis_probe", True),
+    ("controlled_observability", "active_axis_probe", -1),
+])
+def test_seed_override_cannot_mutate_formal_or_invalid_scope(stage, method, seed):
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="seed override"):
+        RUNNER._make_env({}, {}, (stage, "rj45-train-02", "tx-positive", method, 1, None),
+                         diagnostic_environment_seed=seed)
+
+
+def test_controlled_episode_requires_explicit_seed_before_constructing_environment():
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="explicit environment seed"):
+        RUNNER._episode({}, {}, ("controlled_observability", "rj45-train-02", "tx-positive", "active_axis_probe", 1, None), None)
 
 
 def _file_sha(path: Path) -> str:
@@ -254,8 +282,9 @@ def test_smoke_plan_is_fixed_and_cannot_claim_full_admission() -> None:
     }
 
 
+@pytest.mark.parametrize("controlled_seed", [None, 494541735])
 def test_make_env_forwards_fixed_nonnegative_seed_before_construction(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, controlled_seed
 ) -> None:
     observed: dict[str, object] = {}
 
@@ -336,15 +365,16 @@ def test_make_env_forwards_fixed_nonnegative_seed_before_construction(
     env, _torch = RUNNER._make_env(
         prepared,
         runtime,
-        ("admission", "rj45-train-02", "tx-positive", "zero", 1, None),
+        ("controlled_observability" if controlled_seed else "admission", "rj45-train-02", "tx-positive", "active_axis_probe" if controlled_seed else "zero", 1, None),
+        **({"diagnostic_environment_seed": controlled_seed} if controlled_seed else {}),
     )
 
     assert isinstance(env, Environment)
     assert type(RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED) is int
     assert RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED >= 0
     assert observed == {
-        "seed_at_task_configuration": RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
-        "seed_at_construction": RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
+        "seed_at_task_configuration": controlled_seed or RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
+        "seed_at_construction": controlled_seed or RUNNER.TASK_ADMISSION_ENVIRONMENT_SEED,
     }
 
 
