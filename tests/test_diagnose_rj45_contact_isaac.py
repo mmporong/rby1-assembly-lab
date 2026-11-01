@@ -90,14 +90,20 @@ class FakeRecording:
         return SimpleNamespace(
             actual_depth_m=float(evaluation["actual_depth_m"][env_index]),
             lateral_error_m=float(evaluation["lateral_error_m"][env_index]),
-            orientation_error_rad=float(evaluation["orientation_error_rad"][env_index]),
+            orientation_error_rad=float(
+                evaluation["orientation_error_rad"][env_index]
+            ),
         ), True
 
 
 def _combined_contact_fields() -> dict:
     return {
-        "forbidden_contact_load_source": DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE,
-        "forbidden_contact_load_definition": DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION,
+        "forbidden_contact_load_source": (
+            DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE
+        ),
+        "forbidden_contact_load_definition": (
+            DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION
+        ),
         "forbidden_contact_load_n": np.asarray([3.0]),
         "external_forbidden_contact_load_n": np.asarray([2.0]),
         "external_forbidden_contact_load_peak_n": np.asarray([2.5]),
@@ -111,8 +117,12 @@ def _live_env() -> SimpleNamespace:
     pose = np.asarray([[0.0, 0.0, 0.0]])
     quaternion = np.asarray([[1.0, 0.0, 0.0, 0.0]])
     return SimpleNamespace(
-        socket=SimpleNamespace(data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)),
-        plug=SimpleNamespace(data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)),
+        socket=SimpleNamespace(
+            data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)
+        ),
+        plug=SimpleNamespace(
+            data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)
+        ),
         _last_insertion_contact_force_w=np.asarray([[1.0, 2.0, 2.0]]),
         _last_insertion_contact_force_n=np.asarray([3.0]),
         _last_insertion_contact_load_n=np.asarray([4.0]),
@@ -121,7 +131,7 @@ def _live_env() -> SimpleNamespace:
     )
 
 
-def test_diagnostic_snapshot_accepts_measured_combined_forbidden_source_without_relabel() -> None:
+def test_diagnostic_snapshot_accepts_combined_source_without_relabel() -> None:
     extras = {
         **_combined_contact_fields(),
         "insertion_contact_force_source": FakeRecording.INSERTION_FORCE_SOURCE,
@@ -138,7 +148,10 @@ def test_diagnostic_snapshot_accepts_measured_combined_forbidden_source_without_
     assert snapshot.insertion_contact_force_w.tolist() == [1.0, 2.0, 2.0]
     assert snapshot.insertion_contact_load_n == 4.0
     assert snapshot.contact_force_proxy_n.tolist() == [5.0, 6.0]
-    assert extras["forbidden_contact_load_source"] == DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE
+    assert (
+        extras["forbidden_contact_load_source"]
+        == DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE
+    )
 
 
 def test_diagnostic_snapshot_rejects_forged_combined_forbidden_load() -> None:
@@ -158,7 +171,9 @@ def test_diagnostic_snapshot_rejects_forged_combined_forbidden_load() -> None:
 
 
 def test_base_forbidden_source_remains_owned_by_frozen_recording_contract() -> None:
-    extras = {"forbidden_contact_load_source": FakeRecording.FORBIDDEN_CONTACT_LOAD_SOURCE}
+    extras = {
+        "forbidden_contact_load_source": FakeRecording.FORBIDDEN_CONTACT_LOAD_SOURCE
+    }
     assert (
         DIAGNOSTIC._diagnostic_snapshot(
             FakeRecording, _live_env(), extras, object(), terminal=False

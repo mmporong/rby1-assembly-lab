@@ -162,7 +162,10 @@ def _validate_forbidden_contact_provenance(
     cross_hand = float(
         recording._scalar(source["cross_hand_contact_load_n"], env_index)
     )
-    if not all(np.isfinite(value) and value >= 0.0 for value in (combined, external, cross_hand)):
+    if not all(
+        np.isfinite(value) and value >= 0.0
+        for value in (combined, external, cross_hand)
+    ):
         raise recording.RecordingContractError(
             "combined forbidden contact loads must be finite and non-negative"
         )
@@ -186,7 +189,10 @@ def _diagnostic_snapshot(
     source = extras.get("terminal_snapshot") if terminal else extras
     if not isinstance(source, Mapping):
         raise recording.RecordingContractError("diagnostic physical source is missing")
-    if source.get("forbidden_contact_load_source") == recording.FORBIDDEN_CONTACT_LOAD_SOURCE:
+    if (
+        source.get("forbidden_contact_load_source")
+        == recording.FORBIDDEN_CONTACT_LOAD_SOURCE
+    ):
         if terminal:
             return recording.terminal_snapshot_from_extras(extras, geometry, env_index)
         return recording.live_snapshot(env, extras, geometry, env_index)
@@ -212,7 +218,9 @@ def _diagnostic_snapshot(
         force_n = recording._scalar(source["insertion_contact_force_n"], env_index)
         load_n = recording._scalar(source["insertion_contact_load_n"], env_index)
         grip_n = recording._env_value(source["contact_force_proxy_n"], env_index)
-        phase = recording._phase_name(recording._env_value(source["phase"], env_index))
+        phase = recording._phase_name(
+            recording._env_value(source["phase"], env_index)
+        )
     else:
         poses = np.stack(
             (
