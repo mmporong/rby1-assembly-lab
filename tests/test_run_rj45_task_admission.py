@@ -26,15 +26,19 @@ CONFIG = json.loads(
 )
 
 
-@pytest.mark.parametrize("active_probe,probe_phase,controlled,comparison", [
-    (False, "done", False, False), (True, "done", False, False),
-    (True, "probing", False, False), (True, "contact_window", False, False),
-    (True, "returning", False, False), (True, "invalid_latched", False, False),
-    (True, "safety_latched", False, False), (True, "done", True, False),
-    (True, "done", False, True),
+@pytest.mark.parametrize("active_probe,probe_phase,stage,comparison", [
+    (False, "done", "diagnostic", False), (True, "done", "diagnostic", False),
+    (True, "probing", "diagnostic", False), (True, "contact_window", "diagnostic", False),
+    (True, "returning", "diagnostic", False), (True, "invalid_latched", "diagnostic", False),
+    (True, "safety_latched", "diagnostic", False),
+    (True, "done", "controlled_observability", False),
+    (True, "invalid_latched", "force_slope_observability_v3", False),
+    (True, "safety_latched", "force_slope_observability_v3", False),
+    (True, "done", "classical_v2_tuning", True),
 ])
-def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase, controlled, comparison) -> None:
+def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase, stage, comparison) -> None:
     torch = pytest.importorskip("torch")
+    controlled = stage in {"controlled_observability", "force_slope_observability_v3"}
     step_extras = {"terminal_snapshot": {"source": "pre-reset"}}
 
     class Env:
@@ -125,12 +129,29 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         }
     if controlled:
         options["diagnostic_environment_seed"] = 494541735
-    expected_failure = active_probe and probe_phase != "done"
+    expected_failure = (
+        active_probe
+        and probe_phase != "done"
+        and not (
+            stage == "force_slope_observability_v3"
+            and probe_phase in {"invalid_latched", "safety_latched"}
+        )
+    )
     with pytest.raises(RUNNER.AdmissionRunBlocked) if expected_failure else nullcontext():
         result = RUNNER._episode(
             prepared,
             runtime,
-            ("classical_v2_tuning" if comparison else "controlled_observability" if controlled else "diagnostic", "rj45-train-02", "tx-positive", "classical_force_search_v2" if comparison else "active_axis_probe" if controlled else "active_z_probe" if active_probe else "zero", 1, None),
+            (
+                stage,
+                "rj45-train-02",
+                "tx-positive",
+                "classical_force_search_v2" if comparison else
+                "force_slope_probe" if stage == "force_slope_observability_v3" else
+                "active_axis_probe" if controlled else
+                "active_z_probe" if active_probe else "zero",
+                1,
+                None,
+            ),
             None,
             step_observer=Observer(),
             **options,
@@ -151,7 +172,7 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, ac
         assert result["comparison_provider_steps" if comparison else "diagnostic_provider_steps"] == [{
             "step_index": 0,
             "state_before": {"phase": "waiting"},
-            "state": {"phase": "done"},
+            "state": {"phase": probe_phase},
             "commanded_normalized_action6": [0.0] * 6,
         }]
     else:
@@ -187,6 +208,81 @@ def test_seed_override_cannot_mutate_formal_or_invalid_scope(stage, method, seed
 def test_controlled_episode_requires_explicit_seed_before_constructing_environment():
     with pytest.raises(RUNNER.AdmissionRunBlocked, match="explicit environment seed"):
         RUNNER._episode({}, {}, ("controlled_observability", "rj45-train-02", "tx-positive", "active_axis_probe", 1, None), None)
+
+
+@pytest.mark.parametrize("method", ["force_slope_probe", "active_axis_probe"])
+def test_force_slope_v3_episode_requires_explicit_seed(method):
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="explicit environment seed"):
+        RUNNER._episode(
+            {}, {},
+            ("force_slope_observability_v3", "rj45-train-03", "tx-positive", method, 1, None),
+            None,
+        )
+
+
+@pytest.mark.parametrize("method", ["zero", "active_z_probe", "classical_force_search_v2"])
+def test_force_slope_v3_rejects_unregistered_provider_method(method):
+    with pytest.raises(RUNNER.AdmissionRunBlocked):
+        RUNNER._episode(
+            {}, {"modules": {}},
+            ("force_slope_observability_v3", "rj45-train-03", "tx-positive", method, 1, None),
+            None,
+            diagnostic_provider_factory=lambda: None,
+            diagnostic_provider_attestor=lambda _: {"diagnostic_only": True},
+            diagnostic_environment_seed=494541735,
+        )
+
+
+def test_force_slope_v3_rejects_missing_policy_input_in_sweep(monkeypatch):
+    torch = pytest.importorskip("torch")
+
+    class Env:
+        device = "cpu"
+        cfg = SimpleNamespace(seed=494541735)
+        extras = {"policy_observation_valid": torch.tensor([True])}
+        _last_contact_proxy_n = torch.zeros((1, 2))
+        _last_insertion_contact_load_n = torch.zeros(1)
+
+        def reset(self):
+            return {"policy": torch.zeros((1, 79))}
+
+        def step(self, _action):
+            self.extras["policy_observation_valid"] = torch.tensor([False])
+            return (
+                {"policy": torch.zeros((1, 79))},
+                torch.zeros(1),
+                torch.tensor([False]),
+                torch.tensor([False]),
+                {},
+            )
+
+        def close(self):
+            pass
+
+    class Provider:
+        def reset(self):
+            return {"phase": "waiting"}
+
+        def state_telemetry(self, state):
+            return state
+
+        def act(self, _observation, _state):
+            return [0.0] * 6, {"phase": "sweep"}
+
+    monkeypatch.setattr(RUNNER, "_make_env", lambda *_a, **_k: (Env(), torch))
+    monkeypatch.setattr(RUNNER, "_reset_isaac_episode_lifecycle", lambda: None)
+    with pytest.raises(RUNNER.AdmissionRunBlocked, match="policy observation disappeared"):
+        RUNNER._episode(
+            {}, {"modules": {}},
+            (
+                "force_slope_observability_v3", "rj45-train-03", "tx-positive",
+                "force_slope_probe", 1, None,
+            ),
+            None,
+            diagnostic_provider_factory=Provider,
+            diagnostic_provider_attestor=lambda _: {"diagnostic_only": True},
+            diagnostic_environment_seed=494541735,
+        )
 
 
 @pytest.mark.parametrize("stage,method,factory,attestor", [

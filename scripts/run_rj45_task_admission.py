@@ -1034,8 +1034,13 @@ def _bias(config: Mapping[str, Any], case_id: str) -> Mapping[str, Any]:
 
 
 def _make_env(prepared, runtime, row, *, diagnostic_environment_seed=None):
+    controlled_diagnostic_scopes = {
+        ("controlled_observability", "active_axis_probe"),
+        ("force_slope_observability_v3", "force_slope_probe"),
+        ("force_slope_observability_v3", "active_axis_probe"),
+    }
     if diagnostic_environment_seed is not None and (
-        (row[0], row[3]) != ("controlled_observability", "active_axis_probe")
+        (row[0], row[3]) not in controlled_diagnostic_scopes
         or type(diagnostic_environment_seed) is not int
         or not 0 < diagnostic_environment_seed < 2**31
     ):
@@ -1096,7 +1101,12 @@ def _episode(
     comparison_provider_attestor=None,
 ):
     stage, grasp_id, case_id, method_id, slot, _ = row
-    if (stage, method_id) == ("controlled_observability", "active_axis_probe") and diagnostic_environment_seed is None:
+    controlled_diagnostic_scopes = {
+        ("controlled_observability", "active_axis_probe"),
+        ("force_slope_observability_v3", "force_slope_probe"),
+        ("force_slope_observability_v3", "active_axis_probe"),
+    }
+    if (stage, method_id) in controlled_diagnostic_scopes and diagnostic_environment_seed is None:
         raise AdmissionRunBlocked("controlled-observability requires an explicit environment seed")
     modules = runtime["modules"]
     provider = None
@@ -1127,7 +1137,7 @@ def _episode(
     elif diagnostic_override:
         permitted_scope = (stage, method_id) in {
             ("diagnostic", "active_z_probe"),
-            ("controlled_observability", "active_axis_probe"),
+            *controlled_diagnostic_scopes,
         }
         if (
             not permitted_scope
@@ -1140,7 +1150,7 @@ def _episode(
         provider_attestation = diagnostic_provider_attestor(provider)
         if not isinstance(provider_attestation, dict) or not provider_attestation.get("diagnostic_only"):
             raise AdmissionRunBlocked("diagnostic provider attestation is missing")
-    elif method_id in {"active_z_probe", "active_axis_probe"}:
+    elif method_id in {"active_z_probe", "active_axis_probe", "force_slope_probe"}:
         raise AdmissionRunBlocked("active-z diagnostic requires an explicit provider and attestation")
     elif method_id != "oracle_gt_reference":
         kwargs = {}
@@ -1181,7 +1191,7 @@ def _episode(
     if diagnostic_environment_seed is not None:
         if (
             not diagnostic_override
-            or (stage, method_id) != ("controlled_observability", "active_axis_probe")
+            or (stage, method_id) not in controlled_diagnostic_scopes
             or type(diagnostic_environment_seed) is not int
             or not 0 < diagnostic_environment_seed < 2**31
         ):
@@ -1208,8 +1218,20 @@ def _episode(
             valid = env.extras.get("policy_observation_valid")
             action = torch.zeros((1, 6), device=env.device)
             if diagnostic_override and (valid is None or not bool(valid[0])):
-                if provider.state_telemetry(state)["phase"] in {"probing", "contact_window", "returning"}:
-                    raise AdmissionRunBlocked("policy observation disappeared during active-z probe")
+                active_phases = (
+                    {"probing", "contact_window", "returning"}
+                    if stage != "force_slope_observability_v3"
+                    else {
+                        "impulse_pending",
+                        "impulse_responses",
+                        "decision",
+                        "sweep",
+                        "contact_window",
+                        "returning",
+                    }
+                )
+                if provider.state_telemetry(state)["phase"] in active_phases:
+                    raise AdmissionRunBlocked("policy observation disappeared during diagnostic provider")
             if method_id != "oracle_gt_reference" and valid is not None and bool(valid[0]):
                 sample = policy[0].detach().cpu().numpy()
                 if diagnostic_override or comparison_override:
@@ -1235,8 +1257,12 @@ def _episode(
             ended = bool((terminated | truncated)[0])
             if step_observer is not None:
                 step_observer.capture_post(env, step_extras, ended)
-            if diagnostic_override and provider.state_telemetry(state)["phase"] == "invalid_latched":
-                raise AdmissionRunBlocked("active-z provider lost its valid observation scope")
+            if (
+                diagnostic_override
+                and stage != "force_slope_observability_v3"
+                and provider.state_telemetry(state)["phase"] == "invalid_latched"
+            ):
+                raise AdmissionRunBlocked("diagnostic provider lost its valid observation scope")
             observations.append(tuple(float(value) for value in policy[0].detach().cpu().tolist()))
             current_grip = float(env._last_contact_proxy_n[0].max().item())
             current_insertion_load = float(
@@ -1248,8 +1274,15 @@ def _episode(
         else:
             raise AdmissionRunBlocked("episode exceeded the bounded 1200-step limit")
         terminal = _validate_terminal_snapshot(env.extras.get("terminal_snapshot"))
-        if diagnostic_override and provider.state_telemetry(state)["phase"] != "done":
-            raise AdmissionRunBlocked("active-z episode ended before the probe completed")
+        if diagnostic_override:
+            terminal_provider_phase = provider.state_telemetry(state)["phase"]
+            allowed_terminal_phases = (
+                {"done", "invalid_latched", "safety_latched"}
+                if stage == "force_slope_observability_v3"
+                else {"done"}
+            )
+            if terminal_provider_phase not in allowed_terminal_phases:
+                raise AdmissionRunBlocked("diagnostic episode ended before the probe completed")
         admission_snapshot = terminal["task_admission"]
         success = bool(terminal["independent_eval_success"][0])
         forbidden = bool(terminal["forbidden_contact"][0])
