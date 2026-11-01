@@ -668,6 +668,15 @@ def _validate_g1_producer_completion(
     if abort_path.exists():
         _fail("G1 producer abort artifact exists")
     finished = load_json(finished_path, "G1 finished")
+    supervisor_sha = _sha(
+        gate.get("supervisor_validation_sha256"), "G1 supervisor validation SHA"
+    )
+    if (
+        finished.get("supervisor_validation_sha256") != supervisor_sha
+        or finished.get("formal_report_sha256") != report_sha
+        or finished.get("campaign_sha256") != campaign_sha
+    ):
+        _fail("G1 finished artifact bindings do not close the producer proof DAG")
     for key in ("exit_code", "child_exit_code", "external_verifier_exit_code"):
         if type(finished.get(key)) is not int or finished[key] != 0:
             _fail(f"G1 finished {key} must be integer zero")
@@ -725,6 +734,12 @@ def validate_g1_gate(
             "task_admission_completed": True,
             "rl_pilot_admitted": True,
         }
+        or gate.get("required_finished_bindings")
+        != [
+            "supervisor_validation_sha256",
+            "formal_report_sha256",
+            "campaign_sha256",
+        ]
     ):
         _fail("G1 gate target is not the immutable RL admission contract")
     if current_root is None or development is None:
@@ -915,6 +930,16 @@ def validate_g1_gate(
             "supervisor_validation_path": str(supervisor_path),
             "abort_path": str(abort_path),
             "abort_must_remain_absent": True,
+            "required_future_producer_finished_fields": list(
+                gate["required_finished_bindings"]
+            ),
+            "validated_sha256_edges": {
+                "finished_to_supervisor_validation": gate[
+                    "supervisor_validation_sha256"
+                ],
+                "finished_to_formal_report": gate["report_sha256"],
+                "finished_to_campaign_identity": gate["campaign_sha256"],
+            },
         },
     }
 

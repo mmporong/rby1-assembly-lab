@@ -453,16 +453,6 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
     report_path = output / "report.json"
     report_path.write_text(json.dumps(report), encoding="utf-8")
     report_sha = runner.file_sha256(report_path)
-    finished = {
-        "exit_code": 0,
-        "child_exit_code": 0,
-        "external_verifier_exit_code": 0,
-        "execution_contract_passed": True,
-        "task_admission_decision": "admit_rl_pilot",
-        "rl_pilot_admitted": True,
-    }
-    finished_path = job_root / "finished.json"
-    finished_path.write_text(json.dumps(finished), encoding="utf-8")
     supervisor = {
         "execution_contract_passed": True,
         "problems": [],
@@ -476,10 +466,24 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
     }
     supervisor_path = job_root / "supervisor-validation.json"
     supervisor_path.write_text(json.dumps(supervisor), encoding="utf-8")
+    supervisor_sha = runner.file_sha256(supervisor_path)
+    finished = {
+        "exit_code": 0,
+        "child_exit_code": 0,
+        "external_verifier_exit_code": 0,
+        "execution_contract_passed": True,
+        "task_admission_decision": "admit_rl_pilot",
+        "rl_pilot_admitted": True,
+        "supervisor_validation_sha256": supervisor_sha,
+        "formal_report_sha256": report_sha,
+        "campaign_sha256": campaign_sha,
+    }
+    finished_path = job_root / "finished.json"
+    finished_path.write_text(json.dumps(finished), encoding="utf-8")
     contract["g1_gate"].update(
         report_sha256=report_sha,
         finished_sha256=runner.file_sha256(finished_path),
-        supervisor_validation_sha256=runner.file_sha256(supervisor_path),
+        supervisor_validation_sha256=supervisor_sha,
     )
     for path in (campaign_path, report_path, finished_path, supervisor_path):
         contract["source_and_config_sha256"]["current"][
@@ -512,6 +516,14 @@ def _reseal_report(
     contract["source_and_config_sha256"]["current"][
         contract["g1_gate"]["supervisor_validation_path"]
     ] = supervisor_sha
+    finished_path = tmp_path / contract["g1_gate"]["finished_path"]
+    finished = json.loads(finished_path.read_text(encoding="utf-8"))
+    finished.update(
+        supervisor_validation_sha256=supervisor_sha,
+        formal_report_sha256=report_sha,
+        campaign_sha256=contract["g1_gate"]["campaign_sha256"],
+    )
+    _reseal_finished(tmp_path, contract, finished)
 
 
 def _reseal_finished(tmp_path: Path, contract: dict, finished: dict) -> None:
@@ -543,6 +555,13 @@ def test_isolated_formal90_report_derives_authenticated_non_smoke_scope(
     assert normalized["source_report_schema"] == (
         "rj45-task-admission-isolated-report-v1"
     )
+    assert normalized["producer_completion"][
+        "required_future_producer_finished_fields"
+    ] == [
+        "supervisor_validation_sha256",
+        "formal_report_sha256",
+        "campaign_sha256",
+    ]
 
 
 def test_isolated_diagnostic_and_partial_reports_cannot_open_g1_gate(
@@ -688,6 +707,36 @@ def test_finished_record_requires_typed_success_proof(
 
 
 @pytest.mark.parametrize(
+    "field,drop",
+    (
+        ("supervisor_validation_sha256", True),
+        ("supervisor_validation_sha256", False),
+        ("formal_report_sha256", True),
+        ("formal_report_sha256", False),
+        ("campaign_sha256", True),
+        ("campaign_sha256", False),
+    ),
+)
+def test_finished_record_closes_every_artifact_sha_edge(
+    tmp_path: Path, field: str, drop: bool
+) -> None:
+    contract, development, _path, _campaign, report = _isolated_formal_gate_fixture(
+        tmp_path
+    )
+    path = tmp_path / contract["g1_gate"]["finished_path"]
+    finished = json.loads(path.read_text(encoding="utf-8"))
+    if drop:
+        finished.pop(field)
+    else:
+        finished[field] = "0" * 64
+    _reseal_finished(tmp_path, contract, finished)
+    with pytest.raises(runner.LongDriverBlocked, match="proof DAG"):
+        runner.validate_g1_gate(
+            contract, report, current_root=tmp_path, development=development
+        )
+
+
+@pytest.mark.parametrize(
     "mutation",
     (
         "execution_false",
@@ -741,6 +790,57 @@ def test_producer_abort_path_is_derived_and_must_remain_absent(tmp_path: Path) -
         runner.validate_g1_gate(
             contract, report, current_root=tmp_path, development=development
         )
+
+
+def test_fresh_isolated_python_recomputes_positive_gate_without_native_imports(
+    tmp_path: Path,
+) -> None:
+    """Synthetic CPU evidence only; this does not claim an actual G1 admission."""
+
+    contract, _development, _path, _campaign, _report = (
+        _isolated_formal_gate_fixture(tmp_path)
+    )
+    contract_path = tmp_path / "synthetic-contract.json"
+    contract_path.write_text(json.dumps(contract), encoding="utf-8")
+    script_path = ROOT / "scripts/run_rj45_comparison_long.py"
+    child = f"""
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+forbidden = ("torch", "isaac", "omni")
+before = sorted(name for name in sys.modules if name.split(".")[0] in forbidden)
+spec = importlib.util.spec_from_file_location("fresh_g2_gate", {str(script_path)!r})
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+root = Path({str(tmp_path)!r})
+contract = module.load_json(root / "synthetic-contract.json", "synthetic contract")
+development = module.load_json(
+    root / contract["inputs"]["development_config_path"], "development"
+)
+report = module.load_json(root / contract["g1_gate"]["report_path"], "G1 report")
+normalized = module.validate_g1_gate(
+    contract, report, current_root=root, development=development
+)
+after = sorted(name for name in sys.modules if name.split(".")[0] in forbidden)
+print(json.dumps({{"before": before, "after": after, "status": normalized["status"]}}))
+"""
+    result = subprocess.run(
+        [sys.executable, "-I", "-c", child],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    evidence = json.loads(result.stdout)
+    assert evidence == {
+        "before": [],
+        "after": [],
+        "status": "admit_rl_pilot",
+    }
+
 
 def test_budget_requires_exact_num_env_product_and_reviewed_contact_count() -> None:
     runner.validate_contract(_frozen(), execution_mode="train")
