@@ -320,4 +320,3 @@ def build_alignment_overlay(
         "display": display,
         "event_count": len(events),
     }
-

@@ -66,8 +66,9 @@
   },
   "code_sha256": {
     "scripts/build_rj45_publication_media.py": "4abd67c983bd40df8457152e8fcb549b688d82c1640144b773064ec304f6b6cf",
-    "scripts/rj45_publication_alignment_overlay.py": "1cc695b376dea075eb868eafa75411219c566f8b95ca742611687a295aee782e",
+    "scripts/rj45_publication_alignment_overlay.py": "2736761b5ca703c646411b4c3d9fe3932ba8de3b974d78bfbcce3e150240a163",
     "tests/test_rj45_publication_alignment_overlay.py": "591de481fcb44b6bd28ad68ec24c5a315446fb82bb3daad8bb3b69aa93775709"
   },
-  "external_posting_performed": false
+  "external_posting_performed": false,
+  "format_only_recheck": "Removed trailing blank line; regenerated ASS byte-identical to approved output"
 }
