@@ -27,10 +27,15 @@ from typing import Any, Mapping
 
 
 SCHEMA_NAME = "rj45_comparison_isaac_smoke_v1"
-EXPECTED_RUNTIME_COMMIT = "104721acf2222c1cfe8ec86cd030f5116a4fef93"
-EXPECTED_RUNTIME_MANIFEST_SHA256 = (
+EXPECTED_RUNTIME_COMMIT = "1517fbf4af11a296e3e89fcbf2aa25c49a8d017d"
+EXPECTED_EVIDENCE_COMMIT = "104721acf2222c1cfe8ec86cd030f5116a4fef93"
+EXPECTED_EVIDENCE_MANIFEST_SHA256 = (
     "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
 )
+EXPECTED_ACTIVE_MANIFEST_SHA256 = (
+    "79a8cc65b6a72ab1d9fa2bb7824c9e6c0cf37d096585a8f4cce7f2464d134184"
+)
+EXPECTED_RUNTIME_MANIFEST_SHA256 = EXPECTED_EVIDENCE_MANIFEST_SHA256
 EXPECTED_TASK_SHA256 = "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b"
 EXPECTED_TRAINING_SHA256 = (
     "0d5f5a07dcdfe74dfbee58852af0ad1076480cc4f91eaeb990f5e535fc61a179"
@@ -48,7 +53,7 @@ EXPECTED_PARALLEL_CONTACT_EVIDENCE_SHA256 = (
 OBSERVATION_DIM = 79
 ACTION_DIM = 6
 ALGORITHMS = ("ppo", "sac")
-PHYSICS_INPUT_SCHEMA = "rj45_task_admission_physics_inputs_v1"
+PHYSICS_INPUT_SCHEMA = "rj45_task_admission_physics_inputs_v2"
 PHYSICS_INPUT_COUNT = 13
 EXPECTED_CACHE_ASSET_PATHS = {
     "rby1_model_m_v1_2": "assets/cache/rby1/model_v_1_2_m.usd",
@@ -62,6 +67,15 @@ EXPECTED_CURRENT_SOURCE_PATHS = {
     "src/rby1_assembly/rj45_task_admission_env.py",
     "src/rby1_assembly/rj45_comparison_providers.py",
     "src/rby1_assembly/rj45_task_admission.py",
+}
+EXPECTED_EVIDENCE_SOURCE_CONFIG_INPUTS = {
+    "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+    "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+    "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+    "configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+    "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "scripts/run_sim.py": "d20444cac6af9b8ef11903249ea4b0f43ffa50f5bf0808352059b058638694ed",
 }
 
 
@@ -285,25 +299,53 @@ def _selected_cache_records(
 
 
 def validate_physics_input_snapshot(
-    runtime_root: Path, current_root: Path, manifest_path: Path
+    runtime_root: Path,
+    evidence_root: Path,
+    current_root: Path,
+    manifest_path: Path,
 ) -> dict[str, Any]:
     """Validate and snapshot every physics input before AppLauncher exists."""
 
     runtime_root = runtime_root.resolve()
+    evidence_root = evidence_root.resolve()
     current_root = current_root.resolve()
     manifest_path = manifest_path.resolve()
+    if len({runtime_root, evidence_root, current_root}) != 3:
+        raise ComparisonSmokeBlocked("runtime, evidence, and current roots must be distinct")
     manifest = _load_json(manifest_path)
     if manifest.get("schema_name") != PHYSICS_INPUT_SCHEMA:
         raise ComparisonSmokeBlocked("unexpected physics input manifest schema")
     if manifest.get("runtime_commit") != EXPECTED_RUNTIME_COMMIT:
         raise ComparisonSmokeBlocked("physics manifest runtime commit mismatch")
+    base_spec = manifest.get("base_physics_manifest")
+    if not isinstance(base_spec, dict):
+        raise ComparisonSmokeBlocked("base physics manifest binding is missing")
+    base_relative = _safe_relative(base_spec.get("relative_path"), label="base physics manifest")
+    base_path = (current_root / base_relative).resolve()
+    if not base_path.is_relative_to(current_root) or file_sha256(base_path) != base_spec.get("sha256"):
+        raise ComparisonSmokeBlocked("base physics manifest binding mismatch")
+    manifest = {**_load_json(base_path), **manifest}
     physics_expected = manifest.get("physics_inputs")
     if not isinstance(physics_expected, dict) or len(physics_expected) != PHYSICS_INPUT_COUNT:
         raise ComparisonSmokeBlocked("physics input manifest must contain exactly 13 files")
     required = set(manifest.get("required_physics_relative_paths", ()))
     if required != set(physics_expected):
         raise ComparisonSmokeBlocked("physics input required-path set mismatch")
-    physics_map = _exact_hash_map(runtime_root, physics_expected, label="physics input")
+    physics_map = _exact_hash_map(runtime_root, physics_expected, label="active physics input")
+    evidence_physics_map = _exact_hash_map(evidence_root, physics_expected, label="evidence physics input")
+    if physics_map != evidence_physics_map:
+        raise ComparisonSmokeBlocked("active and evidence physics inputs differ")
+    active_import_expected = manifest.get("active_import_inputs", {})
+    if set(active_import_expected) != {
+            "configs/task.json",
+            "assets/generated/build-report.json",
+    }:
+        raise ComparisonSmokeBlocked("active import input set must contain exactly two files")
+    active_import_map = _exact_hash_map(runtime_root, active_import_expected, label="active import input")
+    generic_task_sha = active_import_map["configs/task.json"]
+    generic_report = _load_json(runtime_root / "assets/generated/build-report.json")
+    if generic_report.get("config_sha256") != generic_task_sha:
+        raise ComparisonSmokeBlocked("generic build report task binding mismatch")
 
     core_spec = manifest.get("runtime_core_manifest")
     if not isinstance(core_spec, dict):
@@ -315,6 +357,34 @@ def validate_physics_input_snapshot(
     runtime_manifest = _load_json(core_path)
     runtime_map = _runtime_python_map(runtime_root, runtime_manifest)
 
+    evidence_spec = manifest.get("evidence_core_manifest")
+    if not isinstance(evidence_spec, dict):
+        raise ComparisonSmokeBlocked("evidence core manifest binding is missing")
+    evidence_relative = _safe_relative(
+        evidence_spec.get("relative_path"), label="evidence core manifest"
+    )
+    evidence_core_path = (evidence_root / evidence_relative).resolve()
+    if (
+        not evidence_core_path.is_relative_to(evidence_root)
+        or file_sha256(evidence_core_path) != evidence_spec.get("sha256")
+        or evidence_spec.get("sha256") != EXPECTED_EVIDENCE_MANIFEST_SHA256
+    ):
+        raise ComparisonSmokeBlocked("evidence core manifest binding mismatch")
+    evidence_manifest = _load_json(evidence_core_path)
+    if evidence_manifest.get("git_commit") != EXPECTED_EVIDENCE_COMMIT:
+        raise ComparisonSmokeBlocked("evidence core commit mismatch")
+    evidence_configs = manifest.get("evidence_source_config_inputs")
+    if evidence_configs != EXPECTED_EVIDENCE_SOURCE_CONFIG_INPUTS:
+        raise ComparisonSmokeBlocked("evidence source config map must contain exactly 7 files")
+    evidence_sources = {**evidence_manifest.get("files", {}), **evidence_configs}
+    if len(evidence_sources) != 42:
+        raise ComparisonSmokeBlocked("evidence source input union must contain exactly 42 files")
+    evidence_source_map = _exact_hash_map(
+        evidence_root, evidence_sources, label="evidence source input"
+    )
+    if set(evidence_manifest.get("files", {})) - set(evidence_source_map):
+        raise ComparisonSmokeBlocked("evidence source map omits core Python files")
+
     if physics_map.get("configs/rj45-training-target-offset-v1.json") != EXPECTED_TRAINING_SHA256:
         raise ComparisonSmokeBlocked("trusted training config SHA mismatch")
     if physics_map.get("configs/rj45-training-target-offset-v1.json") != manifest.get(
@@ -322,7 +392,13 @@ def validate_physics_input_snapshot(
     ):
         raise ComparisonSmokeBlocked("physics manifest training binding mismatch")
 
-    task = _load_json(runtime_root / "configs/tasks/rj45-v1.json")
+    active_task_path = runtime_root / "configs/tasks/rj45-v1.json"
+    evidence_task_path = evidence_root / "configs/tasks/rj45-v1.json"
+    if active_task_path.read_bytes() != evidence_task_path.read_bytes():
+        raise ComparisonSmokeBlocked("active and evidence task bytes differ")
+    task = _load_json(active_task_path)
+    if task != _load_json(evidence_task_path):
+        raise ComparisonSmokeBlocked("active and evidence parsed tasks differ")
     expected_generated = manifest.get("generated_asset_sha256")
     if not isinstance(expected_generated, dict) or len(expected_generated) != 5:
         raise ComparisonSmokeBlocked("generated asset map must contain five files")
@@ -352,6 +428,28 @@ def validate_physics_input_snapshot(
         relative = f"assets/generated/tasks/rj45-v1/{filename}"
         if physics_map.get(relative) != digest:
             raise ComparisonSmokeBlocked(f"generated asset SHA mismatch: {filename}")
+    generic_robot = generic_report.get("robot")
+    rj45_robot = build.get("robot")
+    if not isinstance(generic_robot, dict) or not isinstance(rj45_robot, dict):
+        raise ComparisonSmokeBlocked("build report robot projection is missing")
+    projection = {
+        "grasp_center_in_wrist_m": rj45_robot.get("grasp_center_in_wrist_m"),
+        "gripper_finger_span_m": rj45_robot.get("gripper_finger_span_m"),
+        "gripper_geometry": {
+            side: {"bounds_in_wrist_m": rj45_robot.get("gripper_geometry", {}).get(side, {}).get("bounds_in_wrist_m")}
+            for side in ("left", "right")
+        },
+    }
+    generic_projection = {
+        "grasp_center_in_wrist_m": generic_robot.get("grasp_center_in_wrist_m"),
+        "gripper_finger_span_m": generic_robot.get("gripper_finger_span_m"),
+        "gripper_geometry": {
+            side: {"bounds_in_wrist_m": generic_robot.get("gripper_geometry", {}).get(side, {}).get("bounds_in_wrist_m")}
+            for side in ("left", "right")
+        },
+    }
+    if generic_projection != projection:
+        raise ComparisonSmokeBlocked("generic and RJ45 robot geometry projections differ")
 
     cache_records, cache_graph_sha = _selected_cache_records(
         runtime_root, manifest, physics_map
@@ -410,15 +508,44 @@ def validate_physics_input_snapshot(
     if Path(__file__).resolve() != (current_root / validator_relative).resolve():
         raise ComparisonSmokeBlocked("validator source path differs from current root")
 
+    shared_catalog = "configs/rj45-grasp-generation-v2.json"
+    if shared_catalog not in evidence_source_map:
+        raise ComparisonSmokeBlocked("evidence source map omits the shared bank catalog")
     normalized = {
-        "runtime": runtime_map | physics_map,
+        "runtime": runtime_map | physics_map | active_import_map,
+        "evidence": {
+            **{k: v for k, v in evidence_source_map.items() if k != shared_catalog},
+            **evidence_physics_map,
+        },
         "current": current_map,
     }
+    if (
+        len(normalized["runtime"]) != 50 or len(normalized["evidence"]) != 50
+    ):
+        raise ComparisonSmokeBlocked("dual-root normalized namespace count mismatch")
     return {
-        "schema_name": "rj45_task_admission_physics_input_snapshot_v1",
+        "schema_name": "rj45_task_admission_physics_input_snapshot_v2",
         "runtime_root": str(runtime_root),
+        "evidence_root": str(evidence_root),
         "current_root": str(current_root),
         "manifest": {"path": str(manifest_path), "sha256": file_sha256(manifest_path)},
+        "source_manifests": [
+            {
+                "role": "active_core",
+                "path": str(core_path),
+                "sha256": file_sha256(core_path),
+            },
+            {
+                "role": "base_physics",
+                "path": str(base_path),
+                "sha256": file_sha256(base_path),
+            },
+            {
+                "role": "evidence_core",
+                "path": str(evidence_core_path),
+                "sha256": file_sha256(evidence_core_path),
+            },
+        ],
         "normalized_sha256": normalized,
         "normalized_sha256_canonical_sha256": _canonical_json_sha256(normalized),
         "selected_cache_graph_sha256": cache_graph_sha,
@@ -428,20 +555,43 @@ def validate_physics_input_snapshot(
 
 
 def verify_physics_input_end(
-    start_snapshot: Mapping[str, Any], runtime_root: Path, current_root: Path
+    start_snapshot: Mapping[str, Any],
+    runtime_root: Path,
+    evidence_root: Path,
+    current_root: Path,
 ) -> dict[str, Any]:
     """Compare current bytes with an immutable prelaunch physics snapshot."""
 
     expected = start_snapshot.get("normalized_sha256")
     if not isinstance(expected, dict):
         raise ComparisonSmokeBlocked("start snapshot normalized map is missing")
+    if {name: len(values) if isinstance(values, dict) else -1 for name, values in expected.items()} != {
+        "runtime": 50,
+        "evidence": 50,
+        "current": 6,
+    }:
+        raise ComparisonSmokeBlocked("start snapshot namespace counts differ")
     changed: list[str] = []
     missing: list[str] = []
     added: list[str] = []
     expected_canonical = start_snapshot.get("normalized_sha256_canonical_sha256")
     if _canonical_json_sha256(expected) != expected_canonical:
         raise ComparisonSmokeBlocked("start snapshot canonical SHA mismatch")
-    for namespace, root in (("runtime", runtime_root.resolve()), ("current", current_root.resolve())):
+    roots = {
+        "runtime": runtime_root.resolve(),
+        "current": current_root.resolve(),
+    }
+    roots["evidence"] = evidence_root.resolve()
+    if set(expected) != {"runtime", "evidence", "current"} or len(set(roots.values())) != 3:
+        raise ComparisonSmokeBlocked("runtime, evidence, and current roots must be distinct")
+    sealed_roots = {
+        "runtime": start_snapshot.get("runtime_root"),
+        "evidence": start_snapshot.get("evidence_root"),
+        "current": start_snapshot.get("current_root"),
+    }
+    if sealed_roots != {name: str(root) for name, root in roots.items()}:
+        raise ComparisonSmokeBlocked("end-check roots differ from the sealed snapshot roots")
+    for namespace, root in roots.items():
         mapping = expected.get(namespace)
         if not isinstance(mapping, dict):
             raise ComparisonSmokeBlocked(f"start snapshot {namespace} map is missing")
@@ -473,6 +623,41 @@ def verify_physics_input_end(
         missing.append("current/physics-input-manifest")
     elif file_sha256(manifest_path) != manifest.get("sha256"):
         changed.append("current/physics-input-manifest")
+    source_manifests = start_snapshot.get("source_manifests", [])
+    if not isinstance(source_manifests, list):
+        raise ComparisonSmokeBlocked("start snapshot source manifests are invalid")
+    if len(source_manifests) != 3:
+        raise ComparisonSmokeBlocked("start snapshot must bind exactly three source manifests")
+    expected_source_paths = {
+        "active_core": roots["current"] / "configs/rj45-oracle-runtime-validation-ulp2-v1.json",
+        "base_physics": roots["current"] / "configs/rj45-task-admission-physics-inputs-104721a.json",
+        "evidence_core": roots["evidence"] / "configs/rj45-oracle-runtime-104721a.json",
+    }
+    seen_roles: set[str] = set()
+    for index, binding in enumerate(source_manifests):
+        if not isinstance(binding, dict):
+            raise ComparisonSmokeBlocked("start snapshot source manifest binding is invalid")
+        role = binding.get("role")
+        if role not in expected_source_paths or role in seen_roles:
+            raise ComparisonSmokeBlocked("start snapshot source manifest role is invalid")
+        seen_roles.add(role)
+        raw_path = binding.get("path")
+        if (
+            not isinstance(raw_path, str)
+            or not Path(raw_path).is_absolute()
+            or str(Path(raw_path).resolve()) != raw_path
+        ):
+            raise ComparisonSmokeBlocked("start snapshot source manifest path is invalid")
+        path = Path(raw_path).resolve()
+        if path != expected_source_paths[role].resolve():
+            raise ComparisonSmokeBlocked("start snapshot source manifest path differs")
+        label = f"source-manifest/{index}"
+        if not path.is_file():
+            missing.append(label)
+        elif file_sha256(path) != binding.get("sha256"):
+            changed.append(label)
+    if seen_roles != set(expected_source_paths):
+        raise ComparisonSmokeBlocked("start snapshot source manifest roles differ")
     matched = not added and not changed and not missing
     return {
         "schema_name": "rj45_task_admission_physics_input_end_verification_v1",
@@ -494,6 +679,15 @@ def validate_held_proof_physics_binding(
     proof: Mapping[str, Any], snapshot: Mapping[str, Any], manifest_path: Path
 ) -> None:
     manifest = _load_json(manifest_path)
+    base_spec = manifest.get("base_physics_manifest")
+    if isinstance(base_spec, dict):
+        relative = _safe_relative(
+            base_spec.get("relative_path"), label="base physics manifest"
+        )
+        base_path = manifest_path.resolve().parents[1] / relative
+        if file_sha256(base_path) != base_spec.get("sha256"):
+            raise ComparisonSmokeBlocked("base physics manifest binding mismatch")
+        manifest = {**_load_json(base_path), **manifest}
     expected = manifest.get("held_proof_required_source_and_config_sha256")
     actual = proof.get("provenance_contract", {}).get("source_and_config_sha256")
     if not isinstance(actual, dict) or not isinstance(expected, dict):
@@ -522,23 +716,22 @@ def _parallel_evidence_dependency_paths(
 def validate_runtime_snapshot(runtime_root: Path, manifest_path: Path) -> dict[str, Any]:
     runtime_root = runtime_root.resolve()
     manifest_path = manifest_path.resolve()
-    if file_sha256(manifest_path) != EXPECTED_RUNTIME_MANIFEST_SHA256:
-        raise ComparisonSmokeBlocked("runtime manifest SHA-256 mismatch")
+    if (
+        manifest_path.name != "rj45-oracle-runtime-validation-ulp2-v1.json"
+        or file_sha256(manifest_path) != EXPECTED_ACTIVE_MANIFEST_SHA256
+    ):
+        raise ComparisonSmokeBlocked("active runtime manifest path or SHA-256 mismatch")
     manifest = _load_json(manifest_path)
     if manifest.get("git_commit") != EXPECTED_RUNTIME_COMMIT:
         raise ComparisonSmokeBlocked("archived runtime commit mismatch")
-    files = manifest.get("files")
-    if not isinstance(files, dict) or not files:
-        raise ComparisonSmokeBlocked("runtime manifest files are missing")
-    verified: dict[str, str] = {}
-    for relative, expected in sorted(files.items()):
-        path = runtime_root / relative
-        if not path.is_file():
-            raise ComparisonSmokeBlocked(f"archived runtime file is missing: {relative}")
-        observed = file_sha256(path)
-        if observed != expected:
-            raise ComparisonSmokeBlocked(f"archived runtime file drifted: {relative}")
-        verified[relative] = observed
+    if (
+        manifest.get("schema_version") != 2
+        or manifest.get("base_commit") != EXPECTED_EVIDENCE_COMMIT
+        or manifest.get("allowed_delta_path")
+        != "src/rby1_assembly/experiment_contracts.py"
+    ):
+        raise ComparisonSmokeBlocked("active runtime manifest provenance mismatch")
+    verified = _runtime_python_map(runtime_root, manifest)
     return {
         "path": str(manifest_path),
         "sha256": file_sha256(manifest_path),
@@ -550,24 +743,25 @@ def validate_runtime_snapshot(runtime_root: Path, manifest_path: Path) -> dict[s
 
 def validate_prelaunch_inputs(args: argparse.Namespace) -> dict[str, Any]:
     runtime_root = args.runtime_root.resolve()
+    evidence_root = args.evidence_root.resolve()
     current_root = args.current_root.resolve()
-    if runtime_root == current_root:
-        raise ComparisonSmokeBlocked("runtime-root and current-root must be separate")
+    if len({runtime_root, evidence_root, current_root}) != 3:
+        raise ComparisonSmokeBlocked("runtime, evidence, and current roots must be distinct")
     runtime_manifest = validate_runtime_snapshot(runtime_root, args.runtime_manifest)
     fixed = {
         "task_config": (
-            _resolve(runtime_root, args.task_config),
+            _resolve(evidence_root, args.task_config),
             EXPECTED_TASK_SHA256,
         ),
         "training_config": (
-            _resolve(runtime_root, args.training_config),
+            _resolve(evidence_root, args.training_config),
             EXPECTED_TRAINING_SHA256,
         ),
         "runtime_config": (
-            _resolve(runtime_root, args.runtime_config),
+            _resolve(evidence_root, args.runtime_config),
             EXPECTED_RUNTIME_CONFIG_SHA256,
         ),
-        "held_bank": (_resolve(runtime_root, args.held_bank), EXPECTED_BANK_SHA256),
+        "held_bank": (_resolve(evidence_root, args.held_bank), EXPECTED_BANK_SHA256),
         "parallel_contact_evidence": (
             _resolve(runtime_root, args.parallel_contact_evidence),
             EXPECTED_PARALLEL_CONTACT_EVIDENCE_SHA256,
@@ -594,6 +788,7 @@ def validate_prelaunch_inputs(args: argparse.Namespace) -> dict[str, Any]:
         }
     return {
         "runtime_root": str(runtime_root),
+        "evidence_root": str(evidence_root),
         "current_root": str(current_root),
         "runtime_manifest": runtime_manifest,
         "frozen_inputs": frozen_inputs,
@@ -795,12 +990,17 @@ def _build_env(
     from rby1_assembly.rj45_training_env import make_rj45_training_env_type
 
     root = args.runtime_root.resolve()
+    evidence_root = args.evidence_root.resolve()
     task_path = _resolve(root, args.task_config)
-    training_path = _resolve(root, args.training_config)
-    runtime_path = _resolve(root, args.runtime_config)
-    bank_path = _resolve(root, args.held_bank)
+    evidence_task_path = _resolve(evidence_root, args.task_config)
+    training_path = _resolve(evidence_root, args.training_config)
+    runtime_path = _resolve(evidence_root, args.runtime_config)
+    bank_path = _resolve(evidence_root, args.held_bank)
     parallel_spec_path = _resolve(root, args.parallel_contact_evidence)
     task = load_rj45_task(task_path)
+    evidence_task = load_rj45_task(evidence_task_path)
+    if task_path.read_bytes() != evidence_task_path.read_bytes() or task != evidence_task:
+        raise ComparisonSmokeBlocked("active and evidence tasks differ at runtime")
     training = load_training_config(training_path)
     runtime = _load_json(runtime_path)
     parallel_spec = _load_json(parallel_spec_path)
@@ -816,7 +1016,7 @@ def _build_env(
     build_report = _load_json(build_report_path)
     asset_hashes = verify_generated_asset_hashes(root, task, build_report)
     bank, proof = load_verified_held_grasp_bank(
-        root, task, bank_path, "train", allow_final=False
+        evidence_root, evidence_task, bank_path, "train", allow_final=False
     )
     if proof.get("manifest_sha256") != EXPECTED_BANK_SHA256:
         raise ComparisonSmokeBlocked("held-bank manifest proof mismatch")
@@ -849,7 +1049,7 @@ def _build_env(
     )
     env_type = comparison_env_module.make_rj45_comparison_env_type(env_type)
     dependencies = held_grasp_bank_dependency_paths(
-        root, bank_path, "train", allow_final=False
+        evidence_root, bank_path, "train", allow_final=False
     )
     frozen_paths = {
         task_path,
@@ -1172,6 +1372,7 @@ def run_smoke(
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--evidence-root", type=Path, required=True)
     parser.add_argument(
         "--current-root", type=Path, default=Path(__file__).resolve().parents[1]
     )
@@ -1179,7 +1380,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--runtime-manifest",
         type=Path,
-        default=Path("configs/rj45-oracle-runtime-104721a.json"),
+        default=Path("configs/rj45-oracle-runtime-validation-ulp2-v1.json"),
     )
     parser.add_argument(
         "--held-bank",
@@ -1243,6 +1444,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     args.runtime_root = args.runtime_root.resolve()
+    args.evidence_root = args.evidence_root.resolve()
     args.current_root = args.current_root.resolve()
     if not args.runtime_manifest.is_absolute():
         args.runtime_manifest = (args.current_root / args.runtime_manifest).resolve()

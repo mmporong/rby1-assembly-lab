@@ -1,0 +1,32 @@
+{
+  "base_physics_manifest": {
+    "relative_path": "configs/rj45-task-admission-physics-inputs-104721a.json",
+    "sha256": "8e9d8631c3199ec5f7f59f0f85d371ba83800d25c96c3d0ef5ad3636e8b94e2c"
+  },
+  "active_import_inputs": {
+    "assets/generated/build-report.json": "b07af337727bbcf57ede08a53632ed7dc2c9d5f8da7f77004e883f64ae802896",
+    "configs/task.json": "3ec4a0a49848cbf59609c7339554afb90adb15a72d93601f06f73f4453bf7f36"
+  },
+  "evidence_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
+  "evidence_core_manifest": {
+    "relative_path": "configs/rj45-oracle-runtime-104721a.json",
+    "sha256": "d672417f55a61a1345dd442d067813fffdfd30274b547c8c103430866dd7b0f2"
+  },
+  "evidence_source_config_inputs": {
+    "assets/generated/tasks/rj45-v1/build-report.json": "25b3dec084e2f1becb47268a65ec76fba4880241cfacaf43e34eae56d70cd383",
+    "configs/assets.json": "92b41a462db0562d9599dff5bfdce3cbb0d38af774fd9fc77052bf9071c0bd08",
+    "configs/rj45-assets.json": "30ebef7d228a2d02642bf468ae7c60e92d2e740c623e65536342a487c7bb1313",
+    "configs/rj45-grasp-generation-v2.json": "7b1150212f26bec2129444123dfb8d7fa2f145ecdbbec85d05b931f5458a3d86",
+    "configs/runtime.json": "ebb7fa07ab966c1d3e02f24f60c4ef0ad49d01662f194d463d6414e2e003b67a",
+    "configs/tasks/rj45-v1.json": "7ac32092e6e723be066c80c53aecbbd873792e849ce42b742dbafd92cb3af88b",
+    "scripts/run_sim.py": "d20444cac6af9b8ef11903249ea4b0f43ffa50f5bf0808352059b058638694ed"
+  },
+  "runtime_commit": "1517fbf4af11a296e3e89fcbf2aa25c49a8d017d",
+  "runtime_core_manifest": {
+    "relative_path": "configs/rj45-oracle-runtime-validation-ulp2-v1.json",
+    "sha256": "79a8cc65b6a72ab1d9fa2bb7824c9e6c0cf37d096585a8f4cce7f2464d134184"
+  },
+  "schema_name": "rj45_task_admission_physics_inputs_v2",
+  "schema_version": 2,
+  "shared_bank_catalog_relative": "configs/rj45-grasp-generation-v2.json"
+}

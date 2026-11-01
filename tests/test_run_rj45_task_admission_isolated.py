@@ -48,7 +48,14 @@ def _sha(path: Path) -> str:
 
 def _snapshot() -> dict:
     normalized = {
-        "runtime": {"input.usd": "1" * 64},
+        "runtime": {
+            f"inputs/runtime-{index:02d}.bin": f"{index + 1:064x}"
+            for index in range(50)
+        },
+        "evidence": {
+            f"inputs/evidence-{index:02d}.bin": f"{index + 101:064x}"
+            for index in range(50)
+        },
         "current": {relative: "2" * 64 for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS},
     }
     return {
@@ -174,19 +181,19 @@ def test_worker_preflight_and_remaining_bindings_fail_closed(tmp_path: Path) -> 
         destination = current / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(ROOT / relative, destination)
-    normalized = {
-        "runtime": {"input.usd": "1" * 64},
-        "current": {
-            relative: _sha(current / relative)
-            for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS
-        },
+    snapshot = _snapshot()
+    snapshot["normalized_sha256"]["current"] = {
+        relative: _sha(current / relative)
+        for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS
     }
-    snapshot = {
-        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
-        "normalized_sha256": normalized,
-        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(normalized),
-        "manifest": {"path": "/tmp/physics.json", "sha256": "3" * 64},
-    }
+    snapshot.update(
+        runtime_root=str((tmp_path / "runtime").resolve()),
+        evidence_root=str((tmp_path / "evidence").resolve()),
+        current_root=str(current.resolve()),
+    )
+    snapshot["normalized_sha256_canonical_sha256"] = RUNNER._canonical_json_sha256(
+        snapshot["normalized_sha256"]
+    )
     campaign_path = tmp_path / "campaign.json"
     campaign_path.write_text(
         json.dumps(
@@ -311,9 +318,10 @@ def test_worker_identity_references_single_global_physics_map(tmp_path: Path) ->
 
 def _actual_shaped_attestation_inputs(tmp_path: Path):
     runtime_root = tmp_path / "runtime"
+    evidence_root = tmp_path / "evidence"
     (runtime_root / "configs").mkdir(parents=True)
     shutil.copyfile(ROOT / "configs/runtime.json", runtime_root / "configs/runtime.json")
-    bank_root = runtime_root / "artifacts/rj45-4c-bank-generation-v2-20261028"
+    bank_root = evidence_root / "artifacts/rj45-4c-bank-generation-v2-20261028"
     bank_root.mkdir(parents=True)
     catalog_path = bank_root / "catalog.json"
     catalog_path.write_text('{"catalog": 1}\n', encoding="utf-8")
@@ -329,12 +337,12 @@ def _actual_shaped_attestation_inputs(tmp_path: Path):
             json.dumps(
                 {
                     "provenance": {
-                        "nominal_report_path": str(report.relative_to(runtime_root)),
+                        "nominal_report_path": str(report.relative_to(evidence_root)),
                         "nominal_report_sha256": _sha(report),
-                        "nominal_trace_path": str(trace.relative_to(runtime_root)),
+                        "nominal_trace_path": str(trace.relative_to(evidence_root)),
                         "nominal_trace_sha256": _sha(trace),
                         "grasp_generation": {
-                            "catalog_path": str(catalog_path.relative_to(runtime_root)),
+                            "catalog_path": str(catalog_path.relative_to(evidence_root)),
                             "catalog_sha256": _sha(catalog_path),
                         },
                     }
@@ -347,7 +355,7 @@ def _actual_shaped_attestation_inputs(tmp_path: Path):
                 "grasp_id": grasp_id,
                 "split": "train",
                 "artifact": {
-                    "path": str(artifact.relative_to(runtime_root)),
+                    "path": str(artifact.relative_to(evidence_root)),
                     "sha256": _sha(artifact),
                 },
             }
@@ -360,10 +368,16 @@ def _actual_shaped_attestation_inputs(tmp_path: Path):
     physics_runtime = {
         **{f"src/rby1_assembly/runtime_{index:02d}.py": f"{index + 1:064x}" for index in range(35)},
         **{f"assets/physics_{index:02d}.usd": f"{index + 101:064x}" for index in range(13)},
+        "configs/task.json": "e" * 64,
+        "assets/generated/build-report.json": "f" * 64,
     }
     snapshot = {
         "normalized_sha256": {
             "runtime": physics_runtime,
+            "evidence": {
+                f"evidence/source-{index:02d}.bin": f"{index + 201:064x}"
+                for index in range(50)
+            },
             "current": {
                 relative: _sha(ROOT / relative)
                 for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS
@@ -376,7 +390,11 @@ def _actual_shaped_attestation_inputs(tmp_path: Path):
         EXPECTED_BANK_SOURCE_SHA256="9" * 64,
         EXPECTED_IDS=RUNNER.EXPECTED_IDS,
     )
-    args = SimpleNamespace(runtime_root=runtime_root, current_root=ROOT)
+    args = SimpleNamespace(
+        runtime_root=runtime_root,
+        evidence_root=evidence_root,
+        current_root=ROOT,
+    )
     return args, prepared, runner, report, manifest_path
 
 
@@ -387,10 +405,10 @@ def test_trusted_bank_builder_accepts_actual_physics_shape_and_rehashes_bank26(
     trusted = COORDINATOR._trusted_worker_attestation(args, prepared, runner)
     frozen = trusted["frozen_input_sha256"]
     physics = prepared["physics_input_snapshot"]["normalized_sha256"]["runtime"]
-    assert len(physics) == 48
+    assert len(physics) == 50
     assert len(frozen) == 26
     frozen_relative = {
-        str(Path(path).relative_to(args.runtime_root)) for path in frozen
+        str(Path(path).relative_to(args.evidence_root)) for path in frozen
     }
     assert frozen_relative.isdisjoint(physics)
     campaign = {"trusted_worker_attestation": trusted}
@@ -797,6 +815,7 @@ def test_worker_rc0_parent_cleans_residual_owned_group(
     args = SimpleNamespace(
         current_root=ROOT,
         runtime_root=tmp_path / "runtime",
+        evidence_root=tmp_path / "evidence",
         config=ROOT / "configs/rj45-comparison-development.json",
         playback_actions=PLAYBACK_PATH,
         worker_timeout_seconds=2.0,
@@ -848,7 +867,12 @@ def test_native_signal_still_invokes_post_exit_verifier(
         def wait(self, timeout=None):
             return self.returncode
 
-    monkeypatch.setattr(COORDINATOR.subprocess, "Popen", lambda *args, **kwargs: CrashedProcess())
+    worker_calls = []
+    monkeypatch.setattr(
+        COORDINATOR.subprocess,
+        "Popen",
+        lambda command, **kwargs: worker_calls.append(command) or CrashedProcess(),
+    )
     monkeypatch.setattr(
         COORDINATOR,
         "_cleanup_owned_process_group",
@@ -869,6 +893,7 @@ def test_native_signal_still_invokes_post_exit_verifier(
     args = SimpleNamespace(
         current_root=ROOT,
         runtime_root=tmp_path / "runtime",
+        evidence_root=tmp_path / "evidence",
         config=ROOT / "configs/rj45-comparison-development.json",
         playback_actions=ROOT / "docs/evidence/rj45-frozen-ablation-20261031/source-actions.json",
         worker_timeout_seconds=1.0,
@@ -881,7 +906,11 @@ def test_native_signal_still_invokes_post_exit_verifier(
     result = COORDINATOR._launch_worker(args, spec, _sha(spec), output)
     assert result["return_code"] == -11
     assert result["post_exit_verifier_return_code"] == 2
+    assert len(worker_calls) == 1
     assert len(verifier_calls) == 1
+    for command in (worker_calls[0], verifier_calls[0]):
+        evidence_index = command.index("--evidence-root")
+        assert command[evidence_index + 1] == str(args.evidence_root)
 
 
 def test_first_failure_stops_following_chunks_and_identity_precedes_worker(
