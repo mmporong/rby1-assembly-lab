@@ -1,6 +1,6 @@
 {
   "schema": "rj45-controlled-observability-contract-v2",
-  "frozen": false,
+  "frozen": true,
   "seed_namespace": "rj45-controlled-observability-v2/environment",
   "environment_seeds": [494541735, 903551052, 1615423706],
   "grasps": ["rj45-train-02", "rj45-train-05"],

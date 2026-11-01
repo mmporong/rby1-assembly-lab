@@ -28,14 +28,18 @@ def test_validate_only_is_cpu_only_and_does_not_write(tmp_path):
                             capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
-    assert payload["frozen"] is False
+    assert payload["frozen"] == json.loads((ROOT / "configs/rj45-controlled-observability-v2.json").read_text())["frozen"]
     assert len(payload["plan"]) == 24
     assert not (tmp_path / "no-output").exists()
 
 
 def test_unfrozen_config_cannot_execute_or_import_simulator(tmp_path):
+    config = json.loads((ROOT / "configs/rj45-controlled-observability-v2.json").read_text())
+    config["frozen"] = False
+    draft = tmp_path / "draft.json"
+    draft.write_text(json.dumps(config))
     with pytest.raises(ValueError, match="not frozen"):
-        RUNNER.main([*args(tmp_path), "--ordinal", "1"])
+        RUNNER.main([*args(tmp_path), "--ordinal", "1", "--config", str(draft)])
     assert not (tmp_path / "no-output").exists()
 
 
