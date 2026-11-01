@@ -1,0 +1,32 @@
+{
+  "schema_name": "rj45-controlled-observability-independent-completed-review-v1",
+  "reviewer": "/root/f_recovery_verify",
+  "reviewed_at_utc": "2026-11-01T09:13:30.099064+00:00",
+  "evidence_integrity": "PASS",
+  "chunk1_separation": "FAIL",
+  "archive_sha256": "2f9218e8fecb88e476690c3f39583e82663445fb2bb258656dbfbd76b0a02c1a",
+  "regular_members": 92,
+  "payload_count": 91,
+  "trace_rows": 4362,
+  "verified_cases": 6,
+  "measurement_valid_cases": 6,
+  "contact_window_observations": 13,
+  "D_min": 0.046849005859659176,
+  "threshold": 0.05,
+  "dispersion_raw": 0.0,
+  "dispersion_floor": 1e-06,
+  "signal_to_dispersion": 46849.00585965918,
+  "ratio_threshold": 2,
+  "same_sign_seed_traces_byte_identical": true,
+  "stochastic_robustness_demonstrated": false,
+  "successes": 0,
+  "hard_contact": 0,
+  "forbidden_contact": 0,
+  "reviewed_files": {
+    "local-recovery-verification.json": "0caeab1626ac1de2efaa220d1f5c5228efe4a8ddaae46af9f666d27cddc49f24",
+    "chunk1-analysis.json": "c6803deebd9cf579879631edaaff60a3561a2b33a5aa7ea036a6ac04e45e8a28"
+  },
+  "full_24_adjudication_performed": false,
+  "task_admission_completed": false,
+  "rl_pilot_admitted": false
+}

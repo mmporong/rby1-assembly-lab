@@ -1,0 +1,37 @@
+{
+  "at_utc": "2026-11-01T09:14:37.743040+00:00",
+  "recovery_verified": true,
+  "independent_trace_review": "PASS",
+  "scientific_separation_result": "FAIL",
+  "gpu": {
+    "id": "pyf1b9s0a",
+    "name": "rby1-oracle-crusoe-20261031a",
+    "status": "STOPPED",
+    "at_utc": "2026-11-01T09:14:16.718227+00:00"
+  },
+  "guard": "Id=rby1-controlled-observability-stop-20261101f.timer\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n\nId=rby1-controlled-observability-stop-20261101f.service\nLoadState=not-found\nActiveState=inactive\nSubState=dead\n",
+  "guard_stop_result": "timer stopped; transient units unloaded, both inactive verified",
+  "initial_stop_helper": "stop_not_confirmed_after_8_polls; subsequent_exact_status_STOPPED",
+  "balance_queried": false,
+  "g_native_started": false,
+  "remaining_ordinals_unrun": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ]
+}

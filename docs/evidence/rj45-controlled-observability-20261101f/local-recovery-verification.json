@@ -1,0 +1,28 @@
+{
+  "archive": "/opt/homedata/rby1-storage/transport/rj45-controlled-observability-20261101f-recovery.tar.gz",
+  "archive_bytes": 3244022,
+  "archive_sha256": "2f9218e8fecb88e476690c3f39583e82663445fb2bb258656dbfbd76b0a02c1a",
+  "regular_members": 92,
+  "payload_count": 91,
+  "uncompressed_bytes": 20740192,
+  "destination": "/opt/homedata/rby1-storage/recovered/rj45-controlled-observability-20261101f",
+  "native_launch_claim_sha256": "ae23e3b89f85e57d2085843b56755187997e8badc861c6f24df390f5e3573cb0",
+  "native_admission_sha256": "d8e2969a08c045dbd67e1fc221968135fc3e8cd0f61cb6ec37743f445ab9d981",
+  "safe_inventory": true,
+  "all_payloads_verified": true,
+  "all_extracted_payloads_verified": true,
+  "manifest_post_write_verified": true,
+  "chunk_index": 1,
+  "verified_case_ordinals": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "full_24_adjudication_performed": false,
+  "task_admission_completed": false,
+  "rl_pilot_admitted": false,
+  "scientific_adjudication": false
+}
