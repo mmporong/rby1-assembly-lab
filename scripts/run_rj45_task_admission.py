@@ -1083,12 +1083,33 @@ def _episode(
     candidate_id,
     *, heartbeat=None,
     step_observer=None,
+    diagnostic_provider_factory=None,
+    diagnostic_provider_attestor=None,
 ):
     stage, grasp_id, case_id, method_id, slot, _ = row
     modules = runtime["modules"]
     provider = None
     state = None
-    if method_id != "oracle_gt_reference":
+    diagnostic_override = (
+        diagnostic_provider_factory is not None
+        or diagnostic_provider_attestor is not None
+    )
+    if diagnostic_override:
+        if (
+            stage != "diagnostic"
+            or method_id != "active_z_probe"
+            or not callable(diagnostic_provider_factory)
+            or not callable(diagnostic_provider_attestor)
+        ):
+            raise AdmissionRunBlocked("provider override requires explicit active-z diagnostic scope")
+        provider = diagnostic_provider_factory()
+        state = provider.reset()
+        provider_attestation = diagnostic_provider_attestor(provider)
+        if not isinstance(provider_attestation, dict) or not provider_attestation.get("diagnostic_only"):
+            raise AdmissionRunBlocked("diagnostic provider attestation is missing")
+    elif method_id == "active_z_probe":
+        raise AdmissionRunBlocked("active-z diagnostic requires an explicit provider and attestation")
+    elif method_id != "oracle_gt_reference":
         kwargs = {}
         method = next(item for item in prepared["config"]["methods"] if item["id"] == method_id)
         if method_id == "mean_constant":
@@ -1127,6 +1148,7 @@ def _episode(
     env, torch = _make_env(prepared, runtime, row)
     observations = []
     evaluator_force_samples_n = []
+    diagnostic_provider_steps = []
     try:
         reset = env.reset()
         observation = reset[0] if isinstance(reset, tuple) else reset
@@ -1136,10 +1158,22 @@ def _episode(
             policy = observation["policy"]
             valid = env.extras.get("policy_observation_valid")
             action = torch.zeros((1, 6), device=env.device)
+            if diagnostic_override and (valid is None or not bool(valid[0])):
+                if provider.state_telemetry(state)["phase"] in {"probing", "contact_window", "returning"}:
+                    raise AdmissionRunBlocked("policy observation disappeared during active-z probe")
             if method_id != "oracle_gt_reference" and valid is not None and bool(valid[0]):
                 sample = policy[0].detach().cpu().numpy()
+                if diagnostic_override:
+                    prior_provider_state = provider.state_telemetry(state)
                 produced, state = provider.act(sample, state)
                 action[0] = torch.as_tensor(produced, device=env.device, dtype=action.dtype)
+                if diagnostic_override:
+                    diagnostic_provider_steps.append({
+                        "step_index": step_index,
+                        "state_before": prior_provider_state,
+                        "state": provider.state_telemetry(state),
+                        "commanded_normalized_action6": action[0].detach().cpu().tolist(),
+                    })
             if step_observer is not None:
                 policy_timestamp = getattr(
                     env, "_training_last_policy_observation_timestamp_s", None
@@ -1152,6 +1186,8 @@ def _episode(
             ended = bool((terminated | truncated)[0])
             if step_observer is not None:
                 step_observer.capture_post(env, step_extras, ended)
+            if diagnostic_override and provider.state_telemetry(state)["phase"] == "invalid_latched":
+                raise AdmissionRunBlocked("active-z provider lost its valid observation scope")
             observations.append(tuple(float(value) for value in policy[0].detach().cpu().tolist()))
             current_grip = float(env._last_contact_proxy_n[0].max().item())
             current_insertion_load = float(
@@ -1163,6 +1199,8 @@ def _episode(
         else:
             raise AdmissionRunBlocked("episode exceeded the bounded 1200-step limit")
         terminal = _validate_terminal_snapshot(env.extras.get("terminal_snapshot"))
+        if diagnostic_override and provider.state_telemetry(state)["phase"] != "done":
+            raise AdmissionRunBlocked("active-z episode ended before the probe completed")
         admission_snapshot = terminal["task_admission"]
         success = bool(terminal["independent_eval_success"][0])
         forbidden = bool(terminal["forbidden_contact"][0])
@@ -1191,6 +1229,7 @@ def _episode(
             "admission_snapshot": admission_snapshot,
             "terminal_complete": True,
             "execution_error": None,
+            **({"diagnostic_provider_steps": diagnostic_provider_steps} if diagnostic_override else {}),
         }
     finally:
         env.close()

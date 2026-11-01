@@ -8,6 +8,7 @@ from pathlib import Path
 import subprocess
 import sys
 from types import ModuleType, SimpleNamespace
+from contextlib import nullcontext
 
 import pytest
 
@@ -25,7 +26,8 @@ CONFIG = json.loads(
 )
 
 
-def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) -> None:
+@pytest.mark.parametrize("active_probe,probe_phase", [(False, "done"), (True, "done"), (True, "probing"), (True, "contact_window"), (True, "returning"), (True, "invalid_latched"), (True, "safety_latched")])
+def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch, active_probe, probe_phase) -> None:
     torch = pytest.importorskip("torch")
     step_extras = {"terminal_snapshot": {"source": "pre-reset"}}
 
@@ -57,10 +59,13 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) ->
 
     class Provider:
         def reset(self):
-            return object()
+            return {"phase": "waiting"}
 
         def act(self, observation, state):
-            return [0.0] * 6, state
+            return [0.0] * 6, {"phase": probe_phase}
+
+        def state_telemetry(self, state):
+            return state
 
     calls = []
 
@@ -98,17 +103,48 @@ def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) ->
         }
     }
     prepared = {"config": CONFIG}
-    result = RUNNER._episode(
-        prepared,
-        runtime,
-        ("diagnostic", "rj45-train-02", "tx-positive", "zero", 1, None),
-        None,
-        step_observer=Observer(),
-    )
+    options = ({
+        "diagnostic_provider_factory": Provider,
+        "diagnostic_provider_attestor": lambda provider: {"diagnostic_only": True},
+    } if active_probe else {})
+    expected_failure = active_probe and probe_phase != "done"
+    with pytest.raises(RUNNER.AdmissionRunBlocked) if expected_failure else nullcontext():
+        result = RUNNER._episode(
+            prepared,
+            runtime,
+            ("diagnostic", "rj45-train-02", "tx-positive", "active_z_probe" if active_probe else "zero", 1, None),
+            None,
+            step_observer=Observer(),
+            **options,
+        )
+    if expected_failure:
+        return
     assert [call[0] for call in calls] == ["pre", "post"]
     assert calls[1][2] is step_extras
     assert calls[1][3] is True
     assert len(result["observation_samples"]) == 1
+    if active_probe:
+        assert result["diagnostic_provider_steps"] == [{
+            "step_index": 0,
+            "state_before": {"phase": "waiting"},
+            "state": {"phase": "done"},
+            "commanded_normalized_action6": [0.0] * 6,
+        }]
+    else:
+        assert "diagnostic_provider_steps" not in result
+
+
+@pytest.mark.parametrize("stage,method,factory,attestor", [
+    ("admission", "active_z_probe", lambda: None, lambda _: {}),
+    ("diagnostic", "zero", lambda: None, lambda _: {}),
+    ("diagnostic", "active_z_probe", None, lambda _: {}),
+    ("diagnostic", "active_z_probe", lambda: None, None),
+    ("diagnostic", "active_z_probe", None, None),
+])
+def test_diagnostic_override_cannot_enter_formal_or_implicit_provider_path(stage, method, factory, attestor):
+    with pytest.raises(RUNNER.AdmissionRunBlocked):
+        RUNNER._episode({}, {"modules": {}}, (stage, "rj45-train-02", "tz-positive", method, 1, None), None,
+                        diagnostic_provider_factory=factory, diagnostic_provider_attestor=attestor)
 
 
 def _file_sha(path: Path) -> str:

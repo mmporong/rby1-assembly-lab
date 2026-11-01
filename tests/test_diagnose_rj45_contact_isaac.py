@@ -38,6 +38,18 @@ def test_fixed_plan_is_exactly_eight_train02_development_cases() -> None:
     ]
 
 
+def test_active_probe_plan_is_separate_paired_same_order_repeats() -> None:
+    assert len(DIAGNOSTIC.ACTIVE_Z_PLAN) == 8
+    assert {(row[1], row[2], row[4]) for row in DIAGNOSTIC.ACTIVE_Z_PLAN} == {
+        (grasp, case, repeat)
+        for grasp in ("rj45-train-02", "rj45-train-05")
+        for case in ("tz-positive", "tz-negative")
+        for repeat in (1, 2)
+    }
+    assert all(row[0] == "diagnostic" and row[3] == "active_z_probe" for row in DIAGNOSTIC.ACTIVE_Z_PLAN)
+    assert DIAGNOSTIC._parser().parse_args(["--ordinal", "1", "--output-dir", "/tmp/probe"]).active_z_probe is False
+
+
 def test_diagnostic_geometry_preserves_full_task_frame_xyz_and_quaternion() -> None:
     task_path = Path(__file__).resolve().parents[1] / "configs/tasks/rj45-v1.json"
     task = json.loads(task_path.read_text(encoding="utf-8"))
@@ -405,3 +417,28 @@ def test_runtime_import_root_mismatch_is_blocked(tmp_path: Path) -> None:
     }
     with pytest.raises(FakeBlocked, match="escaped"):
         DIAGNOSTIC._verify_runtime_import_origins_end(runner, prepared, start)
+
+
+def test_active_provider_source_is_in_start_and_end_bindings(tmp_path):
+    current = tmp_path / "current"
+    runtime = tmp_path / "runtime"
+    relative_paths = [
+        (current, "scripts/run_rj45_task_admission.py"),
+        (current, "src/rby1_assembly/rj45_diagnostic_trace.py"),
+        (current, "src/rby1_assembly/rj45_active_z_probe.py"),
+        (runtime, "src/rby1_assembly/recording.py"),
+        (runtime, "src/rby1_assembly/dataset.py"),
+    ]
+    for root, relative in relative_paths:
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(relative)
+    prepared = {"current_root": current, "runtime_root": runtime,
+                "physics_input_snapshot": {"normalized_sha256": {"current": {}}}}
+    assert "active_z_provider" not in DIAGNOSTIC._source_bindings(prepared)
+    prepared["active_z_probe"] = True
+    before = DIAGNOSTIC._source_bindings(prepared)
+    (current / "src/rby1_assembly/rj45_active_z_probe.py").write_text("changed")
+    after = DIAGNOSTIC._source_bindings(prepared)
+    assert before["active_z_provider"] != after["active_z_provider"]
+    assert {k for k in before if before[k] != after[k]} == {"active_z_provider"}

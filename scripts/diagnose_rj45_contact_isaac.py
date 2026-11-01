@@ -36,6 +36,12 @@ DIAGNOSTIC_PLAN = (
     ("diagnostic", "rj45-train-02", "tz-positive", "oracle_gt_reference", 1, None),
     ("diagnostic", "rj45-train-02", "tz-negative", "oracle_gt_reference", 1, None),
 )
+ACTIVE_Z_PLAN = tuple(
+    ("diagnostic", grasp, case, "active_z_probe", repeat, None)
+    for grasp in ("rj45-train-02", "rj45-train-05")
+    for case in ("tz-positive", "tz-negative")
+    for repeat in (1, 2)
+)
 COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE = (
     "max_of_external_forbidden_and_cross_hand_physx_contact_loads"
 )
@@ -64,6 +70,7 @@ def _sha256(path: Path) -> str:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ordinal", type=int, required=True, choices=range(1, 9))
+    parser.add_argument("--active-z-probe", action="store_true")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--runtime-root", type=Path, default=RUNTIME_ROOT)
     parser.add_argument("--evidence-root", type=Path, default=EVIDENCE_ROOT)
@@ -107,6 +114,8 @@ def _source_bindings(prepared: Mapping[str, Any]) -> dict[str, str]:
         "runtime_recording": runtime_root / "src/rby1_assembly/recording.py",
         "runtime_dataset": runtime_root / "src/rby1_assembly/dataset.py",
     }
+    if prepared.get("active_z_probe"):
+        paths["active_z_provider"] = current_root / "src/rby1_assembly/rj45_active_z_probe.py"
     bindings.update({name: _sha256(path) for name, path in paths.items()})
     return bindings
 
@@ -534,6 +543,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         if output_preexisted:
             raise FileExistsError(f"output directory already exists: {args.output_dir}")
         prepared = runner._prepare(_prepare_args(args))
+        prepared["active_z_probe"] = args.active_z_probe
         start_sources = _source_bindings(prepared)
         pre_physics = prepared["runtime_validator"].verify_physics_input_end(
             prepared["physics_input_snapshot"],
@@ -556,7 +566,26 @@ def main(argv: Sequence[str] | None = None) -> int:
             runner, prepared, runtime
         )
 
-        row = DIAGNOSTIC_PLAN[args.ordinal - 1]
+        row = (ACTIVE_Z_PLAN if args.active_z_probe else DIAGNOSTIC_PLAN)[args.ordinal - 1]
+        provider_kwargs = {}
+        if args.active_z_probe:
+            provider_path = prepared["current_root"] / "src/rby1_assembly/rj45_active_z_probe.py"
+            probe = _load_module("rby1_active_z_diagnostic_provider", provider_path)
+
+            def attest_probe(provider):
+                return {
+                    "diagnostic_only": True,
+                    "applied_controller_sha256": provider.controller_sha256(),
+                    "applied_artifact_sha256": None,
+                    "controller_payload": provider.canonical_payload(),
+                    "provider_source_sha256": _sha256(provider_path),
+                    "provider_import_origin": str(Path(probe.__file__).resolve()),
+                }
+
+            provider_kwargs = {
+                "diagnostic_provider_factory": probe.ActiveZProbeProvider,
+                "diagnostic_provider_attestor": attest_probe,
+            }
         writer = trace_module.JsonlTraceWriter(
             args.output_dir / "ticks.jsonl",
             args.output_dir / "ticks.sidecar.json",
@@ -577,6 +606,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             row,
             None,
             step_observer=observer,
+            **provider_kwargs,
         )
         sidecar = observer.finalize()
         frozen_bank_end = _verify_frozen_bank_end(runner, runtime)
@@ -603,6 +633,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "grasp_id": row[1],
                 "case_id": row[2],
                 "method_id": row[3],
+                "repeat": row[4],
                 "environment_seed": runner.TASK_ADMISSION_ENVIRONMENT_SEED,
                 "provider_inputs": episode["provider_inputs"],
             },
@@ -629,6 +660,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "rl_pilot_admitted": False,
             },
         }
+        if args.active_z_probe:
+            report["active_z_probe"] = {
+                "controller_payload": episode["controller_payload"],
+                "controller_sha256": episode["applied_controller_sha256"],
+                "provider_source_sha256": episode["provider_source_sha256"],
+                "provider_import_origin": episode["provider_import_origin"],
+                "steps": episode["diagnostic_provider_steps"],
+            }
         runner._atomic_json(report_path, report)
         return 0
     except Exception as error:
