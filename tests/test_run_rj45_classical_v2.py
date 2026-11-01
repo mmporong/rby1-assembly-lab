@@ -68,8 +68,10 @@ def _write_json(path, value):
 
 
 def test_validate_only_tuning_is_cpu_only_and_does_not_write(tmp_path):
+    draft = tmp_path / "draft.json"
+    _write_json(draft, _config(frozen=False))
     result = subprocess.run(
-        [sys.executable, str(SCRIPT), *_args(tmp_path), "--validate-only"],
+        [sys.executable, str(SCRIPT), *_args(tmp_path), "--config", str(draft), "--validate-only"],
         capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr

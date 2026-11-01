@@ -205,7 +205,6 @@ def test_payload_sha_telemetry_and_base_source_are_stable() -> None:
 def test_v2_config_preregisters_24_slots_selection_and_noncausal_basis() -> None:
     config = json.loads((ROOT / "configs/rj45-classical-tuning-v2.json").read_text())
     assert config["schema"] == "rj45-classical-tuning-v2"
-    assert config["frozen"] is False
     assert config["tuning_grasp_id"] == "rj45-train-03"
     assert config["candidate_count"] == 4
     assert config["episodes_per_candidate"] == 6

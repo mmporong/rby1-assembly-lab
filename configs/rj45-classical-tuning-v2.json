@@ -1,6 +1,6 @@
 {
   "schema": "rj45-classical-tuning-v2",
-  "frozen": false,
+  "frozen": true,
   "provider_schema": "rj45-classical-force-search-controller-v2",
   "tuning_grasp_id": "rj45-train-03",
   "signed_cases": [
