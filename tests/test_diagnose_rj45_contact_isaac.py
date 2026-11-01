@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import hashlib
+from dataclasses import dataclass
+import json
 from pathlib import Path
 import sys
 from types import SimpleNamespace
@@ -36,6 +38,24 @@ def test_fixed_plan_is_exactly_eight_train02_development_cases() -> None:
     ]
 
 
+def test_diagnostic_geometry_preserves_full_task_frame_xyz_and_quaternion() -> None:
+    task_path = Path(__file__).resolve().parents[1] / "configs/tasks/rj45-v1.json"
+    task = json.loads(task_path.read_text(encoding="utf-8"))
+    geometry = DIAGNOSTIC._geometry(task, FakeRecording)
+    assert geometry.socket_entry_position_m.tolist() == [0.0, -0.033, 0.0005075]
+    assert geometry.socket_entry_quaternion_wxyz.tolist() == [1.0, 0.0, 0.0, 0.0]
+    assert geometry.plug_tip_position_m.tolist() == [0.0, 0.01137, 0.0]
+    assert geometry.plug_tip_quaternion_wxyz.tolist() == [1.0, 0.0, 0.0, 0.0]
+    assert geometry.recording.socket_entry_y_m == -0.033
+    assert geometry.recording.plug_tip_y_m == 0.01137
+    identity_poses = np.asarray(
+        [[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]] * 2
+    )
+    assert DIAGNOSTIC._full_frame_geometry_metrics(
+        FakeRecording, identity_poses, geometry
+    ) == pytest.approx((0.04437, 0.0005075, 0.0), abs=1e-12, rel=0.0)
+
+
 def test_existing_output_is_rejected_without_resume_or_mutation(tmp_path: Path) -> None:
     output = tmp_path / "existing"
     output.mkdir()
@@ -54,6 +74,16 @@ class FakeBlocked(RuntimeError):
     pass
 
 
+@dataclass(frozen=True)
+class FakeGroundTruth:
+    actual_depth_m: float
+    lateral_error_m: float
+    orientation_error_rad: float
+    force_peak_n: float = 0.0
+    grasp_both: bool = False
+    forbidden_contact: bool = False
+
+
 class FakeRecording:
     FORBIDDEN_CONTACT_LOAD_SOURCE = "external-only"
     INSERTION_FORCE_SOURCE = "insertion-net"
@@ -62,13 +92,55 @@ class FakeRecording:
     class RecordingContractError(RuntimeError):
         pass
 
+    class AssemblyGeometry:
+        def __init__(self, socket_entry_y_m, plug_tip_y_m):
+            self.socket_entry_y_m = socket_entry_y_m
+            self.plug_tip_y_m = plug_tip_y_m
+            self.metric_tolerance_m = 1e-5
+            self.angular_tolerance_rad = 1e-5
+
+    @staticmethod
+    def wxyz_to_xyzw(value):
+        return np.asarray(value)
+
+    @staticmethod
+    def _quat_apply_wxyz(quaternion, vector):
+        xyz = quaternion[1:4]
+        twice_cross = 2.0 * np.cross(xyz, vector)
+        return vector + quaternion[0] * twice_cross + np.cross(xyz, twice_cross)
+
+    @staticmethod
+    def _quat_multiply_wxyz(left, right):
+        lw, lx, ly, lz = left
+        rw, rx, ry, rz = right
+        return np.asarray(
+            (
+                lw * rw - lx * rx - ly * ry - lz * rz,
+                lw * rx + lx * rw + ly * rz - lz * ry,
+                lw * ry - lx * rz + ly * rw + lz * rx,
+                lw * rz + lx * ry - ly * rx + lz * rw,
+            )
+        )
+
     @staticmethod
     def live_snapshot(*_args):
-        return "base-live"
+        return SimpleNamespace(
+            ground_truth=FakeGroundTruth(
+                actual_depth_m=0.01,
+                lateral_error_m=0.001,
+                orientation_error_rad=0.002,
+            ),
+            reported_geometry_consistent=True,
+            insertion_contact_force_w=np.asarray([1.0, 2.0, 2.0]),
+            insertion_contact_force_n=3.0,
+            insertion_contact_load_n=4.0,
+            contact_force_proxy_n=np.asarray([5.0, 6.0]),
+            phase="insert",
+        )
 
     @staticmethod
     def terminal_snapshot_from_extras(*_args):
-        return "base-terminal"
+        return FakeRecording.live_snapshot()
 
     @staticmethod
     def _scalar(value, env_index=0):
@@ -87,13 +159,18 @@ class FakeRecording:
     @staticmethod
     def _metrics_from_mapping(evaluation, poses, geometry, env_index=0):
         assert poses.shape == (2, 7)
-        return SimpleNamespace(
+        lateral = evaluation.get(
+            "lateral_error_m", evaluation.get("actual_lateral_error_m")
+        )
+        orientation = evaluation.get(
+            "orientation_error_rad", evaluation.get("actual_orientation_error_rad")
+        )
+        metrics = FakeGroundTruth(
             actual_depth_m=float(evaluation["actual_depth_m"][env_index]),
-            lateral_error_m=float(evaluation["lateral_error_m"][env_index]),
-            orientation_error_rad=float(
-                evaluation["orientation_error_rad"][env_index]
-            ),
-        ), True
+            lateral_error_m=float(lateral[env_index]),
+            orientation_error_rad=float(orientation[env_index]),
+        )
+        return metrics, not bool(evaluation.get("force_geometry_mismatch", False))
 
 
 def _combined_contact_fields() -> dict:
@@ -131,6 +208,16 @@ def _live_env() -> SimpleNamespace:
     )
 
 
+def _geometry() -> SimpleNamespace:
+    return SimpleNamespace(
+        recording=FakeRecording.AssemblyGeometry(-0.033, 0.01137),
+        socket_entry_position_m=np.asarray([0.0, -0.033, 0.0005075]),
+        socket_entry_quaternion_wxyz=np.asarray([1.0, 0.0, 0.0, 0.0]),
+        plug_tip_position_m=np.asarray([0.0, 0.01137, 0.0]),
+        plug_tip_quaternion_wxyz=np.asarray([1.0, 0.0, 0.0, 0.0]),
+    )
+
+
 def test_diagnostic_snapshot_accepts_combined_source_without_relabel() -> None:
     extras = {
         **_combined_contact_fields(),
@@ -143,7 +230,7 @@ def test_diagnostic_snapshot_accepts_combined_source_without_relabel() -> None:
         },
     }
     snapshot = DIAGNOSTIC._diagnostic_snapshot(
-        FakeRecording, _live_env(), extras, object(), terminal=False
+        FakeRecording, _live_env(), extras, _geometry(), terminal=False
     )
     assert snapshot.insertion_contact_force_w.tolist() == [1.0, 2.0, 2.0]
     assert snapshot.insertion_contact_load_n == 4.0
@@ -166,27 +253,54 @@ def test_diagnostic_snapshot_rejects_forged_combined_forbidden_load() -> None:
         FakeRecording.RecordingContractError, match="differs from its measured components"
     ):
         DIAGNOSTIC._diagnostic_snapshot(
-            FakeRecording, _live_env(), extras, object(), terminal=False
+            FakeRecording, _live_env(), extras, _geometry(), terminal=False
         )
+
+
+def test_reported_geometry_mismatch_is_preserved_for_diagnosis() -> None:
+    extras = {
+        **_combined_contact_fields(),
+        "insertion_contact_force_source": FakeRecording.INSERTION_FORCE_SOURCE,
+        "insertion_contact_load_source": FakeRecording.INSERTION_LOAD_SOURCE,
+        "evaluation": {
+            "actual_depth_m": np.asarray([0.01]),
+            "lateral_error_m": np.asarray([0.001]),
+            "orientation_error_rad": np.asarray([0.002]),
+            "force_geometry_mismatch": True,
+        },
+    }
+    snapshot = DIAGNOSTIC._diagnostic_snapshot(
+        FakeRecording, _live_env(), extras, _geometry(), terminal=False
+    )
+    assert snapshot.reported_geometry_consistent is False
+    assert snapshot.reported_ground_truth.actual_depth_m == 0.01
 
 
 def test_base_forbidden_source_remains_owned_by_frozen_recording_contract() -> None:
     extras = {
-        "forbidden_contact_load_source": FakeRecording.FORBIDDEN_CONTACT_LOAD_SOURCE
+        "forbidden_contact_load_source": FakeRecording.FORBIDDEN_CONTACT_LOAD_SOURCE,
+        "evaluation": {
+            "actual_depth_m": np.asarray([0.01]),
+            "actual_lateral_error_m": np.asarray([0.001]),
+            "actual_orientation_error_rad": np.asarray([0.002]),
+        },
+        "object_poses_world_wxyz": np.asarray(
+            [[[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]] * 2]
+        ),
     }
-    assert (
-        DIAGNOSTIC._diagnostic_snapshot(
-            FakeRecording, _live_env(), extras, object(), terminal=False
-        )
-        == "base-live"
+    live = DIAGNOSTIC._diagnostic_snapshot(
+        FakeRecording, _live_env(), extras, _geometry(), terminal=False
     )
-    terminal = {"terminal_snapshot": extras}
-    assert (
-        DIAGNOSTIC._diagnostic_snapshot(
-            FakeRecording, None, terminal, object(), terminal=True
-        )
-        == "base-terminal"
+    terminal = DIAGNOSTIC._diagnostic_snapshot(
+        FakeRecording,
+        None,
+        {"terminal_snapshot": extras},
+        _geometry(),
+        terminal=True,
     )
+    assert live.legacy_y_only_geometry_consistent is True
+    assert live.reported_geometry_consistent is False
+    assert terminal.reported_ground_truth.lateral_error_m == 0.001
 
 
 def test_terminal_combined_snapshot_reads_pre_reset_clone() -> None:
@@ -212,11 +326,12 @@ def test_terminal_combined_snapshot_reads_pre_reset_clone() -> None:
         FakeRecording,
         SimpleNamespace(socket="poisoned-reset-state", plug="poisoned-reset-state"),
         {"terminal_snapshot": snapshot},
-        object(),
+        _geometry(),
         terminal=True,
     )
     assert result.phase == "insert"
-    assert result.ground_truth.actual_depth_m == 0.01
+    assert result.ground_truth.actual_depth_m == 0.04437
+    assert result.reported_ground_truth.actual_depth_m == 0.01
     assert result.insertion_contact_force_w.tolist() == [1.0, 2.0, 2.0]
 
 

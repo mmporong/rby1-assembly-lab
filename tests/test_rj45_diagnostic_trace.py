@@ -49,7 +49,7 @@ class FakeEnv:
         return self._step_dt
 
 
-def _physics(*, force=(3.0, 4.0, 0.0), load=6.0):
+def _physics(*, force=(3.0, 4.0, 0.0), load=6.0, geometry_consistent=True):
     return SimpleNamespace(
         insertion_contact_force_w=np.asarray(force),
         insertion_contact_force_n=5.0,
@@ -61,6 +61,20 @@ def _physics(*, force=(3.0, 4.0, 0.0), load=6.0):
             lateral_error_m=0.001,
             orientation_error_rad=0.002,
         ),
+        reported_ground_truth=SimpleNamespace(
+            actual_depth_m=0.019,
+            lateral_error_m=0.0015,
+            orientation_error_rad=0.0025,
+        ),
+        reported_geometry_consistent=geometry_consistent,
+        legacy_y_only_ground_truth=SimpleNamespace(
+            actual_depth_m=0.02,
+            lateral_error_m=0.0016,
+            orientation_error_rad=0.002,
+        ),
+        legacy_y_only_geometry_consistent=False,
+        geometry_metric_tolerance_m=1e-5,
+        geometry_angular_tolerance_rad=1e-5,
     )
 
 
@@ -267,6 +281,43 @@ def test_force_vector_and_normal_load_contracts_are_checked(tmp_path: Path) -> N
             {"terminal_snapshot": _post_snapshot(observation)},
             True,
         )
+
+
+def test_geometry_mismatch_is_recorded_without_stopping_diagnostic(tmp_path: Path) -> None:
+    observation = np.zeros((1, 79))
+    env = FakeEnv(_training_snapshot(observation))
+    observer = _observer(
+        tmp_path,
+        live_snapshot=lambda *_args: _physics(geometry_consistent=False),
+    )
+    _capture_pre(observer, env, observation)
+    observer.capture_post(
+        env, {"terminal_snapshot": _post_snapshot(observation)}, False
+    )
+    env.source = _training_snapshot(observation, timestamp=1.1)
+    _capture_pre(observer, env, observation, timestamp=1.1)
+    observer.capture_post(
+        env,
+        {
+            "terminal_snapshot": _post_snapshot(
+                observation, policy_timestamp=1.1, post_timestamp=1.2
+            )
+        },
+        True,
+    )
+    observer.finalize()
+    rows = [json.loads(line) for line in (tmp_path / "ticks.jsonl").read_text().splitlines()]
+    assert rows[0]["reported_geometry_consistent"] is False
+    assert rows[0]["reported_physical_gt"]["actual_depth_m"] == 0.019
+    assert rows[0]["post_physical_gt"]["actual_depth_m"] == 0.02
+    assert rows[0]["reported_minus_recomputed_gt"]["actual_depth_m"] == pytest.approx(
+        -0.001
+    )
+    assert rows[0]["legacy_y_only_physical_gt"]["lateral_error_m"] == 0.0016
+    assert rows[0]["legacy_y_only_geometry_consistent"] is False
+    assert rows[0]["schema_name"] == "rj45-contact-diagnostic-tick-v2"
+    assert rows[0]["geometry_metric_tolerance_m"] == 1e-5
+    assert rows[0]["geometry_angular_tolerance_rad"] == 1e-5
 
 
 def test_jsonl_hash_chain_has_one_row_per_step_and_one_terminal(tmp_path: Path) -> None:

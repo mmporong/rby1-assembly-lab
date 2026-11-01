@@ -301,8 +301,43 @@ class ContactDiagnosticObserver:
             raise DiagnosticTraceError("insertion net-force norm differs from its vector")
         if float(snapshot.insertion_contact_load_n) + 1e-4 < force_norm:
             raise DiagnosticTraceError("normal-load sum is below insertion net-force norm")
+        reported = snapshot.reported_ground_truth
+        reported_values = {
+            "actual_depth_m": float(reported.actual_depth_m),
+            "lateral_error_m": float(reported.lateral_error_m),
+            "orientation_error_rad": float(reported.orientation_error_rad),
+        }
+        recomputed_values = {
+            "actual_depth_m": float(snapshot.ground_truth.actual_depth_m),
+            "lateral_error_m": float(snapshot.ground_truth.lateral_error_m),
+            "orientation_error_rad": float(snapshot.ground_truth.orientation_error_rad),
+        }
+        geometry_consistent = snapshot.reported_geometry_consistent
+        if type(geometry_consistent) is not bool:
+            raise DiagnosticTraceError("reported geometry consistency must be boolean")
+        legacy_values = {
+            "actual_depth_m": float(snapshot.legacy_y_only_ground_truth.actual_depth_m),
+            "lateral_error_m": float(
+                snapshot.legacy_y_only_ground_truth.lateral_error_m
+            ),
+            "orientation_error_rad": float(
+                snapshot.legacy_y_only_ground_truth.orientation_error_rad
+            ),
+        }
+        legacy_consistent = snapshot.legacy_y_only_geometry_consistent
+        if type(legacy_consistent) is not bool:
+            raise DiagnosticTraceError("legacy geometry consistency must be boolean")
+        metric_tolerance_m = float(snapshot.geometry_metric_tolerance_m)
+        angular_tolerance_rad = float(snapshot.geometry_angular_tolerance_rad)
+        if (
+            not math.isfinite(metric_tolerance_m)
+            or metric_tolerance_m <= 0.0
+            or not math.isfinite(angular_tolerance_rad)
+            or angular_tolerance_rad <= 0.0
+        ):
+            raise DiagnosticTraceError("geometry tolerances must be finite and positive")
         row = {
-            "schema_name": "rj45-contact-diagnostic-tick-v1",
+            "schema_name": "rj45-contact-diagnostic-tick-v2",
             **self._pending,
             "observer_post_step_index": self._step_index + 1,
             "observer_post_control_elapsed_s": (
@@ -324,10 +359,16 @@ class ContactDiagnosticObserver:
             "post_phase_name": snapshot.phase,
             "post_state_source": source,
             "terminal": bool(terminal),
-            "post_physical_gt": {
-                "actual_depth_m": float(snapshot.ground_truth.actual_depth_m),
-                "lateral_error_m": float(snapshot.ground_truth.lateral_error_m),
-                "orientation_error_rad": float(snapshot.ground_truth.orientation_error_rad),
+            "post_physical_gt": recomputed_values,
+            "reported_physical_gt": reported_values,
+            "reported_geometry_consistent": geometry_consistent,
+            "legacy_y_only_physical_gt": legacy_values,
+            "legacy_y_only_geometry_consistent": legacy_consistent,
+            "geometry_metric_tolerance_m": metric_tolerance_m,
+            "geometry_angular_tolerance_rad": angular_tolerance_rad,
+            "reported_minus_recomputed_gt": {
+                key: reported_values[key] - recomputed_values[key]
+                for key in recomputed_values
             },
             "insertion_net_force_world_n": force_vector.tolist(),
             "insertion_net_force_norm_n": force_norm,

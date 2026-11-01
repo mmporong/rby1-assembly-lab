@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import replace
 import faulthandler
 import hashlib
 import importlib.util
@@ -115,11 +116,89 @@ def _geometry(task: Mapping[str, Any], recording: Any) -> Any:
     if not isinstance(frames, Mapping):
         raise RuntimeError("task.frames is required for diagnostic geometry")
     try:
-        socket_y = float(frames["socket_entry"]["position_m"][1])
-        plug_y = float(frames["plug_tip"]["position_m"][1])
+        socket_position = np.asarray(
+            frames["socket_entry"]["position_m"], dtype=np.float64
+        )
+        socket_quaternion = np.asarray(
+            frames["socket_entry"]["quaternion_wxyz"], dtype=np.float64
+        )
+        plug_position = np.asarray(frames["plug_tip"]["position_m"], dtype=np.float64)
+        plug_quaternion = np.asarray(
+            frames["plug_tip"]["quaternion_wxyz"], dtype=np.float64
+        )
     except (KeyError, TypeError, ValueError, IndexError) as error:
         raise RuntimeError("task frame geometry is incomplete") from error
-    return recording.AssemblyGeometry(socket_entry_y_m=socket_y, plug_tip_y_m=plug_y)
+    if (
+        socket_position.shape != (3,)
+        or plug_position.shape != (3,)
+        or socket_quaternion.shape != (4,)
+        or plug_quaternion.shape != (4,)
+        or not all(
+            np.isfinite(value).all()
+            for value in (
+                socket_position,
+                plug_position,
+                socket_quaternion,
+                plug_quaternion,
+            )
+        )
+    ):
+        raise RuntimeError("task frame geometry has invalid shape or non-finite values")
+    recording.wxyz_to_xyzw(np.stack((socket_quaternion, plug_quaternion)))
+    return SimpleNamespace(
+        recording=recording.AssemblyGeometry(
+            socket_entry_y_m=float(socket_position[1]),
+            plug_tip_y_m=float(plug_position[1]),
+        ),
+        socket_entry_position_m=socket_position,
+        socket_entry_quaternion_wxyz=socket_quaternion,
+        plug_tip_position_m=plug_position,
+        plug_tip_quaternion_wxyz=plug_quaternion,
+    )
+
+
+def _full_frame_geometry_metrics(
+    recording: Any, poses_world_wxyz: np.ndarray, geometry: Any
+) -> tuple[float, float, float]:
+    poses = np.asarray(poses_world_wxyz, dtype=np.float64)
+    if poses.shape != (2, 7):
+        raise recording.RecordingContractError(
+            f"diagnostic object poses must have shape (2, 7), got {poses.shape}"
+        )
+    socket_position, plug_position = poses[0, :3], poses[1, :3]
+    socket_quaternion, plug_quaternion = poses[0, 3:7], poses[1, 3:7]
+    recording.wxyz_to_xyzw(np.stack((socket_quaternion, plug_quaternion)))
+    entry_position = socket_position + recording._quat_apply_wxyz(
+        socket_quaternion, geometry.socket_entry_position_m
+    )
+    entry_quaternion = recording._quat_multiply_wxyz(
+        socket_quaternion, geometry.socket_entry_quaternion_wxyz
+    )
+    tip_position = plug_position + recording._quat_apply_wxyz(
+        plug_quaternion, geometry.plug_tip_position_m
+    )
+    tip_quaternion = recording._quat_multiply_wxyz(
+        plug_quaternion, geometry.plug_tip_quaternion_wxyz
+    )
+    entry_inverse = entry_quaternion * np.asarray((1.0, -1.0, -1.0, -1.0))
+    relative_position = recording._quat_apply_wxyz(
+        entry_inverse, tip_position - entry_position
+    )
+    relative_quaternion = recording._quat_multiply_wxyz(
+        entry_inverse, tip_quaternion
+    )
+    relative_quaternion /= np.linalg.norm(relative_quaternion)
+    return (
+        float(relative_position[1]),
+        float(np.linalg.norm(relative_position[(0, 2),])),
+        float(
+            2.0
+            * np.arctan2(
+                np.linalg.norm(relative_quaternion[1:4]),
+                abs(relative_quaternion[0]),
+            )
+        ),
+    )
 
 
 def _validate_forbidden_contact_provenance(
@@ -189,37 +268,13 @@ def _diagnostic_snapshot(
     source = extras.get("terminal_snapshot") if terminal else extras
     if not isinstance(source, Mapping):
         raise recording.RecordingContractError("diagnostic physical source is missing")
-    if (
-        source.get("forbidden_contact_load_source")
-        == recording.FORBIDDEN_CONTACT_LOAD_SOURCE
-    ):
-        if terminal:
-            return recording.terminal_snapshot_from_extras(extras, geometry, env_index)
-        return recording.live_snapshot(env, extras, geometry, env_index)
     evaluation = source.get("evaluation")
     if not isinstance(evaluation, Mapping):
         raise recording.RecordingContractError("diagnostic evaluation source is missing")
-    if source.get("insertion_contact_force_source") != recording.INSERTION_FORCE_SOURCE:
-        raise recording.RecordingContractError(
-            "diagnostic insertion contact-force source is unsupported"
-        )
-    if source.get("insertion_contact_load_source") != recording.INSERTION_LOAD_SOURCE:
-        raise recording.RecordingContractError(
-            "diagnostic insertion contact-load source is unsupported"
-        )
-    _validate_forbidden_contact_provenance(recording, source, env_index)
-
     if terminal:
         poses = np.asarray(
             recording._env_value(source["object_poses_world_wxyz"], env_index),
             dtype=np.float64,
-        )
-        force_w = recording._env_value(source["insertion_contact_force_w"], env_index)
-        force_n = recording._scalar(source["insertion_contact_force_n"], env_index)
-        load_n = recording._scalar(source["insertion_contact_load_n"], env_index)
-        grip_n = recording._env_value(source["contact_force_proxy_n"], env_index)
-        phase = recording._phase_name(
-            recording._env_value(source["phase"], env_index)
         )
     else:
         poses = np.stack(
@@ -238,19 +293,90 @@ def _diagnostic_snapshot(
                 ),
             )
         )
+    base_snapshot = None
+    if (
+        source.get("forbidden_contact_load_source")
+        == recording.FORBIDDEN_CONTACT_LOAD_SOURCE
+    ):
+        if terminal:
+            base_snapshot = recording.terminal_snapshot_from_extras(
+                extras, geometry.recording, env_index
+            )
+        else:
+            base_snapshot = recording.live_snapshot(
+                env, extras, geometry.recording, env_index
+            )
+    elif source.get("insertion_contact_force_source") != recording.INSERTION_FORCE_SOURCE:
+        raise recording.RecordingContractError(
+            "diagnostic insertion contact-force source is unsupported"
+        )
+    elif source.get("insertion_contact_load_source") != recording.INSERTION_LOAD_SOURCE:
+        raise recording.RecordingContractError(
+            "diagnostic insertion contact-load source is unsupported"
+        )
+    else:
+        _validate_forbidden_contact_provenance(recording, source, env_index)
+
+    if base_snapshot is not None:
+        force_w = base_snapshot.insertion_contact_force_w
+        force_n = base_snapshot.insertion_contact_force_n
+        load_n = base_snapshot.insertion_contact_load_n
+        grip_n = base_snapshot.contact_force_proxy_n
+        phase = base_snapshot.phase
+    elif terminal:
+        force_w = recording._env_value(source["insertion_contact_force_w"], env_index)
+        force_n = recording._scalar(source["insertion_contact_force_n"], env_index)
+        load_n = recording._scalar(source["insertion_contact_load_n"], env_index)
+        grip_n = recording._env_value(source["contact_force_proxy_n"], env_index)
+        phase = recording._phase_name(
+            recording._env_value(source["phase"], env_index)
+        )
+    else:
         force_w = recording._env_value(env._last_insertion_contact_force_w, env_index)
         force_n = recording._scalar(env._last_insertion_contact_force_n, env_index)
         load_n = recording._scalar(env._last_insertion_contact_load_n, env_index)
         grip_n = recording._env_value(env._last_contact_proxy_n, env_index)
         phase = recording._phase_name(recording._env_value(env._phase, env_index))
 
-    metrics, geometry_consistent = recording._metrics_from_mapping(
-        evaluation, poses, geometry, env_index=0
-    )
-    if not geometry_consistent:
+    def reported_field(*names: str) -> float:
+        for name in names:
+            if name in evaluation:
+                return float(recording._scalar(evaluation[name], env_index))
         raise recording.RecordingContractError(
-            "diagnostic reported geometry differs from recomputed object poses"
+            "diagnostic reported geometry field is missing: " + " or ".join(names)
         )
+
+    reported = SimpleNamespace(
+        actual_depth_m=reported_field("actual_depth_m"),
+        lateral_error_m=reported_field(
+            "lateral_error_m", "actual_lateral_error_m"
+        ),
+        orientation_error_rad=reported_field(
+            "orientation_error_rad", "actual_orientation_error_rad"
+        ),
+    )
+    if base_snapshot is not None:
+        legacy_metrics = base_snapshot.ground_truth
+        legacy_consistent = base_snapshot.reported_geometry_consistent
+    else:
+        legacy_metrics, legacy_consistent = recording._metrics_from_mapping(
+            evaluation, poses, geometry.recording, env_index=0
+        )
+    full_values = _full_frame_geometry_metrics(recording, poses, geometry)
+    metrics = replace(
+        legacy_metrics,
+        actual_depth_m=full_values[0],
+        lateral_error_m=full_values[1],
+        orientation_error_rad=full_values[2],
+    )
+    full_consistent = (
+        abs(reported.actual_depth_m - metrics.actual_depth_m)
+        <= geometry.recording.metric_tolerance_m
+        and abs(reported.lateral_error_m - metrics.lateral_error_m)
+        <= geometry.recording.metric_tolerance_m
+        and abs(reported.orientation_error_rad - metrics.orientation_error_rad)
+        <= geometry.recording.angular_tolerance_rad
+    )
     return SimpleNamespace(
         insertion_contact_force_w=np.asarray(force_w, dtype=np.float64),
         insertion_contact_force_n=float(force_n),
@@ -258,6 +384,14 @@ def _diagnostic_snapshot(
         contact_force_proxy_n=np.asarray(grip_n, dtype=np.float64),
         phase=phase,
         ground_truth=metrics,
+        reported_ground_truth=reported,
+        reported_geometry_consistent=bool(full_consistent),
+        legacy_y_only_ground_truth=legacy_metrics,
+        legacy_y_only_geometry_consistent=bool(legacy_consistent),
+        geometry_metric_tolerance_m=float(geometry.recording.metric_tolerance_m),
+        geometry_angular_tolerance_rad=float(
+            geometry.recording.angular_tolerance_rad
+        ),
     )
 
 
