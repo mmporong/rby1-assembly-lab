@@ -1082,6 +1082,7 @@ def _episode(
     row,
     candidate_id,
     *, heartbeat=None,
+    step_observer=None,
 ):
     stage, grasp_id, case_id, method_id, slot, _ = row
     modules = runtime["modules"]
@@ -1139,15 +1140,20 @@ def _episode(
                 sample = policy[0].detach().cpu().numpy()
                 produced, state = provider.act(sample, state)
                 action[0] = torch.as_tensor(produced, device=env.device, dtype=action.dtype)
+            if step_observer is not None:
+                step_observer.capture_pre(env, policy, action)
             step = env.step(action)
-            observation, _, terminated, truncated, _ = step
+            observation, _, terminated, truncated, step_extras = step
+            ended = bool((terminated | truncated)[0])
+            if step_observer is not None:
+                step_observer.capture_post(env, step_extras, ended)
             observations.append(tuple(float(value) for value in policy[0].detach().cpu().tolist()))
             current_grip = float(env._last_contact_proxy_n[0].max().item())
             current_insertion_load = float(
                 env._last_insertion_contact_load_n[0].item()
             )
             evaluator_force_samples_n.append(max(current_grip, current_insertion_load))
-            if bool((terminated | truncated)[0]):
+            if ended:
                 break
         else:
             raise AdmissionRunBlocked("episode exceeded the bounded 1200-step limit")

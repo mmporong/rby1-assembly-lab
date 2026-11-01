@@ -25,6 +25,79 @@ CONFIG = json.loads(
 )
 
 
+def test_episode_optional_observer_brackets_the_same_single_step(monkeypatch) -> None:
+    torch = pytest.importorskip("torch")
+    step_extras = {"terminal_snapshot": {"source": "pre-reset"}}
+
+    class Env:
+        device = "cpu"
+        extras = {"terminal_snapshot": object()}
+        _last_contact_proxy_n = torch.zeros((1, 2))
+        _last_insertion_contact_load_n = torch.zeros(1)
+
+        def reset(self):
+            return {"policy": torch.zeros((1, 79))}
+
+        def step(self, action):
+            assert action.shape == (1, 6)
+            return (
+                {"policy": torch.ones((1, 79))},
+                torch.zeros(1),
+                torch.tensor([True]),
+                torch.tensor([False]),
+                step_extras,
+            )
+
+        def close(self):
+            return None
+
+    class Provider:
+        def reset(self):
+            return object()
+
+        def act(self, observation, state):
+            return [0.0] * 6, state
+
+    calls = []
+
+    class Observer:
+        def capture_pre(self, env, policy, action):
+            calls.append(("pre", env, policy.clone(), action.clone()))
+
+        def capture_post(self, env, extras, terminal):
+            calls.append(("post", env, extras, terminal))
+
+    terminal = {
+        "independent_eval_success": [False],
+        "hard_overload": [False],
+        "forbidden_contact": [False],
+        "timestamp_s": [0.1],
+        "task_admission": {},
+    }
+    monkeypatch.setattr(RUNNER, "_make_env", lambda *_args: (Env(), torch))
+    monkeypatch.setattr(RUNNER, "_validate_terminal_snapshot", lambda _value: terminal)
+    monkeypatch.setattr(RUNNER, "_reset_isaac_episode_lifecycle", lambda: None)
+    runtime = {
+        "modules": {
+            "rj45_comparison_providers": SimpleNamespace(
+                make_fair_provider=lambda *_args, **_kwargs: Provider()
+            )
+        }
+    }
+    prepared = {"config": CONFIG}
+    result = RUNNER._episode(
+        prepared,
+        runtime,
+        ("diagnostic", "rj45-train-02", "tx-positive", "zero", 1, None),
+        None,
+        step_observer=Observer(),
+    )
+    assert [call[0] for call in calls] == ["pre", "post"]
+    assert calls[1][2] is step_extras
+    assert calls[1][3] is True
+    assert len(result["observation_samples"]) == 1
+
+
 def _file_sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
