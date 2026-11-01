@@ -170,8 +170,8 @@ class ContactDiagnosticObserver:
     _POST_STEP_FIELDS = (
         ("policy_input_observation", (1, 79)),
         ("policy_input_timestamp_s", (1,)),
-        ("requested_expanded_residual_action", (1, 6)),
-        ("applied_bounded_residual_action", (1, 6)),
+        ("requested_expanded_residual_action", (1, 12)),
+        ("applied_bounded_residual_action", (1, 12)),
         ("applied_tip_target_offset_entry_6d", (1, 6)),
     )
 
@@ -312,10 +312,10 @@ class ContactDiagnosticObserver:
             "source_timestamp_delta_s": (
                 post_timestamp_s - self._pending["pre_policy_timestamp_s"]
             ),
-            "current_requested_expanded_residual_action6": current[
+            "current_requested_expanded_residual_action12": current[
                 "requested_expanded_residual_action"
             ][0].tolist(),
-            "current_applied_bounded_residual_action6": current[
+            "current_applied_bounded_expanded_action12": current[
                 "applied_bounded_residual_action"
             ][0].tolist(),
             "current_applied_tip_target_offset_entry6": current[

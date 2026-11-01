@@ -19,8 +19,8 @@ def _training_snapshot(observation: np.ndarray, timestamp: float = 1.0) -> dict:
         "policy_input_observation": observation,
         "policy_input_timestamp_s": np.asarray([timestamp]),
         "policy_input_valid": np.asarray([True]),
-        "requested_expanded_residual_action": np.full((1, 6), 0.1),
-        "applied_bounded_residual_action": np.full((1, 6), 0.2),
+        "requested_expanded_residual_action": np.asarray([[0.0] * 6 + [0.1] * 6]),
+        "applied_bounded_residual_action": np.asarray([[0.0] * 6 + [0.2] * 6]),
         "applied_tip_target_offset_entry_6d": np.full((1, 6), 0.3),
     }
 
@@ -86,8 +86,12 @@ def _post_snapshot(
         "policy_input_observation": observation.copy(),
         "policy_input_timestamp_s": np.asarray([policy_timestamp]),
         "policy_input_valid": np.asarray([True]),
-        "requested_expanded_residual_action": np.full((1, 6), action),
-        "applied_bounded_residual_action": np.full((1, 6), action),
+        "requested_expanded_residual_action": np.asarray(
+            [[0.0] * 6 + [action] * 6]
+        ),
+        "applied_bounded_residual_action": np.asarray(
+            [[0.0] * 6 + [action] * 6]
+        ),
         "applied_tip_target_offset_entry_6d": np.full((1, 6), action),
     }
 
@@ -149,8 +153,8 @@ def test_teacher_cache_refresh_and_current_actions_are_captured_post_step(
     assert row["policy_command_depth"] == 62.0
     assert row["policy_advance"] == 63.0
     assert row["commanded_normalized_action6"] == [0.7] * 6
-    assert row["current_requested_expanded_residual_action6"] == [0.7] * 6
-    assert row["current_applied_bounded_residual_action6"] == [0.7] * 6
+    assert row["current_requested_expanded_residual_action12"] == [0.0] * 6 + [0.7] * 6
+    assert row["current_applied_bounded_expanded_action12"] == [0.0] * 6 + [0.7] * 6
     assert row["current_applied_tip_target_offset_entry6"] == [0.7] * 6
 
 
@@ -185,6 +189,23 @@ def test_missing_post_step_source_field_fails_without_fallback(tmp_path: Path) -
     _capture_pre(observer, env, observation)
     with pytest.raises(DiagnosticTraceError, match="missing fields"):
         observer.capture_post(env, {"terminal_snapshot": source}, True)
+
+
+@pytest.mark.parametrize(
+    "field",
+    ("requested_expanded_residual_action", "applied_bounded_residual_action"),
+)
+def test_expanded_action_sources_reject_silent_6d_shape_narrowing(
+    tmp_path: Path, field: str
+) -> None:
+    observation = np.zeros((1, 79))
+    env = FakeEnv({})
+    observer = _observer(tmp_path)
+    _capture_pre(observer, env, observation)
+    snapshot = _post_snapshot(observation)
+    snapshot[field] = np.full((1, 6), 0.7)
+    with pytest.raises(DiagnosticTraceError, match=r"shape \(1, 12\)"):
+        observer.capture_post(env, {"terminal_snapshot": snapshot}, True)
 
 
 @pytest.mark.parametrize(
