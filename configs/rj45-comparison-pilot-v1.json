@@ -1,0 +1,139 @@
+{
+  "schema_name": "rj45_comparison_pilot_v1",
+  "frozen": false,
+  "status": "draft_requires_scientific_freeze",
+  "purpose": "Development-only PPO/SAC pilot over the fixed G1 two-grasp by signed-six-condition schedule.",
+  "execution_modes": ["train", "evaluate-dev"],
+  "forbidden_execution_modes": ["evaluate-final"],
+  "final_split_allowed": false,
+  "resume_supported": false,
+  "retry_policy": {
+    "maximum_full_seed_retries": 1,
+    "allowed_reasons": ["infrastructure_failure", "provenance_failure"],
+    "low_success_rate_retry_allowed": false,
+    "resume_partial_seed_allowed": false
+  },
+  "scientific_scope": {
+    "actor_observation_dim": 79,
+    "critic_observation_dim": 79,
+    "residual_action_dim": 6,
+    "residual_action_scope": "right_arm_insert_tip_offset_only",
+    "left_arm": "scripted_support",
+    "environment": "simulation_proxy",
+    "ground_truth_policy_fallback": false
+  },
+  "policy_initialization": {
+    "mean_initializer": "zero",
+    "initial_log_std": null,
+    "selection_source": "frozen_prelaunch_contract_not_runtime_outcome"
+  },
+  "minimum_outcome_contract": {
+    "minimum_valid_policy_transitions": null,
+    "minimum_algorithm_updates": null,
+    "minimum_actual_update_input_transitions": null,
+    "minimum_condition_transition_count_per_condition": null,
+    "require_all_12_conditions_reach_align_to_insert": true,
+    "require_all_transition_actions_exact_zero": true,
+    "low_reward_or_success_rate_is_not_an_invalidity": true
+  },
+  "fairness": {
+    "primary_budget": "exact_raw_environment_control_transitions",
+    "primary_budget_formula": "num_envs_times_wave_count_times_cycles_times_wave_vector_steps",
+    "report_valid_learning_warmup_invalid": true,
+    "report_ppo_actual_update_inputs_and_discarded_tail": true,
+    "report_sac_replay_warmup_learning_start_updates_credit": true,
+    "report_wall_and_gpu_secondary": true,
+    "raw_equals_learnable_claim_allowed": false,
+    "same_valid_learning_efficiency_claim_allowed": false,
+    "success_contingent_stopping": false,
+    "paired_algorithm_condition_schedule": true,
+    "paired_environment_seeds": true,
+    "separate_rng_namespaces": ["model", "schedule", "environment", "development_environment"],
+    "environment_rng_isolation_scope": "python_numpy_torch_cpu_and_cuda0_generator_state_isolated_at_reset_step_and_wave_reset;gpu_kernel_bit_exactness_not_claimed"
+  },
+  "budget": {
+    "num_envs": 4,
+    "wave_count": 3,
+    "cycles_candidate": 16,
+    "cycles": null,
+    "wave_vector_steps_candidate": 1024,
+    "wave_vector_steps": null,
+    "raw_transition_budget_candidate": 196608,
+    "raw_transition_budget": null,
+    "raw_transition_budget_upper_bound": null,
+    "vector_steps": null,
+    "ppo_rollout_target_valid_transitions_candidate": 128,
+    "ppo_rollout_target_valid_transitions": null,
+    "maximum_ppo_wave_tail_fraction_candidate": 0.03125,
+    "maximum_ppo_wave_tail_fraction": null,
+    "sac_replay_capacity": null,
+    "sac_batch_size": null,
+    "sac_random_warmup_valid_transitions": null,
+    "sac_learning_starts_valid_transitions": null,
+    "sac_utd_ratio": null
+  },
+  "seeds": [],
+  "algorithms": ["ppo", "sac"],
+  "g1_gate": {
+    "required_status": "admit_rl_pilot",
+    "required_smoke_only": false,
+    "required_claims": {
+      "task_admission_completed": true,
+      "rl_pilot_admitted": true
+    },
+    "report_path": null,
+    "report_sha256": null,
+    "campaign_path": null,
+    "campaign_sha256": null
+  },
+  "inputs": {
+    "runtime_root": "/opt/homedata/rby1-storage/immutable-inputs/rj45-runtime-1517fbf",
+    "evidence_root": "/opt/homedata/rby1-storage/immutable-inputs/rj45-evidence-104721a",
+    "development_evidence_root": null,
+    "runtime_manifest_path": null,
+    "runtime_manifest_sha256": null,
+    "physics_input_manifest_path": null,
+    "physics_input_manifest_sha256": null,
+    "evidence_manifest_path": null,
+    "evidence_manifest_sha256": null,
+    "parallel_contact_proof_path": null,
+    "parallel_contact_proof_sha256": null,
+    "task_config_path": "configs/tasks/rj45-v1.json",
+    "training_config_path": "configs/rj45-training-target-offset-v1.json",
+    "development_config_path": "configs/rj45-comparison-development.json",
+    "held_bank_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
+  },
+  "held_grasps": [
+    {"grasp_id": "rj45-train-02", "held_grasp_index": 1, "held_artifact_sha256": "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5"},
+    {"grasp_id": "rj45-train-05", "held_grasp_index": 4, "held_artifact_sha256": "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7"}
+  ],
+  "bias_cases": [
+    {"case_id": "tx-positive", "translation_bias_entry_m": [0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tx-negative", "translation_bias_entry_m": [-0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tz-positive", "translation_bias_entry_m": [0.0, 0.0, 0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "tz-negative", "translation_bias_entry_m": [0.0, 0.0, -0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+    {"case_id": "rx-positive", "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.003490658503988659, 0.0, 0.0]},
+    {"case_id": "rx-negative", "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [-0.003490658503988659, 0.0, 0.0]}
+  ],
+  "development_evaluation": {
+    "split": "dev",
+    "allow_final": false,
+    "raw_transition_budget": null,
+    "vector_steps": null,
+    "cycles": null,
+    "wave_vector_steps": null,
+    "held_bank_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
+    "held_grasps": [
+      {"grasp_id": "rj45-dev-01", "held_grasp_index": 0, "held_artifact_sha256": "7fc4d78e011c4267fc1968a3e81b3d0281bf4c8d647ffa3823e7197836bec9b5"},
+      {"grasp_id": "rj45-dev-02", "held_grasp_index": 1, "held_artifact_sha256": "0a7520631b095167764ed2443847c786ebabcfa9dd26a3ab666fd1cd4b4d5358"}
+    ],
+    "bias_cases": [
+      {"case_id": "dev-tx-positive", "translation_bias_entry_m": [0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+      {"case_id": "dev-tx-negative", "translation_bias_entry_m": [-0.00012, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+      {"case_id": "dev-tz-positive", "translation_bias_entry_m": [0.0, 0.0, 0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+      {"case_id": "dev-tz-negative", "translation_bias_entry_m": [0.0, 0.0, -0.00012], "rotation_vector_bias_entry_rad": [0.0, 0.0, 0.0]},
+      {"case_id": "dev-rx-positive", "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [0.003490658503988659, 0.0, 0.0]},
+      {"case_id": "dev-rx-negative", "translation_bias_entry_m": [0.0, 0.0, 0.0], "rotation_vector_bias_entry_rad": [-0.003490658503988659, 0.0, 0.0]}
+    ]
+  }
+}

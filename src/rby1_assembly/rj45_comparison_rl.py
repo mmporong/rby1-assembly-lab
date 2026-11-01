@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import math
 from pathlib import Path
 import tempfile
-from typing import Any, Protocol
+from typing import Any, Callable, Protocol, Sequence
 
 import gymnasium
 import torch
@@ -66,6 +66,102 @@ class CollectorResult:
     sac_learning_starts_requested: int | None
     sac_learning_starts_effective: int
     sac_first_update_after_valid_insertions: int
+    actual_update_input_transitions: int
+    discarded_tail_valid_transitions: int
+    sac_update_credit: float
+    wave_boundaries: tuple["CollectorWaveBoundary", ...]
+
+
+@dataclass(frozen=True)
+class CollectorWaveBoundary:
+    """Cumulative counters captured after one explicit synchronized wave reset."""
+
+    completed_wave_index: int
+    next_wave_index: int
+    raw_transitions: int
+    valid_policy_transitions: int
+    algorithm_updates: int
+    actual_update_input_transitions: int
+    pending_policy_transitions: int
+
+
+@dataclass(frozen=True)
+class CollectorProgress:
+    """Read-only cumulative counters exposed to bounded-run drivers."""
+
+    algorithm: str
+    raw_transitions: int
+    valid_policy_transitions: int
+    warmup_transitions: int
+    algorithm_updates: int
+    optimizer_steps: int
+    pending_policy_transitions: int
+    actual_update_input_transitions: int
+    discarded_tail_valid_transitions: int
+    random_warmup_transitions: int
+    replay_insertions: int
+    replay_size: int
+    replay_first_ready_at: int
+    sac_update_credit: float
+    sac_first_update_after_valid_insertions: int
+    wave_boundaries_completed: int
+
+
+def collector_progress(agent) -> CollectorProgress:
+    """Return cumulative collector state without exposing its mutable storage."""
+
+    algorithm = getattr(agent, "_comparison_algorithm", None)
+    if algorithm not in {"ppo", "sac"}:
+        raise ValueError("agent is not a comparison PPO/SAC agent")
+    state = agent._comparison_state
+    pending = (
+        sum(len(trajectory) for trajectory in state["trajectories"])
+        if algorithm == "ppo"
+        else 0
+    )
+    discarded = int(state["discarded_tail_valid_transitions"])
+    actual_update_inputs = (
+        int(state["valid_policy_transitions"]) - pending - discarded
+        if algorithm == "ppo"
+        else int(state["sac_update_input_transitions"])
+    )
+    return CollectorProgress(
+        algorithm=algorithm,
+        raw_transitions=int(state["raw_transitions"]),
+        valid_policy_transitions=int(state["valid_policy_transitions"]),
+        warmup_transitions=int(state["warmup_transitions"]),
+        algorithm_updates=int(state["algorithm_updates"]),
+        optimizer_steps=int(state["optimizer_steps"]),
+        pending_policy_transitions=pending,
+        actual_update_input_transitions=actual_update_inputs,
+        discarded_tail_valid_transitions=discarded,
+        random_warmup_transitions=int(state["random_warmup_transitions"]),
+        replay_insertions=int(state["replay_insertions"]),
+        replay_size=len(agent.memory) if algorithm == "sac" else 0,
+        replay_first_ready_at=(
+            int(state["replay_first_ready_at"]) if algorithm == "sac" else 0
+        ),
+        sac_update_credit=(float(state["sac_update_credit"]) if algorithm == "sac" else 0.0),
+        sac_first_update_after_valid_insertions=(
+            int(state["first_update_after_valid_insertions"])
+            if algorithm == "sac"
+            else 0
+        ),
+        wave_boundaries_completed=int(state["wave_boundaries_completed"]),
+    )
+
+
+def discard_pending_ppo_tail(agent) -> int:
+    """Discard a terminal partial PPO rollout without performing an update."""
+
+    if getattr(agent, "_comparison_algorithm", None) != "ppo":
+        raise ValueError("pending rollout tails exist only for PPO")
+    state = agent._comparison_state
+    discarded = sum(len(trajectory) for trajectory in state["trajectories"])
+    for trajectory in state["trajectories"]:
+        trajectory.clear()
+    state["discarded_tail_valid_transitions"] += discarded
+    return discarded
 
 
 def absorbing_done(terminated: torch.Tensor, truncated: torch.Tensor) -> torch.Tensor:
@@ -437,6 +533,11 @@ def make_agent(
         "sac_update_credit": 0.0,
         "replay_first_ready_at": 0,
         "first_update_after_valid_insertions": 0,
+        "raw_transitions": 0,
+        "warmup_transitions": 0,
+        "discarded_tail_valid_transitions": 0,
+        "sac_update_input_transitions": 0,
+        "wave_boundaries_completed": 0,
     }
     return agent
 
@@ -563,6 +664,10 @@ def collect_bounded(
     algorithm: str,
     vector_steps: int,
     require_policy_validity: bool = False,
+    initial_reset_result: Any | None = None,
+    progress_callback: Callable[[CollectorProgress], None] | None = None,
+    wave_vector_steps: Sequence[int] | None = None,
+    wave_reset_callback: Callable[[int], Any] | None = None,
 ) -> CollectorResult:
     """Observe a bounded vector rollout and preserve every policy-valid row.
 
@@ -581,6 +686,23 @@ def collect_bounded(
         raise ValueError("collector algorithm does not match the agent")
     if getattr(agent, "_comparison_num_envs", None) != env.num_envs:
         raise ValueError("collector environment count does not match the agent")
+    if (wave_vector_steps is None) != (wave_reset_callback is None):
+        raise ValueError("wave_vector_steps and wave_reset_callback must be provided together")
+    wave_boundaries: set[int] = set()
+    if wave_vector_steps is not None:
+        if (
+            not wave_vector_steps
+            or any(
+                isinstance(steps, bool) or not isinstance(steps, int) or steps < 1
+                for steps in wave_vector_steps
+            )
+            or sum(wave_vector_steps) != vector_steps
+        ):
+            raise ValueError("wave_vector_steps must be positive integers summing to vector_steps")
+        cumulative = 0
+        for steps in wave_vector_steps[:-1]:
+            cumulative += steps
+            wave_boundaries.add(cumulative)
     state = agent._comparison_state
     if algorithm == "ppo":
         # Each collector call performs an explicit environment reset. Close any
@@ -590,7 +712,8 @@ def collect_bounded(
         for trajectory in state["trajectories"]:
             if trajectory and not bool(trajectory[-1]["segment_end"]):
                 trajectory[-1]["segment_end"] = True
-    observations, current_infos = _reset_observation(env.reset())
+    reset_result = env.reset() if initial_reset_result is None else initial_reset_result
+    observations, current_infos = _reset_observation(reset_result)
     if observations.shape != (env.num_envs, OBSERVATION_DIM):
         raise ValueError("environment reset must return [num_envs, 79]")
     agent.enable_training_mode(True, apply_to_models=False)
@@ -603,6 +726,7 @@ def collect_bounded(
     terminated_count = truncated_count = absorbing_count = 0
     mixed_validity_vector_steps = 0
     valid_policy_transitions = warmup_transitions = 0
+    boundary_records: list[CollectorWaveBoundary] = []
     for _environment_step in range(vector_steps):
         valid = _policy_validity(
             current_infos,
@@ -721,16 +845,53 @@ def collect_bounded(
                     agent.update(timestep=state["algorithm_updates"], timesteps=vector_steps)
                 agent.enable_models_training_mode(False)
                 state["algorithm_updates"] += update_calls
+                state["sac_update_input_transitions"] += (
+                    update_calls * agent.cfg.gradient_steps * agent.cfg.batch_size
+                )
                 optimizers_per_update = 3 if agent.cfg.learn_entropy else 2
                 state["optimizer_steps"] += (
                     update_calls * agent.cfg.gradient_steps * optimizers_per_update
                 )
         state["valid_policy_transitions"] += valid_count
+        state["raw_transitions"] += env.num_envs
+        state["warmup_transitions"] += env.num_envs - valid_count
         observations = next_observations
         current_infos = infos
         terminated_count += int(terminated.sum().item())
         truncated_count += int(truncated.sum().item())
         absorbing_count += int(done.sum().item())
+        completed_steps = _environment_step + 1
+        if completed_steps in wave_boundaries:
+            if algorithm == "ppo":
+                for trajectory in state["trajectories"]:
+                    if trajectory and not bool(trajectory[-1]["segment_end"]):
+                        trajectory[-1]["segment_end"] = True
+            next_wave_index = len(boundary_records) + 1
+            reset_observations, reset_infos = _reset_observation(
+                wave_reset_callback(next_wave_index)  # type: ignore[misc]
+            )
+            if reset_observations.shape != (env.num_envs, OBSERVATION_DIM):
+                raise ValueError("wave reset must return [num_envs, 79]")
+            observations = reset_observations
+            current_infos = reset_infos
+            state["wave_boundaries_completed"] += 1
+            progress = collector_progress(agent)
+            boundary_records.append(
+                CollectorWaveBoundary(
+                    completed_wave_index=next_wave_index - 1,
+                    next_wave_index=next_wave_index,
+                    raw_transitions=progress.raw_transitions,
+                    valid_policy_transitions=progress.valid_policy_transitions,
+                    algorithm_updates=progress.algorithm_updates,
+                    actual_update_input_transitions=(
+                        progress.actual_update_input_transitions
+                    ),
+                    pending_policy_transitions=progress.pending_policy_transitions,
+                )
+            )
+        if progress_callback is not None:
+            progress_callback(collector_progress(agent))
+    final_progress = collector_progress(agent)
     return CollectorResult(
         algorithm=algorithm,
         vector_steps=vector_steps,
@@ -783,6 +944,10 @@ def collect_bounded(
         sac_first_update_after_valid_insertions=(
             state["first_update_after_valid_insertions"] if algorithm == "sac" else 0
         ),
+        actual_update_input_transitions=final_progress.actual_update_input_transitions,
+        discarded_tail_valid_transitions=final_progress.discarded_tail_valid_transitions,
+        sac_update_credit=final_progress.sac_update_credit,
+        wave_boundaries=tuple(boundary_records),
     )
 
 

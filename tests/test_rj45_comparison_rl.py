@@ -11,7 +11,9 @@ from rby1_assembly.rj45_comparison_rl import (
     absorbing_done,
     absorbing_gae_returns,
     collect_bounded,
+    collector_progress,
     deterministic_action,
+    discard_pending_ppo_tail,
     finite_losses,
     load_inference_checkpoint,
     make_agent,
@@ -140,6 +142,201 @@ class _StaticValidityRecordingEnv(_SyntheticEnv):
 
 
 class ComparisonContractTests(unittest.TestCase):
+    def test_progress_callback_is_monotonic_and_read_only(self):
+        agent = make_agent("ppo", num_envs=2, rollout_steps=8, batch_size=4)
+        snapshots = []
+        result = collect_bounded(
+            agent,
+            _WarmupSyntheticEnv(num_envs=2, horizon=20),
+            algorithm="ppo",
+            vector_steps=4,
+            require_policy_validity=True,
+            progress_callback=snapshots.append,
+        )
+        self.assertEqual([item.raw_transitions for item in snapshots], [2, 4, 6, 8])
+        self.assertEqual([item.valid_policy_transitions for item in snapshots], [0, 2, 4, 6])
+        self.assertEqual(snapshots[-1], collector_progress(agent))
+        self.assertEqual(result.actual_update_input_transitions, 0)
+        with self.assertRaises(AttributeError):
+            snapshots[-1].raw_transitions = 99
+
+    def test_initial_reset_result_avoids_second_reset(self):
+        class CountingEnv(_SyntheticEnv):
+            def __init__(self):
+                super().__init__(num_envs=1, horizon=20)
+                self.resets = 0
+
+            def reset(self):
+                self.resets += 1
+                return super().reset()
+
+        env = CountingEnv()
+        initial = env.reset()
+        agent = make_agent("ppo", num_envs=1, rollout_steps=4, batch_size=4)
+        collect_bounded(
+            agent,
+            env,
+            algorithm="ppo",
+            vector_steps=1,
+            initial_reset_result=initial,
+        )
+        self.assertEqual(env.resets, 1)
+
+    def test_callback_omission_preserves_legacy_result(self):
+        first = make_agent("sac", num_envs=2, batch_size=2, seed=91)
+        second = make_agent("sac", num_envs=2, batch_size=2, seed=91)
+        torch.manual_seed(1234)
+        result_without = collect_bounded(
+            first, _SyntheticEnv(num_envs=2), algorithm="sac", vector_steps=2
+        )
+        torch.manual_seed(1234)
+        result_with = collect_bounded(
+            second,
+            _SyntheticEnv(num_envs=2),
+            algorithm="sac",
+            vector_steps=2,
+            progress_callback=lambda _progress: None,
+        )
+        self.assertEqual(result_without, result_with)
+        self.assertEqual(collector_progress(first), collector_progress(second))
+
+    def test_terminal_ppo_tail_is_discarded_without_update(self):
+        agent = make_agent("ppo", num_envs=2, rollout_steps=4, batch_size=4)
+        result = collect_bounded(
+            agent, _SyntheticEnv(num_envs=2), algorithm="ppo", vector_steps=3
+        )
+        self.assertEqual(result.pending_policy_transitions, 6)
+        self.assertEqual(discard_pending_ppo_tail(agent), 6)
+        progress = collector_progress(agent)
+        self.assertEqual(progress.pending_policy_transitions, 0)
+        self.assertEqual(progress.discarded_tail_valid_transitions, 6)
+        self.assertEqual(progress.actual_update_input_transitions, 0)
+        self.assertEqual(progress.algorithm_updates, 0)
+
+    def test_sac_credit_is_public_and_reconciles_with_updates(self):
+        agent = make_agent(
+            "sac",
+            num_envs=1,
+            batch_size=2,
+            replay_capacity=16,
+            sac_utd_ratio=0.5,
+        )
+        result = collect_bounded(
+            agent, _SyntheticEnv(num_envs=1), algorithm="sac", vector_steps=3
+        )
+        progress = collector_progress(agent)
+        self.assertEqual(result.replay_insertions, 3)
+        self.assertEqual(progress.algorithm_updates, 1)
+        self.assertEqual(progress.sac_update_credit, 0.5)
+        self.assertEqual(progress.actual_update_input_transitions, 2)
+
+    def test_sac_replay_exposure_is_not_reported_as_update_input_before_update(self):
+        agent = make_agent(
+            "sac",
+            num_envs=1,
+            batch_size=4,
+            replay_capacity=16,
+            sac_learning_starts_valid_transitions=8,
+        )
+        collect_bounded(
+            agent, _SyntheticEnv(num_envs=1), algorithm="sac", vector_steps=3
+        )
+        progress = collector_progress(agent)
+        self.assertEqual(progress.replay_insertions, 3)
+        self.assertEqual(progress.algorithm_updates, 0)
+        self.assertEqual(progress.actual_update_input_transitions, 0)
+
+    def test_single_collect_wave_reset_closes_ppo_gae_segment(self):
+        agent = make_agent("ppo", num_envs=1, rollout_steps=4, batch_size=4, seed=9)
+        with torch.no_grad():
+            for parameter in agent.value.parameters():
+                parameter.zero_()
+            agent.value.net[-1].bias.fill_(10.0)
+        env = _FixedRewardEnv(num_envs=1, horizon=20)
+        initial = env.reset()
+        reset_calls = 0
+
+        def reset_wave(index):
+            nonlocal reset_calls
+            self.assertEqual(index, 1)
+            reset_calls += 1
+            return env.reset()
+
+        snapshots = []
+        result = collect_bounded(
+            agent,
+            env,
+            algorithm="ppo",
+            vector_steps=4,
+            initial_reset_result=initial,
+            wave_vector_steps=(2, 2),
+            wave_reset_callback=reset_wave,
+            progress_callback=snapshots.append,
+        )
+        segment_returns, _ = absorbing_gae_returns(
+            torch.tensor([[[1.0]], [[2.0]]]),
+            torch.full((2, 1, 1), 10.0),
+            torch.zeros(2, 1, 1, dtype=torch.bool),
+            torch.zeros(2, 1, 1, dtype=torch.bool),
+            last_values=torch.tensor([[10.0]]),
+            discount_factor=agent.cfg.discount_factor,
+            gae_lambda=agent.cfg.gae_lambda,
+        )
+        self.assertEqual(reset_calls, 1)
+        self.assertEqual(len(result.wave_boundaries), 1)
+        self.assertEqual(result.wave_boundaries[0].raw_transitions, 2)
+        self.assertEqual(snapshots[-1].wave_boundaries_completed, 1)
+        self.assertTrue(
+            torch.allclose(
+                agent.memory.get_tensor_by_name("returns")[:, 0, 0],
+                segment_returns[:, 0, 0].repeat(2),
+                atol=1.0e-5,
+            )
+        )
+
+    def test_sac_wave_reset_preserves_replay_updates_and_credit(self):
+        agent = make_agent(
+            "sac",
+            num_envs=1,
+            batch_size=2,
+            replay_capacity=16,
+            sac_utd_ratio=0.5,
+        )
+        env = _SyntheticEnv(num_envs=1)
+        initial = env.reset()
+        result = collect_bounded(
+            agent,
+            env,
+            algorithm="sac",
+            vector_steps=4,
+            initial_reset_result=initial,
+            wave_vector_steps=(2, 2),
+            wave_reset_callback=lambda _index: env.reset(),
+        )
+        progress = collector_progress(agent)
+        self.assertEqual(result.replay_insertions, 4)
+        self.assertEqual(progress.algorithm_updates, 2)
+        self.assertEqual(progress.actual_update_input_transitions, 4)
+        self.assertEqual(progress.sac_update_credit, 0.0)
+        self.assertEqual(progress.wave_boundaries_completed, 1)
+
+    def test_wave_hook_arguments_fail_closed_without_changing_legacy_calls(self):
+        agent = make_agent("ppo", num_envs=1, rollout_steps=2, batch_size=2)
+        env = _SyntheticEnv(num_envs=1)
+        for kwargs in (
+            {"wave_vector_steps": (1, 1)},
+            {"wave_reset_callback": env.reset},
+            {"wave_vector_steps": (1, 2), "wave_reset_callback": lambda _index: env.reset()},
+        ):
+            with self.assertRaisesRegex(ValueError, "wave"):
+                collect_bounded(
+                    agent,
+                    env,
+                    algorithm="ppo",
+                    vector_steps=2,
+                    **kwargs,
+                )
+
     def test_zero_mean_initializer_is_exact_for_all_observations(self):
         observations = torch.randn(37, OBSERVATION_DIM)
         for algorithm in ("ppo", "sac"):
