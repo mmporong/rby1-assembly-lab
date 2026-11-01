@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from dataclasses import asdict
 import importlib.util
 import hashlib
 import json
@@ -525,6 +526,186 @@ def _expected_classical_controller_sha256(
     return canonical_sha256(payload)
 
 
+G1_CPU_SOURCE_PATHS = (
+    "scripts/run_rj45_task_admission.py",
+    "scripts/run_rj45_task_admission_isolated.py",
+    "src/rby1_assembly/rj45_task_admission.py",
+)
+
+
+def _same_json(left: Any, right: Any) -> bool:
+    try:
+        return json.dumps(left, sort_keys=True, allow_nan=False) == json.dumps(
+            right, sort_keys=True, allow_nan=False
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def _strict_bool(value: Any, label: str) -> bool:
+    if type(value) is not bool:
+        _fail(f"{label} must be a boolean")
+    return value
+
+
+def _finite_number(value: Any, label: str, *, nonnegative: bool = False) -> float:
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        _fail(f"{label} must be a finite number")
+    result = float(value)
+    if not math.isfinite(result) or (nonnegative and result < 0.0):
+        _fail(f"{label} must be a finite nonnegative number")
+    return result
+
+
+def _validate_g1_episode_rows(
+    rows: Any, expected_plan: list[dict[str, Any]]
+) -> list[Mapping[str, Any]]:
+    if not isinstance(rows, list) or len(rows) != 90:
+        _fail("G1 isolated formal report must contain exactly 90 episodes")
+    identity_keys = ("stage", "grasp_id", "case_id", "method_id", "slot")
+    normalized: list[Mapping[str, Any]] = []
+    for expected, row in zip(expected_plan, rows, strict=True):
+        ordinal = expected["ordinal"]
+        if not isinstance(row, Mapping):
+            _fail(f"G1 episode {ordinal} must be an object")
+        if type(row.get("slot")) is not int or any(
+            row.get(key) != expected[key] for key in identity_keys
+        ):
+            _fail(f"G1 episode identity mismatch at ordinal {ordinal}")
+        if row.get("execution_error") is not None:
+            _fail(f"G1 episode execution error at ordinal {ordinal}")
+        if _strict_bool(row.get("terminal_complete"), "terminal_complete") is not True:
+            _fail(f"G1 episode is not terminal-complete at ordinal {ordinal}")
+        for key in ("success", "hard_contact", "forbidden_contact"):
+            _strict_bool(row.get(key), f"G1 episode {ordinal} {key}")
+        for key in ("evaluator_force_p95_n", "completion_time_s"):
+            _finite_number(row.get(key), f"G1 episode {ordinal} {key}", nonnegative=True)
+        provider_inputs = row.get("provider_inputs")
+        if not isinstance(provider_inputs, list) or any(
+            not isinstance(item, str) for item in provider_inputs
+        ):
+            _fail(f"G1 episode {ordinal} provider inputs are invalid")
+        samples = row.get("observation_samples")
+        if not isinstance(samples, list):
+            _fail(f"G1 episode {ordinal} observation samples are invalid")
+        for sample in samples:
+            if not isinstance(sample, list) or len(sample) != 79:
+                _fail(f"G1 episode {ordinal} observation sample width differs")
+            for value in sample:
+                _finite_number(value, f"G1 episode {ordinal} observation sample")
+        snapshot = row.get("admission_snapshot")
+        if not isinstance(snapshot, Mapping):
+            _fail(f"G1 episode {ordinal} admission snapshot is missing")
+        for key in (
+            "prefreeze_snapshot_valid",
+            "insert_transition_snapshot_valid",
+            "transition_contract_checked",
+            "actual_applied_action_is_exact_zero",
+        ):
+            value = snapshot.get(key)
+            if not isinstance(value, list) or len(value) != 1:
+                _fail(f"G1 episode {ordinal} {key} shape differs")
+            if _strict_bool(value[0], f"G1 episode {ordinal} {key}") is not True:
+                _fail(f"G1 episode {ordinal} {key} is false")
+        for key in (
+            "requested_translation_bias_entry_m",
+            "applied_translation_bias_entry_m",
+            "requested_rotation_bias_entry_rad",
+            "applied_rotation_bias_entry_rad",
+        ):
+            matrix = snapshot.get(key)
+            if not isinstance(matrix, list) or len(matrix) != 1 or not isinstance(
+                matrix[0], list
+            ) or len(matrix[0]) != 3:
+                _fail(f"G1 episode {ordinal} {key} shape differs")
+            for value in matrix[0]:
+                _finite_number(value, f"G1 episode {ordinal} {key}")
+        normalized.append(row)
+    return normalized
+
+
+def _g1_artifact_paths(
+    gate: Mapping[str, Any], current_root: Path
+) -> tuple[Path, Path, Path, Path, Path]:
+    report = _resolve_under(current_root, gate.get("report_path"), "G1 report")
+    campaign = _resolve_under(current_root, gate.get("campaign_path"), "G1 campaign")
+    finished = _resolve_under(current_root, gate.get("finished_path"), "G1 finished")
+    supervisor = _resolve_under(
+        current_root,
+        gate.get("supervisor_validation_path"),
+        "G1 supervisor validation",
+    )
+    job_root = finished.parent
+    if (
+        supervisor != job_root / "supervisor-validation.json"
+        or finished != job_root / "finished.json"
+        or report != job_root / "output" / "report.json"
+        or campaign != job_root / "output" / "campaign-identity.json"
+    ):
+        _fail("G1 artifacts must use one exact producer job-root layout")
+    return report, campaign, finished, supervisor, job_root / "output" / "campaign-aborted.json"
+
+
+def _validate_g1_producer_completion(
+    gate: Mapping[str, Any], *, current_root: Path, report_sha: str, campaign_sha: str
+) -> tuple[Path, Path, Path]:
+    report_path, campaign_path, finished_path, supervisor_path, abort_path = (
+        _g1_artifact_paths(gate, current_root)
+    )
+    for path, field, label in (
+        (report_path, "report_sha256", "G1 report"),
+        (campaign_path, "campaign_sha256", "G1 campaign"),
+        (finished_path, "finished_sha256", "G1 finished"),
+        (
+            supervisor_path,
+            "supervisor_validation_sha256",
+            "G1 supervisor validation",
+        ),
+    ):
+        expected = _sha(gate.get(field), f"{label} SHA")
+        if not path.is_file() or file_sha256(path) != expected:
+            _fail(f"{label} SHA-256 mismatch")
+    if abort_path.exists():
+        _fail("G1 producer abort artifact exists")
+    finished = load_json(finished_path, "G1 finished")
+    for key in ("exit_code", "child_exit_code", "external_verifier_exit_code"):
+        if type(finished.get(key)) is not int or finished[key] != 0:
+            _fail(f"G1 finished {key} must be integer zero")
+    if (
+        _strict_bool(
+            finished.get("execution_contract_passed"),
+            "G1 finished execution_contract_passed",
+        )
+        is not True
+        or finished.get("task_admission_decision") != "admit_rl_pilot"
+        or _strict_bool(
+            finished.get("rl_pilot_admitted"), "G1 finished rl_pilot_admitted"
+        )
+        is not True
+    ):
+        _fail("G1 finished record does not prove successful RL admission")
+    supervisor = load_json(supervisor_path, "G1 supervisor validation")
+    proof = supervisor.get("proof")
+    if (
+        _strict_bool(
+            supervisor.get("execution_contract_passed"),
+            "G1 supervisor execution_contract_passed",
+        )
+        is not True
+        or supervisor.get("problems") != []
+        or not isinstance(proof, Mapping)
+        or proof.get("formal_report_sha256") != report_sha
+        or proof.get("campaign_sha256") != campaign_sha
+        or type(proof.get("episode_count")) is not int
+        or proof.get("episode_count") != 90
+        or proof.get("decision") != "admit_rl_pilot"
+        or _strict_bool(proof.get("rl_pilot_admitted"), "G1 supervisor RL proof")
+        is not True
+    ):
+        _fail("G1 supervisor validation does not prove exact90 RL admission")
+    return campaign_path, abort_path, supervisor_path
+
+
 def validate_g1_gate(
     contract: Mapping[str, Any],
     report: Mapping[str, Any],
@@ -546,149 +727,196 @@ def validate_g1_gate(
         }
     ):
         _fail("G1 gate target is not the immutable RL admission contract")
-    if report.get("status") != "admit_rl_pilot":
-        _fail("G1 report status does not admit the RL pilot")
-    schema = report.get("schema_name")
-    if schema != "rj45-task-admission-isolated-report-v1":
-        _fail("unsupported or missing G1 report schema")
     if current_root is None or development is None:
         _fail("isolated G1 report requires its frozen campaign contract")
-    if schema == "rj45-task-admission-isolated-report-v1":
-        campaign_path = _resolve_under(
-            current_root, gate.get("campaign_path"), "G1 isolated campaign"
+    schema = report.get("schema_name")
+    if schema != "rj45-task-admission-isolated-report-v1":
+        _fail("unsupported diagnostic, errata, or missing G1 report schema")
+    if report.get("status") != "admit_rl_pilot":
+        _fail("G1 report status does not admit the RL pilot")
+    report_sha = _sha(gate.get("report_sha256"), "G1 report SHA")
+    campaign_sha = _sha(gate.get("campaign_sha256"), "G1 campaign SHA")
+    campaign_path, abort_path, supervisor_path = _validate_g1_producer_completion(
+        gate,
+        current_root=current_root,
+        report_sha=report_sha,
+        campaign_sha=campaign_sha,
+    )
+    report_path = _g1_artifact_paths(gate, current_root)[0]
+    if not _same_json(report, load_json(report_path, "G1 report artifact")):
+        _fail("G1 report object differs from its authenticated artifact")
+    identity = report.get("campaign_identity")
+    if (
+        not isinstance(identity, Mapping)
+        or identity.get("sha256") != campaign_sha
+        or not isinstance(identity.get("path"), str)
+        or not identity.get("path")
+    ):
+        _fail("G1 report campaign identity mismatch")
+    campaign = load_json(campaign_path, "G1 isolated campaign")
+    expected_plan = _expected_g1_formal_plan(development)
+    expected_partitions = [
+        list(range(start, end + 1))
+        for start, end in (
+            (1, 6), (7, 12), (13, 18), (19, 30), (31, 42),
+            (43, 54), (55, 66), (67, 78), (79, 90),
         )
-        campaign_sha = _sha(gate.get("campaign_sha256"), "G1 campaign SHA")
-        if not campaign_path.is_file() or file_sha256(campaign_path) != campaign_sha:
-            _fail("G1 campaign SHA-256 mismatch")
-        identity = report.get("campaign_identity")
-        if (
-            not isinstance(identity, Mapping)
-            or identity.get("sha256") != campaign_sha
-            or not isinstance(identity.get("path"), str)
-            or not identity.get("path")
-        ):
-            _fail("G1 report campaign identity mismatch")
-        campaign = load_json(campaign_path, "G1 isolated campaign")
-        expected_plan = _expected_g1_formal_plan(development)
-        expected_partitions = [
-            list(range(start, end + 1))
-            for start, end in (
-                (1, 6), (7, 12), (13, 18), (19, 30), (31, 42),
-                (43, 54), (55, 66), (67, 78), (79, 90),
-            )
-        ]
-        if (
-            campaign.get("schema_name")
-            != "rj45-task-admission-isolated-campaign-v1"
-            or campaign.get("purpose") != "formal_campaign"
-            or campaign.get("environment_seed") != 20261121
-            or campaign.get("execution_plan") != expected_plan
-            or campaign.get("formal_partitions") != expected_partitions
-        ):
-            _fail("G1 campaign is not the exact formal tuning18 plus admission72 plan")
-        campaign_config = campaign.get("config")
-        if (
-            not isinstance(campaign_config, Mapping)
-            or campaign_config.get("sha256")
-            != file_sha256(current_root / contract["inputs"]["development_config_path"])
-        ):
-            _fail("G1 campaign config identity differs from the frozen development config")
-        episodes = report.get("episodes")
-        if not isinstance(episodes, list) or len(episodes) != 90:
-            _fail("G1 isolated formal report must contain exactly 90 episodes")
-        raw_selection = report.get("tuning_selection")
-        selected_candidate = (
-            raw_selection.get("candidate_id")
-            if isinstance(raw_selection, Mapping)
-            else None
+    ]
+    if (
+        campaign.get("schema_name")
+        != "rj45-task-admission-isolated-campaign-v1"
+        or campaign.get("purpose") != "formal_campaign"
+        or type(campaign.get("environment_seed")) is not int
+        or campaign.get("environment_seed") != 20261121
+        or campaign.get("execution_plan") != expected_plan
+        or campaign.get("formal_partitions") != expected_partitions
+    ):
+        _fail("G1 campaign is not the exact formal tuning18 plus admission72 plan")
+    development_path = _resolve_under(
+        current_root,
+        contract["inputs"]["development_config_path"],
+        "G1 development config",
+    )
+    campaign_config = campaign.get("config")
+    if (
+        not isinstance(campaign_config, Mapping)
+        or campaign_config.get("sha256") != file_sha256(development_path)
+    ):
+        _fail("G1 campaign config identity differs from the frozen development config")
+
+    bindings = contract.get("source_and_config_sha256", {}).get("current")
+    if not isinstance(bindings, Mapping):
+        _fail("current source binding is missing for G1 CPU verification")
+    report_path, _, finished_path, _, _ = _g1_artifact_paths(gate, current_root)
+    for path in (report_path, campaign_path, finished_path, supervisor_path):
+        relative = str(path.relative_to(current_root.resolve()))
+        if bindings.get(relative) != file_sha256(path):
+            _fail(f"G1 producer artifact is absent from current source binding: {relative}")
+    for relative in G1_CPU_SOURCE_PATHS:
+        path = _resolve_under(current_root, relative, f"G1 CPU source {relative}")
+        if bindings.get(relative) != file_sha256(path):
+            _fail(f"G1 CPU source is absent from current source binding: {relative}")
+
+    physics_start = campaign.get("physics_input_start")
+    snapshot_current = (
+        physics_start.get("normalized_sha256", {}).get("current")
+        if isinstance(physics_start, Mapping)
+        else None
+    )
+    source_sha = campaign.get("source_sha256")
+    if (
+        not isinstance(snapshot_current, Mapping)
+        or snapshot_current.get(G1_CPU_SOURCE_PATHS[0]) != bindings[G1_CPU_SOURCE_PATHS[0]]
+        or snapshot_current.get(G1_CPU_SOURCE_PATHS[2]) != bindings[G1_CPU_SOURCE_PATHS[2]]
+        or not isinstance(source_sha, Mapping)
+        or source_sha.get("runner") != bindings[G1_CPU_SOURCE_PATHS[0]]
+        or source_sha.get("coordinator") != bindings[G1_CPU_SOURCE_PATHS[1]]
+    ):
+        _fail("G1 CPU verifier sources differ from the producer physics snapshot")
+
+    rows = _validate_g1_episode_rows(report.get("episodes"), expected_plan)
+    before = set(sys.modules)
+    try:
+        module_suffix = hashlib.sha256(
+            str(current_root.resolve()).encode("utf-8")
+        ).hexdigest()[:16]
+        runner = _load_module_path(
+            current_root / G1_CPU_SOURCE_PATHS[0],
+            f"rby1_g2_gate_admission_runner_{module_suffix}",
         )
-        identity_keys = ("stage", "grasp_id", "case_id", "method_id", "slot")
-        for expected, episode in zip(expected_plan, episodes, strict=True):
-            if not isinstance(episode, Mapping) or any(
-                episode.get(key) != expected[key] for key in identity_keys
-            ):
-                _fail(f"G1 episode identity mismatch at ordinal {expected['ordinal']}")
+        coordinator = _load_module_path(
+            current_root / G1_CPU_SOURCE_PATHS[1],
+            f"rby1_g2_gate_admission_coordinator_{module_suffix}",
+        )
+        admission = _load_module_path(
+            current_root / G1_CPU_SOURCE_PATHS[2],
+            f"rby1_g2_gate_admission_protocol_{module_suffix}",
+        )
+        coordinator._assert_cpu_only_imports(before)
+        protocol, recomputed_seal = coordinator._seal_tuning(
+            rows[:18], development, runner, admission
+        )
+        selected = protocol.selection.candidate_id
+        for expected, row in zip(expected_plan, rows, strict=True):
             expected_candidate = expected["candidate_id"]
             if expected["stage"] == "admission" and expected["method_id"] == "classical_force_search":
-                expected_candidate = selected_candidate
-            if episode.get("candidate_id") != expected_candidate:
+                expected_candidate = selected
+            if row.get("candidate_id") != expected_candidate:
                 _fail(f"G1 episode candidate identity mismatch at ordinal {expected['ordinal']}")
-        producer_claims = report.get("claims")
-        if producer_claims != {
-            "task_admission_completed": True,
-            "rl_pilot_admitted": True,
-            "native_crash_cause_fixed": False,
-        }:
-            _fail("G1 isolated formal report claims do not admit the RL pilot")
-        selection = raw_selection
-        seal = report.get("classical_seal")
-        selection_keys = {
-            "candidate_id",
-            "success_count",
-            "evaluator_force_p95_n",
-            "completion_time_median_s",
-            "met_target",
+        playback_rows = development["methods"][2].get("selected_rows")
+        playback_rows = _integer(playback_rows, "G1 playback selected rows", minimum=1)
+        prepared = {
+            "config": development,
+            "playback_actions": (None,) * playback_rows,
         }
-        if (
-            not isinstance(selection, Mapping)
-            or not isinstance(seal, Mapping)
-            or set(selection) != selection_keys
-            or set(seal)
-            != {
-                "selected_candidate_id",
-                "canonical_controller_config_sha256",
-                "tuning_report_sha256",
-                "selection",
-            }
-            or selection.get("candidate_id") != seal.get("selected_candidate_id")
-            or selection.get("candidate_id") not in {"A", "B", "C"}
-            or seal.get("selection") != selection
-            or not SHA_RE.fullmatch(
-                str(seal.get("canonical_controller_config_sha256", ""))
-            )
-            or seal.get("canonical_controller_config_sha256")
-            != _expected_classical_controller_sha256(
-                development, str(selection.get("candidate_id", ""))
-            )
-            or not SHA_RE.fullmatch(str(seal.get("tuning_report_sha256", "")))
-            or type(selection.get("success_count")) is not int
-            or not 0 <= selection["success_count"] <= 6
-            or isinstance(selection.get("evaluator_force_p95_n"), bool)
-            or not isinstance(selection.get("evaluator_force_p95_n"), (int, float))
-            or not math.isfinite(float(selection["evaluator_force_p95_n"]))
-            or isinstance(selection.get("completion_time_median_s"), bool)
-            or not isinstance(selection.get("completion_time_median_s"), (int, float))
-            or not math.isfinite(float(selection["completion_time_median_s"]))
-            or type(selection.get("met_target")) is not bool
-        ):
-            _fail("G1 isolated formal tuning seal is invalid")
-        decision = report.get("decision")
-        if not isinstance(decision, Mapping) or decision.get("state") != report["status"]:
-            _fail("G1 isolated decision differs from report status")
-        normalized_claims = dict(required)
-        return {
-            "schema_name": "rj45_g1_gate_normalized_v1",
-            "source_report_schema": schema,
-            "status": report["status"],
-            "non_smoke": True,
-            "claims": normalized_claims,
-            "scientific_scope_claims": {
-                "physical_initial_pose_error_sweep": False,
-                "success_range_curve_proven": False,
-            },
-            "producer_claims": dict(producer_claims),
-            "campaign": {
-                "frozen_path": str(campaign_path),
-                "reported_source_path": identity["path"],
-                "sha256": campaign_sha,
-                "purpose": campaign["purpose"],
-                "environment_seed": campaign["environment_seed"],
-                "episode_count": 90,
-                "tuning_episode_count": 18,
-                "admission_episode_count": 72,
-            },
-        }
-    raise AssertionError("unreachable G1 schema branch")
+        protocol, baseline, evidence = coordinator._adjudicate_exact90(
+            rows, prepared, runner, admission, protocol
+        )
+        coordinator._assert_cpu_only_imports(before)
+    except LongDriverBlocked:
+        raise
+    except Exception as error:
+        raise LongDriverBlocked(f"G1 CPU recomputation failed: {error}") from error
+
+    producer_claims = report.get("claims")
+    expected_claims = {
+        "task_admission_completed": True,
+        "rl_pilot_admitted": True,
+        "native_crash_cause_fixed": False,
+    }
+    if producer_claims != expected_claims:
+        _fail("G1 isolated formal report claims do not admit the RL pilot")
+    if (
+        protocol.decision.state != "admit_rl_pilot"
+        or protocol.decision.reasons != ()
+        or not _same_json(report.get("tuning_selection"), asdict(protocol.selection))
+        or not _same_json(report.get("classical_seal"), recomputed_seal["classical_seal"])
+        or not _same_json(report.get("baseline_artifact_seal"), asdict(baseline))
+        or not _same_json(report.get("contract_evidence"), asdict(evidence))
+        or not _same_json(report.get("decision"), asdict(protocol.decision))
+    ):
+        _fail("G1 producer report differs from independent CPU recomputation")
+    if set(asdict(evidence)) != {
+        "archive_hash_valid",
+        "held_identity_valid",
+        "requested_applied_bias_valid",
+        "prefreeze_reset_equivalent",
+        "insert_transition_equivalent",
+        "first_insert_physical_zero",
+        "telemetry_complete",
+        "snapshots_complete",
+        "finite_values",
+        "baseline_artifacts_verified",
+    } or any(value is not True for value in asdict(evidence).values()):
+        _fail("G1 ContractEvidence is not the exact ten-field positive proof")
+    return {
+        "schema_name": "rj45_g1_gate_normalized_v1",
+        "source_report_schema": schema,
+        "status": report["status"],
+        "non_smoke": True,
+        "claims": dict(required),
+        "scientific_scope_claims": {
+            "physical_initial_pose_error_sweep": False,
+            "success_range_curve_proven": False,
+        },
+        "producer_claims": dict(producer_claims),
+        "campaign": {
+            "frozen_path": str(campaign_path),
+            "reported_source_path": identity["path"],
+            "sha256": campaign_sha,
+            "purpose": campaign["purpose"],
+            "environment_seed": campaign["environment_seed"],
+            "episode_count": 90,
+            "tuning_episode_count": 18,
+            "admission_episode_count": 72,
+        },
+        "producer_completion": {
+            "finished_path": str(finished_path),
+            "supervisor_validation_path": str(supervisor_path),
+            "abort_path": str(abort_path),
+            "abort_must_remain_absent": True,
+        },
+    }
 
 
 def validate_development_config_binding(
@@ -940,10 +1168,14 @@ def validate_contract(
         },
         "current": {
             contract.get("g1_gate", {}).get("report_path"),
+            contract.get("g1_gate", {}).get("campaign_path"),
+            contract.get("g1_gate", {}).get("finished_path"),
+            contract.get("g1_gate", {}).get("supervisor_validation_path"),
             inputs.get("development_config_path"),
             inputs.get("runtime_manifest_path"),
             inputs.get("physics_input_manifest_path"),
             "scripts/run_rj45_comparison_long.py",
+            *G1_CPU_SOURCE_PATHS,
             "src/rby1_assembly/rj45_comparison_rl.py",
             "src/rby1_assembly/rj45_comparison_env.py",
             "src/rby1_assembly/rj45_comparison_pilot_env.py",
@@ -1053,8 +1285,21 @@ def capture_input_snapshot(
         "normalized_sha256": normalized,
         "source_manifests": source_manifests,
         "canonical_sha256": canonical_sha256(
-            {"normalized_sha256": normalized, "source_manifests": source_manifests}
+            {
+                "normalized_sha256": normalized,
+                "source_manifests": source_manifests,
+                "must_remain_absent": [
+                    str(
+                        _g1_artifact_paths(
+                            contract["g1_gate"], current_root
+                        )[4]
+                    )
+                ],
+            }
         ),
+        "must_remain_absent": [
+            str(_g1_artifact_paths(contract["g1_gate"], current_root)[4])
+        ],
     }
 
 
@@ -1094,10 +1339,23 @@ def verify_input_snapshot(snapshot: Mapping[str, Any]) -> dict[str, Any]:
         )
         if not path.is_file() or file_sha256(path) != binding.get("sha256"):
             errors.append(f"source_manifest.{role}")
+    must_remain_absent = snapshot.get("must_remain_absent")
+    if (
+        not isinstance(must_remain_absent, list)
+        or len(must_remain_absent) != 1
+        or not isinstance(must_remain_absent[0], str)
+    ):
+        _fail("start input absent-path contract is malformed")
+    if Path(must_remain_absent[0]).exists():
+        errors.append("must_remain_absent.G1_campaign_abort")
     if errors:
         _fail(f"source inputs changed after start: {sorted(errors)}")
     canonical = canonical_sha256(
-        {"normalized_sha256": normalized, "source_manifests": source_manifests}
+        {
+            "normalized_sha256": normalized,
+            "source_manifests": source_manifests,
+            "must_remain_absent": must_remain_absent,
+        }
     )
     if canonical != snapshot.get("canonical_sha256"):
         _fail("start input snapshot canonical SHA mismatch")
@@ -1673,6 +1931,7 @@ def build_wave_accounting(
 
 
 def _train(prepared: Mapping[str, Any], output_dir: Path) -> dict[str, Any]:
+    verify_input_snapshot(prepared["input_snapshot"])
     comparison_rl = _load_current_module("rj45_comparison_rl")
     collect_bounded = comparison_rl.collect_bounded
     collector_progress = comparison_rl.collector_progress
@@ -1866,6 +2125,7 @@ def _train(prepared: Mapping[str, Any], output_dir: Path) -> dict[str, Any]:
 def _evaluate_dev(
     prepared: Mapping[str, Any], run_manifest: Path, run_manifest_sha256: str
 ) -> dict[str, Any]:
+    verify_input_snapshot(prepared["input_snapshot"])
     comparison_rl = _load_current_module("rj45_comparison_rl")
     deterministic_action = comparison_rl.deterministic_action
     load_inference_checkpoint = comparison_rl.load_inference_checkpoint

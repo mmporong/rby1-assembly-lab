@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import importlib.util
+from dataclasses import asdict
 import json
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 from types import SimpleNamespace
@@ -39,7 +41,16 @@ def _frozen():
         minimum_actual_update_input_transitions=12,
         minimum_condition_transition_count_per_condition=1,
     )
-    value["g1_gate"].update(report_path="g1-report.json", report_sha256="4" * 64)
+    value["g1_gate"].update(
+        report_path="g1-job/output/report.json",
+        report_sha256="4" * 64,
+        campaign_path="g1-job/output/campaign-identity.json",
+        campaign_sha256="5" * 64,
+        finished_path="g1-job/finished.json",
+        finished_sha256="6" * 64,
+        supervisor_validation_path="g1-job/supervisor-validation.json",
+        supervisor_validation_sha256="7" * 64,
+    )
     value["budget"].update(
         cycles=1,
         wave_vector_steps=10,
@@ -88,10 +99,14 @@ def _frozen():
     }
     current_paths = {
         value["g1_gate"]["report_path"],
+        value["g1_gate"]["campaign_path"],
+        value["g1_gate"]["finished_path"],
+        value["g1_gate"]["supervisor_validation_path"],
         value["inputs"]["development_config_path"],
         value["inputs"]["runtime_manifest_path"],
         value["inputs"]["physics_input_manifest_path"],
         "scripts/run_rj45_comparison_long.py",
+        *runner.G1_CPU_SOURCE_PATHS,
         "src/rby1_assembly/rj45_comparison_rl.py",
         "src/rby1_assembly/rj45_comparison_env.py",
         "src/rby1_assembly/rj45_comparison_pilot_env.py",
@@ -250,6 +265,13 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
         (ROOT / contract["inputs"]["development_config_path"]).read_bytes()
     )
     plan = runner._expected_g1_formal_plan(development)
+    for relative in runner.G1_CPU_SOURCE_PATHS:
+        destination = tmp_path / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, destination)
+        contract["source_and_config_sha256"]["current"][relative] = runner.file_sha256(
+            destination
+        )
     campaign = {
         "schema_name": "rj45-task-admission-isolated-campaign-v1",
         "purpose": "formal_campaign",
@@ -266,26 +288,149 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
             "path": "/producer/configs/rj45-comparison-development.json",
             "sha256": runner.file_sha256(development_path),
         },
+        "physics_input_start": {
+            "normalized_sha256": {
+                "current": {
+                    runner.G1_CPU_SOURCE_PATHS[0]: contract["source_and_config_sha256"]["current"][runner.G1_CPU_SOURCE_PATHS[0]],
+                    runner.G1_CPU_SOURCE_PATHS[2]: contract["source_and_config_sha256"]["current"][runner.G1_CPU_SOURCE_PATHS[2]],
+                }
+            }
+        },
+        "source_sha256": {
+            "runner": contract["source_and_config_sha256"]["current"][runner.G1_CPU_SOURCE_PATHS[0]],
+            "coordinator": contract["source_and_config_sha256"]["current"][runner.G1_CPU_SOURCE_PATHS[1]],
+        },
     }
-    campaign_path = tmp_path / "formal-campaign.json"
+    job_root = tmp_path / "job"
+    output = job_root / "output"
+    output.mkdir(parents=True)
+    campaign_path = output / "campaign-identity.json"
     campaign_path.write_text(json.dumps(campaign), encoding="utf-8")
     campaign_sha = runner.file_sha256(campaign_path)
     contract["g1_gate"].update(
-        campaign_path="formal-campaign.json", campaign_sha256=campaign_sha
+        campaign_path=str(campaign_path.relative_to(tmp_path)),
+        campaign_sha256=campaign_sha,
+        report_path="job/output/report.json",
+        finished_path="job/finished.json",
+        supervisor_validation_path="job/supervisor-validation.json",
     )
+    g1_runner = runner._load_module_path(
+        tmp_path / runner.G1_CPU_SOURCE_PATHS[0], "synthetic_g1_runner"
+    )
+    coordinator = runner._load_module_path(
+        tmp_path / runner.G1_CPU_SOURCE_PATHS[1], "synthetic_g1_coordinator"
+    )
+    admission = runner._load_module_path(
+        tmp_path / runner.G1_CPU_SOURCE_PATHS[2], "synthetic_g1_protocol"
+    )
+    candidates = {
+        row["id"]: row for row in development["classical_tuning"]["candidates"]
+    }
+    held = {row["grasp_id"]: row for row in development["held_grasps"]}
+    biases = {row["case_id"]: row for row in development["bias_cases"]}
+    baseline = admission.make_baseline_artifact_seal(
+        source_trace_gzip_sha256=development["methods"][2]["source_trace_gzip_sha256"],
+        mean_constant_action=development["methods"][1]["normalized_right6"],
+        playback_selected_rows=development["methods"][2]["selected_rows"],
+    )
+
+    def snapshot(row):
+        bias = biases[row["case_id"]]
+        grasp = held.get(row["grasp_id"])
+        return {
+            "applied_held_grasp_id": row["grasp_id"],
+            "applied_held_grasp_index": 2 if grasp is None else grasp["verified_index"],
+            "applied_held_artifact_sha256": "8" * 64 if grasp is None else grasp["artifact_sha256"],
+            "requested_translation_bias_entry_m": [list(bias["translation_bias_entry_m"])],
+            "applied_translation_bias_entry_m": [list(bias["translation_bias_entry_m"])],
+            "requested_rotation_bias_entry_rad": [list(bias["rotation_vector_bias_entry_rad"])],
+            "applied_rotation_bias_entry_rad": [list(bias["rotation_vector_bias_entry_rad"])],
+            "prefreeze_translation_socket_entry_m_xyz": [[0.0, 0.0, 0.0]],
+            "prefreeze_shortest_rotation_vector_socket_entry_rad_xyz": [[0.0, 0.0, 0.0]],
+            "insert_transition_translation_socket_entry_m_xyz": [[0.0, 0.0, 0.0]],
+            "insert_transition_shortest_rotation_vector_socket_entry_rad_xyz": [[0.0, 0.0, 0.0]],
+            "prefreeze_snapshot_valid": [True],
+            "insert_transition_snapshot_valid": [True],
+            "transition_contract_checked": [True],
+            "actual_applied_action_is_exact_zero": [True],
+        }
+
+    def observations(case_id):
+        value = 0.2 if case_id.endswith("positive") else -0.2
+        sample = [0.0] * 79
+        sample[7] = value
+        sample[37] = 0.1
+        return [list(sample) for _ in range(13)]
+
     episodes = []
     for row in plan:
         episode = {key: value for key, value in row.items() if key != "ordinal"}
-        if row["stage"] == "admission" and row["method_id"] == "classical_force_search":
-            episode["candidate_id"] = "A"
+        method = row["method_id"]
+        if row["stage"] == "tuning":
+            candidate = candidates[row["candidate_id"]]
+            payload = g1_runner._classical_payload(
+                SimpleNamespace(
+                    candidate_id=row["candidate_id"],
+                    position_gain=candidate["position_gain"],
+                    rotation_gain=candidate["rotation_gain"],
+                    force_trigger_n=candidate["force_trigger_n"],
+                    search_step_m=candidate["search_step_m"],
+                )
+            )
+            success_limit = {"A": 4, "B": 3, "C": 2}[row["candidate_id"]]
+            success = development["bias_cases"].index(biases[row["case_id"]]) < success_limit
+            artifact_sha = None
+            controller_sha = runner.canonical_sha256(payload)
+            actual_payload = payload
+        else:
+            success = method == "oracle_gt_reference" or (
+                method == "zero" and row["case_id"] == "tz-positive" and row["slot"] == 1
+            )
+            episode["candidate_id"] = "A" if method == "classical_force_search" else None
+            controller_sha = (
+                runner._expected_classical_controller_sha256(development, "A")
+                if method == "classical_force_search"
+                else None
+            )
+            artifact_sha = (
+                baseline.mean_constant_artifact_sha256
+                if method == "mean_constant"
+                else baseline.playback_artifact_sha256
+                if method == "open_loop_playback"
+                else None
+            )
+            actual_payload = None
+        episode.update(
+            success=success,
+            hard_contact=False,
+            forbidden_contact=False,
+            evaluator_force_p95_n=5.0,
+            completion_time_s=3.0,
+            provider_inputs=["observation79", "provider_owned_state"],
+            applied_controller_sha256=controller_sha,
+            applied_artifact_sha256=artifact_sha,
+            observation_samples=(
+                observations(row["case_id"])
+                if row["stage"] == "admission" and method == "zero"
+                else []
+            ),
+            admission_snapshot=snapshot(row),
+            terminal_complete=True,
+            execution_error=None,
+            actual_classical_controller_payload=actual_payload,
+        )
         episodes.append(episode)
-    tuning_selection = {
-        "candidate_id": "A",
-        "success_count": 4,
-        "evaluator_force_p95_n": 7.5,
-        "completion_time_median_s": 3.0,
-        "met_target": True,
-    }
+    protocol, seal = coordinator._seal_tuning(
+        episodes[:18], development, g1_runner, admission
+    )
+    protocol, recomputed_baseline, evidence = coordinator._adjudicate_exact90(
+        episodes,
+        {"config": development, "playback_actions": [None] * 364},
+        g1_runner,
+        admission,
+        protocol,
+    )
+    assert protocol.decision.state == "admit_rl_pilot"
     report = {
         "schema_name": "rj45-task-admission-isolated-report-v1",
         "status": "admit_rl_pilot",
@@ -293,16 +438,11 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
             "path": "/producer/output/formal-campaign.json",
             "sha256": campaign_sha,
         },
-        "tuning_selection": tuning_selection,
-        "classical_seal": {
-            "selected_candidate_id": "A",
-            "canonical_controller_config_sha256": (
-                runner._expected_classical_controller_sha256(development, "A")
-            ),
-            "tuning_report_sha256": "9" * 64,
-            "selection": tuning_selection,
-        },
-        "decision": {"state": "admit_rl_pilot"},
+        "tuning_selection": asdict(protocol.selection),
+        "classical_seal": seal["classical_seal"],
+        "baseline_artifact_seal": asdict(recomputed_baseline),
+        "contract_evidence": asdict(evidence),
+        "decision": asdict(protocol.decision),
         "episodes": episodes,
         "claims": {
             "task_admission_completed": True,
@@ -310,7 +450,78 @@ def _isolated_formal_gate_fixture(tmp_path: Path):
             "native_crash_cause_fixed": False,
         },
     }
+    report_path = output / "report.json"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    report_sha = runner.file_sha256(report_path)
+    finished = {
+        "exit_code": 0,
+        "child_exit_code": 0,
+        "external_verifier_exit_code": 0,
+        "execution_contract_passed": True,
+        "task_admission_decision": "admit_rl_pilot",
+        "rl_pilot_admitted": True,
+    }
+    finished_path = job_root / "finished.json"
+    finished_path.write_text(json.dumps(finished), encoding="utf-8")
+    supervisor = {
+        "execution_contract_passed": True,
+        "problems": [],
+        "proof": {
+            "formal_report_sha256": report_sha,
+            "campaign_sha256": campaign_sha,
+            "episode_count": 90,
+            "decision": "admit_rl_pilot",
+            "rl_pilot_admitted": True,
+        },
+    }
+    supervisor_path = job_root / "supervisor-validation.json"
+    supervisor_path.write_text(json.dumps(supervisor), encoding="utf-8")
+    contract["g1_gate"].update(
+        report_sha256=report_sha,
+        finished_sha256=runner.file_sha256(finished_path),
+        supervisor_validation_sha256=runner.file_sha256(supervisor_path),
+    )
+    for path in (campaign_path, report_path, finished_path, supervisor_path):
+        contract["source_and_config_sha256"]["current"][
+            str(path.relative_to(tmp_path))
+        ] = runner.file_sha256(path)
     return contract, development, campaign_path, campaign, report
+
+
+def _reseal_report(
+    tmp_path: Path, contract: dict, report: dict, *, supervisor: dict | None = None
+) -> None:
+    report_path = tmp_path / contract["g1_gate"]["report_path"]
+    report_path.write_text(json.dumps(report, allow_nan=True), encoding="utf-8")
+    report_sha = runner.file_sha256(report_path)
+    contract["g1_gate"]["report_sha256"] = report_sha
+    contract["source_and_config_sha256"]["current"][
+        contract["g1_gate"]["report_path"]
+    ] = report_sha
+    supervisor_path = tmp_path / contract["g1_gate"]["supervisor_validation_path"]
+    value = (
+        json.loads(supervisor_path.read_text(encoding="utf-8"))
+        if supervisor is None
+        else supervisor
+    )
+    if supervisor is None and isinstance(value.get("proof"), dict):
+        value["proof"]["formal_report_sha256"] = report_sha
+    supervisor_path.write_text(json.dumps(value), encoding="utf-8")
+    supervisor_sha = runner.file_sha256(supervisor_path)
+    contract["g1_gate"]["supervisor_validation_sha256"] = supervisor_sha
+    contract["source_and_config_sha256"]["current"][
+        contract["g1_gate"]["supervisor_validation_path"]
+    ] = supervisor_sha
+
+
+def _reseal_finished(tmp_path: Path, contract: dict, finished: dict) -> None:
+    path = tmp_path / contract["g1_gate"]["finished_path"]
+    path.write_text(json.dumps(finished), encoding="utf-8")
+    digest = runner.file_sha256(path)
+    contract["g1_gate"]["finished_sha256"] = digest
+    contract["source_and_config_sha256"]["current"][
+        contract["g1_gate"]["finished_path"]
+    ] = digest
 
 
 def test_isolated_formal90_report_derives_authenticated_non_smoke_scope(
@@ -352,8 +563,13 @@ def test_isolated_diagnostic_and_partial_reports_cannot_open_g1_gate(
         runner.validate_g1_gate(
             contract, diagnostic, current_root=tmp_path, development=development
         )
+    errata = {**report, "schema_name": "rj45-task-admission-isolated-errata-v1"}
+    with pytest.raises(runner.LongDriverBlocked, match="errata"):
+        runner.validate_g1_gate(
+            contract, errata, current_root=tmp_path, development=development
+        )
     partial = {**report, "episodes": report["episodes"][:32]}
-    with pytest.raises(runner.LongDriverBlocked, match="exactly 90"):
+    with pytest.raises(runner.LongDriverBlocked, match="authenticated artifact"):
         runner.validate_g1_gate(
             contract, partial, current_root=tmp_path, development=development
         )
@@ -370,17 +586,161 @@ def test_isolated_campaign_hash_and_formal_purpose_are_fail_closed(
         runner.validate_g1_gate(
             contract, report, current_root=tmp_path, development=development
         )
-
     campaign.pop("purpose")
     path.write_text(json.dumps(campaign), encoding="utf-8")
     mutated_sha = runner.file_sha256(path)
     contract["g1_gate"]["campaign_sha256"] = mutated_sha
     report["campaign_identity"]["sha256"] = mutated_sha
-    with pytest.raises(runner.LongDriverBlocked, match="exact formal"):
+    with pytest.raises(runner.LongDriverBlocked):
         runner.validate_g1_gate(
             contract, report, current_root=tmp_path, development=development
         )
 
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        "identity_only",
+        "89_rows",
+        "91_rows",
+        "terminal_false",
+        "execution_error",
+        "nonfinite",
+        "boolean_as_integer",
+        "snapshot_bias",
+        "zero_action_false",
+        "provider_authority",
+        "controller_seal",
+        "artifact_seal",
+    ),
+)
+def test_raw90_cpu_recomputation_rejects_identity_and_contract_tamper(
+    tmp_path: Path, mutation: str
+) -> None:
+    contract, development, _path, _campaign, report = _isolated_formal_gate_fixture(
+        tmp_path
+    )
+    rows = report["episodes"]
+    if mutation == "identity_only":
+        report["episodes"] = [
+            {
+                key: row[key]
+                for key in ("stage", "grasp_id", "case_id", "method_id", "slot", "candidate_id")
+            }
+            for row in rows
+        ]
+    elif mutation == "89_rows":
+        report["episodes"] = rows[:-1]
+    elif mutation == "91_rows":
+        report["episodes"] = [*rows, dict(rows[-1])]
+    elif mutation == "terminal_false":
+        rows[18]["terminal_complete"] = False
+    elif mutation == "execution_error":
+        rows[18]["execution_error"] = {"type": "RuntimeError"}
+    elif mutation == "nonfinite":
+        rows[18]["completion_time_s"] = float("nan")
+    elif mutation == "boolean_as_integer":
+        rows[18]["hard_contact"] = 0
+    elif mutation == "snapshot_bias":
+        rows[18]["admission_snapshot"]["applied_translation_bias_entry_m"][0][0] += 0.01
+    elif mutation == "zero_action_false":
+        rows[18]["admission_snapshot"]["actual_applied_action_is_exact_zero"] = [False]
+    elif mutation == "provider_authority":
+        rows[18]["provider_inputs"] = ["known_calibration_bias"]
+    elif mutation == "controller_seal":
+        classical = next(row for row in rows[18:] if row["method_id"] == "classical_force_search")
+        classical["applied_controller_sha256"] = "0" * 64
+    elif mutation == "artifact_seal":
+        mean = next(row for row in rows[18:] if row["method_id"] == "mean_constant")
+        mean["applied_artifact_sha256"] = "0" * 64
+    _reseal_report(tmp_path, contract, report)
+    with pytest.raises(runner.LongDriverBlocked):
+        runner.validate_g1_gate(
+            contract, report, current_root=tmp_path, development=development
+        )
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    (
+        ("exit_code", 1),
+        ("child_exit_code", 1),
+        ("external_verifier_exit_code", 1),
+        ("execution_contract_passed", 1),
+        ("task_admission_decision", "blocked"),
+        ("rl_pilot_admitted", False),
+    ),
+)
+def test_finished_record_requires_typed_success_proof(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    contract, development, _path, _campaign, report = _isolated_formal_gate_fixture(
+        tmp_path
+    )
+    path = tmp_path / contract["g1_gate"]["finished_path"]
+    finished = json.loads(path.read_text(encoding="utf-8"))
+    finished[field] = value
+    _reseal_finished(tmp_path, contract, finished)
+    with pytest.raises(runner.LongDriverBlocked):
+        runner.validate_g1_gate(
+            contract, report, current_root=tmp_path, development=development
+        )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    (
+        "execution_false",
+        "problems",
+        "proof_missing",
+        "report_hash",
+        "campaign_hash",
+        "row_count",
+        "decision",
+        "rl_bool_as_int",
+    ),
+)
+def test_supervisor_validation_requires_exact_recomputed_proof(
+    tmp_path: Path, mutation: str
+) -> None:
+    contract, development, _path, _campaign, report = _isolated_formal_gate_fixture(
+        tmp_path
+    )
+    path = tmp_path / contract["g1_gate"]["supervisor_validation_path"]
+    supervisor = json.loads(path.read_text(encoding="utf-8"))
+    if mutation == "execution_false":
+        supervisor["execution_contract_passed"] = False
+    elif mutation == "problems":
+        supervisor["problems"] = [{"stage": "validation"}]
+    elif mutation == "proof_missing":
+        supervisor["proof"] = None
+    elif mutation == "report_hash":
+        supervisor["proof"]["formal_report_sha256"] = "0" * 64
+    elif mutation == "campaign_hash":
+        supervisor["proof"]["campaign_sha256"] = "0" * 64
+    elif mutation == "row_count":
+        supervisor["proof"]["episode_count"] = 89
+    elif mutation == "decision":
+        supervisor["proof"]["decision"] = "blocked"
+    elif mutation == "rl_bool_as_int":
+        supervisor["proof"]["rl_pilot_admitted"] = 1
+    _reseal_report(tmp_path, contract, report, supervisor=supervisor)
+    with pytest.raises(runner.LongDriverBlocked):
+        runner.validate_g1_gate(
+            contract, report, current_root=tmp_path, development=development
+        )
+
+
+def test_producer_abort_path_is_derived_and_must_remain_absent(tmp_path: Path) -> None:
+    contract, development, _path, _campaign, report = _isolated_formal_gate_fixture(
+        tmp_path
+    )
+    abort = tmp_path / "job/output/campaign-aborted.json"
+    abort.write_text("{}", encoding="utf-8")
+    with pytest.raises(runner.LongDriverBlocked, match="abort artifact"):
+        runner.validate_g1_gate(
+            contract, report, current_root=tmp_path, development=development
+        )
 
 def test_budget_requires_exact_num_env_product_and_reviewed_contact_count() -> None:
     runner.validate_contract(_frozen(), execution_mode="train")
@@ -391,6 +751,25 @@ def test_budget_requires_exact_num_env_product_and_reviewed_contact_count() -> N
     runner.validate_parallel_contact_proof({"validated_probe_num_envs": 4}, 4)
     with pytest.raises(runner.LongDriverBlocked, match="exact num_envs"):
         runner.validate_parallel_contact_proof({"validated_probe_num_envs": 12}, 4)
+
+
+@pytest.mark.parametrize(
+    "relative",
+    (
+        "g1-job/output/report.json",
+        "g1-job/output/campaign-identity.json",
+        "g1-job/finished.json",
+        "g1-job/supervisor-validation.json",
+        *runner.G1_CPU_SOURCE_PATHS,
+    ),
+)
+def test_contract_requires_all_g1_artifact_and_cpu_source_bindings(
+    relative: str,
+) -> None:
+    contract = _frozen()
+    contract["source_and_config_sha256"]["current"].pop(relative)
+    with pytest.raises(runner.LongDriverBlocked, match="current source bindings"):
+        runner.validate_contract(contract, execution_mode="train")
 
 
 def test_paired_schedule_has_identical_conditions_and_environment_seeds() -> None:
@@ -485,6 +864,12 @@ def test_input_start_end_gate_detects_hash_tamper(tmp_path: Path) -> None:
         contract["inputs"][sha_field] = runner.file_sha256(path)
     snapshot = runner.capture_input_snapshot(contract, current_root=roots["current"])
     assert runner.verify_input_snapshot(snapshot)["matched"] is True
+    abort_path = Path(snapshot["must_remain_absent"][0])
+    abort_path.parent.mkdir(parents=True, exist_ok=True)
+    abort_path.write_text("{}", encoding="utf-8")
+    with pytest.raises(runner.LongDriverBlocked, match="G1_campaign_abort"):
+        runner.verify_input_snapshot(snapshot)
+    abort_path.unlink()
     tampered = roots["evidence"] / contract["inputs"]["training_config_path"]
     tampered.write_text("tampered", encoding="utf-8")
     with pytest.raises(runner.LongDriverBlocked, match="changed after start"):
