@@ -81,6 +81,11 @@
       "task_admission_completed": true,
       "rl_pilot_admitted": true
     },
+    "required_finished_bindings": [
+      "supervisor_validation_sha256",
+      "formal_report_sha256",
+      "campaign_sha256"
+    ],
     "report_path": null,
     "report_sha256": null,
     "campaign_path": null,
