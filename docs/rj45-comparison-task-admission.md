@@ -1,6 +1,6 @@
 # RJ45 비교 과제 학습 진입 조건
 
-상태: **G1 Isaac task-admission 3-episode smoke 통과, full90은 32/90에서 native 중단**. source `2e1f926` packet의 classical tuning 18회와 admission 14회는 원자 파일로 보존됐지만 exit `-11` 뒤 full report가 생성되지 않았다. 따라서 중간 32회를 방법 성능이나 학습 효과로 집계하지 않는다. `classical_force_search A`, `zero`, `oracle_gt_reference`가 각 1회씩 terminal contract를 완성한 앞선 smoke에서는 hard/forbidden contact가 모두 0회였다. 이는 실행 경로·접촉 telemetry·계약 판정의 작동 확인이다. smoke는 한 bias case만 사용했고 classical은 train-03, zero와 oracle은 train-02에서 실행됐으므로 세 방식의 성능 차이나 학습 효과를 비교하는 근거가 아니다. `task_admission_completed=false`, `rl_pilot_admitted=false`이며 G1은 아직 완료되지 않았다. [smoke 근거](evidence/rj45-task-admission-smoke-20261101/README.md)와 [full90 중단 근거](evidence/rj45-task-admission-interrupted-20261101/README.md)를 분리해 보존한다.
+상태: **G1 diagnostic ordinal 33 계약 통과, 새 formal 90회 격리 검증 진행 중**. source `2e1f926` packet의 classical tuning 18회와 admission 14회는 보존했지만 exit `-11` 뒤 full report가 생성되지 않아 최종 판정에 쓰지 않는다. 새 process에서 ordinal 33 한 건을 비판정 diagnostic으로 실행한 결과 terminal·finite·provenance·cleanup·end-input 계약을 통과했다. `mean_constant`는 성공하지 못했고, 관측은 727×79, 벽시계 시간은 약 222.4초였다. 회수 archive SHA-256은 `d584eca81b627eef1b1a1d4511472db0d35373ee9145a5c4e384b309469e2234`이며 회수 뒤 실행 환경 `STOPPED`와 종료 guard closed를 확인했다. 이 한 건으로 task admission, RL 효과, native `SIGSEGV` 원인 해결을 판정하지 않는다. 2026-11-01T01:35:11Z에 기존 32회와 diagnostic 1회를 재사용하지 않는 새 formal campaign을 별도 경로에서 시작했다. 전체 격리 검증은 진행 중이며 최종 판정은 미확정이다. `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
 
 ## 검증 범위
 
@@ -14,11 +14,15 @@ reset 동등성은 warmup 안정성 통과 뒤 `_freeze_training_estimator`를 �
 
 성공 기준 50 µm, 0.5°, 깊이 12 mm, 0.4초 유지, 25 N은 `configs/tasks/rj45-v1.json`에서 바꾸지 않는다. G1과 기존 공개 결과는 development이며 새 final 평가에 재사용하지 않는다.
 
-## archive와 held-grasp 고정
+## active runtime·historical evidence 이중 root와 held-grasp 고정
 
-실행기는 `--runtime-root`로 동결 archive root를 받고 그 아래의 `artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json`을 읽는다. 현재 저장소의 같은 상대경로에는 bank가 없으므로 로컬 경로가 있다고 가정하지 않는다.
+실행기는 `--runtime-root`로 active runtime을, `--evidence-root`로 historical evidence를 받는다. active runtime은 `1517fbf`의 core 35개를 import하고 실행한다. historical `104721a` root는 과거 trace·proof·bank 검증 전용이며 Python module import 경로로 쓰지 않는다. 두 root의 task config bytes와 parsed value가 같지 않거나 import가 active runtime 밖으로 벗어나면 중단한다.
 
-`load_verified_held_grasp_bank(runtime_root, task, bank_path, "train", allow_final=False)`로 train 8개 전체를 먼저 검증한다. manifest SHA는 `c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5`, `bank_source_contract_sha256(proof)`는 `38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0`이어야 한다. `proof.selected_grasp_ids`가 `rj45-train-01`부터 `08`까지 순서대로인지 확인한 뒤 ID로 index를 찾는다. `train-02 → 1`, `train-05 → 4`가 아니면 중단한다. 각 case는 해당 `bank[index]`를 `held_state`로 factory에 넘긴다.
+수치 검증 대상 core 35개 중 예전 root와 바이트가 다른 파일은 `experiment_contracts.py` 하나다. 이 파일은 raw pose에서 파생된 `lateral_error_m`·`orientation_error_rad` 직렬화 차이만 2 binary64 ULP까지 허용한다. `depth_m`, 원본 `relative_position_entry_m`·`relative_quaternion_entry_wxyz`, `source`는 exact 일치를 유지하고, 2 ULP 허용으로 물리 성공 tolerance를 바꾸지 않는다. historical proof 8개의 의미는 active code로 검증한다.
+
+현재 봉인 대상은 active runtime 50개, historical evidence 50개, current 6개, bank 26개이며 train bank 8개를 active code로 의미 검증한다. held-grasp bank는 evidence root 아래의 `artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json`에서 읽는다. 현재 저장소의 같은 상대경로에 bank가 있다고 가정하지 않는다.
+
+`load_verified_held_grasp_bank(evidence_root, evidence_task, bank_path, "train", allow_final=False)`로 train 8개 전체를 먼저 검증한다. manifest SHA는 `c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5`, `bank_source_contract_sha256(proof)`는 `38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0`이어야 한다. `proof.selected_grasp_ids`가 `rj45-train-01`부터 `08`까지 순서대로인지 확인한 뒤 ID로 index를 찾는다. `train-02 → 1`, `train-05 → 4`가 아니면 중단한다. 각 case는 해당 `bank[index]`를 `held_state`로 factory에 넘긴다.
 
 legacy 단건 `held_state`에는 grasp ID telemetry가 없으므로 `rby1_assembly.rj45_task_admission_env.make_rj45_task_admission_env_type`가 `applied_held_grasp_id`, `applied_held_grasp_index`, `applied_held_artifact_sha256`을 환경 telemetry에 넣는다. runner는 이 값과 factory closure에 넘긴 `bank[index]`의 canonical artifact SHA를 reset마다 대조한다. 같은 wrapper가 요청한 6D bias를 `_training_translation_bias_entry`, `_training_rotation_bias_entry`에 넣고 적용값을 절대오차 `1e-9` 안에서 대조한다. telemetry가 없거나 불일치하면 결과 실패가 아니라 `invalid_contract`다.
 
@@ -62,7 +66,7 @@ constant/playback 봉인은 원본과 파생 아티팩트를 나눠 검증한다
 
 2 grasp × 6 bias case = 12 case다. provider는 5개지만 `zero`만 2회이므로 case당 실행 slot은 6개, 최대 `12 × 6 = 72 episode`다. case 교체와 성공 tolerance 완화는 금지한다.
 
-실제 G1은 frozen `104721a`의 training core를 사용한다. `rj45_training_env.py` SHA-256은 `ecdbfed020e0751721ad834b70e895a7f9ac195f4939e97ee8d82ddf7c0bd96c`, `rj45_training.py` SHA-256은 `cc59be01737c9d7db312c83c5592f93fdb10df74ab3f77ca34cada542954b180`이며 run identity manifest와 일치한다. 이 경로의 79D simulation proxy는 estimator·controller·joint·force state로 구성되고 base가 반환하는 noisy observation을 입력으로 소비하지 않는다. 별도의 센서 latency·dropout sampler도 없다. 따라서 아래 반복 차이 `N`은 일반적인 센서 노이즈 분산 추정이 아니라, 고정 시드 프로토콜에서 calibration bias·reset·접촉 동역학을 포함한 상태와 관측 궤적의 반복성을 보는 지표다.
+실제 G1은 active `1517fbf`의 training core를 import하고, historical `104721a`의 trace·proof는 출처 검증에만 사용한다. 이 경로의 79D simulation proxy는 estimator·controller·joint·force state로 구성되고 base가 반환하는 noisy observation을 입력으로 소비하지 않는다. 별도의 센서 latency·dropout sampler도 없다. 따라서 아래 반복 차이 `N`은 일반적인 센서 노이즈 분산 추정이 아니라, 고정 시드 프로토콜에서 calibration bias·reset·접촉 동역학을 포함한 상태와 관측 궤적의 반복성을 보는 지표다.
 
 `zero` slot 1의 12개만 성공률·headroom 분모에 넣는다. slot 2는 동일 시드 반복 관측 차이 `N` 측정 전용이며 성과 횟수에 합산하지 않는다. 각 run을 30 Hz의 첫 entry contact tick에 맞추고 그 tick을 포함한 13 sample, 즉 12 transition의 0.4초 window로 잡는다. contact는 SI로 복원한 `||obs[37:40]×8||₂ ≥ 0.25 N`이다. contact가 없거나 13 sample이 없으면 그 case/축은 관측 불가다.
 
@@ -90,7 +94,8 @@ feature는 GT·추정 상대 자세를 제외한 `concat(obs[7:40], obs[63:78])`
 ```bash
 cd "$HOME/rby1-assembly-lab"
 OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission.py \
-  --runtime-root <동결-archive-root> \
+  --runtime-root <동결-active-runtime-root> \
+  --evidence-root <동결-historical-evidence-root> \
   --current-root "$PWD" \
   --config configs/rj45-comparison-development.json \
   --output-dir artifacts/rj45-task-admission-smoke-<새-ID> \
@@ -98,14 +103,15 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --headless --device cuda:0
 ```
 
-전체 development admission은 CPU coordinator가 물리 입력 48개와 held-bank 입력 26개를 구분해 봉인한 뒤, 최대 12 episode씩 9개 fresh process chunk로 순차 실행한다. classical tuning 18회와 admission 72회, 최대 90회의 과학 조건·seed·성공 기준은 바꾸지 않는다. 이 구조는 native process 수명을 제한하고 chunk 전후 provenance를 검증하기 위한 것이며 병렬 환경 학습을 뜻하지 않는다. source `2e1f926` packet의 첫 full90은 32/90에서 native `SIGSEGV`로 중단됐고 원인은 확정되지 않았다. 기존 32회와 새 campaign을 섞지 않는다.
+전체 development admission은 CPU coordinator가 active runtime 50개, historical evidence 50개, current 6개, held-bank 26개를 구분해 봉인하고 train bank 8개를 의미 검증한 뒤, 최대 12 episode씩 9개 fresh process chunk로 순차 실행한다. classical tuning 18회와 admission 72회, 최대 90회의 과학 조건·seed·성공 기준은 바꾸지 않는다. 이 구조는 native process 수명을 제한하고 chunk 전후 provenance를 검증하기 위한 것이며 병렬 환경 학습을 뜻하지 않는다. 첫 full90은 32/90에서 native `SIGSEGV`로 중단됐고 원인은 확정되지 않았다. 기존 32회와 diagnostic 1회를 새 campaign에 섞지 않는다.
 
-먼저 ordinal 33 한 건만 비판정 diagnostic으로 실행한다. 별도 출력 경로를 사용하며 이 결과로 task admission이나 RL pilot을 판정하지 않는다.
+ordinal 33 한 건의 비판정 diagnostic은 아래 형태의 명령으로 실행했다. 새 출력 경로를 사용하며 이 결과로 task admission이나 RL pilot을 판정하지 않는다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
 OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission_isolated.py \
-  --runtime-root <동결-archive-root> \
+  --runtime-root <동결-active-runtime-root> \
+  --evidence-root <동결-historical-evidence-root> \
   --current-root "$PWD" \
   --config configs/rj45-comparison-development.json \
   --playback-actions docs/evidence/rj45-frozen-ablation-20261031/source-actions.json \
@@ -114,12 +120,13 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --diagnostic-ordinal 33
 ```
 
-diagnostic이 격리·종료·provenance 계약을 통과하면 새 출력 경로에서 formal campaign을 처음부터 실행한다. 이 두 실제 GPU 실행은 아직 수행하지 않았고 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+diagnostic 계약 통과 뒤 새 출력 경로에서 formal campaign을 처음부터 시작했다. 전체 격리 검증은 진행 중이며 최종 판정 전까지 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
 OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj45_task_admission_isolated.py \
-  --runtime-root <동결-archive-root> \
+  --runtime-root <동결-active-runtime-root> \
+  --evidence-root <동결-historical-evidence-root> \
   --current-root "$PWD" \
   --config configs/rj45-comparison-development.json \
   --playback-actions docs/evidence/rj45-frozen-ablation-20261031/source-actions.json \

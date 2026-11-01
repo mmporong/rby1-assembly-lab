@@ -31,7 +31,11 @@ RJ45 장면은 TE 공식 잭 CAD와 플러그 도면 치수를 사용한다. 어
 | 고정 PPO의 상수·재생 대조 | 학습 조건은 PPO·상수·재생 모두 성공, 새 보정 오차는 무보정 4/4·PPO 0/4 | 5조건×4방법의 유효 평가 20회. 상수·재생도 새 조건에서는 각각 0/4였다. 한 조건의 성공으로 피드백 학습을 입증할 수 없으며 정책을 승격하지 않았다. [조건별 결과·적용 행동 감사](docs/evidence/rj45-frozen-ablation-20261031/README.md) |
 | 단일·다중 보정 오차 PPO 비교 | 미사용 8조건에서 단일조건 PPO 2/8, 다중조건 PPO 3/8, 무보정 2/8 | 두 PPO는 각각 64 updates·8,192 transitions로 맞췄다. 다중조건 PPO는 단일조건 PPO보다 1건 높았지만 사전 기준인 2건 이상 차이를 충족하지 못했다. 1 seed 결과이므로 효과·일반화·최종 정책을 주장하지 않는다. [27회 평가·원본 계보·감사](docs/evidence/rj45-multibias-20261031/README.md) |
 
-표준 관측 PPO는 한 고정 train 조건에서 학습 가능성을 보였지만, 보정 오차 네 개를 순환해 학습한 후속 비교에서도 다중조건 PPO의 미사용 조건 성과는 3/8에 그쳤다. 단일조건 PPO·무보정보다 각각 1건 높았으며, 사전 기준과 다중 seed 반복 조건을 충족하지 못해 강화학습의 효과나 일반화를 입증하지 않았다. 새 PPO/SAC 공통 비교 경로는 skrl 2.1.0으로 구현해 G0 실제 GPU 검증을 마쳤고, [G1 Isaac 사전 검증](docs/evidence/rj45-task-admission-smoke-20261101/README.md)은 계약 3/3으로 통과했다. 후속 full90은 32/90에서 native process가 중단돼 [원본과 중단 범위](docs/evidence/rj45-task-admission-interrupted-20261101/README.md)를 보존했으며, 이 32회는 방법 성능이나 학습 효과로 집계하지 않는다. 물리 입력 봉인과 CPU coordinator 기반 fresh-process 격리는 171개 관련 CPU 테스트와 독립 검수를 통과했고, 실제 GPU diagnostic 33과 새 full90 campaign은 아직 실행하지 않았다. G1 완료, RL pilot 진입과 main training은 모두 미완료다. 정책은 삽입 단계의 오른손 6차원 목표 보정을 결정하며, 지지팔과 삽입 진행·중단·복구는 스크립트가 담당한다. 현재 actor와 critic의 79D 입력은 시뮬레이션 추정 상태이며 카메라 정책이나 실물 센서 검증을 뜻하지 않는다. 관측·보상·행동 한도·학습 조건·전이 예산·최종 checkpoint 선택은 고정하고, 실행 전 비교 규칙을 별도로 확정한다. 데이터 분리와 판정 기준은 [강화학습 기여 검증 계획](docs/rj45-rl-contribution-plan.md)에 있다.
+표준 관측 PPO는 한 고정 train 조건에서 학습 가능성을 보였지만, 보정 오차 네 개를 순환해 학습한 후속 비교에서도 다중조건 PPO의 미사용 조건 성과는 3/8에 그쳤다. 단일조건 PPO·무보정보다 각각 1건 높았으며, 사전 기준과 다중 seed 반복 조건을 충족하지 못해 강화학습의 효과나 일반화를 입증하지 못했다. 새 PPO/SAC 공통 비교 경로는 skrl 2.1.0으로 구현해 G0 GPU 검증을 마친 상태다. G1의 첫 full90은 32/90에서 native process가 중단돼 [원본과 중단 범위](docs/evidence/rj45-task-admission-interrupted-20261101/README.md)를 보존했으며, 이 32회는 방법 성능이나 학습 효과로 집계하지 않는다. 이후 새 process의 diagnostic ordinal 33 한 건이 종료·유한값·출처·정리·입력 종료 계약을 통과했다. `mean_constant`는 실패했고, 이 한 건으로 native 중단 원인이 해결됐다고 보지 않는다. 기존 32회와 diagnostic 1회를 재사용하지 않는 새 formal 90회 격리 검증은 진행 중이며 최종 판정은 확정되지 않았다.
+
+수치 검증·active runtime과 historical evidence의 dual-root 보완·G2 장기 실행기를 포함한 대표 CPU 통합 범위는 330 PASS·126 subtests를 통과했다. 이 수치는 저장소 전체 테스트 수가 아니다. G2 설정은 아직 동결되지 않은 초안이고 본학습은 시작하지 않았다. G1 task admission과 RL pilot 진입도 미확정이다.
+
+정책은 삽입 단계의 오른손 6차원 목표 보정만 결정하고, 지지팔·삽입 진행·중단·복구는 스크립트가 담당한다. actor와 critic의 79D 입력은 시뮬레이션 proxy이며 카메라 정책, 실물 센서, Sim-to-Real, 양팔 모두의 학습을 검증한 결과가 아니다. 데이터 분리와 판정 기준은 [강화학습 기여 검증 계획](docs/rj45-rl-contribution-plan.md)에 있다.
 
 [같은 조건의 성공·실패를 측정값과 함께 보는 60fps 영상](docs/media/rj45/multibias/fresh05-multibias-comparison.mp4)을 남겼다. 평가 후 고른 한 사례의 새 물리 재생이며, 전체 조건에서의 개선 효과를 대체하지 않는다. [촬영·시각 정렬·회수 계보](docs/evidence/rj45-multibias-20261031/README.md#실제-물리-재생-영상)에 원본과 한계를 기록했다.
 
@@ -84,7 +88,7 @@ PYTHONPATH=src .venv/bin/python -m pytest -q tests
 
 설치·실행·종료 절차와 검증 순서는 [Brev 실행 문서](docs/brev-run.md)에 있다. 실행기는 단계 변화와 물리 상태를 JSONL trace로 남기고, 단일 환경 실행을 MP4로 기록한다. 아래 기존 toy 근접 촬영은 1280×960에서 물리 상태를 초당 120장 기록했고, 공유용 4배속 영상과 정상 속도 전체 구도 영상은 모두 60 fps다. 물리 120 Hz·제어 30 Hz는 촬영 전후에 동일하다. RJ45 명목 영상과 병렬 PPO 영상은 서로 다른 계약으로 촬영했으며, 각 근거 문서에 프레임과 원본 해시를 기록했다.
 
-전용 Brev L40S에 고정 버전 환경을 설치하고 사용자가 승인한 NVIDIA Omniverse EULA 설정으로 GPU 연산·PhysX·렌더링을 실행했다. 컴퓨팅 예산과 중지 원칙은 [예산 설정](configs/compute-budget.json)에 기록한다.
+고정 버전 GPU 환경에서 사용자가 승인한 NVIDIA Omniverse EULA 설정으로 연산·PhysX·렌더링을 실행했다. 후속 실행은 사용자가 승인한 잔여 예산과 실행별 상한을 따르며, 정확한 예산과 중지 상태는 비추적 운영 기록에서 관리한다.
 
 ## 기존 toy 과제 미디어
 
