@@ -1,6 +1,6 @@
 # RJ45 비교 과제 학습 진입 조건
 
-상태: **G1 diagnostic ordinal 33 계약 통과, 새 formal 90회 격리 검증 진행 중**. source `2e1f926` packet의 classical tuning 18회와 admission 14회는 보존했지만 exit `-11` 뒤 full report가 생성되지 않아 최종 판정에 쓰지 않는다. 새 process에서 ordinal 33 한 건을 비판정 diagnostic으로 실행한 결과 terminal·finite·provenance·cleanup·end-input 계약을 통과했다. `mean_constant`는 성공하지 못했고, 관측은 727×79, 벽시계 시간은 약 222.4초였다. 회수 archive SHA-256은 `d584eca81b627eef1b1a1d4511472db0d35373ee9145a5c4e384b309469e2234`이며 회수 뒤 실행 환경 `STOPPED`와 종료 guard closed를 확인했다. 이 한 건으로 task admission, RL 효과, native `SIGSEGV` 원인 해결을 판정하지 않는다. 2026-11-01T01:35:11Z에 기존 32회와 diagnostic 1회를 재사용하지 않는 새 formal campaign을 별도 경로에서 시작했다. 전체 격리 검증은 진행 중이며 최종 판정은 미확정이다. `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+상태: **formal 90회 native 물리 실행 완료, coordinator 중단으로 G1 미완료**. source `2e1f926` packet의 첫 full90 32회는 최종 판정에 쓰지 않았다. 새 formal campaign은 tuning 18회와 admission 72회를 모두 실행했고, 9개 worker의 90개 row가 terminal-complete·execution-error-none이었으며 raw/source/end-input/cleanup 계약을 통과했다. 최종 coordinator는 worker-style module alias `rby1_current_rj45_task_admission`이 없어 `KeyError`로 중단됐다. 원본 `report.json`은 생성되지 않았고 supervisor execution contract는 `false`다. `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지하며 G2 본학습은 시작하지 않았다. 결과 회수 뒤 실행 환경은 `STOPPED`, 종료 guard는 closed로 확인했다.
 
 ## 검증 범위
 
@@ -120,7 +120,7 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --diagnostic-ordinal 33
 ```
 
-diagnostic 계약 통과 뒤 새 출력 경로에서 formal campaign을 처음부터 시작했다. 전체 격리 검증은 진행 중이며 최종 판정 전까지 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
+diagnostic 계약 통과 뒤 새 출력 경로에서 formal campaign을 처음부터 실행했다. native 물리 90회는 종료됐지만 coordinator 중단으로 `task_admission_completed=false`, `rl_pilot_admitted=false`를 유지한다.
 
 ```bash
 cd "$HOME/rby1-assembly-lab"
@@ -133,6 +133,14 @@ OMNI_KIT_ACCEPT_EULA=YES PYTHONPATH=src <Isaac-전용-python> -u scripts/run_rj4
   --output-dir artifacts/rj45-task-admission-isolated-full-<새-ID> \
   --purpose formal_campaign
 ```
+
+## formal 90회 실행 결과와 판정 경계
+
+9개 worker가 tuning 18회와 admission 72회를 실행했다. 90개 row가 모두 terminal-complete이고 execution error가 없었으며, worker·external verifier exit 0, source·end-input 일치, process-group cleanup을 통과했다. 최종 coordinator는 `rby1_current_rj45_task_admission` module alias 조회에서 `KeyError`로 중단됐다. 이 때문에 원본 `report.json`은 생성되지 않았고 supervisor execution contract는 `false`다. 실행 계약 실패를 물리 90회 종료로 소급해 성공 처리하지 않는다.
+
+회수한 원본 90회는 변경하지 않았다. 원본 protocol에 worker-style module alias만 복원한 독립 CPU 진단은 `infeasible_or_unobservable`을 반환했다. slot 1 safe success count는 `oracle_gt_reference` 12/12, `zero` 6/12, `mean_constant` 2/12, `open_loop_playback` 1/12, `classical_force_search` 6/12였다. reference는 성공과 안전 gate를 통과했지만, 두 grasp 모두 tx만 observable이었다. tz·rx는 고정한 0.25 N contact sample이 없어 grasp당 observable axis가 1/3이었고 최소 2/3 gate를 통과하지 못했다. recovered row만으로는 contact sample 미검출의 물리적 원인을 구분할 수 없으며, 사전등록 feature·threshold·window·gate를 사후 조정하지 않았다.
+
+이 CPU 진단은 회수 row의 내적 일관성과 alias 복원 후 판정기가 반환할 상태를 보여준다. 원본 producer report, supervisor 계약 통과, G1 완료, RL pilot 승인, final held-out 평가를 입증하지 않는다. module alias 의존성을 명시적으로 주입하도록 수정한 `ed1a375`는 독립 대상 CPU 테스트 86개를 통과했지만, native campaign을 재실행하지 않았고 원본 과학 상태도 바꾸지 않았다.
 
 attempt-C는 환경 생성 전에 `cfg.seed`가 없어서 세 번 모두 중단됐다. 이는 물리 또는 제어 결과가 아니라 구성 실패다. 실패 기록은 보존했고, attempt-D에서는 모든 case·method·slot에 같은 nonnegative integer seed `20261121`을 factory 호출 전에 전달하고 provenance에 기록했다. runner SHA-256은 `2f5483ee2c11cd8deb8b9bd87c2b1ddc1c10e912d1b21ece6eec1fe3af96a0f8`이다. 독립 검증은 3/3 terminal, 실행 계획, 144,686개 유한 수치, bias·held identity·최초 action 계약, 동결 runtime hash 35개를 확인했다. VM은 결과 회수 뒤 `STOPPED`로 확인됐다. 실행 창 비용 `0.7288 USD`는 시간과 단가를 곱한 추정치이며 청구액이 아니다. G0 완료 근거는 [`docs/evidence/rj45-comparison-g0-20261101/README.md`](evidence/rj45-comparison-g0-20261101/README.md)에 보존한다.
 
