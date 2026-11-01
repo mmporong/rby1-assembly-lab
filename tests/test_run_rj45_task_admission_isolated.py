@@ -1084,6 +1084,117 @@ def test_adjudication_is_not_called_before_exact90() -> None:
         )
 
 
+def test_fresh_isolated_adjudication_uses_loaded_admission_module() -> None:
+    code = f'''\
+import importlib.util
+import json
+from pathlib import Path
+import sys
+
+root = Path({str(ROOT)!r})
+
+def load(relative, name):
+    spec = importlib.util.spec_from_file_location(name, root / relative)
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
+    spec.loader.exec_module(module)
+    return module
+
+coordinator = load(
+    "scripts/run_rj45_task_admission_isolated.py", "fresh_isolated_coordinator"
+)
+runner = load(
+    "scripts/run_rj45_task_admission.py", "rby1_isolated_admission_runner"
+)
+admission = load(
+    "src/rby1_assembly/rj45_task_admission.py", "rby1_isolated_admission_protocol"
+)
+assert "rby1_current_rj45_task_admission" not in sys.modules
+config = json.loads(
+    (root / "configs/rj45-comparison-development.json").read_text(encoding="utf-8")
+)
+rows = []
+for _stage, grasp_id, case_id, method_id, slot, _candidate in runner.build_execution_plan(
+    config, smoke_only=False
+)[18:]:
+    rows.append({{
+        "grasp_id": grasp_id,
+        "case_id": case_id,
+        "method_id": method_id,
+        "slot": slot,
+        "success": False,
+        "hard_contact": False,
+        "forbidden_contact": False,
+        "evaluator_force_p95_n": 1.0,
+        "completion_time_s": 1.0,
+        "provider_inputs": ["observation79", "provider_owned_state"],
+        "applied_controller_sha256": None,
+        "applied_artifact_sha256": None,
+        "observation_samples": [],
+        "execution_error": None,
+        "terminal_complete": True,
+        "admission_snapshot": {{
+            "applied_held_grasp_id": grasp_id,
+            "applied_held_grasp_index": next(
+                row["verified_index"] for row in config["held_grasps"]
+                if row["grasp_id"] == grasp_id
+            ),
+            "applied_held_artifact_sha256": next(
+                row["artifact_sha256"] for row in config["held_grasps"]
+                if row["grasp_id"] == grasp_id
+            ),
+            "requested_translation_bias_entry_m": [[0.0, 0.0, 0.0]],
+            "applied_translation_bias_entry_m": [[0.0, 0.0, 0.0]],
+            "requested_rotation_bias_entry_rad": [[0.0, 0.0, 0.0]],
+            "applied_rotation_bias_entry_rad": [[0.0, 0.0, 0.0]],
+            "prefreeze_translation_socket_entry_m_xyz": [[0.0, 0.0, 0.0]],
+            "prefreeze_shortest_rotation_vector_socket_entry_rad_xyz": [[0.0, 0.0, 0.0]],
+            "insert_transition_translation_socket_entry_m_xyz": [[0.0, 0.0, 0.0]],
+            "insert_transition_shortest_rotation_vector_socket_entry_rad_xyz": [[0.0, 0.0, 0.0]],
+            "prefreeze_snapshot_valid": [True],
+            "insert_transition_snapshot_valid": [True],
+            "transition_contract_checked": [True],
+            "actual_applied_action_is_exact_zero": [True],
+        }},
+    }})
+
+class Protocol:
+    def validate_admission(self, episodes, evidence, baseline):
+        assert isinstance(evidence, admission.ContractEvidence)
+        return self
+
+    def adjudicate(self, episodes, evidence):
+        assert isinstance(evidence, admission.ContractEvidence)
+        return self
+
+_protocol, _baseline, evidence = coordinator._adjudicate_exact90(
+    ([{{}}] * 18) + rows,
+    {{"config": config, "playback_actions": [None] * 364}},
+    runner,
+    admission,
+    Protocol(),
+)
+print(json.dumps({{
+    "evidence_module": type(evidence).__module__,
+    "telemetry_complete": evidence.telemetry_complete,
+}}))
+'''
+    environment = dict(os.environ)
+    environment.pop("PYTHONPATH", None)
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    result = json.loads(completed.stdout)
+    assert result == {
+        "evidence_module": "rby1_isolated_admission_protocol",
+        "telemetry_complete": True,
+    }
+
+
 def test_adjudication_calls_protocol_only_with_exact90() -> None:
     calls = []
 
