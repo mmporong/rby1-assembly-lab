@@ -11,7 +11,10 @@ import json
 from pathlib import Path
 import sys
 import traceback
+from types import SimpleNamespace
 from typing import Any, Mapping, Sequence
+
+import numpy as np
 
 
 CURRENT_ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +34,15 @@ DIAGNOSTIC_PLAN = (
     ("diagnostic", "rj45-train-02", "rx-negative", "zero", 1, None),
     ("diagnostic", "rj45-train-02", "tz-positive", "oracle_gt_reference", 1, None),
     ("diagnostic", "rj45-train-02", "tz-negative", "oracle_gt_reference", 1, None),
+)
+COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE = (
+    "max_of_external_forbidden_and_cross_hand_physx_contact_loads"
+)
+COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION = (
+    "max(external_forbidden_contact_load_n, cross_hand_contact_load_n)"
+)
+CROSS_HAND_CONTACT_LOAD_SOURCE = (
+    "physx_left_hand_sources_filtered_to_right_hand_sum_abs_normal_forces"
 )
 
 
@@ -108,6 +120,137 @@ def _geometry(task: Mapping[str, Any], recording: Any) -> Any:
     except (KeyError, TypeError, ValueError, IndexError) as error:
         raise RuntimeError("task frame geometry is incomplete") from error
     return recording.AssemblyGeometry(socket_entry_y_m=socket_y, plug_tip_y_m=plug_y)
+
+
+def _validate_forbidden_contact_provenance(
+    recording: Any, source: Mapping[str, Any], env_index: int = 0
+) -> None:
+    """Validate the passive hand monitor without rewriting its source label."""
+
+    actual_source = source.get("forbidden_contact_load_source")
+    if actual_source == recording.FORBIDDEN_CONTACT_LOAD_SOURCE:
+        return
+    if actual_source != COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE:
+        raise recording.RecordingContractError(
+            "diagnostic forbidden contact-load source is unsupported"
+        )
+    required = {
+        "forbidden_contact_load_n",
+        "external_forbidden_contact_load_n",
+        "external_forbidden_contact_load_peak_n",
+        "cross_hand_contact_load_n",
+        "cross_hand_contact_load_peak_n",
+    }
+    missing = sorted(required - set(source))
+    if missing:
+        raise recording.RecordingContractError(
+            "combined forbidden contact evidence is incomplete: " + ", ".join(missing)
+        )
+    if (
+        source.get("forbidden_contact_load_definition")
+        != COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION
+        or source.get("cross_hand_contact_load_source")
+        != CROSS_HAND_CONTACT_LOAD_SOURCE
+    ):
+        raise recording.RecordingContractError(
+            "combined forbidden contact provenance differs"
+        )
+    combined = float(recording._scalar(source["forbidden_contact_load_n"], env_index))
+    external = float(
+        recording._scalar(source["external_forbidden_contact_load_n"], env_index)
+    )
+    cross_hand = float(
+        recording._scalar(source["cross_hand_contact_load_n"], env_index)
+    )
+    if not all(np.isfinite(value) and value >= 0.0 for value in (combined, external, cross_hand)):
+        raise recording.RecordingContractError(
+            "combined forbidden contact loads must be finite and non-negative"
+        )
+    if not np.isclose(combined, max(external, cross_hand), atol=1e-6, rtol=1e-6):
+        raise recording.RecordingContractError(
+            "combined forbidden contact load differs from its measured components"
+        )
+
+
+def _diagnostic_snapshot(
+    recording: Any,
+    env: Any,
+    extras: Mapping[str, Any],
+    geometry: Any,
+    *,
+    terminal: bool,
+    env_index: int = 0,
+) -> Any:
+    """Read only the same-tick physical fields used by contact diagnostics."""
+
+    source = extras.get("terminal_snapshot") if terminal else extras
+    if not isinstance(source, Mapping):
+        raise recording.RecordingContractError("diagnostic physical source is missing")
+    if source.get("forbidden_contact_load_source") == recording.FORBIDDEN_CONTACT_LOAD_SOURCE:
+        if terminal:
+            return recording.terminal_snapshot_from_extras(extras, geometry, env_index)
+        return recording.live_snapshot(env, extras, geometry, env_index)
+    evaluation = source.get("evaluation")
+    if not isinstance(evaluation, Mapping):
+        raise recording.RecordingContractError("diagnostic evaluation source is missing")
+    if source.get("insertion_contact_force_source") != recording.INSERTION_FORCE_SOURCE:
+        raise recording.RecordingContractError(
+            "diagnostic insertion contact-force source is unsupported"
+        )
+    if source.get("insertion_contact_load_source") != recording.INSERTION_LOAD_SOURCE:
+        raise recording.RecordingContractError(
+            "diagnostic insertion contact-load source is unsupported"
+        )
+    _validate_forbidden_contact_provenance(recording, source, env_index)
+
+    if terminal:
+        poses = np.asarray(
+            recording._env_value(source["object_poses_world_wxyz"], env_index),
+            dtype=np.float64,
+        )
+        force_w = recording._env_value(source["insertion_contact_force_w"], env_index)
+        force_n = recording._scalar(source["insertion_contact_force_n"], env_index)
+        load_n = recording._scalar(source["insertion_contact_load_n"], env_index)
+        grip_n = recording._env_value(source["contact_force_proxy_n"], env_index)
+        phase = recording._phase_name(recording._env_value(source["phase"], env_index))
+    else:
+        poses = np.stack(
+            (
+                np.concatenate(
+                    (
+                        recording._env_value(env.socket.data.root_pos_w, env_index),
+                        recording._env_value(env.socket.data.root_quat_w, env_index),
+                    )
+                ),
+                np.concatenate(
+                    (
+                        recording._env_value(env.plug.data.root_pos_w, env_index),
+                        recording._env_value(env.plug.data.root_quat_w, env_index),
+                    )
+                ),
+            )
+        )
+        force_w = recording._env_value(env._last_insertion_contact_force_w, env_index)
+        force_n = recording._scalar(env._last_insertion_contact_force_n, env_index)
+        load_n = recording._scalar(env._last_insertion_contact_load_n, env_index)
+        grip_n = recording._env_value(env._last_contact_proxy_n, env_index)
+        phase = recording._phase_name(recording._env_value(env._phase, env_index))
+
+    metrics, geometry_consistent = recording._metrics_from_mapping(
+        evaluation, poses, geometry, env_index=0
+    )
+    if not geometry_consistent:
+        raise recording.RecordingContractError(
+            "diagnostic reported geometry differs from recomputed object poses"
+        )
+    return SimpleNamespace(
+        insertion_contact_force_w=np.asarray(force_w, dtype=np.float64),
+        insertion_contact_force_n=float(force_n),
+        insertion_contact_load_n=float(load_n),
+        contact_force_proxy_n=np.asarray(grip_n, dtype=np.float64),
+        phase=phase,
+        ground_truth=metrics,
+    )
 
 
 def _capture_runtime_start_attestation(
@@ -279,8 +422,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         observer = trace_module.ContactDiagnosticObserver(
             writer,
             _geometry(runtime["task"], recording),
-            live_snapshot=recording.live_snapshot,
-            terminal_snapshot_from_extras=recording.terminal_snapshot_from_extras,
+            live_snapshot=lambda env, extras, geometry: _diagnostic_snapshot(
+                recording, env, extras, geometry, terminal=False
+            ),
+            terminal_snapshot_from_extras=lambda extras, geometry: _diagnostic_snapshot(
+                recording, None, extras, geometry, terminal=True
+            ),
         )
         episode = runner._episode(
             prepared,

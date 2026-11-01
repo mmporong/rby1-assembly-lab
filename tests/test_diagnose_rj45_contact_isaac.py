@@ -4,7 +4,9 @@ import importlib.util
 import hashlib
 from pathlib import Path
 import sys
+from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 
@@ -50,6 +52,157 @@ def test_module_import_does_not_import_native_isaac_modules() -> None:
 
 class FakeBlocked(RuntimeError):
     pass
+
+
+class FakeRecording:
+    FORBIDDEN_CONTACT_LOAD_SOURCE = "external-only"
+    INSERTION_FORCE_SOURCE = "insertion-net"
+    INSERTION_LOAD_SOURCE = "insertion-load"
+
+    class RecordingContractError(RuntimeError):
+        pass
+
+    @staticmethod
+    def live_snapshot(*_args):
+        return "base-live"
+
+    @staticmethod
+    def terminal_snapshot_from_extras(*_args):
+        return "base-terminal"
+
+    @staticmethod
+    def _scalar(value, env_index=0):
+        array = np.asarray(value)
+        return array[env_index] if array.ndim else array.item()
+
+    @staticmethod
+    def _env_value(value, env_index):
+        array = np.asarray(value)
+        return array[env_index] if array.ndim else array
+
+    @staticmethod
+    def _phase_name(value):
+        return ("pregrasp", "close", "check_lift", "align", "insert")[int(value)]
+
+    @staticmethod
+    def _metrics_from_mapping(evaluation, poses, geometry, env_index=0):
+        assert poses.shape == (2, 7)
+        return SimpleNamespace(
+            actual_depth_m=float(evaluation["actual_depth_m"][env_index]),
+            lateral_error_m=float(evaluation["lateral_error_m"][env_index]),
+            orientation_error_rad=float(evaluation["orientation_error_rad"][env_index]),
+        ), True
+
+
+def _combined_contact_fields() -> dict:
+    return {
+        "forbidden_contact_load_source": DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE,
+        "forbidden_contact_load_definition": DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_DEFINITION,
+        "forbidden_contact_load_n": np.asarray([3.0]),
+        "external_forbidden_contact_load_n": np.asarray([2.0]),
+        "external_forbidden_contact_load_peak_n": np.asarray([2.5]),
+        "cross_hand_contact_load_n": np.asarray([3.0]),
+        "cross_hand_contact_load_peak_n": np.asarray([3.5]),
+        "cross_hand_contact_load_source": DIAGNOSTIC.CROSS_HAND_CONTACT_LOAD_SOURCE,
+    }
+
+
+def _live_env() -> SimpleNamespace:
+    pose = np.asarray([[0.0, 0.0, 0.0]])
+    quaternion = np.asarray([[1.0, 0.0, 0.0, 0.0]])
+    return SimpleNamespace(
+        socket=SimpleNamespace(data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)),
+        plug=SimpleNamespace(data=SimpleNamespace(root_pos_w=pose, root_quat_w=quaternion)),
+        _last_insertion_contact_force_w=np.asarray([[1.0, 2.0, 2.0]]),
+        _last_insertion_contact_force_n=np.asarray([3.0]),
+        _last_insertion_contact_load_n=np.asarray([4.0]),
+        _last_contact_proxy_n=np.asarray([[5.0, 6.0]]),
+        _phase=np.asarray([4]),
+    )
+
+
+def test_diagnostic_snapshot_accepts_measured_combined_forbidden_source_without_relabel() -> None:
+    extras = {
+        **_combined_contact_fields(),
+        "insertion_contact_force_source": FakeRecording.INSERTION_FORCE_SOURCE,
+        "insertion_contact_load_source": FakeRecording.INSERTION_LOAD_SOURCE,
+        "evaluation": {
+            "actual_depth_m": np.asarray([0.01]),
+            "lateral_error_m": np.asarray([0.001]),
+            "orientation_error_rad": np.asarray([0.002]),
+        },
+    }
+    snapshot = DIAGNOSTIC._diagnostic_snapshot(
+        FakeRecording, _live_env(), extras, object(), terminal=False
+    )
+    assert snapshot.insertion_contact_force_w.tolist() == [1.0, 2.0, 2.0]
+    assert snapshot.insertion_contact_load_n == 4.0
+    assert snapshot.contact_force_proxy_n.tolist() == [5.0, 6.0]
+    assert extras["forbidden_contact_load_source"] == DIAGNOSTIC.COMBINED_FORBIDDEN_CONTACT_LOAD_SOURCE
+
+
+def test_diagnostic_snapshot_rejects_forged_combined_forbidden_load() -> None:
+    extras = {
+        **_combined_contact_fields(),
+        "insertion_contact_force_source": FakeRecording.INSERTION_FORCE_SOURCE,
+        "insertion_contact_load_source": FakeRecording.INSERTION_LOAD_SOURCE,
+        "evaluation": {},
+    }
+    extras["forbidden_contact_load_n"] = np.asarray([2.5])
+    with pytest.raises(
+        FakeRecording.RecordingContractError, match="differs from its measured components"
+    ):
+        DIAGNOSTIC._diagnostic_snapshot(
+            FakeRecording, _live_env(), extras, object(), terminal=False
+        )
+
+
+def test_base_forbidden_source_remains_owned_by_frozen_recording_contract() -> None:
+    extras = {"forbidden_contact_load_source": FakeRecording.FORBIDDEN_CONTACT_LOAD_SOURCE}
+    assert (
+        DIAGNOSTIC._diagnostic_snapshot(
+            FakeRecording, _live_env(), extras, object(), terminal=False
+        )
+        == "base-live"
+    )
+    terminal = {"terminal_snapshot": extras}
+    assert (
+        DIAGNOSTIC._diagnostic_snapshot(
+            FakeRecording, None, terminal, object(), terminal=True
+        )
+        == "base-terminal"
+    )
+
+
+def test_terminal_combined_snapshot_reads_pre_reset_clone() -> None:
+    snapshot = {
+        **_combined_contact_fields(),
+        "insertion_contact_force_source": FakeRecording.INSERTION_FORCE_SOURCE,
+        "insertion_contact_load_source": FakeRecording.INSERTION_LOAD_SOURCE,
+        "insertion_contact_force_w": np.asarray([[1.0, 2.0, 2.0]]),
+        "insertion_contact_force_n": np.asarray([3.0]),
+        "insertion_contact_load_n": np.asarray([4.0]),
+        "contact_force_proxy_n": np.asarray([[5.0, 6.0]]),
+        "phase": np.asarray([4]),
+        "object_poses_world_wxyz": np.asarray(
+            [[[0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0]] * 2]
+        ),
+        "evaluation": {
+            "actual_depth_m": np.asarray([0.01]),
+            "lateral_error_m": np.asarray([0.001]),
+            "orientation_error_rad": np.asarray([0.002]),
+        },
+    }
+    result = DIAGNOSTIC._diagnostic_snapshot(
+        FakeRecording,
+        SimpleNamespace(socket="poisoned-reset-state", plug="poisoned-reset-state"),
+        {"terminal_snapshot": snapshot},
+        object(),
+        terminal=True,
+    )
+    assert result.phase == "insert"
+    assert result.ground_truth.actual_depth_m == 0.01
+    assert result.insertion_contact_force_w.tolist() == [1.0, 2.0, 2.0]
 
 
 def test_runtime_start_attestation_preserves_actual_provenance_fields() -> None:
