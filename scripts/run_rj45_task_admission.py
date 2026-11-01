@@ -1284,9 +1284,9 @@ def _evidence(
     archive_valid: bool,
     config: Mapping[str, Any],
     *,
+    admission_module: Any,
     baseline_artifacts_verified: bool,
 ):
-    module = sys.modules["rby1_current_rj45_task_admission"]
     complete = all(_row_contract_complete(row) for row in rows)
     configured = {row["grasp_id"]: row for row in config["held_grasps"]}
     identities = all(
@@ -1311,7 +1311,7 @@ def _evidence(
         and row["admission_snapshot"].get("actual_applied_action_is_exact_zero", [False])[0]
         for row in rows if row.get("admission_snapshot")
     )
-    return module.ContractEvidence(
+    return admission_module.ContractEvidence(
         archive_hash_valid=archive_valid,
         held_identity_valid=complete and identities,
         requested_applied_bias_valid=complete and bias_valid,
@@ -1969,6 +1969,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 rows[18:],
                 True,
                 prepared["config"],
+                admission_module=admission,
                 baseline_artifacts_verified=admission.validate_baseline_artifact_seal(
                     baseline_seal
                 ),

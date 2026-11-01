@@ -845,6 +845,7 @@ def _adjudicate_exact90(
         admission_rows,
         True,
         prepared["config"],
+        admission_module=admission,
         baseline_artifacts_verified=admission.validate_baseline_artifact_seal(baseline),
     )
     protocol = protocol.validate_admission(episodes, evidence, baseline).adjudicate(
