@@ -1,0 +1,87 @@
+{
+  "scope": "exploratory development evidence; no admission or learnability claim",
+  "same_seed": 20261121,
+  "repeat_noise_interpretation": "deterministic repeatability only; floor is not measured environmental noise",
+  "metrics": [
+    {
+      "grasp": "rj45-train-02",
+      "sample": "contact_sample13",
+      "feature": "observation48",
+      "D": 0.11443603642692413,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 114436.03642692413,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-02",
+      "sample": "contact_sample13",
+      "feature": "observation79",
+      "D": 1.4728167467539062,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 1472816.7467539061,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-02",
+      "sample": "first_input_after_zero_return",
+      "feature": "observation48",
+      "D": 0.06088638535115024,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 60886.385351150246,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-02",
+      "sample": "first_input_after_zero_return",
+      "feature": "observation79",
+      "D": 0.901247001330867,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 901247.0013308671,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-05",
+      "sample": "contact_sample13",
+      "feature": "observation48",
+      "D": 1.003355302403096,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 1003355.302403096,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-05",
+      "sample": "contact_sample13",
+      "feature": "observation79",
+      "D": 1.6363223099238136,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 1636322.3099238137,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-05",
+      "sample": "first_input_after_zero_return",
+      "feature": "observation48",
+      "D": 1.0012948435237103,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 1001294.8435237104,
+      "diagnostic_thresholds_met": true
+    },
+    {
+      "grasp": "rj45-train-05",
+      "sample": "first_input_after_zero_return",
+      "feature": "observation79",
+      "D": 1.2868501144546018,
+      "raw_repeat_distance": 0.0,
+      "N_with_floor": 1e-06,
+      "D_over_N": 1286850.114454602,
+      "diagnostic_thresholds_met": true
+    }
+  ]
+}

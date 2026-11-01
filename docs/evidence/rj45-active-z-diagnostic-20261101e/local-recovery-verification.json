@@ -1,0 +1,16 @@
+{
+  "archive": "/opt/homedata/rby1-storage/transport/rby1-active-z-diagnostic-20261101e-recovery.tar.gz",
+  "archive_bytes": 3255763,
+  "archive_sha256": "5696a2fa44b62e9d8fa1b8c12d0a0de7079e494ab35f75491708fac4159b6999",
+  "regular_members": 104,
+  "payload_count": 103,
+  "uncompressed_bytes": 21419513,
+  "destination": "/opt/homedata/rby1-storage/recovered/rj45-active-z-diagnostic-20261101e",
+  "native_launch_claim_sha256": "5be727e22469f1ff5df143dadb93d7589d3678d97a5a9176f80a519981c53685",
+  "native_admission_sha256": "b415d1fb1db9b8d3c32f38cbf96225e6a4eeeeb65089f2af41c431f51b334805",
+  "safe_inventory": true,
+  "all_payloads_verified": true,
+  "all_extracted_payloads_verified": true,
+  "manifest_post_write_verified": true,
+  "scientific_adjudication": false
+}

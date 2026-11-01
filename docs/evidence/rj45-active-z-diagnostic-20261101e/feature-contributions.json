@@ -1,0 +1,60 @@
+[
+  {
+    "grasp": "rj45-train-02",
+    "largest_feature_differences": [
+      {
+        "observation_index": 39,
+        "signed_delta": 0.10932957753539085
+      },
+      {
+        "observation_index": 71,
+        "signed_delta": 0.009500987827777863
+      },
+      {
+        "observation_index": 73,
+        "signed_delta": 0.00773270963691175
+      },
+      {
+        "observation_index": 75,
+        "signed_delta": 0.004283587273675948
+      },
+      {
+        "observation_index": 76,
+        "signed_delta": -0.0029941401444375515
+      },
+      {
+        "observation_index": 77,
+        "signed_delta": 0.0025669735623523593
+      }
+    ]
+  },
+  {
+    "grasp": "rj45-train-05",
+    "largest_feature_differences": [
+      {
+        "observation_index": 63,
+        "signed_delta": -1.0
+      },
+      {
+        "observation_index": 39,
+        "signed_delta": 0.07778605818748474
+      },
+      {
+        "observation_index": 71,
+        "signed_delta": 0.00933806598186493
+      },
+      {
+        "observation_index": 77,
+        "signed_delta": 0.005849202862009406
+      },
+      {
+        "observation_index": 72,
+        "signed_delta": -0.0037908554077148438
+      },
+      {
+        "observation_index": 73,
+        "signed_delta": 0.003401438589207828
+      }
+    ]
+  }
+]

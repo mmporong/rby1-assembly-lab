@@ -1,0 +1,993 @@
+{
+  "completed_verified": 8,
+  "total_trace_rows": 4626,
+  "successes": 4,
+  "aggregate": {
+    "schema_name": "rj45-active-z-adjudication-v1",
+    "episode_count": 8,
+    "pass": true,
+    "thresholds": {
+      "signal_minimum": 0.05,
+      "signal_to_noise_minimum": 2.0,
+      "noise_floor": 1e-06
+    },
+    "grasps": {
+      "rj45-train-02": {
+        "pass": true,
+        "signal_d": 0.11027843253115616,
+        "repeat_noise_n": 1e-06,
+        "signal_to_noise_ratio": 110278.43253115616,
+        "missing_contact_windows": [],
+        "checks": {
+          "signal_at_least_0_05": true,
+          "ratio_at_least_2": true
+        }
+      },
+      "rj45-train-05": {
+        "pass": true,
+        "signal_d": 1.0031054414335954,
+        "repeat_noise_n": 1e-06,
+        "signal_to_noise_ratio": 1003105.4414335954,
+        "missing_contact_windows": [],
+        "checks": {
+          "signal_at_least_0_05": true,
+          "ratio_at_least_2": true
+        }
+      }
+    },
+    "claims": {
+      "task_admission_completed": false,
+      "rl_pilot_admitted": false
+    },
+    "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+    "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8"
+  },
+  "cases": [
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 1
+      },
+      "terminal": {
+        "completion_time_s": 14.200000762939453,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 433,
+      "final_gt": {
+        "actual_depth_m": 0.012282505122101583,
+        "lateral_error_m": 3.033337941008107e-05,
+        "orientation_error_rad": 0.002296626632826426
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 18,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 414,
+          "max_net_force_n": 0.388129071034236,
+          "max_normal_load_n": 0.3881290555000305
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 1,
+        "grasp_id": "rj45-train-02",
+        "case_id": "tz-positive",
+        "repeat": 1,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 414,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4807734191417694,
+          0.23019857704639435,
+          -0.3707214295864105,
+          -0.5257077217102051,
+          0.5241844654083252,
+          0.5167710185050964,
+          0.4085649251937866,
+          -0.3593716323375702,
+          -0.3301128149032593,
+          0.35218170285224915,
+          -0.5812854766845703,
+          -0.6220354437828064,
+          0.27502283453941345,
+          -0.2691954970359802,
+          -4.272694422979839e-05,
+          -3.966921576648019e-05,
+          -6.2725589486944955e-06,
+          -4.437098323251121e-05,
+          1.3824462257616688e-05,
+          -4.3051659304182976e-05,
+          7.153439946705475e-05,
+          -3.8082082028267905e-05,
+          0.000483737385366112,
+          0.0004032029246445745,
+          3.0783714464632794e-05,
+          0.0005337399779818952,
+          -0.00042625630157999694,
+          -0.00046163779916241765,
+          0.1878504753112793,
+          0.46540597081184387,
+          -0.00015510116645600647,
+          -0.0003328956663608551,
+          0.046581123024225235,
+          0.0,
+          -0.055785976350307465,
+          0.014930964447557926,
+          0.0035802526399493217,
+          0.0011761983623728156,
+          -0.00044902169611305,
+          -0.0006755193462595344,
+          0.00017086666775867343,
+          -0.08052190393209457,
+          0.00791947077959776,
+          -0.0019669535104185343,
+          0.014142196625471115,
+          -0.0005284945364110172,
+          0.0014026961289346218,
+          0.000741084455512464
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3"
+    },
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 2
+      },
+      "terminal": {
+        "completion_time_s": 14.200000762939453,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 433,
+      "final_gt": {
+        "actual_depth_m": 0.012282505122101583,
+        "lateral_error_m": 3.033337941008107e-05,
+        "orientation_error_rad": 0.002296626632826426
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 18,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 414,
+          "max_net_force_n": 0.388129071034236,
+          "max_normal_load_n": 0.3881290555000305
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 2,
+        "grasp_id": "rj45-train-02",
+        "case_id": "tz-positive",
+        "repeat": 2,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 414,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4807734191417694,
+          0.23019857704639435,
+          -0.3707214295864105,
+          -0.5257077217102051,
+          0.5241844654083252,
+          0.5167710185050964,
+          0.4085649251937866,
+          -0.3593716323375702,
+          -0.3301128149032593,
+          0.35218170285224915,
+          -0.5812854766845703,
+          -0.6220354437828064,
+          0.27502283453941345,
+          -0.2691954970359802,
+          -4.272694422979839e-05,
+          -3.966921576648019e-05,
+          -6.2725589486944955e-06,
+          -4.437098323251121e-05,
+          1.3824462257616688e-05,
+          -4.3051659304182976e-05,
+          7.153439946705475e-05,
+          -3.8082082028267905e-05,
+          0.000483737385366112,
+          0.0004032029246445745,
+          3.0783714464632794e-05,
+          0.0005337399779818952,
+          -0.00042625630157999694,
+          -0.00046163779916241765,
+          0.1878504753112793,
+          0.46540597081184387,
+          -0.00015510116645600647,
+          -0.0003328956663608551,
+          0.046581123024225235,
+          0.0,
+          -0.055785976350307465,
+          0.014930964447557926,
+          0.0035802526399493217,
+          0.0011761983623728156,
+          -0.00044902169611305,
+          -0.0006755193462595344,
+          0.00017086666775867343,
+          -0.08052190393209457,
+          0.00791947077959776,
+          -0.0019669535104185343,
+          0.014142196625471115,
+          -0.0005284945364110172,
+          0.0014026961289346218,
+          0.000741084455512464
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 1
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 727,
+      "final_gt": {
+        "actual_depth_m": 0.012300888876042452,
+        "lateral_error_m": 0.00012102718473309595,
+        "orientation_error_rad": 1.4485967949811874e-05
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 710,
+          "max_net_force_n": 0.5513259099615552,
+          "max_normal_load_n": 0.5513259172439575
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 3,
+        "grasp_id": "rj45-train-02",
+        "case_id": "tz-negative",
+        "repeat": 1,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 709,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4807867109775543,
+          0.2302047461271286,
+          -0.3707177937030792,
+          -0.5257041454315186,
+          0.5241842269897461,
+          0.5167707800865173,
+          0.4085695743560791,
+          -0.35982656478881836,
+          -0.33137181401252747,
+          0.3516032099723816,
+          -0.5816982388496399,
+          -0.6233252286911011,
+          0.2758151888847351,
+          -0.268843412399292,
+          -8.582089503761381e-05,
+          -1.175838042399846e-05,
+          -2.717251300055068e-05,
+          -1.2982705811737105e-05,
+          7.67657911637798e-06,
+          3.231348819099367e-05,
+          -7.04760750522837e-05,
+          -0.0005211737006902695,
+          0.00034158301423303783,
+          0.00013898730685468763,
+          3.2607691537123173e-05,
+          0.0002500736736692488,
+          -5.3392283007269725e-05,
+          -0.0006951323011890054,
+          0.1861088126897812,
+          0.46424025297164917,
+          6.870592915220186e-05,
+          -0.0007702038856223226,
+          -0.06274845451116562,
+          0.0,
+          -0.05325079336762428,
+          0.014034908264875412,
+          0.0018676123581826687,
+          0.0013232232304289937,
+          -0.00042517983820289373,
+          0.00017086666775867343,
+          -0.0014026961289346218,
+          -0.09002289175987244,
+          0.006926060188561678,
+          -0.009699663147330284,
+          0.013875962235033512,
+          -0.0048120818100869656,
+          0.004396836273372173,
+          -0.0018258891068398952
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-02",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 2
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 727,
+      "final_gt": {
+        "actual_depth_m": 0.012300888876042452,
+        "lateral_error_m": 0.00012102718473309595,
+        "orientation_error_rad": 1.4485967949811874e-05
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 710,
+          "max_net_force_n": 0.5513259099615552,
+          "max_normal_load_n": 0.5513259172439575
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 4,
+        "grasp_id": "rj45-train-02",
+        "case_id": "tz-negative",
+        "repeat": 2,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 709,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4807867109775543,
+          0.2302047461271286,
+          -0.3707177937030792,
+          -0.5257041454315186,
+          0.5241842269897461,
+          0.5167707800865173,
+          0.4085695743560791,
+          -0.35982656478881836,
+          -0.33137181401252747,
+          0.3516032099723816,
+          -0.5816982388496399,
+          -0.6233252286911011,
+          0.2758151888847351,
+          -0.268843412399292,
+          -8.582089503761381e-05,
+          -1.175838042399846e-05,
+          -2.717251300055068e-05,
+          -1.2982705811737105e-05,
+          7.67657911637798e-06,
+          3.231348819099367e-05,
+          -7.04760750522837e-05,
+          -0.0005211737006902695,
+          0.00034158301423303783,
+          0.00013898730685468763,
+          3.2607691537123173e-05,
+          0.0002500736736692488,
+          -5.3392283007269725e-05,
+          -0.0006951323011890054,
+          0.1861088126897812,
+          0.46424025297164917,
+          6.870592915220186e-05,
+          -0.0007702038856223226,
+          -0.06274845451116562,
+          0.0,
+          -0.05325079336762428,
+          0.014034908264875412,
+          0.0018676123581826687,
+          0.0013232232304289937,
+          -0.00042517983820289373,
+          0.00017086666775867343,
+          -0.0014026961289346218,
+          -0.09002289175987244,
+          0.006926060188561678,
+          -0.009699663147330284,
+          0.013875962235033512,
+          -0.0048120818100869656,
+          0.004396836273372173,
+          -0.0018258891068398952
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66"
+    },
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-05",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 1
+      },
+      "terminal": {
+        "completion_time_s": 13.633334159851074,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 421,
+      "final_gt": {
+        "actual_depth_m": 0.012271379118735555,
+        "lateral_error_m": 2.667844577854565e-06,
+        "orientation_error_rad": 0.003011760269543988
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 16,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 404,
+          "max_net_force_n": 0.38441423904537586,
+          "max_normal_load_n": 0.3844141960144043
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 5,
+        "grasp_id": "rj45-train-05",
+        "case_id": "tz-positive",
+        "repeat": 1,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 404,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4809392988681793,
+          0.23023876547813416,
+          -0.3706102967262268,
+          -0.5256435871124268,
+          0.5243549942970276,
+          0.5169335603713989,
+          0.4085404872894287,
+          -0.36099034547805786,
+          -0.3302805423736572,
+          0.3537587523460388,
+          -0.5813146233558655,
+          -0.6223070025444031,
+          0.2745348811149597,
+          -0.2676396369934082,
+          -3.1240040698321536e-05,
+          -5.2116625738563016e-05,
+          -3.9381004171445966e-05,
+          -5.196439451538026e-05,
+          9.926202437782194e-06,
+          -2.5710221962071955e-05,
+          3.503795596770942e-05,
+          -0.0001414502039551735,
+          0.0007136875647120178,
+          0.00044564378913491964,
+          0.00010217366070719436,
+          0.0006292409379966557,
+          -0.0004771804960910231,
+          -0.0006169159314595163,
+          0.18730148673057556,
+          0.4631681740283966,
+          -9.299104567617178e-05,
+          -0.0002542010915931314,
+          0.03822603076696396,
+          0.0,
+          -0.0555674284696579,
+          0.014911096543073654,
+          0.0036080682184547186,
+          0.0008900960674509406,
+          -0.00041723254253156483,
+          -0.00038146975566633046,
+          -0.00021855038357898593,
+          -0.08159081637859344,
+          0.009961923584342003,
+          -0.001549720880575478,
+          0.015179317444562912,
+          0.0005364418611861765,
+          0.0008781751384958625,
+          -0.0008861224632710218
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648"
+    },
+    {
+      "case": {
+        "case_id": "tz-positive",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-05",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 2
+      },
+      "terminal": {
+        "completion_time_s": 13.633334159851074,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": true
+      },
+      "rows": 421,
+      "final_gt": {
+        "actual_depth_m": 0.012271379118735555,
+        "lateral_error_m": 2.667844577854565e-06,
+        "orientation_error_rad": 0.003011760269543988
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 16,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "done": {
+          "rows": 1,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 404,
+          "max_net_force_n": 0.38441423904537586,
+          "max_normal_load_n": 0.3844141960144043
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 6,
+        "grasp_id": "rj45-train-05",
+        "case_id": "tz-positive",
+        "repeat": 2,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 404,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.4809392988681793,
+          0.23023876547813416,
+          -0.3706102967262268,
+          -0.5256435871124268,
+          0.5243549942970276,
+          0.5169335603713989,
+          0.4085404872894287,
+          -0.36099034547805786,
+          -0.3302805423736572,
+          0.3537587523460388,
+          -0.5813146233558655,
+          -0.6223070025444031,
+          0.2745348811149597,
+          -0.2676396369934082,
+          -3.1240040698321536e-05,
+          -5.2116625738563016e-05,
+          -3.9381004171445966e-05,
+          -5.196439451538026e-05,
+          9.926202437782194e-06,
+          -2.5710221962071955e-05,
+          3.503795596770942e-05,
+          -0.0001414502039551735,
+          0.0007136875647120178,
+          0.00044564378913491964,
+          0.00010217366070719436,
+          0.0006292409379966557,
+          -0.0004771804960910231,
+          -0.0006169159314595163,
+          0.18730148673057556,
+          0.4631681740283966,
+          -9.299104567617178e-05,
+          -0.0002542010915931314,
+          0.03822603076696396,
+          0.0,
+          -0.0555674284696579,
+          0.014911096543073654,
+          0.0036080682184547186,
+          0.0008900960674509406,
+          -0.00041723254253156483,
+          -0.00038146975566633046,
+          -0.00021855038357898593,
+          -0.08159081637859344,
+          0.009961923584342003,
+          -0.001549720880575478,
+          0.015179317444562912,
+          0.0005364418611861765,
+          0.0008781751384958625,
+          -0.0008861224632710218
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3,
+          0.39999999999999997
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-05",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 1
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 732,
+      "final_gt": {
+        "actual_depth_m": 0.012300564150372041,
+        "lateral_error_m": 0.00012042042539023113,
+        "orientation_error_rad": 3.128049202692498e-06
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 715,
+          "max_net_force_n": 0.33810040995370694,
+          "max_normal_load_n": 0.338100403547287
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 7,
+        "grasp_id": "rj45-train-05",
+        "case_id": "tz-negative",
+        "repeat": 1,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 714,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.48094984889030457,
+          0.2302454560995102,
+          -0.37060612440109253,
+          -0.5256447792053223,
+          0.5243558883666992,
+          0.5169333219528198,
+          0.40854617953300476,
+          -0.3609672486782074,
+          -0.33140140771865845,
+          0.3526933789253235,
+          -0.5817055702209473,
+          -0.6232198476791382,
+          0.2756003141403198,
+          -0.2673511505126953,
+          -8.245523349614814e-05,
+          -1.0926444701908622e-05,
+          -2.797431079670787e-05,
+          6.83242324157618e-05,
+          -4.831834303331561e-06,
+          5.1173799874959514e-05,
+          -9.573042916599661e-05,
+          -0.0006994426366873085,
+          0.0010573950130492449,
+          0.00044321813038550317,
+          0.00010526375262998044,
+          0.0007587588625028729,
+          -0.0004141789977438748,
+          -0.001164525980129838,
+          0.18529438972473145,
+          0.46201175451278687,
+          6.035495243850164e-05,
+          -0.00028149510035291314,
+          -0.03956002742052078,
+          1.0,
+          -0.05366405099630356,
+          0.014326971024274826,
+          0.0017762185307219625,
+          0.002038479084149003,
+          -0.0005086263408884406,
+          0.000488758145365864,
+          -0.0016490619163960218,
+          -0.09092888236045837,
+          0.013752778992056847,
+          -0.004951159469783306,
+          0.014980635605752468,
+          0.0009616216993890703,
+          0.0006477038841694593,
+          -0.006735325325280428
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d"
+    },
+    {
+      "case": {
+        "case_id": "tz-negative",
+        "environment_seed": 20261121,
+        "grasp_id": "rj45-train-05",
+        "method_id": "active_z_probe",
+        "provider_inputs": [
+          "observation79",
+          "provider_owned_state"
+        ],
+        "repeat": 2
+      },
+      "terminal": {
+        "completion_time_s": 24.000001907348633,
+        "forbidden_contact": false,
+        "hard_contact": false,
+        "success": false
+      },
+      "rows": 732,
+      "final_gt": {
+        "actual_depth_m": 0.012300564150372041,
+        "lateral_error_m": 0.00012042042539023113,
+        "orientation_error_rad": 3.128049202692498e-06
+      },
+      "reported_mismatch_rows": 0,
+      "phases": {
+        "align": {
+          "rows": 17,
+          "max_net_force_n": 0.0,
+          "max_normal_load_n": 0.0
+        },
+        "insert": {
+          "rows": 715,
+          "max_net_force_n": 0.33810040995370694,
+          "max_normal_load_n": 0.338100403547287
+        }
+      },
+      "active_z": {
+        "schema_name": "rj45-active-z-verified-episode-v1",
+        "verified": true,
+        "ordinal": 8,
+        "grasp_id": "rj45-train-05",
+        "case_id": "tz-negative",
+        "repeat": 2,
+        "provider_import_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+        "valid_provider_steps": 714,
+        "provider_final_phase": "done",
+        "contact_observed": true,
+        "contact_window_observations": 13,
+        "contact_policy_observation48_median": [
+          -0.48094984889030457,
+          0.2302454560995102,
+          -0.37060612440109253,
+          -0.5256447792053223,
+          0.5243558883666992,
+          0.5169333219528198,
+          0.40854617953300476,
+          -0.3609672486782074,
+          -0.33140140771865845,
+          0.3526933789253235,
+          -0.5817055702209473,
+          -0.6232198476791382,
+          0.2756003141403198,
+          -0.2673511505126953,
+          -8.245523349614814e-05,
+          -1.0926444701908622e-05,
+          -2.797431079670787e-05,
+          6.83242324157618e-05,
+          -4.831834303331561e-06,
+          5.1173799874959514e-05,
+          -9.573042916599661e-05,
+          -0.0006994426366873085,
+          0.0010573950130492449,
+          0.00044321813038550317,
+          0.00010526375262998044,
+          0.0007587588625028729,
+          -0.0004141789977438748,
+          -0.001164525980129838,
+          0.18529438972473145,
+          0.46201175451278687,
+          6.035495243850164e-05,
+          -0.00028149510035291314,
+          -0.03956002742052078,
+          1.0,
+          -0.05366405099630356,
+          0.014326971024274826,
+          0.0017762185307219625,
+          0.002038479084149003,
+          -0.0005086263408884406,
+          0.000488758145365864,
+          -0.0016490619163960218,
+          -0.09092888236045837,
+          0.013752778992056847,
+          -0.004951159469783306,
+          0.014980635605752468,
+          0.0009616216993890703,
+          0.0006477038841694593,
+          -0.006735325325280428
+        ],
+        "observed_absolute_nonzero_z_levels": [
+          0.09999999999999999,
+          0.10000000000000002,
+          0.19999999999999998,
+          0.2,
+          0.3
+        ],
+        "controller_sha256": "f08141ade852bcd1f042d488fc70298d24b8b9e4d304b60a813ab3358c419b8d",
+        "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+        "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+        "hard_contact": false,
+        "forbidden_contact": false,
+        "formal_claims_preserved_false": true
+      },
+      "trace_sha256": "a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d"
+    }
+  ]
+}

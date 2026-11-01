@@ -1,0 +1,223 @@
+{
+  "schema_name": "rj45-active-z-independent-completed-review-v1",
+  "reviewed_at_utc": "2026-11-01T08:11:53.795340Z",
+  "reviewer": "/root/recovery_review",
+  "verdict": "PASS",
+  "scope": "independent raw recovery verification and development-only diagnostic recomputation; not task admission or RL admission",
+  "recovery": {
+    "archive_path": "/opt/homedata/rby1-storage/transport/rby1-active-z-diagnostic-20261101e-recovery.tar.gz",
+    "archive_sha256": "5696a2fa44b62e9d8fa1b8c12d0a0de7079e494ab35f75491708fac4159b6999",
+    "recovered_job": "/opt/homedata/rby1-storage/recovered/rj45-active-z-diagnostic-20261101e/job",
+    "regular_archive_members": 104,
+    "manifest_payloads": 103,
+    "archive_inventory_exact": true,
+    "all_archive_payload_sha256_verified": true,
+    "all_extracted_payload_sha256_verified": true
+  },
+  "source": {
+    "source_commit": "906fed3873a16c84f6202115e8a03fb718830bb7",
+    "packet_manifest_sha256": "8e4bff6f4913bcf59adda5b495f4aceadb538b8d8f479c4730c4e27f47af163b",
+    "packet_members": 17,
+    "analysis_source_sha256": "3ec9075d6897403bd5123350569052c7e29cd57d408d9c7d840214efd704c93e",
+    "provider_source_sha256": "2293a59788b3c084027525e3960e48cce48f6ed0bad5f3758bd74d5dde093ac8",
+    "expected_provider_origin": "/home/ubuntu/workspace/rby1-active-z-diagnostic-20261101e/current/src/rby1_assembly/rj45_active_z_probe.py",
+    "all_report_source_start_end_bindings_match_cpu_preflight": true
+  },
+  "raw_trace_verification": {
+    "episodes": 8,
+    "rows": 4626,
+    "terminal_rows": 8,
+    "successes": 4,
+    "hard_contacts": 0,
+    "forbidden_contacts": 0,
+    "reported_full_frame_geometry_mismatches": 0,
+    "legacy_y_only_geometry_mismatches": 4614,
+    "max_insertion_net_force_n": 0.5513259099615552,
+    "max_insertion_normal_load_n": 0.5513259172439575,
+    "all_row_hash_chains_verified": true,
+    "all_sidecar_and_terminal_bindings_verified": true,
+    "all_geometry_deltas_tolerances_and_flags_recomputed": true,
+    "all_action_and_provider_state_replays_verified": true,
+    "all_contact_windows_exactly_13_observations": true,
+    "all_stored_post_exit_verifications_equal_independent_replay": true,
+    "claims": {
+      "task_admission_completed": false,
+      "rl_pilot_admitted": false
+    }
+  },
+  "cases": [
+    {
+      "ordinal": 1,
+      "grasp_id": "rj45-train-02",
+      "case_id": "tz-positive",
+      "repeat": 1,
+      "environment_seed": 20261121,
+      "rows": 433,
+      "provider_steps": 414,
+      "success": true,
+      "trace_sha256": "03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3",
+      "report_sha256": "4ed160e40ac464fe9e7dd289d181ba934a32fb5c8ae0c19eb5f32eddb0102f33",
+      "contact_sample13_step": 228,
+      "first_input_after_zero_return_step": 232
+    },
+    {
+      "ordinal": 2,
+      "grasp_id": "rj45-train-02",
+      "case_id": "tz-positive",
+      "repeat": 2,
+      "environment_seed": 20261121,
+      "rows": 433,
+      "provider_steps": 414,
+      "success": true,
+      "trace_sha256": "03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3",
+      "report_sha256": "40c1dbd9803d15ab1eb4df5df51fbf0687cf4d061a146cfb0c3c297d161ef9a7",
+      "contact_sample13_step": 228,
+      "first_input_after_zero_return_step": 232
+    },
+    {
+      "ordinal": 3,
+      "grasp_id": "rj45-train-02",
+      "case_id": "tz-negative",
+      "repeat": 1,
+      "environment_seed": 20261121,
+      "rows": 727,
+      "provider_steps": 709,
+      "success": false,
+      "trace_sha256": "b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66",
+      "report_sha256": "b08736fecc27d7b58a3b964cc594fab7c7b6d525dca8bffa388a7dbfc5e7c59b",
+      "contact_sample13_step": 198,
+      "first_input_after_zero_return_step": 202
+    },
+    {
+      "ordinal": 4,
+      "grasp_id": "rj45-train-02",
+      "case_id": "tz-negative",
+      "repeat": 2,
+      "environment_seed": 20261121,
+      "rows": 727,
+      "provider_steps": 709,
+      "success": false,
+      "trace_sha256": "b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66",
+      "report_sha256": "66e718cf52fe1167e553f423a51244505c172bedf17b73d4e95f6d67472c4403",
+      "contact_sample13_step": 198,
+      "first_input_after_zero_return_step": 202
+    },
+    {
+      "ordinal": 5,
+      "grasp_id": "rj45-train-05",
+      "case_id": "tz-positive",
+      "repeat": 1,
+      "environment_seed": 20261121,
+      "rows": 421,
+      "provider_steps": 404,
+      "success": true,
+      "trace_sha256": "1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648",
+      "report_sha256": "fae98ac4443aea11d80b647fbf27f08a9ac51d5bfa961407104161576dbe6832",
+      "contact_sample13_step": 212,
+      "first_input_after_zero_return_step": 216
+    },
+    {
+      "ordinal": 6,
+      "grasp_id": "rj45-train-05",
+      "case_id": "tz-positive",
+      "repeat": 2,
+      "environment_seed": 20261121,
+      "rows": 421,
+      "provider_steps": 404,
+      "success": true,
+      "trace_sha256": "1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648",
+      "report_sha256": "c928901b38da4e4239bf0948e85d4ef8d955602b7bbd312801516a90193dd117",
+      "contact_sample13_step": 212,
+      "first_input_after_zero_return_step": 216
+    },
+    {
+      "ordinal": 7,
+      "grasp_id": "rj45-train-05",
+      "case_id": "tz-negative",
+      "repeat": 1,
+      "environment_seed": 20261121,
+      "rows": 732,
+      "provider_steps": 714,
+      "success": false,
+      "trace_sha256": "a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d",
+      "report_sha256": "fac5a4c2e5e8c412faa0e5dacd150c5f6e16b0cfeaddcccd9a65374aa7849555",
+      "contact_sample13_step": 186,
+      "first_input_after_zero_return_step": 189
+    },
+    {
+      "ordinal": 8,
+      "grasp_id": "rj45-train-05",
+      "case_id": "tz-negative",
+      "repeat": 2,
+      "environment_seed": 20261121,
+      "rows": 732,
+      "provider_steps": 714,
+      "success": false,
+      "trace_sha256": "a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d",
+      "report_sha256": "70cc53b02a75b162940ffb825b2daaa4436604581cb8c063e341dbd43d220112",
+      "contact_sample13_step": 186,
+      "first_input_after_zero_return_step": 189
+    }
+  ],
+  "registered_13_sample_median_48d_adjudication": {
+    "pass": true,
+    "thresholds": {
+      "D_minimum": 0.05,
+      "D_over_N_minimum": 2.0,
+      "N_floor": 0.000001
+    },
+    "rj45-train-02": {
+      "D": 0.11027843253115616,
+      "N": 0.000001,
+      "D_over_N": 110278.43253115616,
+      "pass": true
+    },
+    "rj45-train-05": {
+      "D": 1.0031054414335954,
+      "N": 0.000001,
+      "D_over_N": 1003105.4414335954,
+      "pass": true
+    }
+  },
+  "exploratory_single_observation_cues": {
+    "scope": "development-only exploratory handoff cues; no admission and no retuning",
+    "contact_sample13": {
+      "observation48": {
+        "rj45-train-02": {"D": 0.11443603642692413, "N": 0.000001, "D_over_N": 114436.03642692413},
+        "rj45-train-05": {"D": 1.003355302403096, "N": 0.000001, "D_over_N": 1003355.302403096}
+      },
+      "observation79": {
+        "rj45-train-02": {"D": 1.4728167467539062, "N": 0.000001, "D_over_N": 1472816.7467539061},
+        "rj45-train-05": {"D": 1.6363223099238136, "N": 0.000001, "D_over_N": 1636322.3099238137}
+      }
+    },
+    "first_input_after_zero_return": {
+      "observation48": {
+        "rj45-train-02": {"D": 0.06088638535115024, "N": 0.000001, "D_over_N": 60886.385351150246},
+        "rj45-train-05": {"D": 1.0012948435237103, "N": 0.000001, "D_over_N": 1001294.8435237104}
+      },
+      "observation79": {
+        "rj45-train-02": {"D": 0.901247001330867, "N": 0.000001, "D_over_N": 901247.0013308671},
+        "rj45-train-05": {"D": 1.2868501144546018, "N": 0.000001, "D_over_N": 1286850.114454602}
+      }
+    },
+    "all_within_sign_repeat_distances": 0.0
+  },
+  "repeatability_limit": {
+    "same_environment_seed_for_all_episodes": 20261121,
+    "same_grasp_sign_repeat_trace_bytes_identical": true,
+    "repeat_trace_sha_pairs": [
+      ["03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3", "03116866439e73c2cd803ba96a118a412516677947d2c0e2ea667d666ae14fa3"],
+      ["b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66", "b1e969b4be31144b37908b8559a5b28287a40b2ffbdfadfa3766fdaef6f50e66"],
+      ["1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648", "1a2d01497143b165ccf0a2ea06e51ddf4b9c9ed922b391854a0fb9f0cd23f648"],
+      ["a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d", "a4f2b88630f6c363bfc70602dc5c6dfb22a2d9ccc8f74f20a993eb2f626a940d"]
+    ],
+    "interpretation": "The registered N equals the 1e-6 floor because repeated trajectories are byte-identical under the same seed. The very large D/N ratios do not measure stochastic repeat noise and do not establish generalization."
+  },
+  "claim_limits": [
+    "This establishes bounded development-condition active-Z diagnostic observability for the registered two grasps and signed tz cases only.",
+    "It does not retroactively reuse or pass formal90.",
+    "It does not establish task admission, held-out performance, policy learnability, RL admission, causal robustness, or generalization.",
+    "The single-observation 48D and 79D cues are exploratory handoff evidence only."
+  ]
+}
