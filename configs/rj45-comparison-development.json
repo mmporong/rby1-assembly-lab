@@ -29,9 +29,12 @@
   },
   "archive": {
     "runtime_root_cli_argument": "--runtime-root",
+    "evidence_root_cli_argument": "--evidence-root",
+    "active_runtime_commit": "1517fbf4af11a296e3e89fcbf2aa25c49a8d017d",
+    "historical_evidence_commit": "104721acf2222c1cfe8ec86cd030f5116a4fef93",
     "held_bank_relative_path": "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json",
     "held_bank_exists_in_current_local_repository": false,
-    "loader_api": "rby1_assembly.held_grasp.load_verified_held_grasp_bank(runtime_root, task, bank_path, 'train', allow_final=False)",
+    "loader_api": "active rby1_assembly.held_grasp.load_verified_held_grasp_bank(evidence_root, evidence_task, bank_path, 'train', allow_final=False)",
     "expected_train_count": 8,
     "manifest_sha256": "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5",
     "source_contract_sha256": "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0",

@@ -3,7 +3,9 @@ from __future__ import annotations
 import importlib.util
 import hashlib
 import json
+import os
 from pathlib import Path
+import subprocess
 import sys
 from types import ModuleType, SimpleNamespace
 
@@ -32,6 +34,84 @@ def _current_source_hashes(root: Path) -> dict[str, str]:
         relative: _file_sha(root / relative)
         for relative in RUNNER.EXPECTED_CURRENT_SOURCE_PATHS
     }
+
+
+def _end_verifier_fixture(
+    tmp_path: Path, current: Path
+) -> tuple[Path, Path, dict, dict[str, str]]:
+    runtime = tmp_path / "runtime"
+    evidence = tmp_path / "evidence"
+    runtime_map = {}
+    evidence_map = {}
+    for index in range(50):
+        runtime_path = runtime / f"inputs/runtime-{index:02d}.bin"
+        evidence_path = evidence / f"inputs/evidence-{index:02d}.bin"
+        runtime_path.parent.mkdir(parents=True, exist_ok=True)
+        evidence_path.parent.mkdir(parents=True, exist_ok=True)
+        runtime_path.write_bytes(f"runtime-{index}\n".encode())
+        evidence_path.write_bytes(f"evidence-{index}\n".encode())
+        runtime_map[str(runtime_path.relative_to(runtime))] = _file_sha(runtime_path)
+        evidence_map[str(evidence_path.relative_to(evidence))] = _file_sha(evidence_path)
+    normalized = {
+        "runtime": runtime_map,
+        "evidence": evidence_map,
+        "current": _current_source_hashes(current),
+    }
+    manifest_path = tmp_path / "physics-manifest.json"
+    manifest_path.write_text("{}\n", encoding="utf-8")
+    snapshot = {
+        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
+        "runtime_root": str(runtime.resolve()),
+        "evidence_root": str(evidence.resolve()),
+        "current_root": str(current.resolve()),
+        "normalized_sha256": normalized,
+        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(
+            normalized
+        ),
+        "manifest": {"path": str(manifest_path), "sha256": _file_sha(manifest_path)},
+        "source_manifests": [
+            {
+                "role": "active_core",
+                "path": str(
+                    current / "configs/rj45-oracle-runtime-validation-ulp2-v1.json"
+                ),
+                "sha256": _file_sha(
+                    current / "configs/rj45-oracle-runtime-validation-ulp2-v1.json"
+                ),
+            },
+            {
+                "role": "base_physics",
+                "path": str(
+                    current
+                    / "configs/rj45-task-admission-physics-inputs-104721a.json"
+                ),
+                "sha256": _file_sha(
+                    current
+                    / "configs/rj45-task-admission-physics-inputs-104721a.json"
+                ),
+            },
+            {
+                "role": "evidence_core",
+                "path": str(evidence / "configs/rj45-oracle-runtime-104721a.json"),
+                "sha256": "",
+            },
+        ],
+        "selected_cache_graph_sha256": "b" * 64,
+    }
+    frozen = {
+        str(evidence / relative): digest
+        for relative, digest in list(evidence_map.items())[:26]
+    }
+    evidence_manifest = evidence / "configs/rj45-oracle-runtime-104721a.json"
+    evidence_manifest.parent.mkdir(parents=True, exist_ok=True)
+    evidence_manifest.write_bytes(
+        Path(
+            "/opt/homedata/rby1-storage/immutable-inputs/rj45-evidence-104721a/"
+            "configs/rj45-oracle-runtime-104721a.json"
+        ).read_bytes()
+    )
+    snapshot["source_manifests"][2]["sha256"] = _file_sha(evidence_manifest)
+    return runtime, evidence, snapshot, frozen
 
 
 def test_full_plan_runs_tuning18_before_admission72() -> None:
@@ -217,6 +297,8 @@ def test_validate_only_writes_nonclaiming_report(
         [
             "--runtime-root",
             str(tmp_path / "runtime"),
+            "--evidence-root",
+            str(tmp_path / "evidence"),
             "--config",
             str(tmp_path / "config.json"),
             "--output-dir",
@@ -365,6 +447,8 @@ def test_failing_smoke_main_writes_blocked_report(
         [
             "--runtime-root",
             str(tmp_path / "runtime"),
+            "--evidence-root",
+            str(tmp_path / "evidence"),
             "--config",
             str(tmp_path / "config.json"),
             "--output-dir",
@@ -448,6 +532,7 @@ def test_partial_interrupt_preserves_full_immutable_episode_row(
     exit_code = RUNNER.main(
         [
             "--runtime-root", str(tmp_path / "runtime"),
+            "--evidence-root", str(tmp_path / "evidence"),
             "--config", str(tmp_path / "config.json"),
             "--output-dir", str(output),
             "--smoke-only",
@@ -530,6 +615,7 @@ def test_episode_persist_failure_is_not_acknowledged_as_completed(
     exit_code = RUNNER.main(
         [
             "--runtime-root", str(tmp_path / "runtime"),
+            "--evidence-root", str(tmp_path / "evidence"),
             "--config", str(tmp_path / "config.json"),
             "--output-dir", str(output),
             "--smoke-only",
@@ -559,6 +645,8 @@ def test_preflight_error_writes_blocked_report(
         [
             "--runtime-root",
             str(tmp_path / "runtime"),
+            "--evidence-root",
+            str(tmp_path / "evidence"),
             "--config",
             str(tmp_path / "config.json"),
             "--output-dir",
@@ -586,6 +674,8 @@ def test_sigint_writes_interrupted_report_and_preserves_exit_contract(
         [
             "--runtime-root",
             str(tmp_path / "runtime"),
+            "--evidence-root",
+            str(tmp_path / "evidence"),
             "--config",
             str(tmp_path / "config.json"),
             "--output-dir",
@@ -603,9 +693,12 @@ def test_sigint_writes_interrupted_report_and_preserves_exit_contract(
 
 def test_cpu_end_verifier_marks_missing_identity_unverifiable(tmp_path: Path) -> None:
     output = tmp_path / "missing-identity"
+    runtime = tmp_path / "runtime"
+    evidence = tmp_path / "evidence"
     result = RUNNER.verify_after_child_exit(
         output_dir=output,
-        runtime_root=tmp_path / "runtime",
+        runtime_root=runtime,
+        evidence_root=evidence,
         current_root=SCRIPT.parents[1],
     )
     assert result["status"] == "unverifiable_start"
@@ -617,36 +710,22 @@ def test_cpu_end_verifier_survives_reportless_child_crash_and_blocks_mutation(
     tmp_path: Path,
 ) -> None:
     current = SCRIPT.parents[1]
-    runtime = tmp_path / "runtime"
-    runtime.mkdir()
-    runtime_input = runtime / "input.usd"
-    runtime_input.write_text("stable\n", encoding="utf-8")
-    manifest_path = tmp_path / "physics-manifest.json"
-    manifest_path.write_text("{}\n", encoding="utf-8")
-    normalized = {
-        "runtime": {"input.usd": _file_sha(runtime_input)},
-        "current": _current_source_hashes(current),
-    }
-    snapshot = {
-        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
-        "normalized_sha256": normalized,
-        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(
-            normalized
-        ),
-        "manifest": {
-            "path": str(manifest_path),
-            "sha256": _file_sha(manifest_path),
-        },
-        "selected_cache_graph_sha256": "b" * 64,
-    }
+    runtime, evidence, snapshot, frozen = _end_verifier_fixture(tmp_path, current)
     matched_output = tmp_path / "matched"
     matched_output.mkdir()
     (matched_output / "run-identity.json").write_text(
-        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+        json.dumps(
+            {
+                "physics_input_start": snapshot,
+                "provenance": {"frozen_input_sha256": frozen},
+            }
+        ),
+        encoding="utf-8",
     )
     matched = RUNNER.verify_after_child_exit(
         output_dir=matched_output,
         runtime_root=runtime,
+        evidence_root=evidence,
         current_root=current,
     )
     assert matched["status"] == "matched"
@@ -655,23 +734,32 @@ def test_cpu_end_verifier_survives_reportless_child_crash_and_blocks_mutation(
     assert RUNNER.verify_after_child_exit(
         output_dir=matched_output,
         runtime_root=runtime,
+        evidence_root=evidence,
         current_root=current,
     )["sha256"] == matched["sha256"]
 
+    runtime_input = runtime / next(iter(snapshot["normalized_sha256"]["runtime"]))
     runtime_input.write_text("mutated\n", encoding="utf-8")
     blocked_output = tmp_path / "blocked"
     blocked_output.mkdir()
     (blocked_output / "run-identity.json").write_text(
-        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+        json.dumps(
+            {
+                "physics_input_start": snapshot,
+                "provenance": {"frozen_input_sha256": frozen},
+            }
+        ),
+        encoding="utf-8",
     )
     blocked = RUNNER.verify_after_child_exit(
         output_dir=blocked_output,
         runtime_root=runtime,
+        evidence_root=evidence,
         current_root=current,
     )
     assert blocked["status"] == "input_mutation_blocked"
     assert blocked["scientific_completion_allowed"] is False
-    assert blocked["changed"] == ["runtime/input.usd"]
+    assert blocked["changed"] == ["runtime/inputs/runtime-00.bin"]
     assert not (blocked_output / "report.json").exists()
 
 
@@ -682,27 +770,24 @@ def test_cpu_end_verifier_rejects_changed_validator_before_import(tmp_path: Path
         destination = current / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes((source_root / relative).read_bytes())
-    runtime = tmp_path / "runtime"
-    runtime.mkdir()
-    runtime_input = runtime / "input.usd"
-    runtime_input.write_text("stable\n", encoding="utf-8")
-    manifest_path = tmp_path / "physics-manifest.json"
-    manifest_path.write_text("{}\n", encoding="utf-8")
-    normalized = {
-        "runtime": {"input.usd": _file_sha(runtime_input)},
-        "current": _current_source_hashes(current),
-    }
-    snapshot = {
-        "schema_name": RUNNER.PHYSICS_INPUT_SNAPSHOT_SCHEMA,
-        "normalized_sha256": normalized,
-        "normalized_sha256_canonical_sha256": RUNNER._canonical_json_sha256(normalized),
-        "manifest": {"path": str(manifest_path), "sha256": _file_sha(manifest_path)},
-        "selected_cache_graph_sha256": "b" * 64,
-    }
+    for relative in (
+        "configs/rj45-oracle-runtime-validation-ulp2-v1.json",
+        "configs/rj45-task-admission-physics-inputs-104721a.json",
+    ):
+        destination = current / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((source_root / relative).read_bytes())
+    runtime, evidence, snapshot, frozen = _end_verifier_fixture(tmp_path, current)
     output = tmp_path / "malicious-validator"
     output.mkdir()
     (output / "run-identity.json").write_text(
-        json.dumps({"physics_input_start": snapshot}), encoding="utf-8"
+        json.dumps(
+            {
+                "physics_input_start": snapshot,
+                "provenance": {"frozen_input_sha256": frozen},
+            }
+        ),
+        encoding="utf-8",
     )
     marker = tmp_path / "validator-imported"
     validator = current / RUNNER.END_VALIDATOR_RELATIVE
@@ -713,12 +798,93 @@ def test_cpu_end_verifier_rejects_changed_validator_before_import(tmp_path: Path
         encoding="utf-8",
     )
     result = RUNNER.verify_after_child_exit(
-        output_dir=output, runtime_root=runtime, current_root=current
+        output_dir=output,
+        runtime_root=runtime,
+        evidence_root=evidence,
+        current_root=current,
     )
     assert result["status"] == "input_mutation_blocked"
     assert result["scientific_completion_allowed"] is False
     assert "current source changed" in result["error"]["message"]
     assert not marker.exists()
+
+
+def test_cpu_end_verifier_rejects_copied_base_physics_manifest_tamper(
+    tmp_path: Path,
+) -> None:
+    source_root = SCRIPT.parents[1]
+    current = tmp_path / "current"
+    for relative in (
+        *RUNNER.EXPECTED_CURRENT_SOURCE_PATHS,
+        "configs/rj45-oracle-runtime-validation-ulp2-v1.json",
+        "configs/rj45-task-admission-physics-inputs-104721a.json",
+    ):
+        destination = current / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((source_root / relative).read_bytes())
+    runtime, evidence, snapshot, frozen = _end_verifier_fixture(tmp_path, current)
+    base_manifest = current / "configs/rj45-task-admission-physics-inputs-104721a.json"
+    base_manifest.write_bytes(base_manifest.read_bytes() + b"\n")
+    output = tmp_path / "tampered-base-manifest"
+    output.mkdir()
+    (output / "run-identity.json").write_text(
+        json.dumps(
+            {
+                "physics_input_start": snapshot,
+                "provenance": {"frozen_input_sha256": frozen},
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = RUNNER.verify_after_child_exit(
+        output_dir=output,
+        runtime_root=runtime,
+        evidence_root=evidence,
+        current_root=current,
+    )
+    assert result["status"] == "input_mutation_blocked"
+    assert result["error"]["message"] == (
+        "physics input source manifest changed before end check"
+    )
+    assert result["scientific_completion_allowed"] is False
+
+
+def test_dual_root_cli_requires_evidence_root(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        RUNNER._parser().parse_args(
+            [
+                "--runtime-root", str(tmp_path / "runtime"),
+                "--config", str(tmp_path / "config.json"),
+                "--output-dir", str(tmp_path / "output"),
+            ]
+        )
+
+
+def test_actual_active_validator_proves_historical_bank8_without_native_imports() -> None:
+    runtime = Path("/opt/homedata/rby1-storage/immutable-inputs/rj45-runtime-1517fbf")
+    evidence = Path("/opt/homedata/rby1-storage/immutable-inputs/rj45-evidence-104721a")
+    code = f'''\
+import importlib.util, json
+from pathlib import Path
+p = Path({str(Path(__file__).resolve().parents[1] / "scripts/run_rj45_task_admission.py")!r})
+s = importlib.util.spec_from_file_location("fresh_runner", p)
+m = importlib.util.module_from_spec(s)
+s.loader.exec_module(m)
+print(json.dumps(m._semantic_bank_preflight(Path({str(runtime)!r}), Path({str(evidence)!r}))))
+'''
+    environment = dict(os.environ)
+    environment.pop("PYTHONPATH", None)
+    completed = subprocess.run(
+        [sys.executable, "-c", code],
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    proof = json.loads(completed.stdout)
+    assert proof["selected_grasp_ids"] == list(RUNNER.EXPECTED_IDS)
+    assert proof["manifest_sha256"] == RUNNER.EXPECTED_BANK_SHA256
+    assert Path(proof["verifier_origin"]).is_relative_to(runtime / "src")
 
 
 @pytest.mark.parametrize(

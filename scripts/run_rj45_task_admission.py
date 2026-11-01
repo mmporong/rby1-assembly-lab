@@ -20,17 +20,27 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 
-EXPECTED_RUNTIME_COMMIT = "104721acf2222c1cfe8ec86cd030f5116a4fef93"
+EXPECTED_RUNTIME_COMMIT = "1517fbf4af11a296e3e89fcbf2aa25c49a8d017d"
 EXPECTED_BANK_SHA256 = "c2fbcfea9528f4a9cefb8c4c63aba6cc561fe2f3095a0fa16b7456dda8da54d5"
 EXPECTED_BANK_SOURCE_SHA256 = "38cf66d4dea11fe4253021fa57e3c0b5347974dda7490ddb9b7890e6819098d0"
 EXPECTED_PLAYBACK_ACTIONS_FILE_SHA256 = "7dfc8db1558aea29295436f60e850da9b377d0b85c7b8e7fcdcecd9f54bcbc96"
 EXPECTED_IDS = tuple(f"rj45-train-{index:02d}" for index in range(1, 9))
+EXPECTED_ARTIFACT_SHA256 = (
+    "6408e83c9e854d17014093a12014eb886673e5d3c6f382870214d42f489e4f75",
+    "0c0a21e53cb944460f3402b46598871933b8a89a1f61eebf4c15947bedbe5ff5",
+    "405a707a3ed544110fb3a95817360f77984bc671d4a482d639ba25bf1705cbf4",
+    "090631370864a35bcc3cc77f93039a232e70c2896987589fa94651b1bafc03c2",
+    "8ccca951e5deb7b515e394047b2cf3c645bac6b66eb46c2b531155c274d852d7",
+    "b8269658eb899ce51e834d1b61eb275a55e6635424dc16959dd53aa3632a7c35",
+    "65ee23e5c64de6786b37f4152797ef2ac47609fe530d525dd2164abbc1e78a7e",
+    "7a1c97db66ef9867b75fe0ce9892968fe7697f38c1b297bb6b86b365f1019aea",
+)
 EXPECTED_FIXED_INDICES = {"rj45-train-02": 1, "rj45-train-05": 4, "rj45-train-03": 2}
 MAX_DEVELOPMENT_EPISODES = 90
 TASK_ADMISSION_ENVIRONMENT_SEED = 20261121
-PHYSICS_INPUT_SNAPSHOT_SCHEMA = "rj45_task_admission_physics_input_snapshot_v1"
+PHYSICS_INPUT_SNAPSHOT_SCHEMA = "rj45_task_admission_physics_input_snapshot_v2"
 PHYSICS_INPUT_MANIFEST_RELATIVE = Path(
-    "configs/rj45-task-admission-physics-inputs-104721a.json"
+    "configs/rj45-task-admission-physics-inputs-validation-ulp2-v1.json"
 )
 ISOLATED_CAMPAIGN_SCHEMA = "rj45-task-admission-isolated-campaign-v1"
 ISOLATED_WORKER_SPEC_SCHEMA = "rj45-task-admission-isolated-worker-spec-v1"
@@ -512,6 +522,7 @@ def _runtime_versions() -> dict[str, str]:
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--evidence-root", type=Path, required=True)
     parser.add_argument("--current-root", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -781,11 +792,88 @@ def _physics_input_manifest_path(value: Path, current_root: Path) -> Path:
     return path
 
 
+def _semantic_bank_preflight(
+    runtime_root: Path, evidence_root: Path
+) -> dict[str, Any]:
+    """Validate all eight historical reports with authenticated active CPU code."""
+
+    before = set(sys.modules)
+    runtime_src = (runtime_root / "src").resolve()
+    sys.path.insert(0, str(runtime_src))
+    try:
+        from rby1_assembly import experiment_contracts, held_grasp
+        from rby1_assembly.rj45_task import load_rj45_task
+
+        for module in (experiment_contracts, held_grasp):
+            origin = Path(module.__file__).resolve()
+            if not origin.is_relative_to(runtime_src):
+                raise AdmissionRunBlocked("semantic preflight import escaped active runtime")
+        if (
+            held_grasp.verify_rj45_nominal_evidence
+            is not experiment_contracts.verify_rj45_nominal_evidence
+        ):
+            raise AdmissionRunBlocked("held-grasp verifier function binding differs")
+        verifier_path = (runtime_src / "rby1_assembly/experiment_contracts.py").resolve()
+        if (
+            Path(experiment_contracts.verify_rj45_nominal_evidence.__code__.co_filename).resolve()
+            != verifier_path
+            or _sha256(verifier_path)
+            != "cfc3e7f7d8867b6ac3dc4156297e7d77aa3c38c812084f4991f603acc9e34cb1"
+        ):
+            raise AdmissionRunBlocked("semantic verifier code origin or bytes differ")
+        active_task_path = runtime_root / "configs/tasks/rj45-v1.json"
+        evidence_task_path = evidence_root / "configs/tasks/rj45-v1.json"
+        if active_task_path.read_bytes() != evidence_task_path.read_bytes():
+            raise AdmissionRunBlocked("active and evidence task bytes differ")
+        active_task = load_rj45_task(active_task_path)
+        evidence_task = load_rj45_task(evidence_task_path)
+        if active_task != evidence_task:
+            raise AdmissionRunBlocked("active and evidence parsed tasks differ")
+        bank_path = (
+            evidence_root
+            / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
+        )
+        bank, proof = held_grasp.load_verified_held_grasp_bank(
+            evidence_root, evidence_task, bank_path, "train", allow_final=False
+        )
+        if (
+            len(bank) != 8
+            or proof.get("manifest_sha256") != EXPECTED_BANK_SHA256
+            or proof.get("selected_grasp_ids") != list(EXPECTED_IDS)
+            or proof.get("selected_artifact_sha256")
+            != list(EXPECTED_ARTIFACT_SHA256)
+        ):
+            raise AdmissionRunBlocked("semantic preflight did not validate exact bank8")
+        if held_grasp.bank_source_contract_sha256(proof) != EXPECTED_BANK_SOURCE_SHA256:
+            raise AdmissionRunBlocked("semantic preflight source contract mismatch")
+    finally:
+        if sys.path and sys.path[0] == str(runtime_src):
+            sys.path.pop(0)
+    introduced = set(sys.modules) - before
+    forbidden = sorted(
+        name
+        for name in introduced
+        if name.split(".", 1)[0] in {"isaac", "isaaclab", "isaacsim", "omni", "torch"}
+    )
+    if forbidden:
+        raise AdmissionRunBlocked(
+            f"semantic preflight imported forbidden native modules: {forbidden}"
+        )
+    return {
+        "selected_grasp_ids": list(proof["selected_grasp_ids"]),
+        "selected_artifact_sha256": list(proof["selected_artifact_sha256"]),
+        "manifest_sha256": proof["manifest_sha256"],
+        "verifier_origin": str(Path(experiment_contracts.__file__).resolve()),
+        "held_grasp_origin": str(Path(held_grasp.__file__).resolve()),
+    }
+
+
 def _prepare(args: argparse.Namespace) -> dict[str, Any]:
     runtime_root = args.runtime_root.resolve()
+    evidence_root = args.evidence_root.resolve()
     current_root = args.current_root.resolve()
-    if runtime_root == current_root:
-        raise AdmissionRunBlocked("runtime-root and current-root must be separate")
+    if len({runtime_root, evidence_root, current_root}) != 3:
+        raise AdmissionRunBlocked("runtime, evidence, and current roots must be distinct")
     config_path = args.config if args.config.is_absolute() else current_root / args.config
     playback_path = args.playback_actions if args.playback_actions.is_absolute() else current_root / args.playback_actions
     config = _json(config_path)
@@ -822,13 +910,15 @@ def _prepare(args: argparse.Namespace) -> dict[str, Any]:
     validator = importlib.util.module_from_spec(spec)
     sys.modules[spec.name] = validator
     spec.loader.exec_module(validator)
-    manifest_path = current_root / "configs/rj45-oracle-runtime-104721a.json"
+    manifest_path = current_root / "configs/rj45-oracle-runtime-validation-ulp2-v1.json"
     runtime_snapshot = validator.validate_runtime_snapshot(runtime_root, manifest_path)
     physics_input_snapshot = validator.validate_physics_input_snapshot(
-        runtime_root, current_root, physics_manifest
+        runtime_root, evidence_root, current_root, physics_manifest
     )
+    semantic_bank_preflight = _semantic_bank_preflight(runtime_root, evidence_root)
     return {
         "runtime_root": runtime_root,
+        "evidence_root": evidence_root,
         "current_root": current_root,
         "config_path": config_path.resolve(),
         "config": config,
@@ -841,11 +931,13 @@ def _prepare(args: argparse.Namespace) -> dict[str, Any]:
         "runtime_snapshot": runtime_snapshot,
         "physics_input_manifest": physics_manifest,
         "physics_input_snapshot": physics_input_snapshot,
+        "semantic_bank_preflight": semantic_bank_preflight,
     }
 
 
 def _load_runtime(prepared: Mapping[str, Any]):
     runtime_root: Path = prepared["runtime_root"]
+    evidence_root: Path = prepared["evidence_root"]
     current_root: Path = prepared["current_root"]
     sys.path.insert(0, str(runtime_root / "src"))
     from rby1_assembly.held_grasp import bank_source_contract_sha256, held_grasp_bank_dependency_paths, load_verified_held_grasp_bank
@@ -855,9 +947,16 @@ def _load_runtime(prepared: Mapping[str, Any]):
     if int(AssemblyPhase.ALIGN) != 3 or int(AssemblyPhase.INSERT) != 4:
         raise AdmissionRunBlocked("frozen ALIGN/INSERT phase codes changed")
 
-    task = load_rj45_task(runtime_root / "configs/tasks/rj45-v1.json")
-    bank_path = runtime_root / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
-    bank, proof = load_verified_held_grasp_bank(runtime_root, task, bank_path, "train", allow_final=False)
+    task_path = runtime_root / "configs/tasks/rj45-v1.json"
+    evidence_task_path = evidence_root / "configs/tasks/rj45-v1.json"
+    if task_path.read_bytes() != evidence_task_path.read_bytes():
+        raise AdmissionRunBlocked("active and evidence task bytes differ")
+    task = load_rj45_task(task_path)
+    evidence_task = load_rj45_task(evidence_task_path)
+    if task != evidence_task:
+        raise AdmissionRunBlocked("active and evidence parsed tasks differ")
+    bank_path = evidence_root / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
+    bank, proof = load_verified_held_grasp_bank(evidence_root, evidence_task, bank_path, "train", allow_final=False)
     prepared["runtime_validator"].validate_held_proof_physics_binding(
         proof,
         prepared["physics_input_snapshot"],
@@ -879,7 +978,7 @@ def _load_runtime(prepared: Mapping[str, Any]):
         sys.modules[spec.name] = module
         spec.loader.exec_module(module)
         current_modules[name] = module
-    frozen_paths = held_grasp_bank_dependency_paths(runtime_root, bank_path, "train", allow_final=False)
+    frozen_paths = held_grasp_bank_dependency_paths(evidence_root, bank_path, "train", allow_final=False)
     frozen_hashes = {path.resolve(): _sha256(path) for path in (bank_path, *frozen_paths)}
     return {"task": task, "bank": bank, "proof": proof, "indices": indices, "modules": current_modules, "frozen_hashes": frozen_hashes, "runtime_versions": runtime_versions}
 
@@ -1261,15 +1360,38 @@ def _validate_end_snapshot_before_validator(
 
     if start.get("schema_name") != PHYSICS_INPUT_SNAPSHOT_SCHEMA:
         raise AdmissionRunBlocked("physics input start snapshot schema mismatch")
+    sealed_roots: dict[str, Path] = {}
+    for namespace in ("runtime", "evidence", "current"):
+        raw_root = start.get(f"{namespace}_root")
+        if not isinstance(raw_root, str) or not raw_root:
+            raise AdmissionRunBlocked(f"physics input start {namespace} root is invalid")
+        root = Path(raw_root)
+        if not root.is_absolute() or str(root.resolve()) != raw_root:
+            raise AdmissionRunBlocked(f"physics input start {namespace} root is not canonical")
+        sealed_roots[namespace] = root.resolve()
+    if len(set(sealed_roots.values())) != 3:
+        raise AdmissionRunBlocked("physics input start roots must be distinct")
+    if sealed_roots["current"] != current_root.resolve():
+        raise AdmissionRunBlocked("physics input start current root differs")
     normalized = start.get("normalized_sha256")
-    if not isinstance(normalized, dict) or set(normalized) != {"runtime", "current"}:
+    if not isinstance(normalized, dict) or set(normalized) != {
+        "runtime",
+        "evidence",
+        "current",
+    }:
         raise AdmissionRunBlocked("physics input start snapshot map is invalid")
+    if {name: len(values) if isinstance(values, dict) else -1 for name, values in normalized.items()} != {
+        "runtime": 50,
+        "evidence": 50,
+        "current": 6,
+    }:
+        raise AdmissionRunBlocked("physics input start snapshot namespace counts differ")
     if (
         _canonical_json_sha256(normalized)
         != start.get("normalized_sha256_canonical_sha256")
     ):
         raise AdmissionRunBlocked("physics input start snapshot canonical SHA mismatch")
-    for namespace in ("runtime", "current"):
+    for namespace in ("runtime", "evidence", "current"):
         mapping = normalized.get(namespace)
         if not isinstance(mapping, dict) or not mapping:
             raise AdmissionRunBlocked(
@@ -1300,6 +1422,42 @@ def _validate_end_snapshot_before_validator(
             raise AdmissionRunBlocked(f"current source is missing before end check: {relative}")
         if _sha256(path) != current_map[relative]:
             raise AdmissionRunBlocked(f"current source changed before end check: {relative}")
+    source_manifests = start.get("source_manifests")
+    if not isinstance(source_manifests, list) or len(source_manifests) != 3:
+        raise AdmissionRunBlocked("physics input start source manifest set is invalid")
+    expected_source_paths = {
+        "active_core": sealed_roots["current"]
+        / "configs/rj45-oracle-runtime-validation-ulp2-v1.json",
+        "base_physics": sealed_roots["current"]
+        / "configs/rj45-task-admission-physics-inputs-104721a.json",
+        "evidence_core": sealed_roots["evidence"]
+        / "configs/rj45-oracle-runtime-104721a.json",
+    }
+    seen_roles: set[str] = set()
+    for binding in source_manifests:
+        if not isinstance(binding, dict):
+            raise AdmissionRunBlocked("physics input start source manifest binding is invalid")
+        role = binding.get("role")
+        raw_path = binding.get("path")
+        digest = binding.get("sha256")
+        if (
+            role not in expected_source_paths
+            or role in seen_roles
+            or not isinstance(raw_path, str)
+            or not Path(raw_path).is_absolute()
+            or str(Path(raw_path).resolve()) != raw_path
+            or Path(raw_path).resolve() != expected_source_paths[role].resolve()
+            or not isinstance(digest, str)
+            or len(digest) != 64
+            or any(character not in "0123456789abcdef" for character in digest)
+        ):
+            raise AdmissionRunBlocked("physics input start source manifest binding differs")
+        path = expected_source_paths[role]
+        if not path.is_file() or _sha256(path) != digest:
+            raise AdmissionRunBlocked("physics input source manifest changed before end check")
+        seen_roles.add(role)
+    if seen_roles != set(expected_source_paths):
+        raise AdmissionRunBlocked("physics input start source manifest roles differ")
     return current_root / END_VALIDATOR_RELATIVE
 
 
@@ -1325,12 +1483,43 @@ def _physics_start_from_identity(identity: Mapping[str, Any]) -> Mapping[str, An
     return start
 
 
+def _bank_map_from_identity(identity: Mapping[str, Any]) -> Mapping[str, str]:
+    provenance = identity.get("provenance")
+    if isinstance(provenance, dict) and isinstance(
+        provenance.get("frozen_input_sha256"), dict
+    ):
+        return provenance["frozen_input_sha256"]
+    campaign_binding = identity.get("campaign_identity")
+    if not isinstance(campaign_binding, dict):
+        raise AdmissionRunBlocked("run identity has no frozen bank binding")
+    campaign_path = Path(str(campaign_binding.get("path", ""))).resolve()
+    if not campaign_path.is_file() or _sha256(campaign_path) != campaign_binding.get("sha256"):
+        raise AdmissionRunBlocked("worker campaign SHA mismatch for bank end check")
+    campaign = _json(campaign_path)
+    frozen = campaign.get("trusted_worker_attestation", {}).get("frozen_input_sha256")
+    if not isinstance(frozen, dict):
+        raise AdmissionRunBlocked("worker campaign has no frozen bank map")
+    return frozen
+
+
 def verify_after_child_exit(
-    *, output_dir: Path, runtime_root: Path, current_root: Path
+    *,
+    output_dir: Path,
+    runtime_root: Path,
+    current_root: Path,
+    evidence_root: Path,
 ) -> dict[str, Any]:
     """Write a CPU-only end check that remains callable after a child crash."""
 
     output_dir = output_dir.resolve()
+    if len(
+        {
+            runtime_root.resolve(),
+            evidence_root.resolve(),
+            current_root.resolve(),
+        }
+    ) != 3:
+        raise AdmissionRunBlocked("runtime, evidence, and current roots must be distinct")
     destination = output_dir / "physics-input-end-verification.json"
     identity_path = output_dir / "run-identity.json"
     if not identity_path.is_file():
@@ -1359,9 +1548,29 @@ def verify_after_child_exit(
             sys.modules[spec.name] = validator
             spec.loader.exec_module(validator)
             result = validator.verify_physics_input_end(
-                start, runtime_root.resolve(), current_root.resolve()
+                start,
+                runtime_root.resolve(),
+                evidence_root.resolve(),
+                current_root.resolve(),
             )
-            result["scientific_completion_allowed"] = result["matched"]
+            frozen = _bank_map_from_identity(identity)
+            if len(frozen) != 26:
+                raise AdmissionRunBlocked("frozen bank map must contain exactly 26 inputs")
+            evidence = evidence_root.resolve()
+            for raw_path, expected in frozen.items():
+                path = Path(raw_path).resolve()
+                if (
+                    raw_path != str(path)
+                    or not path.is_relative_to(evidence)
+                    or not path.is_file()
+                    or _sha256(path) != expected
+                ):
+                    raise AdmissionRunBlocked("frozen bank input changed at end check")
+            result["bank_input_count"] = 26
+            result["bank_matched"] = True
+            result["scientific_completion_allowed"] = (
+                result["matched"] and result["bank_matched"]
+            )
         except Exception as error:
             result = {
                 "schema_name": "rj45_task_admission_physics_input_end_verification_v1",
@@ -1400,6 +1609,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             verification = verify_after_child_exit(
                 output_dir=args.output_dir,
                 runtime_root=args.runtime_root,
+                evidence_root=args.evidence_root,
                 current_root=args.current_root,
             )
             print(json.dumps(verification, sort_keys=True, allow_nan=False))
@@ -1443,6 +1653,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             pre_env_verification = prepared["runtime_validator"].verify_physics_input_end(
                 prepared["physics_input_snapshot"],
                 prepared["runtime_root"],
+                prepared["evidence_root"],
                 prepared["current_root"],
             )
             if not pre_env_verification["matched"]:
@@ -1599,6 +1810,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             end_verification = verify_after_child_exit(
                 output_dir=args.output_dir,
                 runtime_root=prepared["runtime_root"],
+                evidence_root=prepared["evidence_root"],
                 current_root=prepared["current_root"],
             )
             if not end_verification["matched"]:
@@ -1714,6 +1926,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             end_verification = verify_after_child_exit(
                 output_dir=args.output_dir,
                 runtime_root=prepared["runtime_root"],
+                evidence_root=prepared["evidence_root"],
                 current_root=prepared["current_root"],
             )
             if not end_verification["matched"]:

@@ -241,13 +241,14 @@ def _trusted_worker_attestation(
     args: argparse.Namespace, prepared: Mapping[str, Any], runner: Any
 ) -> dict[str, Any]:
     runtime_root = args.runtime_root.resolve()
+    evidence_root = args.evidence_root.resolve()
     current_root = args.current_root.resolve()
     runtime_config = _load_json(runtime_root / "configs/runtime.json")
     snapshot_current = prepared["physics_input_snapshot"]["normalized_sha256"]["current"]
-    bank_path = runtime_root / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
+    bank_path = evidence_root / "artifacts/rj45-4c-bank-generation-v2-20261028/held-grasp-bank.json"
     if _sha256(bank_path) != runner.EXPECTED_BANK_SHA256:
         raise IsolatedCampaignBlocked("held-bank manifest differs from the fixed contract")
-    dependencies = _held_bank_dependencies(runtime_root, bank_path)
+    dependencies = _held_bank_dependencies(evidence_root, bank_path)
     frozen = {str(path): _sha256(path) for path in dependencies}
     manifest = _load_json(bank_path)
     train_entries = [entry for entry in manifest["entries"] if entry.get("split") == "train"]
@@ -284,14 +285,14 @@ def _verify_trusted_bank_inputs(
     frozen = trusted.get("frozen_input_sha256")
     if not isinstance(frozen, dict) or not frozen:
         raise IsolatedCampaignBlocked("campaign frozen bank map is missing")
-    runtime_root = args.runtime_root.resolve()
+    evidence_root = args.evidence_root.resolve()
     for raw_path, expected_sha in frozen.items():
         if not isinstance(raw_path, str) or not isinstance(expected_sha, str):
             raise IsolatedCampaignBlocked("campaign frozen bank entry is invalid")
         path = Path(raw_path).resolve()
         if (
             raw_path != str(path)
-            or not path.is_relative_to(runtime_root)
+            or not path.is_relative_to(evidence_root)
             or not path.is_file()
             or _sha256(path) != expected_sha
         ):
@@ -305,6 +306,8 @@ def _prepare_campaign(
         [
             "--runtime-root",
             str(args.runtime_root),
+            "--evidence-root",
+            str(args.evidence_root),
             "--current-root",
             str(args.current_root),
             "--config",
@@ -385,7 +388,10 @@ def _verify_campaign_inputs(
     )
     _assert_cpu_only_imports(before)
     result = validator.verify_physics_input_end(
-        snapshot, args.runtime_root.resolve(), args.current_root.resolve()
+        snapshot,
+        args.runtime_root.resolve(),
+        args.evidence_root.resolve(),
+        args.current_root.resolve(),
     )
     if not result.get("matched"):
         raise IsolatedCampaignBlocked("campaign physics inputs changed before worker")
@@ -425,6 +431,8 @@ def _launch_worker(
         str(runner_path),
         "--runtime-root",
         str(args.runtime_root),
+        "--evidence-root",
+        str(args.evidence_root),
         "--current-root",
         str(args.current_root),
         "--config",
@@ -468,6 +476,7 @@ def _launch_worker(
     verifier_result = _run_post_exit_verifier(
         [
             sys.executable, str(runner_path), "--runtime-root", str(args.runtime_root),
+            "--evidence-root", str(args.evidence_root),
             "--current-root", str(args.current_root), "--config", str(args.config),
             "--output-dir", str(worker_dir), "--verify-after-child-exit",
         ],
@@ -962,6 +971,7 @@ def run_campaign(
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--runtime-root", type=Path, required=True)
+    parser.add_argument("--evidence-root", type=Path, required=True)
     parser.add_argument(
         "--current-root", type=Path, default=Path(__file__).resolve().parents[1]
     )
@@ -986,6 +996,16 @@ def _parser() -> argparse.ArgumentParser:
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if len(
+        {
+            args.runtime_root.resolve(),
+            args.evidence_root.resolve(),
+            args.current_root.resolve(),
+        }
+    ) != 3:
+        raise IsolatedCampaignBlocked(
+            "runtime, evidence, and current roots must be distinct"
+        )
     if (args.purpose == "diagnostic_nonadjudicative") != (
         args.diagnostic_ordinal == 33
     ):
