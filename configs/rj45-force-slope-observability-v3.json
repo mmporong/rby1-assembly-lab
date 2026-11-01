@@ -1,6 +1,6 @@
 {
   "schema": "rj45-force-slope-observability-contract-v3",
-  "frozen": false,
+  "frozen": true,
   "development_grasps": [
     "rj45-train-03"
   ],

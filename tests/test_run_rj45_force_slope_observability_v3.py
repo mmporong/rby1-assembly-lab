@@ -29,15 +29,20 @@ def _args(tmp_path):
 
 
 def _draft_config():
-    return json.loads(
+    config = json.loads(
         (ROOT / "configs/rj45-force-slope-observability-v3.json").read_text()
     )
+    config["frozen"] = False
+    return config
 
 
 def test_validate_only_is_cpu_only_for_both_stages(tmp_path):
+    draft = tmp_path / "draft-config.json"
+    draft.write_text(json.dumps(_draft_config()))
     for stage, count in (("development", 6), ("confirmation", 24)):
         result = subprocess.run(
-            [sys.executable, str(SCRIPT), *_args(tmp_path), "--stage", stage, "--validate-only"],
+            [sys.executable, str(SCRIPT), *_args(tmp_path), "--stage", stage,
+             "--config", str(draft), "--validate-only"],
             capture_output=True,
             text=True,
         )
@@ -51,8 +56,11 @@ def test_validate_only_is_cpu_only_for_both_stages(tmp_path):
 
 
 def test_unfrozen_execution_fails_before_simulator_import(tmp_path):
+    draft = tmp_path / "draft-config.json"
+    draft.write_text(json.dumps(_draft_config()))
     with pytest.raises(ValueError, match="not frozen"):
-        RUNNER.main([*_args(tmp_path), "--stage", "development", "--ordinal", "1"])
+        RUNNER.main([*_args(tmp_path), "--stage", "development", "--ordinal", "1",
+                     "--config", str(draft)])
     assert not (tmp_path / "no-output").exists()
 
 

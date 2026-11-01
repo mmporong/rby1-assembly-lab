@@ -4,7 +4,7 @@
 
 v2는 train-02/tx에서 sample13 feature48 거리 0.046849가 등록 기준 0.05에 못 미쳐 조기 종료했다. [v2 결과](evidence/rj45-controlled-observability-20261101f/README.md)와 고정 소스·설정·원시 자료는 실패 상태로 보존한다.
 
-이 문서는 다른 제어법 하나를 개발 자료로 검증하는 별도 계약이다. 현재 설정은 `frozen=false`이며 GPU 실행을 허용하지 않는다. 물리·성공 기준과 관측 분리 기준은 유지한다. 목표는 기존의 zero/classical/PPO/SAC 공정 비교와 실제 영상이다.
+이 문서는 다른 제어법 하나를 개발 자료로 검증하는 별도 계약이다. 후보와 개발·확인 행렬을 CPU 독립 검수 후 `frozen=true`로 고정했다. GPU 실행은 별도 패킷과 native gate 검수를 거친다. 물리·성공 기준과 관측 분리 기준은 유지한다. 목표는 기존의 zero/classical/PPO/SAC 공정 비교와 실제 영상이다.
 
 ## 기존 자료에서 확인한 기전과 남은 가설
 
