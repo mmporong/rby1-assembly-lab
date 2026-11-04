@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import random
+import re
 import tempfile
 from typing import Any, Iterable
 
@@ -287,6 +288,7 @@ def _verify_training_bundle(
     manifest_path: Path,
     training_provenance_path: Path,
     runner_config_path: Path,
+    checkpoint_inspection_path: Path | None = None,
 ) -> dict[str, Any]:
     checkpoint_bytes = checkpoint_path.read_bytes()
     checkpoint_sha = hashlib.sha256(checkpoint_bytes).hexdigest()
@@ -297,6 +299,10 @@ def _verify_training_bundle(
     runner_config, _runner_bytes, runner_sha = _load(runner_config_path)
     report_provenance = report["provenance"]
     evidence = report_provenance["verified_checkpoint_evidence"]
+    if manifest.get("schema_version") != 1:
+        _fail(f"{label} checkpoint manifest schema_version must be 1")
+    if manifest.get("training_completed") is not True:
+        _fail(f"{label} checkpoint manifest does not mark training as completed")
     if checkpoint_sha != report_provenance["checkpoint_sha256"]:
         _fail(f"{label} checkpoint bytes do not match the evaluation report")
     if manifest_sha != evidence["checkpoint_manifest_sha256"]:
@@ -361,12 +367,14 @@ def _verify_training_bundle(
     rollout_steps = _integer(
         runner_config.get("num_steps_per_env"), f"{label}.num_steps_per_env", minimum=1
     )
-    updates = _integer(runner_config.get("max_iterations"), f"{label}.max_iterations", minimum=1)
+    planned_updates = _integer(
+        runner_config.get("max_iterations"), f"{label}.max_iterations", minimum=1
+    )
     policy = _object(runner_config.get("policy"), f"{label}.runner.policy")
     initial_noise_std = _finite(
         policy.get("init_noise_std"), f"{label}.policy.init_noise_std", minimum=0.0
     )
-    return {
+    result = {
         "status": "checkpoint_manifest_provenance_runner_bytes_verified",
         "unverified": [
             "source and non-runner config bytes referenced by training provenance",
@@ -382,11 +390,124 @@ def _verify_training_bundle(
         "training_seed": seed,
         "training_num_envs": training_num_envs,
         "rollout_steps_per_env": rollout_steps,
-        "training_updates": updates,
+        "planned_training_updates": planned_updates,
+        "checkpoint_completed_updates": None,
+        "checkpoint_completed_updates_verification": (
+            "not_verified_checkpoint_payload_not_inspected"
+        ),
         "initial_action_noise_std": initial_noise_std,
         "policy_initialization_status": initialization_status,
         "policy_initialization": evidence.get("policy_initialization"),
     }
+    if checkpoint_inspection_path is not None:
+        inspection, _inspection_bytes, inspection_sha = _load(checkpoint_inspection_path)
+        if set(inspection) != {
+            "schema_version",
+            "status",
+            "checkpoint",
+            "planned_training_updates",
+            "checkpoint_manifest",
+            "training_provenance",
+            "runner_config",
+            "loader",
+            "completion_derivation",
+        }:
+            _fail(f"{label} checkpoint inspection fields are incomplete or unexpected")
+        if inspection.get("schema_version") != 2:
+            _fail(f"{label} checkpoint inspection schema_version must be 2")
+        if inspection.get("status") != "checkpoint_payload_and_lineage_verified":
+            _fail(f"{label} checkpoint inspection status is not verified")
+        inspected_checkpoint = _object(
+            inspection.get("checkpoint"), f"{label}.checkpoint_inspection.checkpoint"
+        )
+        inspected_manifest = _object(
+            inspection.get("checkpoint_manifest"),
+            f"{label}.checkpoint_inspection.checkpoint_manifest",
+        )
+        inspected_provenance = _object(
+            inspection.get("training_provenance"),
+            f"{label}.checkpoint_inspection.training_provenance",
+        )
+        inspected_runner = _object(
+            inspection.get("runner_config"), f"{label}.checkpoint_inspection.runner_config"
+        )
+        loader = _object(inspection.get("loader"), f"{label}.checkpoint_inspection.loader")
+        if loader != {"map_location": "cpu", "weights_only": True}:
+            _fail(f"{label} checkpoint inspection did not use the safe CPU loader contract")
+        derivation = _object(
+            inspection.get("completion_derivation"),
+            f"{label}.checkpoint_inspection.completion_derivation",
+        )
+        training_script = _object(
+            derivation.get("training_script"),
+            f"{label}.checkpoint_inspection.completion_derivation.training_script",
+        )
+        if derivation.get("formula") != "completed_updates = checkpoint payload iter + 1":
+            _fail(f"{label} checkpoint completion formula is not the reviewed contract")
+        if (
+            derivation.get("training_mode_basis")
+            != "assumed_fresh_no_resume_requires_review_of_pinned_training_script"
+            or derivation.get("checkpoint_scope") != "checkpoints created in this run directory"
+            or derivation.get("rsl_rl_version") != "3.0.1"
+        ):
+            _fail(f"{label} checkpoint completion derivation prerequisites differ")
+        if training_provenance.get("checkpoint_scope") != derivation.get("checkpoint_scope"):
+            _fail(f"{label} inspection checkpoint scope differs from training provenance")
+        training_runtime_versions = _object(
+            training_provenance.get("runtime_versions"),
+            f"{label}.training_provenance.runtime_versions",
+        )
+        if training_runtime_versions.get("rsl-rl-lib") != derivation.get("rsl_rl_version"):
+            _fail(f"{label} inspection RSL-RL version differs from training provenance")
+        if training_script.get("sha256") != source_and_config.get("scripts/train.py"):
+            _fail(f"{label} checkpoint inspection training script differs from provenance")
+        if inspected_checkpoint.get("sha256") != checkpoint_sha:
+            _fail(f"{label} checkpoint inspection refers to different checkpoint bytes")
+        if inspected_manifest.get("sha256") != manifest_sha:
+            _fail(f"{label} checkpoint inspection refers to different manifest bytes")
+        if inspected_manifest.get("training_completed") is not True:
+            _fail(f"{label} checkpoint inspection does not verify completed training manifest")
+        if inspected_provenance.get("sha256") != training_provenance_sha:
+            _fail(f"{label} checkpoint inspection refers to different training provenance bytes")
+        if inspected_runner.get("sha256") != runner_sha:
+            _fail(f"{label} checkpoint inspection refers to different runner config bytes")
+        if inspected_provenance.get("seed") != seed or inspected_runner.get("seed") != seed:
+            _fail(f"{label} checkpoint inspection seed lineage differs")
+        if inspection.get("planned_training_updates") != planned_updates:
+            _fail(f"{label} checkpoint inspection planned updates differ from runner config")
+        filename_iteration = _integer(
+            inspected_checkpoint.get("filename_iteration"),
+            f"{label}.checkpoint_inspection.filename_iteration",
+        )
+        payload_iteration = _integer(
+            inspected_checkpoint.get("payload_iteration"),
+            f"{label}.checkpoint_inspection.payload_iteration",
+        )
+        completed_updates = _integer(
+            inspected_checkpoint.get("completed_updates"),
+            f"{label}.checkpoint_inspection.completed_updates",
+            minimum=1,
+        )
+        checkpoint_name_match = re.fullmatch(r"model_(\d+)\.pt", checkpoint_path.name)
+        if checkpoint_name_match is None:
+            _fail(f"{label} checkpoint filename must use model_N.pt")
+        actual_filename_iteration = int(checkpoint_name_match.group(1))
+        if filename_iteration != actual_filename_iteration:
+            _fail(f"{label} checkpoint inspection index differs from actual checkpoint filename")
+        if filename_iteration != payload_iteration or completed_updates != payload_iteration + 1:
+            _fail(f"{label} checkpoint inspection iteration fields disagree")
+        if completed_updates > planned_updates:
+            _fail(f"{label} checkpoint completed updates exceed planned updates")
+        result["checkpoint_completed_updates"] = completed_updates
+        result["checkpoint_completed_updates_verification"] = (
+            "supplied_inspection_report_consistent_payload_not_rechecked"
+        )
+        result["checkpoint_inspection"] = {
+            "path": str(checkpoint_inspection_path),
+            "sha256": inspection_sha,
+            "status": inspection["status"],
+        }
+    return result
 
 
 def _canonical_condition(condition: dict[str, Any]) -> str:
@@ -975,7 +1096,15 @@ def analyze_reports(
             "results": {label: _outcome_record(index[key]) for label, index in indexes.items()},
         })
     return {
-        "schema_version": 1,
+        "schema_version": 2,
+        "schema_compatibility": {
+            "version_1_training_updates_interpretation": (
+                "runner max_iterations copied as a planned limit; it did not verify checkpoint completion"
+            ),
+            "version_2": (
+                "planned_training_updates is separate from checkpoint_completed_updates and its verification status"
+            ),
+        },
         "scope": {
             "verification_status": (
                 "report_proof_hashes_consistent_inputs_not_rehashed"
@@ -1073,7 +1202,9 @@ def _parse_condition(value: str) -> tuple[str, Path]:
     return label, Path(raw_path)
 
 
-def _atomic_write(path: Path, text: str) -> None:
+def _write_new(path: Path, text: str) -> None:
+    if path.exists():
+        _fail(f"output already exists and will not be overwritten: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary: Path | None = None
     try:
@@ -1084,8 +1215,10 @@ def _atomic_write(path: Path, text: str) -> None:
             handle.write(text)
             handle.flush()
             os.fsync(handle.fileno())
-        os.replace(temporary, path)
-        temporary = None
+        try:
+            os.link(temporary, path)
+        except FileExistsError as error:
+            raise ValueError(f"output already exists and will not be overwritten: {path}") from error
     finally:
         if temporary is not None:
             temporary.unlink(missing_ok=True)
@@ -1100,6 +1233,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--checkpoint-manifest", action="append", type=_parse_condition, default=[])
     parser.add_argument("--training-provenance", action="append", type=_parse_condition, default=[])
     parser.add_argument("--runner-config", action="append", type=_parse_condition, default=[])
+    parser.add_argument("--checkpoint-inspection", action="append", type=_parse_condition, default=[])
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--expected-attempts", type=int, default=32)
     parser.add_argument("--bootstrap-resamples", type=int, default=100_000)
@@ -1121,6 +1255,7 @@ def main(argv: list[str] | None = None) -> int:
         "manifest": dict(args.checkpoint_manifest),
         "training_provenance": dict(args.training_provenance),
         "runner_config": dict(args.runner_config),
+        "checkpoint_inspection": dict(args.checkpoint_inspection),
     }
     for argument_name, mapping in bundle_arguments.items():
         raw_values = getattr(args, {
@@ -1128,6 +1263,7 @@ def main(argv: list[str] | None = None) -> int:
             "manifest": "checkpoint_manifest",
             "training_provenance": "training_provenance",
             "runner_config": "runner_config",
+            "checkpoint_inspection": "checkpoint_inspection",
         }[argument_name])
         if len(mapping) != len(raw_values):
             _fail(f"duplicate label in --{argument_name.replace('_', '-')}")
@@ -1157,13 +1293,19 @@ def main(argv: list[str] | None = None) -> int:
     bundle_verification: dict[str, Any] = {}
     for label in condition_paths:
         supplied = {name: mapping.get(label) for name, mapping in bundle_arguments.items()}
-        if all(path is None for path in supplied.values()):
+        core_names = ("checkpoint", "manifest", "training_provenance", "runner_config")
+        if all(supplied[name] is None for name in core_names):
+            if supplied["checkpoint_inspection"] is not None:
+                _fail(f"{label} checkpoint inspection requires the complete training bundle")
             bundle_verification[label] = {
                 "status": "not_supplied_report_claims_only",
                 "causal_interpretation": "prohibited",
+                "planned_training_updates": None,
+                "checkpoint_completed_updates": None,
+                "checkpoint_completed_updates_verification": "not_verified_no_training_bundle",
             }
             continue
-        if any(path is None for path in supplied.values()):
+        if any(supplied[name] is None for name in core_names):
             _fail(f"{label} training bundle must supply checkpoint, manifest, provenance, and runner config")
         bundle_verification[label] = _verify_training_bundle(
             label,
@@ -1172,6 +1314,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest_path=supplied["manifest"],
             training_provenance_path=supplied["training_provenance"],
             runner_config_path=supplied["runner_config"],
+            checkpoint_inspection_path=supplied["checkpoint_inspection"],
         )
         bundle_verification[label]["causal_interpretation"] = (
             "prohibited_without_a_separately_verified_preregistered_experiment_plan"
@@ -1181,7 +1324,7 @@ def main(argv: list[str] | None = None) -> int:
         label: {"path": str(entry[3]), "sha256": entry[2]} for label, entry in loaded.items()
     }
     _verify_path_hashes(input_hashes)
-    _atomic_write(args.output, json.dumps(result, indent=2, allow_nan=False) + "\n")
+    _write_new(args.output, json.dumps(result, indent=2, allow_nan=False) + "\n")
     print(json.dumps({
         "output": str(args.output),
         "results": result["results"],

@@ -239,6 +239,8 @@ class AnalyzeRj45PairedTests(unittest.TestCase):
 
     def test_current_nominal_and_held_proofs_are_cross_checked(self) -> None:
         result = _analyze(_report("biased_zero", {0}), _report("learned", {0}))
+        self.assertEqual(result["schema_version"], 2)
+        self.assertIn("version_1_training_updates_interpretation", result["schema_compatibility"])
         self.assertEqual(
             result["scope"]["verification_status"],
             "report_proof_hashes_consistent_inputs_not_rehashed",
@@ -437,39 +439,6 @@ class AnalyzeRj45PairedTests(unittest.TestCase):
         self.assertEqual(MODULE._bin_index(50.0 - 1e-10, MODULE.DEFAULT_TRANSLATION_EDGES_UM), 0)
         self.assertEqual(MODULE._bin_index(50.0, MODULE.DEFAULT_TRANSLATION_EDGES_UM), 1)
 
-    def test_historical_training_bundle_bytes_are_verified(self) -> None:
-        root = Path(__file__).resolve().parents[1]
-        run = root / "artifacts/rj45-target-offset-pilot/logs/rj45-v1/2026-10-26_15-55-36"
-        report = json.loads(
-            (root / "artifacts/rj45-target-offset-pilot/validation-learned42.json").read_text()
-        )
-        result = MODULE._verify_training_bundle(
-            "standard79",
-            report,
-            checkpoint_path=run / "model_19.pt",
-            manifest_path=run / "checkpoint_manifest.json",
-            training_provenance_path=run / "training_provenance.json",
-            runner_config_path=run / "runner_config.json",
-        )
-        self.assertEqual(
-            result["status"],
-            "checkpoint_manifest_provenance_runner_bytes_verified",
-        )
-        self.assertEqual(result["training_seed"], 20261026)
-        self.assertEqual(result["training_updates"], 20)
-        with tempfile.TemporaryDirectory() as directory:
-            tampered = Path(directory) / "model_19.pt"
-            tampered.write_bytes((run / "model_19.pt").read_bytes() + b"tampered")
-            with self.assertRaisesRegex(ValueError, "checkpoint bytes do not match"):
-                MODULE._verify_training_bundle(
-                    "standard79",
-                    report,
-                    checkpoint_path=tampered,
-                    manifest_path=run / "checkpoint_manifest.json",
-                    training_provenance_path=run / "training_provenance.json",
-                    runner_config_path=run / "runner_config.json",
-                )
-
     def test_training_source_lineage_requires_full_package_and_train_entrypoint(self) -> None:
         evaluation = {
             "src/rby1_assembly/a.py": SHA_A,
@@ -490,6 +459,250 @@ class AnalyzeRj45PairedTests(unittest.TestCase):
         del no_train["scripts/train.py"]
         with self.assertRaisesRegex(ValueError, "lowercase SHA-256"):
             MODULE._validate_training_source_lineage(evaluation, no_train, "test")
+
+    def test_checkpoint_inspection_separates_planned_and_completed_updates(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory)
+            checkpoint = run / "model_2.pt"
+            runner = run / "runner_config.json"
+            provenance = run / "training_provenance.json"
+            manifest = run / "checkpoint_manifest.json"
+            inspection = run / "checkpoint_inspection.json"
+            checkpoint.write_bytes(b"checkpoint payload bytes")
+            runner.write_text(json.dumps({
+                "seed": 7,
+                "num_steps_per_env": 8,
+                "max_iterations": 20,
+                "policy": {"init_noise_std": 0.1},
+            }), encoding="utf-8")
+            report = _report("learned", {0})
+            report["provenance"]["source_sha256"] = {
+                "src/rby1_assembly/a.py": SHA_A,
+                "scripts/evaluate_policy.py": SHA_B,
+            }
+            report["provenance"]["policy_config"] = "configs/ppo.json"
+            report["provenance"]["policy_config_sha256"] = SHA_B
+            source_and_config = {
+                "src/rby1_assembly/a.py": SHA_A,
+                "scripts/train.py": SHA_C,
+                report["rj45_training_config"]["path"]: report["rj45_training_config"]["sha256"],
+                "configs/ppo.json": SHA_B,
+                str(runner): MODULE._sha_file(runner),
+            }
+            provenance.write_text(json.dumps({
+                "seed": 7,
+                "num_envs": 64,
+                "checkpoint_scope": "checkpoints created in this run directory",
+                "runtime_versions": {"rsl-rl-lib": "3.0.1"},
+                "source_and_config_sha256": source_and_config,
+                "rj45_nominal_evidence": _nominal_proof(),
+                "policy_initialization": _policy_initialization(),
+                "rj45_training_contract": {
+                    "training_config_sha256": report["rj45_training_config"]["sha256"],
+                    "held_grasp_reset_proof": _held_proof(),
+                },
+            }), encoding="utf-8")
+            manifest.write_text(json.dumps({
+                "schema_version": 1,
+                "training_completed": True,
+                "training_provenance_sha256": MODULE._sha_file(provenance),
+                "checkpoints": {checkpoint.name: MODULE._sha_file(checkpoint)},
+            }), encoding="utf-8")
+            report["provenance"]["checkpoint_sha256"] = MODULE._sha_file(checkpoint)
+            evidence = report["provenance"]["verified_checkpoint_evidence"]
+            evidence["training_provenance_sha256"] = MODULE._sha_file(provenance)
+            evidence["checkpoint_manifest_sha256"] = MODULE._sha_file(manifest)
+
+            valid_manifest = json.loads(manifest.read_text(encoding="utf-8"))
+            unsupported_manifest = copy.deepcopy(valid_manifest)
+            unsupported_manifest["schema_version"] = 2
+            manifest.write_text(json.dumps(unsupported_manifest), encoding="utf-8")
+            evidence["checkpoint_manifest_sha256"] = MODULE._sha_file(manifest)
+            with self.assertRaisesRegex(ValueError, "manifest schema_version must be 1"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                )
+
+            incomplete_manifest = copy.deepcopy(valid_manifest)
+            incomplete_manifest["training_completed"] = False
+            manifest.write_text(json.dumps(incomplete_manifest), encoding="utf-8")
+            evidence["checkpoint_manifest_sha256"] = MODULE._sha_file(manifest)
+            with self.assertRaisesRegex(ValueError, "does not mark training as completed"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                )
+
+            manifest.write_text(json.dumps(valid_manifest), encoding="utf-8")
+            evidence["checkpoint_manifest_sha256"] = MODULE._sha_file(manifest)
+            uninspected = MODULE._verify_training_bundle(
+                "A1",
+                report,
+                checkpoint_path=checkpoint,
+                manifest_path=manifest,
+                training_provenance_path=provenance,
+                runner_config_path=runner,
+            )
+            self.assertEqual(uninspected["planned_training_updates"], 20)
+            self.assertIsNone(uninspected["checkpoint_completed_updates"])
+            self.assertEqual(
+                uninspected["checkpoint_completed_updates_verification"],
+                "not_verified_checkpoint_payload_not_inspected",
+            )
+            inspection.write_text(json.dumps({
+                "schema_version": 2,
+                "status": "checkpoint_payload_and_lineage_verified",
+                "checkpoint": {
+                    "path": str(checkpoint),
+                    "sha256": MODULE._sha_file(checkpoint),
+                    "filename_iteration": 2,
+                    "payload_iteration": 2,
+                    "completed_updates": 3,
+                },
+                "planned_training_updates": 20,
+                "checkpoint_manifest": {
+                    "path": str(manifest),
+                    "sha256": MODULE._sha_file(manifest),
+                    "training_completed": True,
+                },
+                "training_provenance": {
+                    "path": str(provenance),
+                    "sha256": MODULE._sha_file(provenance),
+                    "seed": 7,
+                },
+                "runner_config": {
+                    "path": str(runner),
+                    "sha256": MODULE._sha_file(runner),
+                    "seed": 7,
+                },
+                "loader": {"map_location": "cpu", "weights_only": True},
+                "completion_derivation": {
+                    "formula": "completed_updates = checkpoint payload iter + 1",
+                    "training_mode_basis": (
+                        "assumed_fresh_no_resume_requires_review_of_pinned_training_script"
+                    ),
+                    "checkpoint_scope": "checkpoints created in this run directory",
+                    "rsl_rl_version": "3.0.1",
+                    "training_script": {"path": "scripts/train.py", "sha256": SHA_C},
+                },
+            }), encoding="utf-8")
+            result = MODULE._verify_training_bundle(
+                "A1",
+                report,
+                checkpoint_path=checkpoint,
+                manifest_path=manifest,
+                training_provenance_path=provenance,
+                runner_config_path=runner,
+                checkpoint_inspection_path=inspection,
+            )
+            self.assertEqual(result["planned_training_updates"], 20)
+            self.assertEqual(result["checkpoint_completed_updates"], 3)
+            self.assertEqual(
+                result["checkpoint_completed_updates_verification"],
+                "supplied_inspection_report_consistent_payload_not_rechecked",
+            )
+
+            original_provenance = json.loads(provenance.read_text(encoding="utf-8"))
+            original_manifest = json.loads(manifest.read_text(encoding="utf-8"))
+            original_inspection = json.loads(inspection.read_text(encoding="utf-8"))
+
+            def write_changed_provenance(payload: dict) -> None:
+                provenance.write_text(json.dumps(payload), encoding="utf-8")
+                changed_manifest = copy.deepcopy(original_manifest)
+                changed_manifest["training_provenance_sha256"] = MODULE._sha_file(provenance)
+                manifest.write_text(json.dumps(changed_manifest), encoding="utf-8")
+                evidence["training_provenance_sha256"] = MODULE._sha_file(provenance)
+                evidence["checkpoint_manifest_sha256"] = MODULE._sha_file(manifest)
+                changed_inspection = copy.deepcopy(original_inspection)
+                changed_inspection["training_provenance"]["sha256"] = MODULE._sha_file(provenance)
+                changed_inspection["checkpoint_manifest"]["sha256"] = MODULE._sha_file(manifest)
+                inspection.write_text(json.dumps(changed_inspection), encoding="utf-8")
+
+            changed_scope = copy.deepcopy(original_provenance)
+            changed_scope["checkpoint_scope"] = "unreviewed resume directory"
+            write_changed_provenance(changed_scope)
+            with self.assertRaisesRegex(ValueError, "scope differs from training provenance"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                    checkpoint_inspection_path=inspection,
+                )
+
+            changed_runtime = copy.deepcopy(original_provenance)
+            changed_runtime["runtime_versions"]["rsl-rl-lib"] = "3.0.2"
+            write_changed_provenance(changed_runtime)
+            with self.assertRaisesRegex(ValueError, "RSL-RL version differs"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                    checkpoint_inspection_path=inspection,
+                )
+
+            write_changed_provenance(original_provenance)
+
+            wrong_index = json.loads(inspection.read_text(encoding="utf-8"))
+            wrong_index["checkpoint"]["filename_iteration"] = 3
+            wrong_index["checkpoint"]["payload_iteration"] = 3
+            wrong_index["checkpoint"]["completed_updates"] = 4
+            inspection.write_text(json.dumps(wrong_index), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "actual checkpoint filename"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                    checkpoint_inspection_path=inspection,
+                )
+            wrong_index["checkpoint"]["filename_iteration"] = 2
+            wrong_index["checkpoint"]["payload_iteration"] = 2
+            wrong_index["checkpoint"]["completed_updates"] = 3
+            inspection.write_text(json.dumps(wrong_index), encoding="utf-8")
+
+            checkpoint.write_bytes(b"tampered checkpoint")
+            with self.assertRaisesRegex(ValueError, "checkpoint bytes do not match"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                    checkpoint_inspection_path=inspection,
+                )
+            checkpoint.write_bytes(b"checkpoint payload bytes")
+
+            damaged = json.loads(inspection.read_text(encoding="utf-8"))
+            damaged["checkpoint"]["completed_updates"] = 4
+            inspection.write_text(json.dumps(damaged), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "iteration fields disagree"):
+                MODULE._verify_training_bundle(
+                    "A1",
+                    report,
+                    checkpoint_path=checkpoint,
+                    manifest_path=manifest,
+                    training_provenance_path=provenance,
+                    runner_config_path=runner,
+                    checkpoint_inspection_path=inspection,
+                )
 
     def test_output_cannot_overwrite_bundle_and_inputs_are_rehashed(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -514,6 +727,13 @@ class AnalyzeRj45PairedTests(unittest.TestCase):
             path.write_text("after")
             with self.assertRaisesRegex(ValueError, "changed during analysis"):
                 MODULE._verify_path_hashes(expected)
+
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "existing.json"
+            output.write_text("preserve", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "will not be overwritten"):
+                MODULE._write_new(output, "replacement")
+            self.assertEqual(output.read_text(encoding="utf-8"), "preserve")
 
 
 if __name__ == "__main__":
